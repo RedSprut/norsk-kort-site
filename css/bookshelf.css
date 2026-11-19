@@ -1,0 +1,116 @@
+/* ============ 📚 Библиотека — читать и слушать (js/bookshelf.js) ============
+ * Reuses the reader's shelf pieces (css/reader.css: .rd-cover, .rd-grid, .rd-book, .rd-bar, .rd-drop, .rd-mine…). */
+.bs-modal .modal-body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.bs-modal.bs-drag { outline: 3px dashed var(--accent); outline-offset: -8px; }
+
+/* ---------- tabs ---------- */
+.bs-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); }
+.bs-tab {
+  flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 6px 12px;
+  border: 0; border-radius: 12px; background: transparent; color: var(--text); font: 600 14px var(--font); cursor: pointer; white-space: nowrap;
+  transition: background .18s, color .18s, box-shadow .18s, transform .15s;
+}
+.bs-tab:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.bs-tab:active { transform: scale(.97); }
+.bs-tab[aria-selected="true"] { background: var(--accent); color: #fff; box-shadow: 0 6px 16px -8px var(--accent); }
+.bs-tab:focus-visible, .bs-modal :is(button, a, summary):focus-visible { outline: 3px solid var(--accent2); outline-offset: 2px; }
+@media (max-width: 520px) {
+  .bs-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); }
+  .bs-tab { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 12.5px; white-space: normal; text-align: center; line-height: 1.15; }
+  .bs-tab > span:first-child { font-size: 18px; }
+}
+.bs-pane { display: flex; flex-direction: column; gap: 16px; min-width: 0; outline: none; }
+
+/* ---------- common ---------- */
+.bs-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.bs-h h3 { margin: 0; font-size: 16px; }
+.bs-h p { margin: 0; }
+.bs-tiny { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0; }
+.bs-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.bs-btns .btn, .bs-li-btn, .bs-card .btn, .bs-wide { min-height: 44px; white-space: normal; }
+.bs-wide { width: 100%; }
+.bs-sec { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bs-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 12px; text-align: center; color: var(--muted); line-height: 1.5;
+  border-radius: 18px; border: 1px dashed var(--panel-border); background: color-mix(in srgb, var(--accent) 4%, transparent); }
+.bs-empty b { color: var(--text); font-size: 16px; }
+.bs-empty .bs-btns { justify-content: center; margin-top: 4px; }
+.bs-empty.sm { padding: 14px 12px; }
+.bs-empty-ico { font-size: 40px; }
+
+/* ---------- 📖 Читаю сейчас ---------- */
+.bs-hero {
+  display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 20px; align-items: center; padding: 18px; border-radius: 20px;
+  background: radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%), var(--panel);
+  border: 1px solid var(--panel-border);
+}
+.bs-hero-cover { width: 100%; }
+.bs-hero-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.bs-kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.bs-hero-t { margin: 0; font-size: clamp(19px, 3.2vw, 26px); line-height: 1.2; overflow-wrap: anywhere; }
+.bs-hero-a { color: var(--muted); font-size: 14px; }
+.bs-hero-m { color: var(--muted); font-size: 13px; }
+.bs-hero .rd-bar { max-width: 320px; margin-top: 4px; }
+.bs-hero .bs-btns { margin-top: 8px; }
+.bs-big { font-size: 15.5px; padding-left: 18px; padding-right: 18px; }
+@media (max-width: 520px) {
+  .bs-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 16px 14px; gap: 14px; }
+  .bs-hero-cover { width: min(170px, 56vw); }
+  .bs-hero-info { align-items: center; width: 100%; }
+  .bs-hero .rd-bar { width: 100%; }
+  .bs-hero .bs-btns { justify-content: center; width: 100%; }
+  .bs-hero .bs-btns .btn { flex: 1 1 100%; }
+}
+.bs-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 14px; }
+@media (max-width: 380px) { .bs-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+.bs-mini { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 0; border: 0; background: none; color: var(--text); text-align: left; cursor: pointer; border-radius: 12px; }
+.bs-mini-cover { pointer-events: none; }
+.bs-mini:hover .bs-mini-cover { transform: translateY(-4px) rotate(-.6deg); }
+.bs-mini:hover .bs-mini-t { color: var(--accent2); }
+.bs-mini-t { font-weight: 700; font-size: 13.5px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.bs-mini-m { font-size: 12px; color: var(--muted); }
+.bs-mini .rd-gen-t { font-size: 13px; }
+
+/* the audio course in progress */
+.bs-ac { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); }
+.bs-ac-ico { font-size: 26px; }
+.bs-ac-info { flex: 1 1 200px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bs-ac-info span { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.bs-ac .btn { min-height: 44px; }
+@media (max-width: 420px) { .bs-ac .btn { flex: 1 1 100%; } }
+
+/* ---------- lists (Слушать) ---------- */
+.bs-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.bs-li { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); min-width: 0; transition: border-color .18s, background .18s; }
+.bs-li:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); }
+.bs-li-cover { flex: 0 0 auto; width: 44px; border-radius: 3px 7px 7px 3px; pointer-events: none; }
+.bs-li-cover .rd-gen { padding: 10% 6%; }
+.bs-li-cover .rd-gen-t { font-size: 7px; -webkit-line-clamp: 3; }
+.bs-li-cover .rd-gen-a, .bs-li-cover .rd-gen-flags, .bs-li-cover .rd-gen-orn { display: none; }
+.bs-li-ico { flex: 0 0 auto; min-width: 44px; text-align: center; font-size: 16px; white-space: nowrap; letter-spacing: 1px; }
+.bs-li-t { flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bs-li-t b { overflow-wrap: anywhere; font-size: 14.5px; line-height: 1.3; }
+.bs-li-t small { color: var(--muted); font-size: 12.5px; }
+.bs-li-btn { flex: 0 0 auto; }
+@media (max-width: 480px) {
+  .bs-li { flex-wrap: wrap; }
+  .bs-li-t { flex: 1 1 calc(100% - 60px); }
+  .bs-li-btn { flex: 1 1 auto; }
+}
+
+/* ---------- 🔎 Найти книгу ---------- */
+.bs-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.bs-card { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--panel-border); transition: transform .18s, border-color .18s, box-shadow .18s; }
+.bs-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); box-shadow: 0 14px 28px -20px var(--accent); }
+.bs-card-ico { font-size: 30px; }
+.bs-card-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.bs-card-info b { font-size: 16px; }
+.bs-card-info span { font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+.bs-card .btn { align-self: flex-start; }
+@media (max-width: 420px) { .bs-cards { grid-template-columns: 1fr; } .bs-card .btn { align-self: stretch; } }
+
+.bs-drop { width: 100%; font: inherit; color: var(--text); }
+.bs-mine { margin: 0; }
+
+@media (prefers-reduced-motion: reduce) { .bs-modal * { transition: none !important; animation: none !important; } }
+/* every button here is a real tap target (≥ 44 px), the small «Все книги ›» ones too */
+.bs-modal .bs-pane .btn, .bs-modal .bs-pane .btn.sm { min-height: 44px; }

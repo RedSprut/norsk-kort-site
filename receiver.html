@@ -1,0 +1,66 @@
+<!doctype html>
+<!--
+  Norsk Kort — the TV page (Google Cast Custom Web Receiver).
+  A Chromecast / Android TV / Google TV opens this page itself when a user taps «📺 Подключить к телевизору» in
+  Chrome / Edge (Windows, Linux, Mac, Android). It plays the program with the TV's own player and draws OUR
+  subtitles on top: the Norwegian line (white) and the Russian translation (yellow) — exactly like in the app.
+  The lines come from the app through a custom message channel (urn:x-cast:no.norskkort.subs).
+  Needs: this file on the site over https + a Cast App ID registered for its URL (Google Cast SDK Developer Console),
+  put into CAST_APP_ID in js/subs.js. Without that the app uses Google's standard receiver (subtitles as a text track).
+-->
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <title>Norsk Kort · TV</title>
+  <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    cast-media-player { --theme-hue: 250; --progress-color: #7c6cff; position: absolute; inset: 0; }
+    #subs { position: absolute; left: 5%; right: 5%; bottom: 10%; z-index: 10; text-align: center; pointer-events: none;
+      font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    #subs .box { display: inline-block; max-width: 100%; background: rgba(0, 0, 0, .62); border-radius: 16px; padding: 14px 30px 16px; }
+    #subs .no { color: #fff; font-size: 46px; font-weight: 700; line-height: 1.25; text-shadow: 0 2px 8px #000; }
+    #subs .ru { color: #ffd76a; font-size: 36px; line-height: 1.25; margin-top: 8px; text-shadow: 0 2px 8px #000; }
+    #brand { position: absolute; top: 28px; left: 36px; z-index: 10; color: rgba(255, 255, 255, .7); font: 600 22px/1 "Google Sans", Roboto, Arial, sans-serif; }
+  </style>
+</head>
+<body>
+  <cast-media-player></cast-media-player>
+  <div id="brand">🇳🇴 ⇄ 🇷🇺 Norsk Kort</div>
+  <div id="subs" aria-live="polite"></div>
+  <script>
+    const NS = 'urn:x-cast:no.norskkort.subs';
+    const ctx = cast.framework.CastReceiverContext.getInstance();
+    const pm = ctx.getPlayerManager();
+    let cues = [], show = true, showRu = true;            // cue: [start, end, norwegian, russian]
+    ctx.addCustomMessageListener(NS, e => {
+      const d = e.data || {};
+      if (d.reset) cues = [];
+      if (Array.isArray(d.cues)) { cues = cues.concat(d.cues); cues.sort((a, b) => a[0] - b[0]); }
+      if (typeof d.show === 'boolean') show = d.show;
+      if (typeof d.ru === 'boolean') showRu = d.ru;
+      last = -2;
+    });
+    const box = document.getElementById('subs');
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let last = -2;
+    setInterval(() => {
+      let t = 0;
+      try { t = pm.getCurrentTimeSec(); } catch (e) { /* not playing yet */ }
+      let i = -1;
+      for (let k = 0; k < cues.length; k++) {
+        if (cues[k][0] > t + 0.05) break;
+        if (t <= cues[k][1] + 0.6) i = k;
+      }
+      if (!show) i = -1;
+      if (i !== last) {
+        last = i;
+        box.innerHTML = i < 0 ? '' : `<div class="box"><div class="no">${esc(cues[i][2])}</div>${showRu && cues[i][3] ? `<div class="ru">${esc(cues[i][3])}</div>` : ''}</div>`;
+      }
+    }, 200);
+    const opts = new cast.framework.CastReceiverOptions();
+    opts.customNamespaces = { [NS]: cast.framework.system.MessageType.JSON };
+    ctx.start(opts);
+  </script>
+</body>
+</html>

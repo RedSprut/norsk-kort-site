@@ -1,0 +1,48 @@
+/* ============ 🔤 bilingual grammar labels (js/gramterms.js) ============ */
+.gt { display: inline; cursor: help; }
+.gt-no { font-weight: 700; }
+.gt-dot { opacity: .55; }
+.gt-ru { font-weight: 500; }
+.fg-label .gt-no { color: var(--text); font-weight: 650; }
+.fg-label .gt-ru { color: var(--muted); }
+.fg-label .gt { text-decoration: underline dotted color-mix(in srgb, var(--muted) 55%, transparent); text-underline-offset: 3px; }
+
+/* the badges on the back of a card */
+.gt-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 6px 0 2px; max-width: 100%; }
+.gt-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; line-height: 1.35;
+  border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); max-width: 100%; overflow-wrap: anywhere;
+  transition: border-color .15s, background .15s, transform .12s; }
+.gt-badge:hover { transform: translateY(-1px); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.gt-b-pos { border-color: color-mix(in srgb, #8b5cf6 40%, var(--panel-border)); }
+.gt-b-pos .gt-no { color: #8b5cf6; }
+.gt-b-m .gt-no { color: #3b82f6; }
+.gt-b-f .gt-no { color: #ec4899; }
+.gt-b-n .gt-no { color: #10b981; }
+.gt-b-mf .gt-no { color: #a855f7; }
+.gt-b-m { border-color: color-mix(in srgb, #3b82f6 40%, var(--panel-border)); }
+.gt-b-f { border-color: color-mix(in srgb, #ec4899 40%, var(--panel-border)); }
+.gt-b-n { border-color: color-mix(in srgb, #10b981 40%, var(--panel-border)); }
+.gt-b-mf { border-color: color-mix(in srgb, #a855f7 40%, var(--panel-border)); }
+.hint .gt-dot, .hint .gt-ru { font-weight: 400; }
+
+/* the card editor's selector */
+.gt-select { cursor: pointer; }
+.gt-select:hover { border-color: var(--accent); }
+
+/* 📖 the glossary (help centre) */
+.gt-gloss { display: flex; flex-direction: column; gap: 12px; margin: 4px 0 12px; }
+.gt-gloss-intro { margin: 0; color: var(--muted); }
+.gt-gsec h4 { margin: 0 0 6px; font-size: 14px; }
+.gt-glist { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 8px; }
+.gt-gi { display: flex; flex-direction: column; gap: 4px; padding: 9px 11px; border-radius: 12px; background: var(--panel); border: 1px solid var(--panel-border); min-width: 0;
+  transition: border-color .15s, box-shadow .2s; }
+.gt-gi:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 8px 20px -16px var(--accent); }
+.gt-gt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.gt-gt b { font-size: 15px; }
+.gt-gt span { color: var(--muted); font-size: 13px; }
+.gt-gtip { font-size: 12.5px; line-height: 1.4; overflow-wrap: anywhere; }
+.gt-gex { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-style: italic; color: var(--text); min-width: 0; }
+.gt-gex span { overflow-wrap: anywhere; }
+.gt-say { flex: none; }
+.gt-say:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+@media (prefers-reduced-motion: reduce) { .gt-badge, .gt-gi { transition: none; } .gt-badge:hover { transform: none; } }

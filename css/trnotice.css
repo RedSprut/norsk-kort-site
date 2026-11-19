@@ -1,0 +1,41 @@
+/* 🌐 «Кто переводит» — the badge in the player and the window with the neural networks */
+.tr-who { display: flex; align-items: center; gap: 8px; width: 100%; margin: 6px 0 2px; padding: 8px 12px; border-radius: 12px; border: 1px solid color-mix(in srgb, #f5a524 45%, var(--panel-border)); background: color-mix(in srgb, #f5a524 10%, var(--panel)); color: var(--text); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; transition: background .15s, border-color .15s; }
+.tr-who:hover { background: color-mix(in srgb, #f5a524 18%, var(--panel)); }
+.tr-who.ai { border-color: color-mix(in srgb, var(--good, #22c55e) 45%, var(--panel-border)); background: color-mix(in srgb, var(--good, #22c55e) 9%, var(--panel)); }
+.tr-who.ai:hover { background: color-mix(in srgb, var(--good, #22c55e) 16%, var(--panel)); }
+.tr-who > span:nth-child(2) { flex: 1; min-width: 0; }
+.tr-who-go { flex: 0 0 auto; font-weight: 600; color: var(--accent); white-space: nowrap; }
+@media (max-width: 480px) { .tr-who { flex-wrap: wrap; } .tr-who-go { width: 100%; padding-left: 26px; } }
+
+.modal.tn-modal { max-width: 620px; }
+.tn-lead { margin: 10px 0 6px; line-height: 1.5; }
+.tn-safe { margin: 8px 0 12px; padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 9%, var(--panel)); font-size: 13px; line-height: 1.45; }
+.tn-title { font-weight: 700; margin: 6px 0 8px; }
+.tn-list { display: flex; flex-direction: column; gap: 8px; }
+.tn-prov { border: 1px solid var(--panel-border); border-radius: 12px; background: var(--panel); overflow: hidden; transition: border-color .15s; }
+.tn-prov:hover, .tn-prov.open { border-color: color-mix(in srgb, var(--accent) 55%, var(--panel-border)); }
+.tn-prov.ok { border-color: color-mix(in srgb, var(--good, #22c55e) 45%, var(--panel-border)); }
+.tn-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.tn-head:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.tn-ico { flex: 0 0 auto; display: inline-flex; width: 28px; justify-content: center; }
+.tn-name { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.tn-name small { width: 100%; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.tn-go { flex: 0 0 auto; font-size: 20px; opacity: .6; transition: transform .15s; }
+.tn-prov.open .tn-go { transform: rotate(90deg); }
+.tn-chip { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+.tn-chip.free { background: color-mix(in srgb, var(--good, #22c55e) 20%, transparent); color: var(--good, #22c55e); }
+.tn-chip.cheap { background: color-mix(in srgb, #f5a524 22%, transparent); color: #f5a524; }
+.tn-chip.paid { background: color-mix(in srgb, var(--muted) 20%, transparent); color: var(--muted); }
+.tn-body { padding: 4px 14px 12px; border-top: 1px solid var(--panel-border); }
+.tn-steps { margin: 8px 0; padding-left: 20px; line-height: 1.6; font-size: 13.5px; }
+.tn-steps li { margin: 4px 0; }
+.tn-steps .btn { margin-left: 6px; vertical-align: middle; }
+.tn-keyrow { display: flex; gap: 8px; }
+.tn-keyrow .input { flex: 1; min-width: 0; }
+.tn-status { min-height: 1.4em; margin-top: 6px; }
+.tn-status .good-t { color: var(--good, #22c55e); font-weight: 600; }
+.tn-status .warn-t { color: #f5a524; }
+.tn-off { display: inline-flex; align-items: center; gap: 6px; margin-right: auto; font-size: 13px; color: var(--muted); cursor: pointer; }
+.tn-modal .modal-foot { flex-wrap: wrap; }
+@media (max-width: 480px) { .tn-keyrow { flex-direction: column; } .tn-keyrow .btn { width: 100%; } .tn-modal .modal-foot .btn { width: 100%; } }
+@media (pointer: coarse) { .tn-keyrow .input { font-size: 16px; } .tn-head { min-height: 52px; } }

@@ -1,0 +1,1160 @@
+{
+ "version": 1,
+ "note": "Устная часть (Muntlig) — собственные задания Norsk Kort по типам устного экзамена Norskprøve A1–A2: рассказ о себе, описание картинки или ситуации, сравнение и мнение. Образцы ответов — собственные тексты.",
+ "tests": [
+  {
+   "id": "munt-deg-selv",
+   "icon": "🙋",
+   "title": "Устно: о себе",
+   "titleNo": "Muntlig: meg selv",
+   "level": "A1–A2",
+   "desc": "Представиться, рассказать о своём дне и о планах — первая часть почти любого устного экзамена.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: представьтесь",
+     "titleNo": "Del 1: Presenter deg selv",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Kan du fortelle litt om deg selv?",
+       "promptRu": "Расскажите немного о себе.",
+       "ask": [
+        "Hva heter du, og hvor kommer du fra?",
+        "Hvor lenge har du bodd i Norge?",
+        "Hvor bor du, og hvem bor du sammen med?",
+        "Hva gjør du til daglig?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "heter",
+        "kommer fra",
+        "bor",
+        "år",
+        "norskkurs",
+        "jobb",
+        "familie"
+       ],
+       "model": "Jeg heter Olga, og jeg kommer fra Russland. Jeg er trettifem år gammel. Jeg har bodd i Norge i to år. Nå bor jeg i en leilighet i Drammen sammen med mannen min og datteren vår. Til daglig går jeg på norskkurs fire dager i uka. Før jobbet jeg som regnskapsfører, og jeg vil gjerne jobbe med økonomi i Norge også. I fritida liker jeg å gå på tur og å lese."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: обычный день",
+     "titleNo": "Del 2: En vanlig dag",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om en vanlig dag for deg.",
+       "promptRu": "Расскажите, как проходит ваш обычный день.",
+       "ask": [
+        "Når står du opp?",
+        "Hva gjør du om formiddagen og om ettermiddagen?",
+        "Hva gjør du om kvelden?",
+        "Er helgen annerledes?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "står opp",
+        "frokost",
+        "klokka",
+        "middag",
+        "kveld",
+        "først",
+        "etterpå"
+       ],
+       "model": "Jeg står opp klokka halv sju. Først dusjer jeg, og så spiser jeg frokost med familien. Klokka åtte følger jeg datteren min til skolen. Etterpå tar jeg bussen til norskkurset. Kurset slutter klokka to. Om ettermiddagen handler jeg mat og lager middag. Vi spiser middag klokka fem. Om kvelden hjelper jeg datteren min med leksene, og så ser vi litt på TV. Jeg legger meg klokka elleve. I helgene sover jeg lenger, og vi går ofte på tur."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: планы на будущее",
+     "titleNo": "Del 3: Planer for framtida",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva er planene dine for framtida? Hvorfor er de viktige for deg?",
+       "promptRu": "Какие у вас планы на будущее? Почему они для вас важны?",
+       "ask": [
+        "Hva vil du gjøre når du er ferdig med norskkurset?",
+        "Vil du jobbe eller studere?",
+        "Hvor vil du bo om fem år?",
+        "Hva må du gjøre for å nå målene dine?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "vil",
+        "jobbe",
+        "norskprøve",
+        "fordi",
+        "håper",
+        "tror",
+        "fem år"
+       ],
+       "model": "Når jeg er ferdig med norskkurset, vil jeg ta Norskprøven på nivå B1. Det er viktig for meg, fordi jeg vil jobbe som regnskapsfører igjen. Først må jeg få godkjent utdanningen min fra Russland. Kanskje må jeg ta noen kurs i norsk skatterett. Om fem år håper jeg at vi bor i et rekkehus med hage. Jeg tror at det blir vanskelig, men jeg gir ikke opp. Derfor snakker jeg norsk så mye som mulig, også med naboene."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-familie",
+   "icon": "👨‍👩‍👧",
+   "title": "Устно: семья",
+   "titleNo": "Muntlig: familie",
+   "level": "A1–A2",
+   "desc": "Рассказ о семье, описание рисунка с семьёй на пикнике и разговор о семьях в Норвегии и на родине.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: ваша семья",
+     "titleNo": "Del 1: Familien din",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om familien din.",
+       "promptRu": "Расскажите о своей семье.",
+       "ask": [
+        "Hvor stor er familien din?",
+        "Hvem bor du sammen med?",
+        "Har du søsken? Hvor bor de?",
+        "Hvor ofte snakker dere sammen?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "familie",
+        "mann",
+        "kone",
+        "barn",
+        "bror",
+        "søster",
+        "foreldre",
+        "bor"
+       ],
+       "model": "Familien min er ikke så stor. Jeg bor sammen med mannen min og sønnen vår. Sønnen vår heter Mark, og han er åtte år. Han går i tredje klasse. Jeg har også en bror. Han bor i Moskva med kona og to barn. Foreldrene mine bor i Kazan. Vi snakker sammen på video hver søndag. Jeg savner dem, men de skal besøke oss i sommer."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: опишите рисунок",
+     "titleNo": "Del 2: Beskriv bildet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Se på bildet. Fortell hva du ser. Hvem er personene, og hva gjør de?",
+       "promptRu": "Посмотрите на рисунок. Расскажите, что вы видите. Кто эти люди и что они делают?",
+       "ask": [
+        "Hvor mange personer er det på bildet?",
+        "Hvem er mor, far og barna, tror du?",
+        "Hvordan er været?",
+        "Hva skal de gjøre etterpå, tror du?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "familie",
+        "far",
+        "mor",
+        "sønn",
+        "mormor",
+        "baby",
+        "ball",
+        "park",
+        "tror"
+       ],
+       "model": "På bildet ser jeg en familie på fem personer. De er ute i en park, og det er sol. Til venstre står faren. Han heter Jonas, og han har mørkt hår og skjegg. Ved siden av ham står moren, Nora. Hun har lyst hår og en rød kjole. Sønnen deres, Emil, har en ball. Jeg tror at han vil spille fotball. Mormor har briller og grått hår. Helt til høyre er en liten baby, Ella. Jeg tror at familien skal ha piknik, og at de koser seg.",
+       "picture": "family-picnic"
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: семьи в Норвегии и на родине",
+     "titleNo": "Del 3: Familier i Norge og i hjemlandet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Sammenlign familier i Norge og i hjemlandet ditt. Hva er likt, og hva er forskjellig?",
+       "promptRu": "Сравните семьи в Норвегии и в вашей стране. Что похоже, а что отличается?",
+       "ask": [
+        "Hvor mange barn har familier vanligvis?",
+        "Bor besteforeldre sammen med barna sine?",
+        "Hvem gjør husarbeidet?",
+        "Hva synes du er bra med norske familier?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "norge",
+        "hjemlandet",
+        "besteforeldre",
+        "barnehage",
+        "synes",
+        "fordi",
+        "men",
+        "likt"
+       ],
+       "model": "I hjemlandet mitt bor besteforeldrene ofte nær barna sine, og de hjelper mye med barnebarna. I Norge bor mange eldre alene, og barna går i barnehage fra de er ett år. Jeg synes at det er bra at både mor og far er hjemme med babyen i Norge, fordi far får permisjon. I Russland gjør kvinnene ofte mest husarbeid, men her deler mange par arbeidet. Det som er likt, er at familien er veldig viktig. Vi samles i bursdager og i høytider begge steder."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-bolig",
+   "icon": "🏠",
+   "title": "Устно: жильё",
+   "titleNo": "Muntlig: bolig",
+   "level": "A1–A2",
+   "desc": "Ваш дом или квартира, описание комнаты и разговор: жить в городе или за городом.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: ваше жильё",
+     "titleNo": "Del 1: Boligen din",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om boligen din.",
+       "promptRu": "Расскажите о своём жилье.",
+       "ask": [
+        "Bor du i et hus eller i en leilighet?",
+        "Hvor mange rom er det?",
+        "Hva liker du best med boligen?",
+        "Leier eller eier du?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "leilighet",
+        "hus",
+        "rom",
+        "stue",
+        "soverom",
+        "kjøkken",
+        "leier",
+        "liker"
+       ],
+       "model": "Jeg bor i en leilighet i tredje etasje i en blokk. Leiligheten har tre rom: en stue, to soverom og et lite kjøkken. Vi har også en balkong. Jeg liker balkongen best, fordi jeg kan sitte der om sommeren og drikke kaffe. Vi leier leiligheten, og husleia er ganske høy. Naboene er hyggelige, og det er en butikk og en busstopp like ved."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: опишите комнату",
+     "titleNo": "Del 2: Beskriv rommet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Tenk på stua di (eller på en stue du kjenner). Beskriv den: hva står hvor?",
+       "promptRu": "Представьте свою гостиную (или знакомую). Опишите её: что где стоит?",
+       "ask": [
+        "Hvilke møbler er det i stua?",
+        "Hva står ved vinduet / på veggen?",
+        "Hvilke farger har rommet?",
+        "Hva gjør dere i stua?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "sofa",
+        "bord",
+        "stol",
+        "lampe",
+        "vindu",
+        "vegg",
+        "står",
+        "henger",
+        "ligger"
+       ],
+       "model": "Stua vår er lys og ganske stor. Midt i rommet står en grå sofa og et lavt bord. På bordet ligger det alltid noen blader og en skål med frukt. Ved vinduet står en lenestol og en lampe, og der leser jeg om kvelden. På veggen henger det et stort bilde av sjøen. TV-en står i hjørnet. Gulvet er av tre, og vi har et blått teppe. Om kvelden sitter hele familien i stua og ser på film.",
+       "scene": "Представьте гостиную: диван, журнальный столик, кресло у окна, лампа, картина на стене, телевизор в углу, ковёр на полу."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: город или деревня?",
+     "titleNo": "Del 3: By eller land?",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Er det bedre å bo i byen eller på landet? Hva mener du? Begrunn svaret.",
+       "promptRu": "Где лучше жить — в городе или за городом? Как вы считаете? Объясните почему.",
+       "ask": [
+        "Hva er fordelene med å bo i byen?",
+        "Hva er fordelene med å bo på landet?",
+        "Hvor bodde du i hjemlandet?",
+        "Hvor vil du bo i framtida?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "byen",
+        "landet",
+        "fordi",
+        "mener",
+        "dyrt",
+        "natur",
+        "men",
+        "på den andre siden"
+       ],
+       "model": "Jeg mener at det er best å bo i byen, i hvert fall nå. I byen er det kort vei til jobb, skole og butikker, og bussen går ofte. Det er også flere jobber og kurs. På den andre siden er det dyrt å bo i byen, og det kan være mye støy. På landet er naturen nær, og barna kan leke ute. I hjemlandet bodde jeg i en stor by, så jeg er vant til byen. Men når barna blir større, vil jeg kanskje flytte til et hus utenfor byen."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-jobb",
+   "icon": "💼",
+   "title": "Устно: работа и учёба",
+   "titleNo": "Muntlig: jobb og utdanning",
+   "level": "A1–A2",
+   "desc": "Работа или учёба, описание класса на рисунке и разговор о том, как найти работу в Норвегии.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: работа и образование",
+     "titleNo": "Del 1: Jobb og utdanning",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om utdanningen din og om jobben din (nå eller før).",
+       "promptRu": "Расскажите о своём образовании и работе (сейчас или раньше).",
+       "ask": [
+        "Hva har du studert?",
+        "Hva jobbet du med i hjemlandet?",
+        "Hva gjør du nå?",
+        "Hva liker du med jobben?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "studert",
+        "jobbet",
+        "jobb",
+        "praksis",
+        "kollegaer",
+        "fordi",
+        "nå"
+       ],
+       "model": "Jeg har studert økonomi på universitetet i Kazan i fem år. Etterpå jobbet jeg som regnskapsfører i et stort firma i ti år. Jeg likte jobben, fordi den var variert, og kollegaene mine var hyggelige. Nå går jeg på norskkurs, og to dager i uka har jeg praksis i en butikk. Der fyller jeg opp varer og hjelper kundene. Det er en god måte å lære norsk på."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: опишите рисунок",
+     "titleNo": "Del 2: Beskriv bildet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Se på bildet. Hvor er personene, og hva gjør de?",
+       "promptRu": "Посмотрите на рисунок. Где эти люди и что они делают?",
+       "ask": [
+        "Hvem er læreren?",
+        "Hva står på tavla?",
+        "Hva gjør elevene?",
+        "Hvordan er stemningen, tror du?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "klasserom",
+        "lærer",
+        "tavle",
+        "elever",
+        "sitter",
+        "bord",
+        "bok",
+        "tror"
+       ],
+       "model": "Bildet viser et klasserom på en skole for voksne. Til venstre står en lærer. Hun har en grønn bok i hånda. Bak henne er det en stor, grønn tavle, og på tavla står det «Velkommen!». Tre elever sitter ved et bord. En mann har skjegg, en kvinne har lyst hår, og en mann har briller. De har bøker og papir foran seg. Jeg tror at det er den første dagen på kurset, og at alle er litt spente.",
+       "picture": "school"
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: как найти работу в Норвегии",
+     "titleNo": "Del 3: Å få jobb i Norge",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva er viktig for å få jobb i Norge? Hva mener du?",
+       "promptRu": "Что важно, чтобы найти работу в Норвегии? Как вы считаете?",
+       "ask": [
+        "Hvor viktig er norsk?",
+        "Hjelper det å ha nettverk og kjente?",
+        "Hvordan søker man jobb i Norge og i hjemlandet?",
+        "Hva gjør du selv for å få jobb?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "norsk",
+        "nettverk",
+        "praksis",
+        "søknad",
+        "intervju",
+        "tror",
+        "fordi",
+        "dessuten"
+       ],
+       "model": "Jeg tror at det viktigste er å kunne norsk. Arbeidsgiverne vil at du forstår kollegaene og kundene. Nettverk er også veldig viktig i Norge. Mange får jobb fordi de kjenner noen, eller fordi de har hatt praksis på arbeidsplassen. I hjemlandet mitt sender man ofte bare en CV, men her skriver man en søknad og går på intervju. Selv går jeg på norskkurs, og jeg har praksis. Dessuten har jeg laget en profil på Finn og på NAV sine sider."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-fritid",
+   "icon": "⚽",
+   "title": "Устно: свободное время",
+   "titleNo": "Muntlig: fritid",
+   "level": "A1–A2",
+   "desc": "Хобби и выходные, рассказ о прошлых выходных и мнение: как норвежцы проводят свободное время.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: ваше свободное время",
+     "titleNo": "Del 1: Fritida di",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva liker du å gjøre i fritida?",
+       "promptRu": "Что вы любите делать в свободное время?",
+       "ask": [
+        "Har du en hobby?",
+        "Trener du?",
+        "Hva gjør du i helgene?",
+        "Hvem er du sammen med i fritida?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "liker",
+        "fritid",
+        "tur",
+        "ski",
+        "hobby",
+        "helgene",
+        "venner"
+       ],
+       "model": "I fritida liker jeg å gå på tur i skogen. Om vinteren prøver jeg å gå på ski, men jeg er ikke så flink ennå. Jeg liker også å lage mat og å bake kaker. Hobbyen min er å strikke. Jeg strikker gensere og luer til familien. I helgene er jeg sammen med familien, og noen ganger besøker vi venner."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: прошлые выходные",
+     "titleNo": "Del 2: Forrige helg",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell hva du gjorde i helgen.",
+       "promptRu": "Расскажите, что вы делали в прошлые выходные.",
+       "ask": [
+        "Hva gjorde du på lørdag?",
+        "Hva gjorde du på søndag?",
+        "Var du sammen med noen?",
+        "Hva var det beste med helgen?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "lørdag",
+        "søndag",
+        "spiste",
+        "dro",
+        "gikk",
+        "var",
+        "etterpå",
+        "fordi"
+       ],
+       "model": "På lørdag sov jeg lenge, og så spiste vi en stor frokost. Etterpå dro vi til byen og handlet klær til sønnen min, fordi han har vokst så mye. Om kvelden kom noen venner på middag. Vi lagde plov og snakket til klokka tolv. På søndag var det fint vær, så vi gikk på tur rundt et vann. Vi tok med kakao og matpakke. Det beste med helgen var turen, fordi det var så stille og vakkert i skogen."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: досуг в Норвегии и на родине",
+     "titleNo": "Del 3: Fritid i Norge og i hjemlandet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva gjør nordmenn i fritida? Er det annerledes i hjemlandet ditt?",
+       "promptRu": "Как норвежцы проводят свободное время? Отличается ли это от вашей страны?",
+       "ask": [
+        "Hvorfor går nordmenn så mye på tur?",
+        "Hva er hytteliv?",
+        "Hva gjør folk i fritida i hjemlandet ditt?",
+        "Hva liker du best?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "nordmenn",
+        "natur",
+        "tur",
+        "hytte",
+        "ski",
+        "hjemlandet",
+        "synes",
+        "men"
+       ],
+       "model": "Nordmenn er veldig glade i naturen. De går på tur nesten uansett vær, og mange har hytte på fjellet eller ved sjøen. Om vinteren går de på ski. I hjemlandet mitt er folk også glade i naturen, men vi bor mer i byene, så vi går ofte på kafé, på teater eller i parken. Mange har en datsja, en slags hytte med hage, der de dyrker grønnsaker. Jeg synes at det norske friluftslivet er sunt, men jeg savner teatrene i hjembyen min."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-mat",
+   "icon": "🍲",
+   "title": "Устно: еда",
+   "titleNo": "Muntlig: mat og måltider",
+   "level": "A1–A2",
+   "desc": "Ваши привычки в еде, рецепт любимого блюда и разговор о здоровой и нездоровой еде.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: ваши приёмы пищи",
+     "titleNo": "Del 1: Måltidene dine",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva spiser du til vanlig i løpet av en dag?",
+       "promptRu": "Что вы обычно едите в течение дня?",
+       "ask": [
+        "Hva spiser du til frokost?",
+        "Har du med matpakke?",
+        "Når spiser du middag?",
+        "Hva drikker du?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "frokost",
+        "lunsj",
+        "middag",
+        "matpakke",
+        "spiser",
+        "drikker",
+        "kaffe"
+       ],
+       "model": "Til frokost spiser jeg vanligvis havregrøt med bær, og jeg drikker kaffe. Til lunsj har jeg med matpakke på kurset, ofte to brødskiver med ost og agurk. Middag spiser vi klokka fem. Da lager jeg ofte fisk eller kylling med poteter og grønnsaker. Om kvelden spiser jeg litt yoghurt eller frukt. Jeg drikker mye vann og te."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: ваше любимое блюдо",
+     "titleNo": "Del 2: Favorittretten din",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om favorittretten din. Hvordan lager man den?",
+       "promptRu": "Расскажите о своём любимом блюде. Как его готовят?",
+       "ask": [
+        "Hva heter retten?",
+        "Hvilke ingredienser trenger man?",
+        "Hvordan lager man den, steg for steg?",
+        "Når spiser dere den?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "suppe",
+        "først",
+        "så",
+        "til slutt",
+        "trenger",
+        "poteter",
+        "løk",
+        "koker"
+       ],
+       "model": "Favorittretten min er borsjtsj. Det er en suppe fra Ukraina og Russland. Man trenger rødbeter, kål, poteter, gulrøtter, løk og kjøtt. Først koker man kjøttet i en time. Så skjærer man grønnsakene i små biter og har dem i suppa. Til slutt har man i litt hvitløk, salt og pepper. Vi spiser borsjtsj med rømme og brød. Den er god og varm, og den passer perfekt en kald vinterdag."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: здоровая и нездоровая еда",
+     "titleNo": "Del 3: Sunn og usunn mat",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva er sunn mat, og hva er usunn mat? Er det lett å spise sunt? Hva mener du?",
+       "promptRu": "Что такое здоровая и нездоровая еда? Легко ли питаться правильно? Ваше мнение?",
+       "ask": [
+        "Hvorfor er det viktig å spise sunt?",
+        "Er sunn mat dyr i Norge?",
+        "Har du endret matvanene dine etter at du kom til Norge?",
+        "Hva kan skolen og butikkene gjøre?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "sunn",
+        "usunn",
+        "fisk",
+        "grønnsaker",
+        "sukker",
+        "mener",
+        "fordi",
+        "dyr"
+       ],
+       "model": "Sunn mat er for eksempel fisk, grønnsaker, frukt og grovt brød. Usunn mat er mat med mye sukker og fett, som brus, godteri og pommes frites. Jeg mener at det ikke alltid er lett å spise sunt. Sunn mat er ofte dyr i Norge, og ferdigmat går raskt. Etter at jeg kom til Norge, spiser jeg mer fisk og mindre brød enn før. Jeg tror at butikkene burde gjøre frukt billigere, fordi da kjøper folk mer av den."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-helse",
+   "icon": "🩺",
+   "title": "Устно: здоровье",
+   "titleNo": "Muntlig: helse",
+   "level": "A1–A2",
+   "desc": "Как вы заботитесь о здоровье, рисунок «болею дома» и разговор о визите к врачу в Норвегии.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: как вы поддерживаете форму",
+     "titleNo": "Del 1: Å holde seg i form",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva gjør du for å holde deg i form?",
+       "promptRu": "Что вы делаете, чтобы быть в форме?",
+       "ask": [
+        "Trener du? Hvor ofte?",
+        "Går du mye?",
+        "Sover du nok?",
+        "Hva gjør du for å slappe av?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "trener",
+        "går",
+        "svømmer",
+        "sover",
+        "slappe av",
+        "ganger i uka"
+       ],
+       "model": "Jeg prøver å gå mye. Jeg går til kurset hver dag, og det tar tjue minutter. To ganger i uka svømmer jeg i svømmehallen. Jeg prøver også å sove åtte timer hver natt. For å slappe av leser jeg en bok eller hører på musikk. Jeg spiser mye grønnsaker, men jeg elsker sjokolade!"
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: опишите рисунок",
+     "titleNo": "Del 2: Beskriv bildet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Se på bildet. Hva har skjedd? Hvordan har personen det?",
+       "promptRu": "Посмотрите на рисунок. Что случилось? Как себя чувствует человек?",
+       "ask": [
+        "Hvor er personen?",
+        "Hva feiler henne / ham, tror du?",
+        "Hva står på bordet?",
+        "Hva bør hun / han gjøre?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "seng",
+        "syk",
+        "feber",
+        "termometer",
+        "te",
+        "medisin",
+        "tror",
+        "bør",
+        "legen"
+       ],
+       "model": "På bildet ligger en person i senga. Hun har et termometer i munnen, så jeg tror at hun har feber. Hun ser trøtt og syk ut. Ved siden av senga står et lite bord med en kopp te og en eske med medisin. Ute er det kaldt, og det snør. Jeg tror at hun er forkjølet eller har influensa. Hun bør drikke mye, hvile og bli hjemme fra jobb. Hvis hun ikke blir bedre, må hun ringe legen.",
+       "picture": "sick"
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: у врача в Норвегии",
+     "titleNo": "Del 3: Hos legen i Norge",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hvordan er det å gå til legen i Norge? Sammenlign med hjemlandet ditt.",
+       "promptRu": "Каково ходить к врачу в Норвегии? Сравните с вашей страной.",
+       "ask": [
+        "Hva er en fastlege?",
+        "Hvordan bestiller man time?",
+        "Hva er bra, og hva er vanskelig?",
+        "Hvordan er det i hjemlandet ditt?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "fastlege",
+        "time",
+        "legevakten",
+        "synes",
+        "men",
+        "hjemlandet",
+        "fordi",
+        "spesialist"
+       ],
+       "model": "I Norge har alle en fastlege. Man bestiller time på nettet eller på telefon, og ofte må man vente en uke eller to. Hvis det er akutt, kan man gå til legevakten. Jeg synes at legene her er vennlige, og at de forklarer godt. Men det er vanskelig å få time til spesialist. I hjemlandet mitt går man ofte direkte til en spesialist, og det går raskere, men man må ofte betale mer. Jeg tror at det norske systemet er rettferdig, fordi alle får hjelp."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-transport",
+   "icon": "🚌",
+   "title": "Устно: транспорт и поездки",
+   "titleNo": "Muntlig: transport og reise",
+   "level": "A1–A2",
+   "desc": "Как вы добираетесь до работы или курса, рассказ о поездке и мнение: машина или общественный транспорт.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: как вы передвигаетесь?",
+     "titleNo": "Del 1: Hvordan reiser du?",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hvordan kommer du deg til kurset eller jobben?",
+       "promptRu": "Как вы добираетесь до курса или работы?",
+       "ask": [
+        "Tar du buss, tog eller bil?",
+        "Hvor lang tid tar det?",
+        "Hva koster det?",
+        "Liker du å reise kollektivt?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "buss",
+        "tar",
+        "minutter",
+        "sykler",
+        "kort",
+        "koster",
+        "morgen"
+       ],
+       "model": "Jeg tar bussen til kurset hver morgen. Bussen går klokka kvart over åtte, og turen tar femten minutter. Jeg har et månedskort, det koster omtrent åtte hundre kroner. Om sommeren sykler jeg, fordi det er billig og sunt. Jeg liker bussen, men den er ofte full om morgenen."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: поездка",
+     "titleNo": "Del 2: En reise",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om en reise du har gjort i Norge eller i et annet land.",
+       "promptRu": "Расскажите о поездке, которую вы совершили по Норвегии или в другую страну.",
+       "ask": [
+        "Hvor reiste du, og når?",
+        "Hvordan reiste du?",
+        "Hva gjorde og så du der?",
+        "Hva likte du best?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "reiste",
+        "tog",
+        "bodde",
+        "så",
+        "gikk",
+        "fordi",
+        "beste",
+        "neste år"
+       ],
+       "model": "I fjor sommer reiste vi til Bergen med tog. Turen tok sju timer, men den var veldig fin, fordi vi så fjell, snø og fosser fra vinduet. I Bergen bodde vi på et lite hotell i sentrum. Vi gikk på Bryggen og på fisketorget, og vi tok Fløibanen opp på fjellet. Det regnet nesten hele tiden, men det gjorde ingenting. Det beste var utsikten fra Fløyen. Neste år vil vi reise til Lofoten."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: машина или общественный транспорт?",
+     "titleNo": "Del 3: Bil eller kollektivtransport?",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Er det bedre å ha bil eller å reise kollektivt? Hva mener du?",
+       "promptRu": "Что лучше: иметь машину или ездить на общественном транспорте? Как вы считаете?",
+       "ask": [
+        "Hva er fordelene med bil?",
+        "Hva er fordelene med buss og tog?",
+        "Hva med miljøet?",
+        "Hvordan er det i hjemlandet ditt?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "kollektivt",
+        "bil",
+        "miljøet",
+        "billigere",
+        "dessuten",
+        "på den andre siden",
+        "fordi",
+        "mener"
+       ],
+       "model": "Jeg mener at det er bedre å reise kollektivt i byen. Buss og tog er billigere enn bil, og det er bedre for miljøet. Dessuten er det vanskelig og dyrt å parkere i sentrum. På den andre siden trenger man ofte bil på landet, fordi bussen går sjelden. Med bil er det også lettere å handle og å kjøre barna til fritidsaktiviteter. I hjemlandet mitt har mange bil, og bensinen er billig. Her i Norge er mange biler elektriske."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-vaer",
+   "icon": "🌦",
+   "title": "Устно: погода и времена года",
+   "titleNo": "Muntlig: vær og årstider",
+   "level": "A1–A2",
+   "desc": "Погода сегодня, любимое время года и разговор о норвежской зиме и погоде на родине.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: погода сегодня",
+     "titleNo": "Del 1: Været i dag",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hvordan er været i dag? Hva har du på deg?",
+       "promptRu": "Какая сегодня погода? Во что вы одеты?",
+       "ask": [
+        "Er det sol, regn eller snø?",
+        "Er det varmt eller kaldt?",
+        "Hva har du på deg i dag?",
+        "Hva skal du gjøre hvis været blir fint?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 60,
+       "minWords": 30,
+       "keywords": [
+        "vær",
+        "grader",
+        "regn",
+        "kaldt",
+        "har på meg",
+        "jakke",
+        "hvis"
+       ],
+       "model": "I dag er det overskyet og litt kaldt. Det er fem grader, og det blåser. I morges regnet det. Jeg har på meg en varm genser, en jakke og gode sko. Jeg har også med en paraply. Hvis været blir fint i ettermiddag, skal jeg gå en tur i parken."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: любимое время года",
+     "titleNo": "Del 2: Favorittårstiden",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hvilken årstid liker du best? Hvorfor?",
+       "promptRu": "Какое время года вы любите больше всего? Почему?",
+       "ask": [
+        "Hvilke måneder hører til årstiden?",
+        "Hvordan er været da?",
+        "Hva gjør du da?",
+        "Hvilken årstid liker du minst?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "våren",
+        "sommeren",
+        "høsten",
+        "vinteren",
+        "liker",
+        "fordi",
+        "mørk",
+        "varm"
+       ],
+       "model": "Jeg liker våren best. Våren er i mars, april og mai. Da blir dagene lengre, og sola kommer tilbake etter den mørke vinteren. Det blir varmere, og trærne blir grønne. Om våren går jeg mye på tur, og jeg sitter gjerne ute på en kafé. Den syttende mai feirer vi nasjonaldagen sammen med naboene. Jeg liker november minst, fordi det er mørkt, vått og grått."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: зима в Норвегии",
+     "titleNo": "Del 3: Vinteren i Norge",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hvordan er det å bo i Norge om vinteren? Sammenlign med hjemlandet ditt.",
+       "promptRu": "Каково жить в Норвегии зимой? Сравните с вашей страной.",
+       "ask": [
+        "Hva er vanskelig med den norske vinteren?",
+        "Hva er fint med den?",
+        "Hvordan er vinteren i hjemlandet ditt?",
+        "Hva gjør du for å trives om vinteren?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "vinteren",
+        "mørk",
+        "kald",
+        "snø",
+        "men",
+        "hjemlandet",
+        "grader",
+        "trives"
+       ],
+       "model": "Den norske vinteren er lang og mørk, spesielt i nord. Det vanskeligste for meg er mørket. I desember blir det mørkt klokka tre. Men vinteren her er ikke så kald som i hjemlandet mitt. Der kan det være minus tretti grader, men det er mer sol. Det fine med vinteren i Norge er snøen og skiturene, og at folk tenner lys og har det koselig inne. For å trives tar jeg D-vitamin, går ut midt på dagen og prøver å gå på ski."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "munt-norge",
+   "icon": "🇳🇴",
+   "title": "Устно: Норвегия и родина",
+   "titleNo": "Muntlig: Norge og hjemlandet",
+   "level": "A1–A2",
+   "desc": "Ваша страна, первые впечатления о Норвегии и сравнение: что лучше здесь, а что — дома.",
+   "sections": [
+    {
+     "id": "m1",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 1: ваша страна",
+     "titleNo": "Del 1: Hjemlandet ditt",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om hjemlandet ditt eller hjembyen din.",
+       "promptRu": "Расскажите о своей стране или родном городе.",
+       "ask": [
+        "Hvor ligger det?",
+        "Hvor mange mennesker bor der?",
+        "Hva er kjent der?",
+        "Hva savner du?"
+       ],
+       "level": "A1",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 30,
+       "keywords": [
+        "kommer fra",
+        "by",
+        "ligger",
+        "bor",
+        "kjent",
+        "savner"
+       ],
+       "model": "Jeg kommer fra Kazan. Det er en stor by i Russland, ved elva Volga. Det bor omtrent én million mennesker der. Byen er gammel og vakker, og den er kjent for Kreml og for mange moskeer og kirker. Om sommeren er det varmt, og om vinteren er det veldig kaldt. Jeg savner familien min og maten fra hjembyen."
+      }
+     ],
+     "note": "Сначала таймер подготовки, потом таймер ответа — как на экзамене. Говорите или печатайте."
+    },
+    {
+     "id": "m2",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 2: первый год в Норвегии",
+     "titleNo": "Del 2: Det første året i Norge",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Fortell om den første tiden din i Norge. Hva var lett, og hva var vanskelig?",
+       "promptRu": "Расскажите о своём первом времени в Норвегии. Что было легко, а что трудно?",
+       "ask": [
+        "Når kom du til Norge?",
+        "Hva overrasket deg?",
+        "Hva var vanskelig i begynnelsen?",
+        "Hvem hjalp deg?"
+       ],
+       "level": "A2",
+       "prepSec": 30,
+       "speakSec": 90,
+       "minWords": 45,
+       "keywords": [
+        "kom",
+        "var",
+        "vanskelig",
+        "overrasket",
+        "i begynnelsen",
+        "hjalp",
+        "nå"
+       ],
+       "model": "Jeg kom til Norge for to år siden, i januar. Det første som overrasket meg, var at det var så mørkt og stille. Folk var høflige, men de snakket ikke så mye med fremmede. I begynnelsen var språket det vanskeligste. Jeg forsto nesten ingenting på butikken. Det var også vanskelig å finne en leilighet. Heldigvis hjalp en nabo meg mye. Nå har jeg venner her, og jeg forstår mye mer."
+      }
+     ]
+    },
+    {
+     "id": "m3",
+     "part": "munt",
+     "type": "speak",
+     "title": "Часть 3: Норвегия и родина",
+     "titleNo": "Del 3: Norge og hjemlandet",
+     "items": [
+      {
+       "id": "1",
+       "prompt": "Hva er bedre i Norge, og hva er bedre i hjemlandet ditt? Begrunn svaret.",
+       "promptRu": "Что лучше в Норвегии, а что — на вашей родине? Объясните почему.",
+       "ask": [
+        "Tenk på arbeid, natur, priser, mennesker og tradisjoner.",
+        "Hva liker du best med Norge?",
+        "Hva savner du fra hjemlandet?",
+        "Hvor vil du bo om ti år?"
+       ],
+       "level": "A2",
+       "prepSec": 60,
+       "speakSec": 120,
+       "minWords": 45,
+       "keywords": [
+        "norge",
+        "hjemlandet",
+        "bedre",
+        "synes",
+        "men",
+        "dessuten",
+        "savner",
+        "billigere"
+       ],
+       "model": "Jeg synes at mye er bedre i Norge. Det er trygt, naturen er fantastisk, og man får hjelp hvis man blir syk eller mister jobben. Dessuten er det mindre byråkrati, og mange ting kan man gjøre på nettet. Men i hjemlandet mitt er livet billigere, og folk er mer åpne. Der går man på besøk uten å avtale først, og det savner jeg. Maten er også bedre hjemme, synes jeg! Om ti år vil jeg nok bo i Norge, men jeg vil reise hjem hver sommer."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

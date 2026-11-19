@@ -1,0 +1,1414 @@
+{
+ "version": 1,
+ "updated": "2026-11-19",
+ "group": "phrases",
+ "attribution": "Фразы для письма — собственный материал Norsk Kort (подбор, формулировки, переводы и пояснения к порядку слов).",
+ "note": "«…» в фразе — место для ваших слов. use: msg = сообщение / письмо, opinion = текст-мнение, story = рассказ / описание (для помощника в тестах «🧰 Шаблон и фразы»).",
+ "decks": [
+  {
+   "id": "phr-start",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Начать текст",
+   "icon": "🚪",
+   "tags": [
+    "skriving",
+    "innledning"
+   ],
+   "level": "A2–B1",
+   "description": "Первые фразы сочинения или рассказа: назвать тему, сказать, о чём будет текст. После обстоятельства в начале — глагол на 2-м месте.",
+   "cards": [
+    {
+     "key": "phr:start:i-dag-vil-jeg-skrive-om",
+     "no": "I dag vil jeg skrive om …",
+     "ru": "Сегодня я хочу написать о …",
+     "uk": "Сьогодні я хочу написати про …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 I dag + V2: I dag vil jeg… (не «I dag jeg vil»).\n🎚 Уровень A2",
+     "example": "I dag vil jeg skrive om familien min.",
+     "exampleRu": "Сегодня я хочу написать о своей семье.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:i-denne-teksten-skal-jeg-fortelle-om",
+     "no": "I denne teksten skal jeg fortelle om …",
+     "ru": "В этом тексте я расскажу о …",
+     "uk": "У цьому тексті я розповім про …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 I denne teksten + V2: skal jeg…\n🎚 Уровень A2",
+     "example": "I denne teksten skal jeg fortelle om byen min.",
+     "exampleRu": "В этом тексте я расскажу о своём городе.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:jeg-vil-fortelle-litt-om",
+     "no": "Jeg vil fortelle litt om …",
+     "ru": "Я хочу немного рассказать о …",
+     "uk": "Я хочу трохи розповісти про …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Подлежащее на 1-м месте: Jeg vil… После vil — инфинитив без å.\n🎚 Уровень A2",
+     "example": "Jeg vil fortelle litt om jobben min.",
+     "exampleRu": "Я хочу немного рассказать о своей работе.",
+     "use": [
+      "story"
+     ]
+    },
+    {
+     "key": "phr:start:forst-vil-jeg-presentere-meg-selv",
+     "no": "Først vil jeg presentere meg selv.",
+     "ru": "Сначала я хочу представиться.",
+     "uk": "Спершу я хочу відрекомендуватися.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Først + V2: Først vil jeg…\n🎚 Уровень A2",
+     "example": "Først vil jeg presentere meg selv. Jeg heter Olga.",
+     "exampleRu": "Сначала я хочу представиться. Меня зовут Ольга.",
+     "use": [
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:start:pa-bildet-ser-vi",
+     "no": "På bildet ser vi …",
+     "ru": "На картинке мы видим …",
+     "uk": "На картинці ми бачимо …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 På bildet + V2: ser vi (не «vi ser»).\n🎚 Уровень A2",
+     "example": "På bildet ser vi en familie som spiser middag.",
+     "exampleRu": "На картинке мы видим семью, которая ужинает.",
+     "use": [
+      "story"
+     ]
+    },
+    {
+     "key": "phr:start:er-et-tema-som-mange-snakker-om",
+     "no": "… er et tema som mange snakker om.",
+     "ru": "… — тема, о которой многие говорят.",
+     "uk": "… — тема, про яку багато хто говорить.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 som + глагол: «som mange snakker om» — в придаточном сначала подлежащее (mange), потом глагол.\n🎚 Уровень A2",
+     "example": "Helse er et tema som mange snakker om.",
+     "exampleRu": "Здоровье — тема, о которой многие говорят.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:mange-mennesker-i-norge",
+     "no": "Mange mennesker i Norge …",
+     "ru": "Многие люди в Норвегии …",
+     "uk": "Багато людей у Норвегії …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Подлежащее «Mange mennesker» на 1-м месте → потом глагол: Mange mennesker i Norge går på ski.\n🎚 Уровень A2",
+     "example": "Mange mennesker i Norge går tur i helgene.",
+     "exampleRu": "Многие люди в Норвегии гуляют по выходным.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:na-til-dags-er-det-mange-som",
+     "no": "Nå til dags er det mange som …",
+     "ru": "В наше время многие …",
+     "uk": "У наш час багато хто …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Nå til dags + V2: er det…; som — подлежащее придаточного, сразу глагол: som jobber.\n🎚 Уровень B1",
+     "example": "Nå til dags er det mange som jobber hjemmefra.",
+     "exampleRu": "В наше время многие работают из дома.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:hvorfor-er-sa-viktig",
+     "no": "Hvorfor er … så viktig?",
+     "ru": "Почему … так важно?",
+     "uk": "Чому … таке важливе?",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Вопрос с вопросительным словом: Hvorfor + глагол + подлежащее.\n🎚 Уровень B1",
+     "example": "Hvorfor er det så viktig å lære norsk?",
+     "exampleRu": "Почему так важно учить норвежский?",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:det-er-mye-a-si-om",
+     "no": "Det er mye å si om …",
+     "ru": "О … можно сказать многое.",
+     "uk": "Про … можна сказати багато.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Det er… — обычный порядок, глагол на 2-м месте.\n🎚 Уровень A2",
+     "example": "Det er mye å si om livet i Norge.",
+     "exampleRu": "О жизни в Норвегии можно сказать многое.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:start:mange-lurer-pa-om",
+     "no": "Mange lurer på om …",
+     "ru": "Многие задаются вопросом, …ли …",
+     "uk": "Багато хто замислюється, чи …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 om — придаточное: om + подлежащее + (ikke) + глагол.\n🎚 Уровень B1",
+     "example": "Mange lurer på om det er lurt å kjøpe bil.",
+     "exampleRu": "Многие задаются вопросом, разумно ли покупать машину.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:start:jeg-har-bodd-i-norge-i-ar",
+     "no": "Jeg har bodd i Norge i … år.",
+     "ru": "Я живу в Норвегии уже … лет.",
+     "uk": "Я живу в Норвегії вже … років.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 har bodd — perfektum: «уже живу» = har bodd i … år.\n🎚 Уровень A2",
+     "example": "Jeg har bodd i Norge i tre år.",
+     "exampleRu": "Я живу в Норвегии уже три года.",
+     "use": [
+      "story",
+      "msg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-opinion",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Высказать мнение",
+   "icon": "💭",
+   "tags": [
+    "skriving",
+    "mening"
+   ],
+   "level": "A2–B1",
+   "description": "Как сказать «я думаю», «по-моему», «я согласен». После synes / mener / tror at — придаточное: подлежащее, потом ikke, потом глагол.",
+   "cards": [
+    {
+     "key": "phr:opinion:jeg-synes-at",
+     "no": "Jeg synes at …",
+     "ru": "Я считаю, что … (моё мнение)",
+     "uk": "Я вважаю, що … (моя думка)",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V: Jeg synes at det ikke er dyrt.\n🎚 Уровень A2",
+     "example": "Jeg synes at Norge er et fint land.",
+     "exampleRu": "Я считаю, что Норвегия — прекрасная страна.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-mener-at",
+     "no": "Jeg mener at …",
+     "ru": "Я считаю (твёрдо), что …",
+     "uk": "Я переконаний (переконана), що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V: Jeg mener at alle bør lære å svømme.\n🎚 Уровень A2",
+     "example": "Jeg mener at barn bør leke ute hver dag.",
+     "exampleRu": "Я считаю, что дети должны каждый день играть на улице.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-tror-at",
+     "no": "Jeg tror at …",
+     "ru": "Я думаю (предполагаю), что …",
+     "uk": "Я думаю (припускаю), що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 tror = не уверен(а). at + S + (ikke) + V: Jeg tror at han ikke kommer.\n🎚 Уровень A2",
+     "example": "Jeg tror at det blir sol i morgen.",
+     "exampleRu": "Я думаю, что завтра будет солнце.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:opinion:etter-min-mening-er",
+     "no": "Etter min mening er …",
+     "ru": "По моему мнению, …",
+     "uk": "На мою думку, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Etter min mening + V2: er det… (не «Etter min mening det er»).\n🎚 Уровень A2",
+     "example": "Etter min mening er det viktig å ha gode venner.",
+     "exampleRu": "По-моему, важно иметь хороших друзей.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:for-meg-er-det-viktig-a",
+     "no": "For meg er det viktig å …",
+     "ru": "Для меня важно …",
+     "uk": "Для мене важливо …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 For meg + V2: er det…; потом å + инфинитив.\n🎚 Уровень A2",
+     "example": "For meg er det viktig å ha tid med familien.",
+     "exampleRu": "Для меня важно проводить время с семьёй.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:opinion:personlig-synes-jeg-at",
+     "no": "Personlig synes jeg at …",
+     "ru": "Лично я считаю, что …",
+     "uk": "Особисто я вважаю, що …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Personlig + V2: synes jeg (инверсия).\n🎚 Уровень B1",
+     "example": "Personlig synes jeg at vinteren er for lang.",
+     "exampleRu": "Лично я считаю, что зима слишком длинная.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-er-enig-i-at",
+     "no": "Jeg er enig i at …",
+     "ru": "Я согласен (согласна) с тем, что …",
+     "uk": "Я згоден (згодна) з тим, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 enig I at… (с мыслью) · enig MED deg (с человеком).\n🎚 Уровень A2",
+     "example": "Jeg er enig i at det er dyrt å bo i Oslo.",
+     "exampleRu": "Я согласен, что в Осло жить дорого.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-er-ikke-enig-i-at",
+     "no": "Jeg er ikke enig i at …",
+     "ru": "Я не согласен (не согласна), что …",
+     "uk": "Я не згоден (не згодна) з тим, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 В главном ikke после глагола: Jeg er ikke enig.\n🎚 Уровень A2",
+     "example": "Jeg er ikke enig i at alle må ha bil.",
+     "exampleRu": "Я не согласен, что у всех должна быть машина.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:det-er-viktig-a",
+     "no": "Det er viktig å …",
+     "ru": "Важно …",
+     "uk": "Важливо …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Det er + прилагательное + å + инфинитив.\n🎚 Уровень A2",
+     "example": "Det er viktig å sove nok.",
+     "exampleRu": "Важно достаточно спать.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:opinion:det-beste-med-er-at",
+     "no": "Det beste med … er at …",
+     "ru": "Самое лучшее в … — то, что …",
+     "uk": "Найкраще в … — те, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Подлежащее «Det beste med …» длинное, но глагол er всё равно 2-й элемент.\n🎚 Уровень A2",
+     "example": "Det beste med Norge er at naturen er så vakker.",
+     "exampleRu": "Самое лучшее в Норвегии — то, что природа такая красивая.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:opinion:det-verste-med-er-at",
+     "no": "Det verste med … er at …",
+     "ru": "Самое плохое в … — то, что …",
+     "uk": "Найгірше в … — те, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V: …er at det ikke finnes buss.\n🎚 Уровень A2",
+     "example": "Det verste med vinteren er at det er mørkt.",
+     "exampleRu": "Самое плохое зимой — то, что темно.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-er-usikker-pa-om",
+     "no": "Jeg er usikker på om …",
+     "ru": "Я не уверен(а), …ли …",
+     "uk": "Я не впевнений (не впевнена), чи …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 om — придаточное: om + S + (ikke) + V.\n🎚 Уровень B1",
+     "example": "Jeg er usikker på om jeg vil flytte.",
+     "exampleRu": "Я не уверен, хочу ли я переезжать.",
+     "use": [
+      "opinion",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:opinion:jeg-liker-godt-a",
+     "no": "Jeg liker godt å …",
+     "ru": "Мне очень нравится …",
+     "uk": "Мені дуже подобається …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 liker å + инфинитив. Отрицание: Jeg liker ikke å …\n🎚 Уровень A2",
+     "example": "Jeg liker godt å lage mat.",
+     "exampleRu": "Мне очень нравится готовить.",
+     "use": [
+      "story",
+      "msg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-proscons",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "За и против",
+   "icon": "⚖️",
+   "tags": [
+    "skriving",
+    "argument"
+   ],
+   "level": "A2–B1",
+   "description": "Плюсы и минусы, «с одной стороны — с другой стороны», «хотя». Наречие в начале → инверсия; men и og инверсии не дают.",
+   "cards": [
+    {
+     "key": "phr:proscons:det-er-bade-fordeler-og-ulemper-med",
+     "no": "Det er både fordeler og ulemper med …",
+     "ru": "У … есть и плюсы, и минусы.",
+     "uk": "У … є і переваги, і недоліки.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Det er… — обычный порядок.\n🎚 Уровень A2",
+     "example": "Det er både fordeler og ulemper med å bo på landet.",
+     "exampleRu": "У жизни в деревне есть и плюсы, и минусы.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:en-fordel-med-er-at",
+     "no": "En fordel med … er at …",
+     "ru": "Плюс … в том, что …",
+     "uk": "Перевага … в тому, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "En fordel med å sykle er at man ikke trenger bil.",
+     "exampleRu": "Плюс велосипеда в том, что не нужна машина.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:en-annen-fordel-er-at",
+     "no": "En annen fordel er at …",
+     "ru": "Ещё один плюс — то, что …",
+     "uk": "Ще одна перевага — те, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "En annen fordel er at det er sunt.",
+     "exampleRu": "Ещё один плюс — это полезно для здоровья.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:en-ulempe-er-at",
+     "no": "En ulempe er at …",
+     "ru": "Минус в том, что …",
+     "uk": "Недолік у тому, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V: …at bussen ikke går ofte.\n🎚 Уровень A2",
+     "example": "En ulempe er at det tar lang tid.",
+     "exampleRu": "Минус в том, что это занимает много времени.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:pa-den-ene-siden",
+     "no": "På den ene siden …",
+     "ru": "С одной стороны, …",
+     "uk": "З одного боку, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 På den ene siden + V2: På den ene siden er det billig.\n🎚 Уровень B1",
+     "example": "På den ene siden er det billig å bo i en liten by.",
+     "exampleRu": "С одной стороны, жить в маленьком городе дёшево.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:pa-den-andre-siden",
+     "no": "På den andre siden …",
+     "ru": "С другой стороны, …",
+     "uk": "З іншого боку, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 På den andre siden + V2: På den andre siden finnes det…\n🎚 Уровень B1",
+     "example": "På den andre siden finnes det færre jobber der.",
+     "exampleRu": "С другой стороны, работы там меньше.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:for-det-forste",
+     "no": "For det første …",
+     "ru": "Во-первых, …",
+     "uk": "По-перше, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 For det første + V2: For det første er det…\n🎚 Уровень A2",
+     "example": "For det første er det sunt å gå tur.",
+     "exampleRu": "Во-первых, гулять полезно.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:for-det-andre",
+     "no": "For det andre …",
+     "ru": "Во-вторых, …",
+     "uk": "По-друге, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 For det andre + V2: For det andre blir man glad.\n🎚 Уровень A2",
+     "example": "For det andre blir man i godt humør.",
+     "exampleRu": "Во-вторых, поднимается настроение.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:dessuten",
+     "no": "Dessuten …",
+     "ru": "Кроме того, …",
+     "uk": "Крім того, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Dessuten + V2: Dessuten koster det lite.\n🎚 Уровень A2",
+     "example": "Dessuten koster det ikke mye.",
+     "exampleRu": "Кроме того, это стоит недорого.",
+     "use": [
+      "opinion",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:proscons:i-tillegg",
+     "no": "I tillegg …",
+     "ru": "К тому же, …",
+     "uk": "До того ж …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 I tillegg + V2: I tillegg har vi…\n🎚 Уровень A2",
+     "example": "I tillegg har vi en stor hage.",
+     "exampleRu": "К тому же у нас большой сад.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:proscons:men",
+     "no": "…, men …",
+     "ru": "…, но …",
+     "uk": "…, але …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 men не меняет порядок: …, men det er dyrt (S + V).\n🎚 Уровень A2",
+     "example": "Det er fint å bo i Oslo, men det er dyrt.",
+     "exampleRu": "В Осло жить хорошо, но дорого.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:proscons:likevel",
+     "no": "Likevel …",
+     "ru": "Тем не менее, …",
+     "uk": "Проте …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Likevel + V2: Likevel tror jeg…\n🎚 Уровень B1",
+     "example": "Likevel tror jeg at det er verdt det.",
+     "exampleRu": "Тем не менее я думаю, что это того стоит.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:proscons:selv-om",
+     "no": "Selv om …, …",
+     "ru": "Хотя …, …",
+     "uk": "Хоча …, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Придаточное впереди → запятая → глагол → подлежащее: Selv om det er kaldt, går jeg ut.\n🎚 Уровень B1",
+     "example": "Selv om det er kaldt, liker jeg vinteren.",
+     "exampleRu": "Хотя холодно, я люблю зиму.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:proscons:noen-mener-at-mens-andre-mener-at",
+     "no": "Noen mener at …, mens andre mener at …",
+     "ru": "Одни считают, что …, а другие — что …",
+     "uk": "Одні вважають, що …, а інші — що …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 mens — придаточное: mens + S + V.\n🎚 Уровень B1",
+     "example": "Noen mener at skolen bør starte senere, mens andre mener at det er feil.",
+     "exampleRu": "Одни считают, что школа должна начинаться позже, а другие — что это неправильно.",
+     "use": [
+      "opinion"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-reason",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Пример и причина",
+   "icon": "🔗",
+   "tags": [
+    "skriving",
+    "bindeord"
+   ],
+   "level": "A2–B1",
+   "description": "fordi, derfor, for eksempel, hvis, så… Главное правило: fordi / hvis / siden начинают придаточное (S → ikke → V), а derfor / for eksempel в начале дают инверсию (V2).",
+   "cards": [
+    {
+     "key": "phr:reason:fordi",
+     "no": "… fordi …",
+     "ru": "… потому что …",
+     "uk": "… тому що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 fordi + S + (ikke) + V: …fordi jeg ikke har tid.\n🎚 Уровень A2",
+     "example": "Jeg lærer norsk fordi jeg bor i Norge.",
+     "exampleRu": "Я учу норвежский, потому что живу в Норвегии.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:derfor",
+     "no": "Derfor …",
+     "ru": "Поэтому …",
+     "uk": "Тому …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Derfor + V2: Derfor bor jeg… (не «Derfor jeg bor»).\n🎚 Уровень A2",
+     "example": "Jeg liker naturen. Derfor går jeg ofte på tur.",
+     "exampleRu": "Я люблю природу. Поэтому я часто хожу в походы.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:for-eksempel",
+     "no": "For eksempel …",
+     "ru": "Например, …",
+     "uk": "Наприклад, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 В начале предложения For eksempel + V2: For eksempel kan man…\n🎚 Уровень A2",
+     "example": "For eksempel kan man sykle til jobben.",
+     "exampleRu": "Например, можно ездить на работу на велосипеде.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:reason:som-for-eksempel",
+     "no": "… som for eksempel …",
+     "ru": "… как например …",
+     "uk": "… як-от …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Внутри предложения порядок не меняется: Jeg liker frukt, som for eksempel epler.\n🎚 Уровень A2",
+     "example": "Jeg liker vintersport, som for eksempel ski og skøyter.",
+     "exampleRu": "Я люблю зимние виды спорта, например лыжи и коньки.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:reason:grunnen-er-at",
+     "no": "Grunnen er at …",
+     "ru": "Причина в том, что …",
+     "uk": "Причина в тому, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "Grunnen er at jeg ikke har bil.",
+     "exampleRu": "Причина в том, что у меня нет машины.",
+     "use": [
+      "opinion",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:det-er-fordi",
+     "no": "Det er fordi …",
+     "ru": "Это потому, что …",
+     "uk": "Це тому, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 fordi + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "Jeg er trøtt i dag. Det er fordi jeg sov dårlig.",
+     "exampleRu": "Я сегодня устал. Это потому, что я плохо спал.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:hvis",
+     "no": "Hvis …, …",
+     "ru": "Если …, то …",
+     "uk": "Якщо …, то …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Придаточное впереди → запятая → глагол → подлежащее: Hvis det regner, blir jeg hjemme.\n🎚 Уровень A2",
+     "example": "Hvis det blir fint vær, går vi på tur.",
+     "exampleRu": "Если будет хорошая погода, мы пойдём гулять.",
+     "use": [
+      "opinion",
+      "msg",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:reason:siden",
+     "no": "Siden …, …",
+     "ru": "Так как …, …",
+     "uk": "Оскільки …, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Siden + S + V, затем инверсия: Siden jeg bor her, kjenner jeg byen.\n🎚 Уровень B1",
+     "example": "Siden jeg jobber om kvelden, kan jeg ikke komme på kurset.",
+     "exampleRu": "Так как я работаю вечером, я не могу прийти на курс.",
+     "use": [
+      "opinion",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:sa",
+     "no": "…, så …",
+     "ru": "…, так что … / поэтому …",
+     "uk": "…, тож … / тому …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 så после запятой = «так что» — без инверсии: …, så vi ble hjemme. А «Så» в начале = «потом» → V2: Så gikk vi hjem.\n🎚 Уровень A2",
+     "example": "Det regnet hele dagen, så vi ble hjemme.",
+     "exampleRu": "Весь день шёл дождь, так что мы остались дома.",
+     "use": [
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:reason:det-betyr-at",
+     "no": "Det betyr at …",
+     "ru": "Это значит, что …",
+     "uk": "Це означає, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "Det betyr at vi må spare penger.",
+     "exampleRu": "Это значит, что нам нужно экономить.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:reason:dette-viser-at",
+     "no": "Dette viser at …",
+     "ru": "Это показывает, что …",
+     "uk": "Це показує, що …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень B1",
+     "example": "Dette viser at sport er bra for helsen.",
+     "exampleRu": "Это показывает, что спорт полезен для здоровья.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:reason:nar",
+     "no": "Når …, …",
+     "ru": "Когда …, …",
+     "uk": "Коли …, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Når + S + V, запятая, глагол главного: Når jeg kommer hjem, lager jeg mat.\n🎚 Уровень A2",
+     "example": "Når jeg kommer hjem fra jobben, lager jeg middag.",
+     "exampleRu": "Когда я прихожу домой с работы, я готовлю ужин.",
+     "use": [
+      "story",
+      "msg"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-compare",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Сравнить",
+   "icon": "🔍",
+   "tags": [
+    "skriving",
+    "sammenligning"
+   ],
+   "level": "A2–B1",
+   "description": "Сравнить Норвегию и родную страну, раньше и сейчас: enn, like … som, mens, i motsetning til.",
+   "cards": [
+    {
+     "key": "phr:compare:er-storre-enn",
+     "no": "… er større enn …",
+     "ru": "… больше, чем …",
+     "uk": "… більший, ніж …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Сравнительная степень + enn: billigere enn, bedre enn.\n🎚 Уровень A2",
+     "example": "Moskva er mye større enn Oslo.",
+     "exampleRu": "Москва намного больше Осло.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:er-like-som",
+     "no": "… er like … som …",
+     "ru": "… такой же …, как …",
+     "uk": "… такий самий …, як …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 like + прилагательное + som: like kaldt som.\n🎚 Уровень A2",
+     "example": "Vinteren i Bergen er ikke like kald som i Moskva.",
+     "exampleRu": "Зима в Бергене не такая холодная, как в Москве.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:i-norge-men-i-hjemlandet-mitt",
+     "no": "I Norge …, men i hjemlandet mitt …",
+     "ru": "В Норвегии …, а у меня на родине …",
+     "uk": "У Норвегії …, а в мене на батьківщині …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Каждая часть начинается с обстоятельства → инверсия: I Norge spiser vi…, men i Russland spiser vi…\n🎚 Уровень A2",
+     "example": "I Norge spiser folk middag klokka fem, men i hjemlandet mitt spiser vi senere.",
+     "exampleRu": "В Норвегии ужинают в пять, а у меня на родине — позже.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:mens",
+     "no": "Mens …, …",
+     "ru": "В то время как …, …",
+     "uk": "Тоді як …, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Mens + S + V, запятая → глагол → подлежащее: Mens det er kaldt her, er det varmt der.\n🎚 Уровень B1",
+     "example": "Mens det er mørkt i Norge om vinteren, er det lyst om sommeren.",
+     "exampleRu": "Зимой в Норвегии темно, а летом светло.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:det-er-stor-forskjell-pa-og",
+     "no": "Det er stor forskjell på … og …",
+     "ru": "Между … и … большая разница.",
+     "uk": "Між … і … велика різниця.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Det er… — обычный порядок.\n🎚 Уровень A2",
+     "example": "Det er stor forskjell på livet i byen og på landet.",
+     "exampleRu": "Между жизнью в городе и в деревне большая разница.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:compare:er-annerledes-enn",
+     "no": "… er annerledes enn …",
+     "ru": "… отличается от …",
+     "uk": "… відрізняється від …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 annerledes enn — «не такой, как».\n🎚 Уровень A2",
+     "example": "Skolen i Norge er annerledes enn skolen i Ukraina.",
+     "exampleRu": "Школа в Норвегии отличается от школы в Украине.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:bade-og",
+     "no": "Både … og …",
+     "ru": "И …, и …",
+     "uk": "І …, і …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Både + подлежащее: Både barn og voksne liker…\n🎚 Уровень A2",
+     "example": "Både barn og voksne liker å gå på ski.",
+     "exampleRu": "И дети, и взрослые любят кататься на лыжах.",
+     "use": [
+      "story",
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:compare:for-men-na",
+     "no": "Før …, men nå …",
+     "ru": "Раньше …, а теперь …",
+     "uk": "Раніше …, а тепер …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Før и nå в начале → инверсия: Før bodde jeg…, men nå bor jeg…\n🎚 Уровень A2",
+     "example": "Før bodde jeg i en stor by, men nå bor jeg på et lite sted.",
+     "exampleRu": "Раньше я жил в большом городе, а теперь живу в маленьком посёлке.",
+     "use": [
+      "story"
+     ]
+    },
+    {
+     "key": "phr:compare:i-motsetning-til",
+     "no": "I motsetning til …",
+     "ru": "В отличие от …",
+     "uk": "На відміну від …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 I motsetning til … + V2: I motsetning til Russland har Norge…\n🎚 Уровень B1",
+     "example": "I motsetning til Spania har Norge kalde vintre.",
+     "exampleRu": "В отличие от Испании, в Норвегии холодные зимы.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:compare:det-samme-gjelder",
+     "no": "Det samme gjelder …",
+     "ru": "То же самое касается …",
+     "uk": "Те саме стосується …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Подлежащее «Det samme» + глагол gjelder.\n🎚 Уровень B1",
+     "example": "Det samme gjelder maten.",
+     "exampleRu": "То же самое касается еды.",
+     "use": [
+      "opinion"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-end",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Закончить текст",
+   "icon": "🏁",
+   "tags": [
+    "skriving",
+    "avslutning"
+   ],
+   "level": "A2–B1",
+   "description": "Последние фразы: вывод, надежда, итог. Обстоятельство в начале → глагол на 2-м месте.",
+   "cards": [
+    {
+     "key": "phr:end:til-slutt-vil-jeg-si-at",
+     "no": "Til slutt vil jeg si at …",
+     "ru": "В заключение хочу сказать, что …",
+     "uk": "Насамкінець хочу сказати, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Til slutt + V2: vil jeg si…\n🎚 Уровень A2",
+     "example": "Til slutt vil jeg si at jeg trives i Norge.",
+     "exampleRu": "В заключение хочу сказать, что мне хорошо в Норвегии.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:end:alt-i-alt",
+     "no": "Alt i alt …",
+     "ru": "В целом …",
+     "uk": "Загалом …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Alt i alt + V2: Alt i alt er jeg fornøyd.\n🎚 Уровень A2",
+     "example": "Alt i alt er jeg fornøyd med livet mitt her.",
+     "exampleRu": "В целом я доволен своей жизнью здесь.",
+     "use": [
+      "opinion",
+      "story"
+     ]
+    },
+    {
+     "key": "phr:end:kort-sagt",
+     "no": "Kort sagt …",
+     "ru": "Короче говоря, …",
+     "uk": "Коротко кажучи, …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Kort sagt + V2: Kort sagt er det…\n🎚 Уровень B1",
+     "example": "Kort sagt er det et fint sted å bo.",
+     "exampleRu": "Короче говоря, это хорошее место для жизни.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:end:derfor-mener-jeg-at",
+     "no": "Derfor mener jeg at …",
+     "ru": "Поэтому я считаю, что …",
+     "uk": "Тому я вважаю, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Derfor + V2 (mener jeg) + at + S + V.\n🎚 Уровень A2",
+     "example": "Derfor mener jeg at alle bør lære å svømme.",
+     "exampleRu": "Поэтому я считаю, что все должны научиться плавать.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:end:konklusjonen-min-er-at",
+     "no": "Konklusjonen min er at …",
+     "ru": "Мой вывод: …",
+     "uk": "Мій висновок: …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень B1",
+     "example": "Konklusjonen min er at fordelene er større enn ulempene.",
+     "exampleRu": "Мой вывод: плюсов больше, чем минусов.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:end:for-a-oppsummere",
+     "no": "For å oppsummere: …",
+     "ru": "Подводя итог: …",
+     "uk": "Підсумовуючи: …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 После двоеточия — обычное предложение: For å oppsummere: …\n🎚 Уровень B1",
+     "example": "For å oppsummere: Det er bra å lære språk.",
+     "exampleRu": "Подводя итог: учить языки — это хорошо.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:end:avslutningsvis-vil-jeg-si-at",
+     "no": "Avslutningsvis vil jeg si at …",
+     "ru": "В завершение скажу, что …",
+     "uk": "На завершення скажу, що …",
+     "wordClass": "frase",
+     "level": "B1",
+     "description": "📏 Avslutningsvis + V2: vil jeg…\n🎚 Уровень B1",
+     "example": "Avslutningsvis vil jeg si at jeg håper på en bedre fremtid.",
+     "exampleRu": "В завершение скажу, что надеюсь на лучшее будущее.",
+     "use": [
+      "opinion"
+     ]
+    },
+    {
+     "key": "phr:end:jeg-haper-at",
+     "no": "Jeg håper at …",
+     "ru": "Я надеюсь, что …",
+     "uk": "Я сподіваюся, що …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + (ikke) + V.\n🎚 Уровень A2",
+     "example": "Jeg håper at jeg får en ny jobb snart.",
+     "exampleRu": "Я надеюсь, что скоро найду новую работу.",
+     "use": [
+      "opinion",
+      "story",
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:end:i-framtiden-vil-jeg",
+     "no": "I framtiden vil jeg …",
+     "ru": "В будущем я хочу …",
+     "uk": "У майбутньому я хочу …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 I framtiden + V2: vil jeg + инфинитив.\n🎚 Уровень A2",
+     "example": "I framtiden vil jeg jobbe som sykepleier.",
+     "exampleRu": "В будущем я хочу работать медсестрой.",
+     "use": [
+      "story"
+     ]
+    },
+    {
+     "key": "phr:end:det-var-alt-for-denne-gangen",
+     "no": "Det var alt for denne gangen.",
+     "ru": "На этот раз всё.",
+     "uk": "Цього разу це все.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Готовая фраза для конца письма или рассказа.\n🎚 Уровень A2",
+     "example": "Det var alt for denne gangen. Ha en fin dag!",
+     "exampleRu": "На этот раз всё. Хорошего дня!",
+     "use": [
+      "msg",
+      "story"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "phr-letter",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrases",
+   "name": "Письмо и сообщение (A2)",
+   "icon": "✉️",
+   "tags": [
+    "skriving",
+    "melding",
+    "brev"
+   ],
+   "level": "A2–B1",
+   "description": "На Norskprøve A2 часто нужно написать сообщение: другу, учителю, соседу, на работу. Приветствие → зачем пишу → ответы на все вопросы задания → вопрос или просьба → прощание и подпись.",
+   "cards": [
+    {
+     "key": "phr:letter:hei",
+     "no": "Hei …!",
+     "ru": "Привет, …!",
+     "uk": "Привіт, …!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Неформальное приветствие: Hei Kari! После приветствия — с новой строки.\n🎚 Уровень A2",
+     "example": "Hei Kari! Takk for sist!",
+     "exampleRu": "Привет, Кари! Спасибо за прошлую встречу!",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:kjaere",
+     "no": "Kjære …,",
+     "ru": "Дорогой (дорогая) …,",
+     "uk": "Дорогий (дорога) …,",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Тёплое или вежливое начало письма. После имени — запятая, текст с новой строки.\n🎚 Уровень A2",
+     "example": "Kjære Anna, takk for brevet ditt!",
+     "exampleRu": "Дорогая Анна, спасибо за письмо!",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:hei-alle-sammen",
+     "no": "Hei alle sammen!",
+     "ru": "Привет всем!",
+     "uk": "Привіт усім!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Обращение к группе: коллегам, классу, соседям.\n🎚 Уровень A2",
+     "example": "Hei alle sammen! Vi har fest på lørdag.",
+     "exampleRu": "Привет всем! В субботу у нас праздник.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:takk-for",
+     "no": "Takk for …!",
+     "ru": "Спасибо за …!",
+     "uk": "Дякую за …!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Takk for + существительное: Takk for brevet! Takk for hjelpen!\n🎚 Уровень A2",
+     "example": "Takk for invitasjonen!",
+     "exampleRu": "Спасибо за приглашение!",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:takk-for-sist",
+     "no": "Takk for sist!",
+     "ru": "Спасибо за прошлую встречу!",
+     "uk": "Дякую за минулу зустріч!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Норвежская вежливая фраза после встречи — пишут в начале письма.\n🎚 Уровень A2",
+     "example": "Hei Per! Takk for sist! Det var hyggelig å se deg.",
+     "exampleRu": "Привет, Пер! Спасибо за встречу! Было приятно тебя увидеть.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:hvordan-har-du-det",
+     "no": "Hvordan har du det?",
+     "ru": "Как у тебя дела?",
+     "uk": "Як у тебе справи?",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Вопрос: Hvordan + глагол + подлежащее.\n🎚 Уровень A2",
+     "example": "Hvordan har du det? Jeg har det bra.",
+     "exampleRu": "Как у тебя дела? У меня всё хорошо.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:jeg-skriver-fordi",
+     "no": "Jeg skriver fordi …",
+     "ru": "Я пишу, потому что …",
+     "uk": "Я пишу, бо …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 fordi + S + (ikke) + V: …fordi jeg ikke kan komme.\n🎚 Уровень A2",
+     "example": "Jeg skriver fordi jeg ikke kan komme på kurset i morgen.",
+     "exampleRu": "Я пишу, потому что не могу прийти завтра на курс.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:dessverre-kan-jeg-ikke",
+     "no": "Dessverre kan jeg ikke …",
+     "ru": "К сожалению, я не могу …",
+     "uk": "На жаль, я не можу …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Dessverre + V2: kan jeg ikke (ikke после подлежащего).\n🎚 Уровень A2",
+     "example": "Dessverre kan jeg ikke komme på jobben i dag.",
+     "exampleRu": "К сожалению, я не могу сегодня прийти на работу.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:jeg-er-syk-og-ma-vaere-hjemme",
+     "no": "Jeg er syk og må være hjemme.",
+     "ru": "Я болею и должен (должна) остаться дома.",
+     "uk": "Я хворий (хвора) і мушу залишитися вдома.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 må + инфинитив без å: må være.\n🎚 Уровень A2",
+     "example": "Jeg er syk og må være hjemme i to dager.",
+     "exampleRu": "Я болею и должен два дня побыть дома.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:jeg-vil-gjerne-invitere-deg-til",
+     "no": "Jeg vil gjerne invitere deg til …",
+     "ru": "Я хотел(а) бы пригласить тебя на …",
+     "uk": "Я хотів (хотіла) б запросити тебе на …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 vil gjerne + инфинитив: vil gjerne invitere.\n🎚 Уровень A2",
+     "example": "Jeg vil gjerne invitere deg til bursdagen min på lørdag.",
+     "exampleRu": "Я хочу пригласить тебя на мой день рождения в субботу.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:har-du-lyst-til-a",
+     "no": "Har du lyst til å …?",
+     "ru": "Хочешь …?",
+     "uk": "Хочеш …?",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Вопрос без вопросительного слова: глагол первым — Har du…?\n🎚 Уровень A2",
+     "example": "Har du lyst til å gå på kino i kveld?",
+     "exampleRu": "Хочешь сходить в кино сегодня вечером?",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:kan-vi-motes-klokka-ved",
+     "no": "Kan vi møtes klokka … ved …?",
+     "ru": "Можем встретиться в … у …?",
+     "uk": "Можемо зустрітися о … біля …?",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Вопрос: Kan vi + инфинитив. Время: klokka seks.\n🎚 Уровень A2",
+     "example": "Kan vi møtes klokka seks ved stasjonen?",
+     "exampleRu": "Можем встретиться в шесть у вокзала?",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:unnskyld-at-jeg-svarer-sa-sent",
+     "no": "Unnskyld at jeg svarer så sent.",
+     "ru": "Извини, что отвечаю так поздно.",
+     "uk": "Вибач, що відповідаю так пізно.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 at + S + V: at jeg svarer.\n🎚 Уровень A2",
+     "example": "Unnskyld at jeg svarer så sent. Jeg har hatt mye å gjøre.",
+     "exampleRu": "Извини, что так поздно отвечаю. У меня было много дел.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:gi-meg-beskjed-om-du-kan-komme",
+     "no": "Gi meg beskjed om du kan komme.",
+     "ru": "Дай знать, сможешь ли ты прийти.",
+     "uk": "Дай знати, чи зможеш ти прийти.",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 om = «ли» → придаточное: om + S + V (om du kan).\n🎚 Уровень A2",
+     "example": "Gi meg beskjed om du kan komme på fredag.",
+     "exampleRu": "Дай мне знать, сможешь ли ты прийти в пятницу.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:jeg-gleder-meg-til-a-se-deg",
+     "no": "Jeg gleder meg til å se deg!",
+     "ru": "Жду встречи с тобой!",
+     "uk": "Чекаю на зустріч із тобою!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 glede seg til å + инфинитив.\n🎚 Уровень A2",
+     "example": "Jeg gleder meg til å se deg i helgen!",
+     "exampleRu": "С нетерпением жду встречи с тобой на выходных!",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:ha-det-bra",
+     "no": "Ha det bra!",
+     "ru": "Всего хорошего! / Пока!",
+     "uk": "Усього найкращого! / Бувай!",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Прощание в конце письма, перед подписью.\n🎚 Уровень A2",
+     "example": "Ha det bra! Vi snakkes.",
+     "exampleRu": "Пока! Созвонимся.",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:hilsen",
+     "no": "Hilsen …",
+     "ru": "С приветом, …",
+     "uk": "З привітом, …",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Подпись: Hilsen Olga. Тепло: Klem fra Olga. Вежливо: Med vennlig hilsen.\n🎚 Уровень A2",
+     "example": "Hilsen Olga",
+     "exampleRu": "С приветом, Ольга",
+     "use": [
+      "msg"
+     ]
+    },
+    {
+     "key": "phr:letter:med-vennlig-hilsen",
+     "no": "Med vennlig hilsen",
+     "ru": "С уважением",
+     "uk": "З повагою",
+     "wordClass": "frase",
+     "level": "A2",
+     "description": "📏 Вежливая подпись — учителю, на работу, в офис. Имя — на следующей строке.\n🎚 Уровень A2",
+     "example": "Med vennlig hilsen\nIvan Petrov",
+     "exampleRu": "С уважением, Иван Петров",
+     "use": [
+      "msg"
+     ]
+    }
+   ]
+  }
+ ]
+}

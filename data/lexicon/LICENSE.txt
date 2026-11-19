@@ -1,0 +1,13 @@
+Offline lexicon of Norsk Kort (forms.json, paradigms.json)
+
+Derived from: Norsk ordbank bokmål 2005 (release 20220201), Språkbanken, Nasjonalbiblioteket.
+  https://www.nb.no/sprakbanken/ressurskatalog/oai-nb-no-sbr-5/
+  Licence: Creative Commons Attribution 4.0 (CC BY 4.0) — https://creativecommons.org/licenses/by/4.0/
+Changes: selected the most frequent lexemes, re-encoded the full-form list and paradigms into a compact JSON
+format, ordered variants (standard forms first, a-forms marked), added frequency-based disambiguation.
+
+Frequency ranking: FrequencyWords no_50k (Hermit Dave, OpenSubtitles 2018), CC BY-SA 4.0
+  https://github.com/hermitdave/FrequencyWords — used only to rank and select entries.
+
+Rebuild: python3 -I build_lexicon.py <extracted ordbank dir> <no_50k.txt> <out dir>
+Short attribution for the UI: «Norsk ordbank (Språkbanken, CC BY)»

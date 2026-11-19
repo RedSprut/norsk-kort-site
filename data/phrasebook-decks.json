@@ -1,0 +1,3407 @@
+{
+ "version": 1,
+ "updated": "2026-11-19",
+ "group": "phrasebook",
+ "attribution": "Разговорник по ситуациям — собственный материал Norsk Kort: фразы составлены заново, переводы на русский и украинский. Темы сверены с разговорником Berlitz и самоучителем С. А. Матвеева (только как список ситуаций, без текстов оттуда).",
+ "format": "cards: { key, no (bokmål, везде du), ru, uk, wordClass: \"frase\", description: короткая пометка 💡 или \"\" }",
+ "decks": [
+  {
+   "id": "pb-intro",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Знакомство",
+   "icon": "👋",
+   "tags": [
+    "frase",
+    "bli kjent"
+   ],
+   "description": "Как представиться, рассказать о себе и поддержать первый разговор. Норвежцы почти со всеми на «ты» (du) — с соседом, врачом и начальником. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:intro:hei-jeg-heter-olga",
+     "no": "Hei! Jeg heter Olga.",
+     "ru": "Привет! Меня зовут Ольга.",
+     "uk": "Привіт! Мене звати Ольга.",
+     "wordClass": "frase",
+     "description": "💡 «Hei» говорят почти всем — и соседу, и врачу, и начальнику. Подставьте своё имя."
+    },
+    {
+     "key": "pb:intro:hva-heter-du",
+     "no": "Hva heter du?",
+     "ru": "Как тебя зовут?",
+     "uk": "Як тебе звати?",
+     "wordClass": "frase",
+     "description": "💡 Норвежцы на «ты» (du) почти со всеми; вежливое «De» звучит старомодно."
+    },
+    {
+     "key": "pb:intro:hyggelig-aa-treffe-deg",
+     "no": "Hyggelig å treffe deg!",
+     "ru": "Приятно познакомиться!",
+     "uk": "Приємно познайомитися!",
+     "wordClass": "frase",
+     "description": "💡 Можно короче: «Hyggelig!»"
+    },
+    {
+     "key": "pb:intro:hvor-kommer-du-fra",
+     "no": "Hvor kommer du fra?",
+     "ru": "Откуда ты?",
+     "uk": "Звідки ти?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:jeg-kommer-fra-ukraina",
+     "no": "Jeg kommer fra Ukraina.",
+     "ru": "Я из Украины.",
+     "uk": "Я з України.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:jeg-kommer-fra-russland-men-naa-bor-jeg-i-norge",
+     "no": "Jeg kommer fra Russland, men nå bor jeg i Norge.",
+     "ru": "Я из России, но сейчас живу в Норвегии.",
+     "uk": "Я з Росії, але зараз живу в Норвегії.",
+     "wordClass": "frase",
+     "description": "💡 После «men nå» глагол стоит на 2-м месте: nå bor jeg."
+    },
+    {
+     "key": "pb:intro:hvor-bor-du",
+     "no": "Hvor bor du?",
+     "ru": "Где ты живёшь?",
+     "uk": "Де ти живеш?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:jeg-bor-i-bergen",
+     "no": "Jeg bor i Bergen.",
+     "ru": "Я живу в Бергене.",
+     "uk": "Я живу в Бергені.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:hvor-lenge-har-du-bodd-i-norge",
+     "no": "Hvor lenge har du bodd i Norge?",
+     "ru": "Сколько ты уже живёшь в Норвегии?",
+     "uk": "Скільки ти вже живеш у Норвегії?",
+     "wordClass": "frase",
+     "description": "💡 По-норвежски здесь perfektum (har bodd), по-русски — настоящее время."
+    },
+    {
+     "key": "pb:intro:jeg-har-bodd-her-i-to-aar",
+     "no": "Jeg har bodd her i to år.",
+     "ru": "Я живу здесь два года.",
+     "uk": "Я живу тут два роки.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:hva-jobber-du-med",
+     "no": "Hva jobber du med?",
+     "ru": "Кем ты работаешь?",
+     "uk": "Ким ти працюєш?",
+     "wordClass": "frase",
+     "description": "💡 Дословно «с чем ты работаешь?» — обычный вопрос о профессии."
+    },
+    {
+     "key": "pb:intro:jeg-jobber-som-sykepleier",
+     "no": "Jeg jobber som sykepleier.",
+     "ru": "Я работаю медсестрой.",
+     "uk": "Я працюю медсестрою.",
+     "wordClass": "frase",
+     "description": "💡 som + профессия без артикля: som lærer, som sjåfør, som renholder."
+    },
+    {
+     "key": "pb:intro:jeg-gaar-paa-norskkurs",
+     "no": "Jeg går på norskkurs.",
+     "ru": "Я хожу на курсы норвежского.",
+     "uk": "Я ходжу на курси норвезької.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:jeg-snakker-litt-norsk",
+     "no": "Jeg snakker litt norsk.",
+     "ru": "Я немного говорю по-норвежски.",
+     "uk": "Я трохи розмовляю норвезькою.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:snakker-du-engelsk",
+     "no": "Snakker du engelsk?",
+     "ru": "Ты говоришь по-английски?",
+     "uk": "Ти розмовляєш англійською?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:unnskyld-jeg-forstaar-ikke",
+     "no": "Unnskyld, jeg forstår ikke.",
+     "ru": "Извини, я не понимаю.",
+     "uk": "Вибач, я не розумію.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:kan-du-snakke-litt-saktere",
+     "no": "Kan du snakke litt saktere?",
+     "ru": "Можешь говорить чуть медленнее?",
+     "uk": "Можеш говорити трохи повільніше?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:kan-du-si-det-en-gang-til",
+     "no": "Kan du si det en gang til?",
+     "ru": "Можешь сказать это ещё раз?",
+     "uk": "Можеш сказати це ще раз?",
+     "wordClass": "frase",
+     "description": "💡 Так же: «Kan du gjenta det?»"
+    },
+    {
+     "key": "pb:intro:hva-betyr-det",
+     "no": "Hva betyr det?",
+     "ru": "Что это значит?",
+     "uk": "Що це означає?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:hvordan-sier-man-det-paa-norsk",
+     "no": "Hvordan sier man det på norsk?",
+     "ru": "Как это сказать по-норвежски?",
+     "uk": "Як це сказати норвезькою?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:er-du-gift",
+     "no": "Er du gift?",
+     "ru": "Ты женат? / Ты замужем?",
+     "uk": "Ти одружений? / Ти заміжня?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:jeg-er-gift-og-har-to-barn",
+     "no": "Jeg er gift og har to barn.",
+     "ru": "Я женат (замужем), у меня двое детей.",
+     "uk": "Я одружений (заміжня), маю двох дітей.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:vi-er-samboere",
+     "no": "Vi er samboere.",
+     "ru": "Мы живём вместе (без брака).",
+     "uk": "Ми живемо разом (без шлюбу).",
+     "wordClass": "frase",
+     "description": "💡 samboer — обычный и официальный статус в Норвегии: пара живёт вместе без брака."
+    },
+    {
+     "key": "pb:intro:har-du-barn",
+     "no": "Har du barn?",
+     "ru": "У тебя есть дети?",
+     "uk": "У тебе є діти?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:hvor-gammel-er-du",
+     "no": "Hvor gammel er du?",
+     "ru": "Сколько тебе лет?",
+     "uk": "Скільки тобі років?",
+     "wordClass": "frase",
+     "description": "💡 Взрослых малознакомых людей о возрасте спрашивают редко."
+    },
+    {
+     "key": "pb:intro:jeg-er-trettifem-aar",
+     "no": "Jeg er trettifem år.",
+     "ru": "Мне тридцать пять лет.",
+     "uk": "Мені тридцять п’ять років.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:velkommen",
+     "no": "Velkommen!",
+     "ru": "Добро пожаловать!",
+     "uk": "Ласкаво просимо!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:takk-for-sist",
+     "no": "Takk for sist!",
+     "ru": "Спасибо за прошлую встречу!",
+     "uk": "Дякую за минулу зустріч!",
+     "wordClass": "frase",
+     "description": "💡 Говорят при новой встрече с тем, с кем уже виделись. Типичная норвежская вежливость."
+    },
+    {
+     "key": "pb:intro:hvordan-gaar-det",
+     "no": "Hvordan går det?",
+     "ru": "Как дела?",
+     "uk": "Як справи?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:bare-bra-takk-og-med-deg",
+     "no": "Bare bra, takk! Og med deg?",
+     "ru": "Хорошо, спасибо! А у тебя?",
+     "uk": "Добре, дякую! А в тебе?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:intro:ha-det-bra",
+     "no": "Ha det bra!",
+     "ru": "Всего хорошего! / Пока!",
+     "uk": "Бувай! / Усього доброго!",
+     "wordClass": "frase",
+     "description": "💡 Коротко: «Ha det!»"
+    },
+    {
+     "key": "pb:intro:vi-ses",
+     "no": "Vi ses!",
+     "ru": "Увидимся!",
+     "uk": "Побачимося!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-shop",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "В магазине",
+   "icon": "🛒",
+   "tags": [
+    "frase",
+    "butikk"
+   ],
+   "description": "Продукты, одежда, касса, пакет, возврат. Кассир почти всегда спросит про пакет и бонусную карту. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:shop:unnskyld-hvor-finner-jeg-melk",
+     "no": "Unnskyld, hvor finner jeg melk?",
+     "ru": "Извините, где найти молоко?",
+     "uk": "Вибачте, де знайти молоко?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:har-dere-glutenfritt-brod",
+     "no": "Har dere glutenfritt brød?",
+     "ru": "У вас есть хлеб без глютена?",
+     "uk": "У вас є хліб без глютену?",
+     "wordClass": "frase",
+     "description": "💡 dere — «вы» о магазине и сотрудниках (множественное число), а не вежливое «Вы»."
+    },
+    {
+     "key": "pb:shop:kan-jeg-hjelpe-deg-med-noe",
+     "no": "Kan jeg hjelpe deg med noe?",
+     "ru": "Чем могу помочь?",
+     "uk": "Чим можу допомогти?",
+     "wordClass": "frase",
+     "description": "💡 Так спрашивает продавец."
+    },
+    {
+     "key": "pb:shop:nei-takk-jeg-bare-ser",
+     "no": "Nei takk, jeg bare ser.",
+     "ru": "Нет, спасибо, я просто смотрю.",
+     "uk": "Ні, дякую, я просто дивлюся.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:hva-koster-denne",
+     "no": "Hva koster denne?",
+     "ru": "Сколько стоит вот эта?",
+     "uk": "Скільки коштує оця?",
+     "wordClass": "frase",
+     "description": "💡 denne — о слове рода en/ei; для слова рода et: «Hva koster dette?»"
+    },
+    {
+     "key": "pb:shop:det-er-litt-for-dyrt",
+     "no": "Det er litt for dyrt.",
+     "ru": "Это дороговато.",
+     "uk": "Це трохи задорого.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:er-dette-paa-tilbud",
+     "no": "Er dette på tilbud?",
+     "ru": "Это по акции?",
+     "uk": "Це за акцією?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:har-du-denne-i-en-annen-storrelse",
+     "no": "Har du denne i en annen størrelse?",
+     "ru": "Есть такая в другом размере?",
+     "uk": "Чи є така в іншому розмірі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:hvor-er-proverommet",
+     "no": "Hvor er prøverommet?",
+     "ru": "Где примерочная?",
+     "uk": "Де примірочна?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:den-er-litt-for-liten",
+     "no": "Den er litt for liten.",
+     "ru": "Она маловата.",
+     "uk": "Вона трохи замала.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:jeg-tar-den",
+     "no": "Jeg tar den.",
+     "ru": "Я её беру.",
+     "uk": "Я її беру.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:jeg-skal-ha-en-halv-kilo-kjottdeig",
+     "no": "Jeg skal ha en halv kilo kjøttdeig.",
+     "ru": "Мне полкило фарша.",
+     "uk": "Мені пів кіло фаршу.",
+     "wordClass": "frase",
+     "description": "💡 «Jeg skal ha …» — обычный способ сказать «мне …» у прилавка."
+    },
+    {
+     "key": "pb:shop:trenger-du-pose",
+     "no": "Trenger du pose?",
+     "ru": "Нужен пакет?",
+     "uk": "Потрібен пакет?",
+     "wordClass": "frase",
+     "description": "💡 Пакет в Норвегии платный, поэтому кассир спрашивает."
+    },
+    {
+     "key": "pb:shop:nei-takk-jeg-har-pose",
+     "no": "Nei takk, jeg har pose.",
+     "ru": "Нет, спасибо, у меня есть пакет.",
+     "uk": "Ні, дякую, у мене є пакет.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:har-du-medlemskort",
+     "no": "Har du medlemskort?",
+     "ru": "У вас есть бонусная карта?",
+     "uk": "У вас є бонусна картка?",
+     "wordClass": "frase",
+     "description": "💡 Сети магазинов дают бонусные карты: Trumf, Coop, Æ…"
+    },
+    {
+     "key": "pb:shop:hvor-mye-blir-det",
+     "no": "Hvor mye blir det?",
+     "ru": "Сколько с меня?",
+     "uk": "Скільки з мене?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:det-blir-to-hundre-og-forti-kroner",
+     "no": "Det blir to hundre og førti kroner.",
+     "ru": "С вас двести сорок крон.",
+     "uk": "З вас двісті сорок крон.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:kan-jeg-betale-med-kort",
+     "no": "Kan jeg betale med kort?",
+     "ru": "Можно заплатить картой?",
+     "uk": "Можна заплатити карткою?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:kan-jeg-betale-med-vipps",
+     "no": "Kan jeg betale med Vipps?",
+     "ru": "Можно заплатить через Vipps?",
+     "uk": "Можна заплатити через Vipps?",
+     "wordClass": "frase",
+     "description": "💡 Vipps — норвежское приложение для оплаты по номеру телефона."
+    },
+    {
+     "key": "pb:shop:vil-du-ha-kvittering",
+     "no": "Vil du ha kvittering?",
+     "ru": "Нужен чек?",
+     "uk": "Потрібен чек?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:selvbetjeningskassen-virker-ikke-kan-du-hjelpe-m",
+     "no": "Selvbetjeningskassen virker ikke. Kan du hjelpe meg?",
+     "ru": "Касса самообслуживания не работает. Поможете?",
+     "uk": "Каса самообслуговування не працює. Допоможете?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:hvor-er-panteautomaten",
+     "no": "Hvor er panteautomaten?",
+     "ru": "Где автомат для сдачи бутылок?",
+     "uk": "Де автомат для здачі пляшок?",
+     "wordClass": "frase",
+     "description": "💡 pant — залог за бутылки и банки: сдаёте в автомат и получаете чек на скидку."
+    },
+    {
+     "key": "pb:shop:jeg-vil-gjerne-bytte-denne",
+     "no": "Jeg vil gjerne bytte denne.",
+     "ru": "Я хотел(а) бы обменять это.",
+     "uk": "Я хотів(ла) б обміняти це.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:kan-jeg-faa-pengene-tilbake",
+     "no": "Kan jeg få pengene tilbake?",
+     "ru": "Можно вернуть деньги?",
+     "uk": "Можна повернути гроші?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:jeg-har-kvitteringen-her",
+     "no": "Jeg har kvitteringen her.",
+     "ru": "Чек у меня с собой.",
+     "uk": "Чек у мене з собою.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:naar-stenger-dere",
+     "no": "Når stenger dere?",
+     "ru": "Когда вы закрываетесь?",
+     "uk": "Коли ви зачиняєтеся?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:er-butikken-aapen-paa-sondag",
+     "no": "Er butikken åpen på søndag?",
+     "ru": "Магазин открыт в воскресенье?",
+     "uk": "Магазин відчинений у неділю?",
+     "wordClass": "frase",
+     "description": "💡 В воскресенье большие магазины закрыты; работают маленькие (Joker, Bunnpris) и заправки."
+    },
+    {
+     "key": "pb:shop:ha-en-fin-dag",
+     "no": "Ha en fin dag!",
+     "ru": "Хорошего дня!",
+     "uk": "Гарного дня!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:shop:takk-i-like-maate",
+     "no": "Takk, i like måte!",
+     "ru": "Спасибо, вам тоже!",
+     "uk": "Дякую, вам також!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-cafe",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Кафе и ресторан",
+   "icon": "☕",
+   "tags": [
+    "frase",
+    "kafé",
+    "restaurant"
+   ],
+   "description": "Заказать, спросить об аллергии, попросить счёт и заплатить каждому за себя. Плюс «Takk for maten» — обязательная фраза после еды в гостях. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:cafe:har-dere-et-bord-til-to",
+     "no": "Har dere et bord til to?",
+     "ru": "Есть столик на двоих?",
+     "uk": "Є столик на двох?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:jeg-har-bestilt-bord-paa-navnet-ivanova",
+     "no": "Jeg har bestilt bord på navnet Ivanova.",
+     "ru": "Я бронировал(а) столик на фамилию Иванова.",
+     "uk": "Я бронював(ла) столик на прізвище Іванова.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:kan-vi-sitte-ute",
+     "no": "Kan vi sitte ute?",
+     "ru": "Можно сесть на улице?",
+     "uk": "Можна сісти надворі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:er-det-ledig-her",
+     "no": "Er det ledig her?",
+     "ru": "Здесь свободно?",
+     "uk": "Тут вільно?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:kan-jeg-faa-menyen",
+     "no": "Kan jeg få menyen?",
+     "ru": "Можно меню?",
+     "uk": "Можна меню?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:hva-anbefaler-du",
+     "no": "Hva anbefaler du?",
+     "ru": "Что посоветуешь?",
+     "uk": "Що порадиш?",
+     "wordClass": "frase",
+     "description": "💡 Официанту тоже говорят «du»."
+    },
+    {
+     "key": "pb:cafe:hva-skal-det-vaere",
+     "no": "Hva skal det være?",
+     "ru": "Что будете?",
+     "uk": "Що будете?",
+     "wordClass": "frase",
+     "description": "💡 Так спрашивает официант или продавец."
+    },
+    {
+     "key": "pb:cafe:jeg-vil-gjerne-ha-en-kaffe",
+     "no": "Jeg vil gjerne ha en kaffe.",
+     "ru": "Я бы хотел(а) кофе.",
+     "uk": "Я хотів(ла) б каву.",
+     "wordClass": "frase",
+     "description": "💡 «Jeg vil gjerne ha …» — вежливое «я бы хотел(а)». Ещё проще: «En kaffe, takk.»"
+    },
+    {
+     "key": "pb:cafe:en-kaffe-latte-og-en-kanelbolle-takk",
+     "no": "En kaffe latte og en kanelbolle, takk.",
+     "ru": "Латте и булочку с корицей, пожалуйста.",
+     "uk": "Лате і булочку з корицею, будь ласка.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:kan-jeg-faa-et-glass-vann",
+     "no": "Kan jeg få et glass vann?",
+     "ru": "Можно стакан воды?",
+     "uk": "Можна склянку води?",
+     "wordClass": "frase",
+     "description": "💡 Воду из-под крана в кафе обычно дают бесплатно."
+    },
+    {
+     "key": "pb:cafe:har-dere-noe-uten-melk",
+     "no": "Har dere noe uten melk?",
+     "ru": "Есть что-нибудь без молока?",
+     "uk": "Є щось без молока?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:jeg-er-allergisk-mot-notter",
+     "no": "Jeg er allergisk mot nøtter.",
+     "ru": "У меня аллергия на орехи.",
+     "uk": "У мене алергія на горіхи.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:er-denne-retten-vegetarisk",
+     "no": "Er denne retten vegetarisk?",
+     "ru": "Это блюдо вегетарианское?",
+     "uk": "Ця страва вегетаріанська?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:spiser-du-her-eller-skal-du-ta-med",
+     "no": "Spiser du her, eller skal du ta med?",
+     "ru": "Здесь или с собой?",
+     "uk": "Тут чи з собою?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:jeg-tar-det-med",
+     "no": "Jeg tar det med.",
+     "ru": "С собой.",
+     "uk": "З собою.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:vi-er-klare-til-aa-bestille",
+     "no": "Vi er klare til å bestille.",
+     "ru": "Мы готовы заказать.",
+     "uk": "Ми готові замовити.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:jeg-tar-dagens-rett",
+     "no": "Jeg tar dagens rett.",
+     "ru": "Я возьму блюдо дня.",
+     "uk": "Я візьму страву дня.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:unnskyld-dette-er-ikke-det-jeg-bestilte",
+     "no": "Unnskyld, dette er ikke det jeg bestilte.",
+     "ru": "Извините, это не то, что я заказывал(а).",
+     "uk": "Вибачте, це не те, що я замовляв(ла).",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:det-smakte-veldig-godt",
+     "no": "Det smakte veldig godt!",
+     "ru": "Было очень вкусно!",
+     "uk": "Було дуже смачно!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:kan-vi-faa-regningen",
+     "no": "Kan vi få regningen?",
+     "ru": "Можно счёт?",
+     "uk": "Можна рахунок?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:kan-vi-betale-hver-for-oss",
+     "no": "Kan vi betale hver for oss?",
+     "ru": "Можно заплатить каждому за себя?",
+     "uk": "Можна заплатити кожному окремо?",
+     "wordClass": "frase",
+     "description": "💡 Платить каждый за себя — в Норвегии нормально."
+    },
+    {
+     "key": "pb:cafe:er-tips-inkludert",
+     "no": "Er tips inkludert?",
+     "ru": "Чаевые включены?",
+     "uk": "Чайові включені?",
+     "wordClass": "frase",
+     "description": "💡 Чаевые не обязательны; округлить сумму — уже приятно."
+    },
+    {
+     "key": "pb:cafe:jeg-spanderer",
+     "no": "Jeg spanderer!",
+     "ru": "Я угощаю!",
+     "uk": "Я пригощаю!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:skaal",
+     "no": "Skål!",
+     "ru": "Будем здоровы! (тост)",
+     "uk": "Будьмо!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:takk-for-maten",
+     "no": "Takk for maten!",
+     "ru": "Спасибо за еду!",
+     "uk": "Дякую за їжу!",
+     "wordClass": "frase",
+     "description": "💡 Говорят после еды тому, кто угощал; в гостях — обязательно."
+    },
+    {
+     "key": "pb:cafe:vel-bekomme",
+     "no": "Vel bekomme!",
+     "ru": "На здоровье! (ответ на «Takk for maten»)",
+     "uk": "На здоров’я!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:hvor-er-toalettet",
+     "no": "Hvor er toalettet?",
+     "ru": "Где туалет?",
+     "uk": "Де туалет?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:cafe:hva-er-passordet-til-wifien",
+     "no": "Hva er passordet til wifien?",
+     "ru": "Какой пароль от вайфая?",
+     "uk": "Який пароль від вайфаю?",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-doctor",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "У врача / legevakt",
+   "icon": "🩺",
+   "tags": [
+    "frase",
+    "lege",
+    "helse"
+   ],
+   "description": "Записаться к фастлеге, рассказать, что болит, попросить больничный и переводчика. Legevakt — дежурная помощь вечером, ночью и в выходные (116 117). Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:doctor:jeg-vil-gjerne-bestille-time-hos-fastlegen",
+     "no": "Jeg vil gjerne bestille time hos fastlegen.",
+     "ru": "Я хотел(а) бы записаться к своему врачу.",
+     "uk": "Я хотів(ла) б записатися до свого лікаря.",
+     "wordClass": "frase",
+     "description": "💡 fastlege — ваш постоянный (семейный) врач. Записываются через helsenorge.no или по телефону."
+    },
+    {
+     "key": "pb:doctor:jeg-har-time-klokka-ti",
+     "no": "Jeg har time klokka ti.",
+     "ru": "У меня приём в десять.",
+     "uk": "У мене прийом о десятій.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-foler-meg-daarlig",
+     "no": "Jeg føler meg dårlig.",
+     "ru": "Я плохо себя чувствую.",
+     "uk": "Я погано почуваюся.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-har-feber",
+     "no": "Jeg har feber.",
+     "ru": "У меня температура.",
+     "uk": "У мене температура.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-har-vondt-i-halsen",
+     "no": "Jeg har vondt i halsen.",
+     "ru": "У меня болит горло.",
+     "uk": "У мене болить горло.",
+     "wordClass": "frase",
+     "description": "💡 «Jeg har vondt i …» — у меня болит …: i hodet, i magen, i ryggen."
+    },
+    {
+     "key": "pb:doctor:jeg-har-vondt-i-magen",
+     "no": "Jeg har vondt i magen.",
+     "ru": "У меня болит живот.",
+     "uk": "У мене болить живіт.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-har-hodepine",
+     "no": "Jeg har hodepine.",
+     "ru": "У меня болит голова.",
+     "uk": "У мене болить голова.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-hoster-mye",
+     "no": "Jeg hoster mye.",
+     "ru": "Я сильно кашляю.",
+     "uk": "Я сильно кашляю.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-er-svimmel",
+     "no": "Jeg er svimmel.",
+     "ru": "У меня кружится голова.",
+     "uk": "У мене паморочиться в голові.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:det-gjor-vondt-her",
+     "no": "Det gjør vondt her.",
+     "ru": "Болит вот здесь.",
+     "uk": "Болить ось тут.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:det-begynte-for-tre-dager-siden",
+     "no": "Det begynte for tre dager siden.",
+     "ru": "Это началось три дня назад.",
+     "uk": "Це почалося три дні тому.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-har-vaert-syk-i-en-uke",
+     "no": "Jeg har vært syk i en uke.",
+     "ru": "Я болею уже неделю.",
+     "uk": "Я хворію вже тиждень.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-bruker-ingen-medisiner",
+     "no": "Jeg bruker ingen medisiner.",
+     "ru": "Я не принимаю никаких лекарств.",
+     "uk": "Я не приймаю жодних ліків.",
+     "wordClass": "frase",
+     "description": "💡 «bruke medisiner» — принимать лекарства (постоянно)."
+    },
+    {
+     "key": "pb:doctor:jeg-er-allergisk-mot-penicillin",
+     "no": "Jeg er allergisk mot penicillin.",
+     "ru": "У меня аллергия на пенициллин.",
+     "uk": "У мене алергія на пеніцилін.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-er-gravid",
+     "no": "Jeg er gravid.",
+     "ru": "Я беременна.",
+     "uk": "Я вагітна.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:trenger-jeg-resept",
+     "no": "Trenger jeg resept?",
+     "ru": "Мне нужен рецепт?",
+     "uk": "Мені потрібен рецепт?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:kan-jeg-faa-sykemelding",
+     "no": "Kan jeg få sykemelding?",
+     "ru": "Можно больничный?",
+     "uk": "Можна лікарняний?",
+     "wordClass": "frase",
+     "description": "💡 sykemelding выписывает врач; на несколько дней можно взять egenmelding самому."
+    },
+    {
+     "key": "pb:doctor:hvor-lenge-maa-jeg-vaere-hjemme",
+     "no": "Hvor lenge må jeg være hjemme?",
+     "ru": "Сколько мне нужно сидеть дома?",
+     "uk": "Скільки мені треба бути вдома?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:maa-jeg-ta-blodprove",
+     "no": "Må jeg ta blodprøve?",
+     "ru": "Мне нужно сдать анализ крови?",
+     "uk": "Мені треба здати аналіз крові?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:hvor-mye-er-egenandelen",
+     "no": "Hvor mye er egenandelen?",
+     "ru": "Сколько я доплачиваю сам(а)?",
+     "uk": "Скільки я доплачую сам(а)?",
+     "wordClass": "frase",
+     "description": "💡 egenandel — доля цены, которую платит пациент. После годового лимита (frikort) — бесплатно."
+    },
+    {
+     "key": "pb:doctor:jeg-trenger-tolk",
+     "no": "Jeg trenger tolk.",
+     "ru": "Мне нужен переводчик.",
+     "uk": "Мені потрібен перекладач.",
+     "wordClass": "frase",
+     "description": "💡 У врача переводчик бесплатный — попросите при записи."
+    },
+    {
+     "key": "pb:doctor:kan-du-skrive-det-ned-for-meg",
+     "no": "Kan du skrive det ned for meg?",
+     "ru": "Можешь мне это записать?",
+     "uk": "Можеш мені це записати?",
+     "wordClass": "frase",
+     "description": "💡 Врачу тоже говорят «du»."
+    },
+    {
+     "key": "pb:doctor:jeg-forsto-ikke-helt-kan-du-forklare-igjen",
+     "no": "Jeg forsto ikke helt. Kan du forklare igjen?",
+     "ru": "Я не совсем понял(а). Можешь объяснить ещё раз?",
+     "uk": "Я не зовсім зрозумів(ла). Можеш пояснити ще раз?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:hvor-ofte-skal-jeg-ta-tablettene",
+     "no": "Hvor ofte skal jeg ta tablettene?",
+     "ru": "Как часто принимать таблетки?",
+     "uk": "Як часто приймати таблетки?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:er-det-farlig",
+     "no": "Er det farlig?",
+     "ru": "Это опасно?",
+     "uk": "Це небезпечно?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:fastlegen-min-har-stengt-hvor-skal-jeg-gaa",
+     "no": "Fastlegen min har stengt. Hvor skal jeg gå?",
+     "ru": "Мой врач уже закрыт. Куда мне идти?",
+     "uk": "Мій лікар уже зачинений. Куди мені йти?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:jeg-maa-til-legevakten",
+     "no": "Jeg må til legevakten.",
+     "ru": "Мне нужно в дежурную неотложку.",
+     "uk": "Мені треба до чергової невідкладної допомоги.",
+     "wordClass": "frase",
+     "description": "💡 legevakt — дежурный врач вечером, ночью и в выходные. Телефон: 116 117."
+    },
+    {
+     "key": "pb:doctor:er-det-lang-ventetid",
+     "no": "Er det lang ventetid?",
+     "ru": "Долго ждать?",
+     "uk": "Довго чекати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:barnet-mitt-har-hoy-feber",
+     "no": "Barnet mitt har høy feber.",
+     "ru": "У моего ребёнка высокая температура.",
+     "uk": "У моєї дитини висока температура.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:doctor:han-har-kastet-opp-hele-natten",
+     "no": "Han har kastet opp hele natten.",
+     "ru": "Его рвало всю ночь.",
+     "uk": "Його рвало всю ніч.",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-pharmacy",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Аптека",
+   "icon": "💊",
+   "tags": [
+    "frase",
+    "apotek",
+    "helse"
+   ],
+   "description": "Забрать лекарство по электронному рецепту, спросить, как принимать, найти что-то от простуды. Рецепт хранится в системе — нужен только документ. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:pharmacy:jeg-skal-hente-en-resept",
+     "no": "Jeg skal hente en resept.",
+     "ru": "Я за лекарством по рецепту.",
+     "uk": "Я по ліки за рецептом.",
+     "wordClass": "frase",
+     "description": "💡 Рецепт электронный (e-resept): назовите имя и покажите документ."
+    },
+    {
+     "key": "pb:pharmacy:her-er-legitimasjonen-min",
+     "no": "Her er legitimasjonen min.",
+     "ru": "Вот мой документ.",
+     "uk": "Ось мій документ.",
+     "wordClass": "frase",
+     "description": "💡 legitimasjon — документ с фото: паспорт, права, ID-карта."
+    },
+    {
+     "key": "pb:pharmacy:det-er-resepten-til-datteren-min",
+     "no": "Det er resepten til datteren min.",
+     "ru": "Это рецепт моей дочери.",
+     "uk": "Це рецепт моєї доньки.",
+     "wordClass": "frase",
+     "description": "💡 За другого человека иногда нужна доверенность или его документ."
+    },
+    {
+     "key": "pb:pharmacy:har-dere-noe-mot-forkjolelse",
+     "no": "Har dere noe mot forkjølelse?",
+     "ru": "У вас есть что-нибудь от простуды?",
+     "uk": "У вас є щось від застуди?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:jeg-trenger-noe-mot-hodepine",
+     "no": "Jeg trenger noe mot hodepine.",
+     "ru": "Мне нужно что-нибудь от головной боли.",
+     "uk": "Мені потрібно щось від головного болю.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:har-dere-paracet",
+     "no": "Har dere Paracet?",
+     "ru": "У вас есть Paracet?",
+     "uk": "У вас є Paracet?",
+     "wordClass": "frase",
+     "description": "💡 Paracet (парацетамол) и Ibux (ибупрофен) — самые частые обезболивающие."
+    },
+    {
+     "key": "pb:pharmacy:har-dere-noe-mot-hoste",
+     "no": "Har dere noe mot hoste?",
+     "ru": "Есть что-нибудь от кашля?",
+     "uk": "Є щось від кашлю?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:jeg-trenger-noe-mot-allergi",
+     "no": "Jeg trenger noe mot allergi.",
+     "ru": "Мне нужно что-нибудь от аллергии.",
+     "uk": "Мені потрібно щось від алергії.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:trenger-jeg-resept-for-denne",
+     "no": "Trenger jeg resept for denne?",
+     "ru": "На это нужен рецепт?",
+     "uk": "На це потрібен рецепт?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:hvor-mange-tabletter-kan-jeg-ta-om-dagen",
+     "no": "Hvor mange tabletter kan jeg ta om dagen?",
+     "ru": "Сколько таблеток можно в день?",
+     "uk": "Скільки таблеток можна на день?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:skal-jeg-ta-den-for-eller-etter-maten",
+     "no": "Skal jeg ta den før eller etter maten?",
+     "ru": "Принимать до еды или после?",
+     "uk": "Приймати до їжі чи після?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:kan-barn-bruke-dette",
+     "no": "Kan barn bruke dette?",
+     "ru": "Это можно детям?",
+     "uk": "Це можна дітям?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:jeg-er-gravid-kan-jeg-ta-dette",
+     "no": "Jeg er gravid. Kan jeg ta dette?",
+     "ru": "Я беременна. Мне это можно?",
+     "uk": "Я вагітна. Мені це можна?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:gir-dette-bivirkninger",
+     "no": "Gir dette bivirkninger?",
+     "ru": "Есть ли побочные эффекты?",
+     "uk": "Чи є побічні ефекти?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:blir-jeg-trott-av-disse",
+     "no": "Blir jeg trøtt av disse?",
+     "ru": "От них клонит в сон?",
+     "uk": "Від них хилить на сон?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:kan-jeg-kjore-bil-naar-jeg-tar-denne-medisinen",
+     "no": "Kan jeg kjøre bil når jeg tar denne medisinen?",
+     "ru": "Можно водить машину, пока принимаю это лекарство?",
+     "uk": "Чи можна кермувати, поки я приймаю ці ліки?",
+     "wordClass": "frase",
+     "description": "💡 Красный треугольник на упаковке: лекарство может мешать водить."
+    },
+    {
+     "key": "pb:pharmacy:har-dere-en-billigere-variant",
+     "no": "Har dere en billigere variant?",
+     "ru": "Есть вариант подешевле?",
+     "uk": "Є дешевший варіант?",
+     "wordClass": "frase",
+     "description": "💡 Могут предложить «byttepreparat» — то же лекарство другой фирмы, дешевле."
+    },
+    {
+     "key": "pb:pharmacy:kan-jeg-snakke-med-farmasoyten",
+     "no": "Kan jeg snakke med farmasøyten?",
+     "ru": "Можно поговорить с фармацевтом?",
+     "uk": "Можна поговорити з фармацевтом?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:kan-du-vise-meg-hvordan-jeg-bruker-denne",
+     "no": "Kan du vise meg hvordan jeg bruker denne?",
+     "ru": "Покажешь, как этим пользоваться?",
+     "uk": "Покажеш, як цим користуватися?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:har-dere-plaster",
+     "no": "Har dere plaster?",
+     "ru": "У вас есть пластырь?",
+     "uk": "У вас є пластир?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:jeg-har-blitt-stukket-av-en-veps",
+     "no": "Jeg har blitt stukket av en veps.",
+     "ru": "Меня ужалила оса.",
+     "uk": "Мене вжалила оса.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:har-dere-graviditetstest",
+     "no": "Har dere graviditetstest?",
+     "ru": "У вас есть тест на беременность?",
+     "uk": "У вас є тест на вагітність?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:er-apoteket-aapent-i-kveld",
+     "no": "Er apoteket åpent i kveld?",
+     "ru": "Аптека открыта сегодня вечером?",
+     "uk": "Аптека відчинена сьогодні ввечері?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:hvor-er-naermeste-dognaapne-apotek",
+     "no": "Hvor er nærmeste døgnåpne apotek?",
+     "ru": "Где ближайшая круглосуточная аптека?",
+     "uk": "Де найближча цілодобова аптека?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:pharmacy:takk-det-var-alt",
+     "no": "Takk, det var alt.",
+     "ru": "Спасибо, это всё.",
+     "uk": "Дякую, це все.",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-transport",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Транспорт и билеты",
+   "icon": "🚌",
+   "tags": [
+    "frase",
+    "transport",
+    "reise"
+   ],
+   "description": "Автобус, трамвай, поезд и паром: где купить билет, где выходить, что делать, если поезд отменили. Билет покупают в приложении до посадки. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:transport:hvor-kjoper-jeg-billett",
+     "no": "Hvor kjøper jeg billett?",
+     "ru": "Где купить билет?",
+     "uk": "Де купити квиток?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:jeg-har-billett-i-appen",
+     "no": "Jeg har billett i appen.",
+     "ru": "У меня билет в приложении.",
+     "uk": "У мене квиток у застосунку.",
+     "wordClass": "frase",
+     "description": "💡 В каждом регионе своё приложение: Ruter, Skyss, AtB, Kolumbus; поезда — Vy."
+    },
+    {
+     "key": "pb:transport:gaar-denne-bussen-til-sentrum",
+     "no": "Går denne bussen til sentrum?",
+     "ru": "Этот автобус идёт в центр?",
+     "uk": "Цей автобус їде до центру?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-gaar-flybussen-fra",
+     "no": "Hvor går flybussen fra?",
+     "ru": "Откуда отходит автобус в аэропорт?",
+     "uk": "Звідки відправляється автобус до аеропорту?",
+     "wordClass": "frase",
+     "description": "💡 flybuss — автобус-экспресс в аэропорт."
+    },
+    {
+     "key": "pb:transport:naar-gaar-neste-buss",
+     "no": "Når går neste buss?",
+     "ru": "Когда следующий автобус?",
+     "uk": "Коли наступний автобус?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-er-naermeste-holdeplass",
+     "no": "Hvor er nærmeste holdeplass?",
+     "ru": "Где ближайшая остановка?",
+     "uk": "Де найближча зупинка?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-maa-jeg-gaa-av",
+     "no": "Hvor må jeg gå av?",
+     "ru": "Где мне выходить?",
+     "uk": "Де мені виходити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-maa-jeg-bytte",
+     "no": "Hvor må jeg bytte?",
+     "ru": "Где мне пересаживаться?",
+     "uk": "Де мені пересідати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:kan-du-si-fra-naar-vi-er-ved-sykehuset",
+     "no": "Kan du si fra når vi er ved sykehuset?",
+     "ru": "Скажешь, когда будем у больницы?",
+     "uk": "Скажеш, коли будемо біля лікарні?",
+     "wordClass": "frase",
+     "description": "💡 Водителю тоже говорят «du»."
+    },
+    {
+     "key": "pb:transport:er-dette-setet-ledig",
+     "no": "Er dette setet ledig?",
+     "ru": "Это место свободно?",
+     "uk": "Це місце вільне?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:en-voksen-og-ett-barn-takk",
+     "no": "En voksen og ett barn, takk.",
+     "ru": "Один взрослый и один детский, пожалуйста.",
+     "uk": "Один дорослий і один дитячий, будь ласка.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hva-koster-en-maanedsbillett",
+     "no": "Hva koster en månedsbillett?",
+     "ru": "Сколько стоит проездной на месяц?",
+     "uk": "Скільки коштує місячний проїзний?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-lenge-gjelder-billetten",
+     "no": "Hvor lenge gjelder billetten?",
+     "ru": "Сколько действует билет?",
+     "uk": "Скільки діє квиток?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:gjelder-billetten-paa-trikken-ogsaa",
+     "no": "Gjelder billetten på trikken også?",
+     "ru": "Билет действует и в трамвае?",
+     "uk": "Квиток діє і в трамваї?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:toget-er-forsinket",
+     "no": "Toget er forsinket.",
+     "ru": "Поезд опаздывает.",
+     "uk": "Потяг запізнюється.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:toget-er-innstilt",
+     "no": "Toget er innstilt.",
+     "ru": "Поезд отменён.",
+     "uk": "Потяг скасовано.",
+     "wordClass": "frase",
+     "description": "💡 innstilt — отменён (поезд, рейс); о самолётах чаще: kansellert."
+    },
+    {
+     "key": "pb:transport:fra-hvilket-spor-gaar-toget-til-oslo",
+     "no": "Fra hvilket spor går toget til Oslo?",
+     "ru": "С какого пути идёт поезд в Осло?",
+     "uk": "З якої колії відправляється потяг до Осло?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:er-det-buss-for-tog-i-dag",
+     "no": "Er det buss for tog i dag?",
+     "ru": "Сегодня вместо поезда ходит автобус?",
+     "uk": "Сьогодні замість потяга їде автобус?",
+     "wordClass": "frase",
+     "description": "💡 «buss for tog» — автобус вместо поезда во время ремонта путей. Частое объявление."
+    },
+    {
+     "key": "pb:transport:billettkontroll-kan-jeg-se-billetten-din",
+     "no": "Billettkontroll. Kan jeg se billetten din?",
+     "ru": "Контроль. Можно ваш билет?",
+     "uk": "Контроль. Можна ваш квиток?",
+     "wordClass": "frase",
+     "description": "💡 Без билета — большой штраф. Покупайте билет до посадки."
+    },
+    {
+     "key": "pb:transport:appen-virker-ikke-men-jeg-har-kjopt-billett",
+     "no": "Appen virker ikke, men jeg har kjøpt billett.",
+     "ru": "Приложение не работает, но я купил(а) билет.",
+     "uk": "Застосунок не працює, але я купив(ла) квиток.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:jeg-har-glemt-sekken-min-paa-bussen",
+     "no": "Jeg har glemt sekken min på bussen.",
+     "ru": "Я забыл(а) рюкзак в автобусе.",
+     "uk": "Я забув(ла) рюкзак в автобусі.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-er-hittegodskontoret",
+     "no": "Hvor er hittegodskontoret?",
+     "ru": "Где бюро находок?",
+     "uk": "Де бюро знахідок?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:kan-jeg-ta-med-sykkelen-paa-toget",
+     "no": "Kan jeg ta med sykkelen på toget?",
+     "ru": "Можно взять велосипед в поезд?",
+     "uk": "Можна взяти велосипед у потяг?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:naar-gaar-siste-ferje",
+     "no": "Når går siste ferje?",
+     "ru": "Когда последний паром?",
+     "uk": "Коли останній пором?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hvor-kan-jeg-parkere",
+     "no": "Hvor kan jeg parkere?",
+     "ru": "Где можно припарковаться?",
+     "uk": "Де можна припаркуватися?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:jeg-har-faatt-parkeringsbot",
+     "no": "Jeg har fått parkeringsbot.",
+     "ru": "Мне выписали штраф за парковку.",
+     "uk": "Мені виписали штраф за паркування.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:kan-du-bestille-en-taxi-til-meg",
+     "no": "Kan du bestille en taxi til meg?",
+     "ru": "Можешь вызвать мне такси?",
+     "uk": "Можеш викликати мені таксі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:hva-koster-det-til-sentrum",
+     "no": "Hva koster det til sentrum?",
+     "ru": "Сколько стоит до центра?",
+     "uk": "Скільки коштує до центру?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:transport:det-er-ko-saa-jeg-blir-litt-forsinket",
+     "no": "Det er kø, så jeg blir litt forsinket.",
+     "ru": "Пробка, поэтому я немного опоздаю.",
+     "uk": "Затор, тож я трохи запізнюся.",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-nav",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "NAV и документы",
+   "icon": "📄",
+   "tags": [
+    "frase",
+    "NAV",
+    "offentlig"
+   ],
+   "description": "NAV, налоговая (Skatteetaten), UDI и полиция: подать заявление, понять письмо, попросить переводчика. Почти всё делается онлайн через BankID. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:nav:jeg-vil-gjerne-melde-meg-som-arbeidssoker",
+     "no": "Jeg vil gjerne melde meg som arbeidssøker.",
+     "ru": "Я хочу зарегистрироваться как ищущий работу.",
+     "uk": "Я хочу зареєструватися як шукач роботи.",
+     "wordClass": "frase",
+     "description": "💡 Регистрация — на nav.no через BankID или MinID."
+    },
+    {
+     "key": "pb:nav:jeg-har-mistet-jobben",
+     "no": "Jeg har mistet jobben.",
+     "ru": "Я потерял(а) работу.",
+     "uk": "Я втратив(ла) роботу.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-vil-soke-om-dagpenger",
+     "no": "Jeg vil søke om dagpenger.",
+     "ru": "Я хочу подать на пособие по безработице.",
+     "uk": "Я хочу подати заяву на допомогу з безробіття.",
+     "wordClass": "frase",
+     "description": "💡 dagpenger — пособие по безработице от NAV."
+    },
+    {
+     "key": "pb:nav:hvordan-soker-jeg",
+     "no": "Hvordan søker jeg?",
+     "ru": "Как подать заявление?",
+     "uk": "Як подати заяву?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-har-sendt-soknaden-paa-nett",
+     "no": "Jeg har sendt søknaden på nett.",
+     "ru": "Я отправил(а) заявление онлайн.",
+     "uk": "Я надіслав(ла) заяву онлайн.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:naar-faar-jeg-svar",
+     "no": "Når får jeg svar?",
+     "ru": "Когда я получу ответ?",
+     "uk": "Коли я отримаю відповідь?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:hvor-lang-er-saksbehandlingstiden",
+     "no": "Hvor lang er saksbehandlingstiden?",
+     "ru": "Сколько рассматривают заявление?",
+     "uk": "Скільки розглядають заяву?",
+     "wordClass": "frase",
+     "description": "💡 saksbehandlingstid — срок рассмотрения; его обычно пишут на сайте."
+    },
+    {
+     "key": "pb:nav:jeg-har-faatt-et-brev-fra-nav-men-jeg-forstaar-d",
+     "no": "Jeg har fått et brev fra NAV, men jeg forstår det ikke.",
+     "ru": "Я получил(а) письмо от NAV, но не понимаю его.",
+     "uk": "Я отримав(ла) листа від NAV, але не розумію його.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:kan-du-forklare-hva-dette-betyr",
+     "no": "Kan du forklare hva dette betyr?",
+     "ru": "Можешь объяснить, что это значит?",
+     "uk": "Можеш пояснити, що це означає?",
+     "wordClass": "frase",
+     "description": "💡 Сотрудникам NAV тоже говорят «du»."
+    },
+    {
+     "key": "pb:nav:jeg-vil-gjerne-snakke-med-veilederen-min",
+     "no": "Jeg vil gjerne snakke med veilederen min.",
+     "ru": "Я хотел(а) бы поговорить со своим консультантом.",
+     "uk": "Я хотів(ла) б поговорити зі своїм консультантом.",
+     "wordClass": "frase",
+     "description": "💡 veileder — ваш консультант в NAV; написать можно через «Skriv til oss» на nav.no."
+    },
+    {
+     "key": "pb:nav:jeg-maa-sende-meldekort-hver-fjortende-dag",
+     "no": "Jeg må sende meldekort hver fjortende dag.",
+     "ru": "Мне нужно отправлять meldekort раз в две недели.",
+     "uk": "Мені треба надсилати meldekort раз на два тижні.",
+     "wordClass": "frase",
+     "description": "💡 meldekort — отчёт для NAV раз в 14 дней: работали ли вы и сколько часов."
+    },
+    {
+     "key": "pb:nav:jeg-har-glemt-aa-sende-meldekortet",
+     "no": "Jeg har glemt å sende meldekortet.",
+     "ru": "Я забыл(а) отправить meldekort.",
+     "uk": "Я забув(ла) надіслати meldekort.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:hvilke-dokumenter-trenger-jeg",
+     "no": "Hvilke dokumenter trenger jeg?",
+     "ru": "Какие документы мне нужны?",
+     "uk": "Які документи мені потрібні?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-har-ikke-bankid-ennaa",
+     "no": "Jeg har ikke BankID ennå.",
+     "ru": "У меня пока нет BankID.",
+     "uk": "У мене ще немає BankID.",
+     "wordClass": "frase",
+     "description": "💡 BankID — электронная подпись от банка. Без неё — MinID или визит в офис."
+    },
+    {
+     "key": "pb:nav:jeg-trenger-et-d-nummer",
+     "no": "Jeg trenger et D-nummer.",
+     "ru": "Мне нужен D-номер.",
+     "uk": "Мені потрібен D-номер.",
+     "wordClass": "frase",
+     "description": "💡 D-nummer — временный личный номер; позже его меняют на fødselsnummer."
+    },
+    {
+     "key": "pb:nav:jeg-maa-fornye-oppholdstillatelsen",
+     "no": "Jeg må fornye oppholdstillatelsen.",
+     "ru": "Мне нужно продлить вид на жительство.",
+     "uk": "Мені треба продовжити дозвіл на проживання.",
+     "wordClass": "frase",
+     "description": "💡 Заявку подают онлайн в UDI, потом приходят в полицию или сервисный центр."
+    },
+    {
+     "key": "pb:nav:hvor-bestiller-jeg-time-hos-politiet",
+     "no": "Hvor bestiller jeg time hos politiet?",
+     "ru": "Где записаться на приём в полицию?",
+     "uk": "Де записатися на прийом до поліції?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-har-flyttet-hvordan-melder-jeg-ny-adresse",
+     "no": "Jeg har flyttet. Hvordan melder jeg ny adresse?",
+     "ru": "Я переехал(а). Как сообщить новый адрес?",
+     "uk": "Я переїхав(ла). Як повідомити нову адресу?",
+     "wordClass": "frase",
+     "description": "💡 О переезде сообщают в Folkeregisteret — онлайн на skatteetaten.no."
+    },
+    {
+     "key": "pb:nav:jeg-trenger-skattekort",
+     "no": "Jeg trenger skattekort.",
+     "ru": "Мне нужна налоговая карточка.",
+     "uk": "Мені потрібна податкова картка.",
+     "wordClass": "frase",
+     "description": "💡 skattekort заказывают на skatteetaten.no; без него работодатель удержит 50 % налога."
+    },
+    {
+     "key": "pb:nav:naar-maa-skattemeldingen-leveres",
+     "no": "Når må skattemeldingen leveres?",
+     "ru": "До какого числа сдавать налоговую декларацию?",
+     "uk": "До якого числа подавати податкову декларацію?",
+     "wordClass": "frase",
+     "description": "💡 skattemelding проверяют весной, обычно до 30 апреля."
+    },
+    {
+     "key": "pb:nav:kan-jeg-faa-tolk-til-motet",
+     "no": "Kan jeg få tolk til møtet?",
+     "ru": "Можно переводчика на встречу?",
+     "uk": "Можна перекладача на зустріч?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:kan-du-hjelpe-meg-aa-fylle-ut-skjemaet",
+     "no": "Kan du hjelpe meg å fylle ut skjemaet?",
+     "ru": "Поможешь заполнить анкету?",
+     "uk": "Допоможеш заповнити анкету?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:hva-skal-jeg-skrive-her",
+     "no": "Hva skal jeg skrive her?",
+     "ru": "Что мне здесь писать?",
+     "uk": "Що мені тут писати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-har-et-mote-paa-nav-kontoret-i-morgen",
+     "no": "Jeg har et møte på NAV-kontoret i morgen.",
+     "ru": "Завтра у меня встреча в офисе NAV.",
+     "uk": "Завтра в мене зустріч в офісі NAV.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:jeg-er-med-i-introduksjonsprogrammet",
+     "no": "Jeg er med i introduksjonsprogrammet.",
+     "ru": "Я участвую в программе интеграции.",
+     "uk": "Я беру участь у програмі інтеграції.",
+     "wordClass": "frase",
+     "description": "💡 introduksjonsprogram — программа для беженцев через kommune: язык, практика, пособие."
+    },
+    {
+     "key": "pb:nav:jeg-vil-soke-om-barnetrygd",
+     "no": "Jeg vil søke om barnetrygd.",
+     "ru": "Я хочу подать на детское пособие.",
+     "uk": "Я хочу подати заяву на допомогу на дитину.",
+     "wordClass": "frase",
+     "description": "💡 barnetrygd — ежемесячное пособие на каждого ребёнка до 18 лет."
+    },
+    {
+     "key": "pb:nav:kan-jeg-faa-det-skriftlig",
+     "no": "Kan jeg få det skriftlig?",
+     "ru": "Можно получить это письменно?",
+     "uk": "Можна отримати це письмово?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:nav:takk-for-hjelpen",
+     "no": "Takk for hjelpen!",
+     "ru": "Спасибо за помощь!",
+     "uk": "Дякую за допомогу!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-bank",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Банк",
+   "icon": "🏦",
+   "tags": [
+    "frase",
+    "bank",
+    "penger"
+   ],
+   "description": "Открыть счёт, получить BankID, заблокировать карту, оплатить счёт с KID, перевести деньги за границу и не попасться мошенникам. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:bank:jeg-vil-gjerne-aapne-en-bankkonto",
+     "no": "Jeg vil gjerne åpne en bankkonto.",
+     "ru": "Я хотел(а) бы открыть счёт в банке.",
+     "uk": "Я хотів(ла) б відкрити рахунок у банку.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:hva-trenger-jeg-for-aa-aapne-konto",
+     "no": "Hva trenger jeg for å åpne konto?",
+     "ru": "Что нужно, чтобы открыть счёт?",
+     "uk": "Що потрібно, щоб відкрити рахунок?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-har-pass-og-d-nummer",
+     "no": "Jeg har pass og D-nummer.",
+     "ru": "У меня есть паспорт и D-номер.",
+     "uk": "У мене є паспорт і D-номер.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:hvordan-faar-jeg-bankid",
+     "no": "Hvordan får jeg BankID?",
+     "ru": "Как получить BankID?",
+     "uk": "Як отримати BankID?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-har-glemt-pin-koden",
+     "no": "Jeg har glemt PIN-koden.",
+     "ru": "Я забыл(а) PIN-код.",
+     "uk": "Я забув(ла) PIN-код.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:kortet-mitt-er-sperret",
+     "no": "Kortet mitt er sperret.",
+     "ru": "Моя карта заблокирована.",
+     "uk": "Мою картку заблоковано.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-har-mistet-bankkortet-kan-dere-sperre-det",
+     "no": "Jeg har mistet bankkortet. Kan dere sperre det?",
+     "ru": "Я потерял(а) банковскую карту. Можете её заблокировать?",
+     "uk": "Я загубив(ла) банківську картку. Можете її заблокувати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:hva-er-kontonummeret-ditt",
+     "no": "Hva er kontonummeret ditt?",
+     "ru": "Какой у тебя номер счёта?",
+     "uk": "Який у тебе номер рахунку?",
+     "wordClass": "frase",
+     "description": "💡 Норвежский номер счёта — 11 цифр: 1234.56.78901."
+    },
+    {
+     "key": "pb:bank:lonnen-min-har-ikke-kommet-inn-ennaa",
+     "no": "Lønnen min har ikke kommet inn ennå.",
+     "ru": "Зарплата ещё не пришла.",
+     "uk": "Зарплата ще не надійшла.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-har-faatt-en-faktura-hvordan-betaler-jeg-den",
+     "no": "Jeg har fått en faktura. Hvordan betaler jeg den?",
+     "ru": "Мне пришёл счёт. Как его оплатить?",
+     "uk": "Мені прийшов рахунок. Як його оплатити?",
+     "wordClass": "frase",
+     "description": "💡 faktura оплачивают в интернет-банке: номер счёта получателя + KID."
+    },
+    {
+     "key": "pb:bank:hva-er-et-kid-nummer",
+     "no": "Hva er et KID-nummer?",
+     "ru": "Что такое KID-номер?",
+     "uk": "Що таке KID-номер?",
+     "wordClass": "frase",
+     "description": "💡 KID — номер платежа: по нему получатель понимает, кто заплатил. Без него оплата может «потеряться»."
+    },
+    {
+     "key": "pb:bank:kan-jeg-faa-efaktura-og-avtalegiro",
+     "no": "Kan jeg få eFaktura og AvtaleGiro?",
+     "ru": "Можно подключить eFaktura и AvtaleGiro?",
+     "uk": "Можна підключити eFaktura та AvtaleGiro?",
+     "wordClass": "frase",
+     "description": "💡 eFaktura — счета приходят прямо в интернет-банк; AvtaleGiro — оплачиваются сами в срок."
+    },
+    {
+     "key": "pb:bank:jeg-vil-sende-penger-til-ukraina",
+     "no": "Jeg vil sende penger til Ukraina.",
+     "ru": "Я хочу перевести деньги в Украину.",
+     "uk": "Я хочу переказати гроші в Україну.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:hva-koster-det-aa-sende-penger-til-utlandet",
+     "no": "Hva koster det å sende penger til utlandet?",
+     "ru": "Сколько стоит перевод за границу?",
+     "uk": "Скільки коштує переказ за кордон?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-vil-gjerne-snakke-med-en-raadgiver",
+     "no": "Jeg vil gjerne snakke med en rådgiver.",
+     "ru": "Я хотел(а) бы поговорить с консультантом.",
+     "uk": "Я хотів(ла) б поговорити з консультантом.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-vil-soke-om-boliglaan",
+     "no": "Jeg vil søke om boliglån.",
+     "ru": "Я хочу подать заявку на ипотеку.",
+     "uk": "Я хочу подати заявку на іпотеку.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:hvor-mye-egenkapital-trenger-jeg",
+     "no": "Hvor mye egenkapital trenger jeg?",
+     "ru": "Сколько нужно собственных денег (первый взнос)?",
+     "uk": "Скільки потрібно власних коштів (перший внесок)?",
+     "wordClass": "frase",
+     "description": "💡 egenkapital — собственные деньги; для ипотеки обычно нужно не меньше 10 % цены жилья."
+    },
+    {
+     "key": "pb:bank:hva-er-renten",
+     "no": "Hva er renten?",
+     "ru": "Какая процентная ставка?",
+     "uk": "Яка процентна ставка?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-ser-en-betaling-som-jeg-ikke-kjenner-igjen",
+     "no": "Jeg ser en betaling som jeg ikke kjenner igjen.",
+     "ru": "Я вижу платёж, который я не узнаю.",
+     "uk": "Я бачу платіж, якого не впізнаю.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-tror-jeg-er-blitt-svindlet",
+     "no": "Jeg tror jeg er blitt svindlet.",
+     "ru": "Кажется, меня обманули мошенники.",
+     "uk": "Здається, мене ошукали шахраї.",
+     "wordClass": "frase",
+     "description": "💡 Банк никогда не просит код BankID по телефону. Сказали код чужому — сразу звоните в банк."
+    },
+    {
+     "key": "pb:bank:kan-jeg-ta-ut-kontanter-her",
+     "no": "Kan jeg ta ut kontanter her?",
+     "ru": "Можно здесь снять наличные?",
+     "uk": "Чи можна тут зняти готівку?",
+     "wordClass": "frase",
+     "description": "💡 Наличными платят редко; банкомат — minibank."
+    },
+    {
+     "key": "pb:bank:hvor-er-naermeste-minibank",
+     "no": "Hvor er nærmeste minibank?",
+     "ru": "Где ближайший банкомат?",
+     "uk": "Де найближчий банкомат?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-vil-sette-penger-paa-sparekonto",
+     "no": "Jeg vil sette penger på sparekonto.",
+     "ru": "Я хочу положить деньги на сберегательный счёт.",
+     "uk": "Я хочу покласти гроші на ощадний рахунок.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:kan-jeg-faa-en-kontoutskrift",
+     "no": "Kan jeg få en kontoutskrift?",
+     "ru": "Можно выписку по счёту?",
+     "uk": "Можна виписку з рахунку?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:bank:jeg-trenger-en-bekreftelse-fra-banken",
+     "no": "Jeg trenger en bekreftelse fra banken.",
+     "ru": "Мне нужна справка из банка.",
+     "uk": "Мені потрібна довідка з банку.",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-housing",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Аренда жилья и соседи",
+   "icon": "🏠",
+   "tags": [
+    "frase",
+    "bolig",
+    "naboer"
+   ],
+   "description": "Найти квартиру, спросить про аренду и залог, сообщить о поломке, договориться с соседями. Объявления — на finn.no, просмотр — visning. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:housing:jeg-ser-etter-en-leilighet-aa-leie",
+     "no": "Jeg ser etter en leilighet å leie.",
+     "ru": "Я ищу квартиру в аренду.",
+     "uk": "Я шукаю квартиру в оренду.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:er-leiligheten-fortsatt-ledig",
+     "no": "Er leiligheten fortsatt ledig?",
+     "ru": "Квартира ещё свободна?",
+     "uk": "Квартира ще вільна?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:naar-kan-jeg-komme-paa-visning",
+     "no": "Når kan jeg komme på visning?",
+     "ru": "Когда можно прийти на просмотр?",
+     "uk": "Коли можна прийти на перегляд?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:hvor-mye-er-husleien",
+     "no": "Hvor mye er husleien?",
+     "ru": "Сколько стоит аренда?",
+     "uk": "Скільки коштує оренда?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:er-strom-og-internett-inkludert",
+     "no": "Er strøm og internett inkludert?",
+     "ru": "Электричество и интернет включены?",
+     "uk": "Електрика й інтернет включені?",
+     "wordClass": "frase",
+     "description": "💡 Электричество часто платят отдельно — зимой это заметная сумма."
+    },
+    {
+     "key": "pb:housing:hvor-stort-er-depositumet",
+     "no": "Hvor stort er depositumet?",
+     "ru": "Какой залог?",
+     "uk": "Яка застава?",
+     "wordClass": "frase",
+     "description": "💡 Залог кладут на отдельный depositumskonto — не отдавайте его наличными."
+    },
+    {
+     "key": "pb:housing:er-leiligheten-moblert",
+     "no": "Er leiligheten møblert?",
+     "ru": "Квартира с мебелью?",
+     "uk": "Квартира мебльована?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:er-det-lov-aa-ha-husdyr",
+     "no": "Er det lov å ha husdyr?",
+     "ru": "Можно держать домашних животных?",
+     "uk": "Чи можна тримати домашніх тварин?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:hvor-lang-er-oppsigelsestiden",
+     "no": "Hvor lang er oppsigelsestiden?",
+     "ru": "Какой срок предупреждения о выезде?",
+     "uk": "Який термін попередження про виїзд?",
+     "wordClass": "frase",
+     "description": "💡 Обычно три месяца — смотрите в договоре (leiekontrakt)."
+    },
+    {
+     "key": "pb:housing:vi-skriver-kontrakt-for-ett-aar",
+     "no": "Vi skriver kontrakt for ett år.",
+     "ru": "Мы заключаем договор на год.",
+     "uk": "Ми укладаємо договір на рік.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:naar-kan-jeg-flytte-inn",
+     "no": "Når kan jeg flytte inn?",
+     "ru": "Когда можно въехать?",
+     "uk": "Коли можна заїхати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:nokkelen-passer-ikke",
+     "no": "Nøkkelen passer ikke.",
+     "ru": "Ключ не подходит.",
+     "uk": "Ключ не підходить.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:oppvaskmaskinen-er-odelagt",
+     "no": "Oppvaskmaskinen er ødelagt.",
+     "ru": "Посудомойка сломалась.",
+     "uk": "Посудомийка зламалася.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:det-drypper-fra-kranen-paa-badet",
+     "no": "Det drypper fra kranen på badet.",
+     "ru": "В ванной капает кран.",
+     "uk": "У ванній капає кран.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:det-er-for-kaldt-i-leiligheten",
+     "no": "Det er for kaldt i leiligheten.",
+     "ru": "В квартире слишком холодно.",
+     "uk": "У квартирі занадто холодно.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:det-er-mugg-paa-badet",
+     "no": "Det er mugg på badet.",
+     "ru": "В ванной плесень.",
+     "uk": "У ванній пліснява.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:kan-du-sende-noen-som-kan-reparere-det",
+     "no": "Kan du sende noen som kan reparere det?",
+     "ru": "Можешь прислать кого-нибудь починить?",
+     "uk": "Можеш прислати когось полагодити?",
+     "wordClass": "frase",
+     "description": "💡 Хозяину квартиры тоже говорят «du»."
+    },
+    {
+     "key": "pb:housing:hvem-har-ansvar-for-snomaaking",
+     "no": "Hvem har ansvar for snømåking?",
+     "ru": "Кто отвечает за уборку снега?",
+     "uk": "Хто відповідає за прибирання снігу?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:naar-er-det-dugnad",
+     "no": "Når er det dugnad?",
+     "ru": "Когда дугнад?",
+     "uk": "Коли дугнад?",
+     "wordClass": "frase",
+     "description": "💡 dugnad — добровольная общая работа соседей: уборка двора и т. п. Приходить принято!"
+    },
+    {
+     "key": "pb:housing:hvor-skal-jeg-kaste-glass-og-metall",
+     "no": "Hvor skal jeg kaste glass og metall?",
+     "ru": "Куда выбрасывать стекло и металл?",
+     "uk": "Куди викидати скло і метал?",
+     "wordClass": "frase",
+     "description": "💡 Мусор сортируют: restavfall, papir, plast, matavfall, glass og metall."
+    },
+    {
+     "key": "pb:housing:hvilken-dag-blir-sopla-hentet",
+     "no": "Hvilken dag blir søpla hentet?",
+     "ru": "В какой день вывозят мусор?",
+     "uk": "У який день вивозять сміття?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:hei-jeg-er-den-nye-naboen-din",
+     "no": "Hei, jeg er den nye naboen din!",
+     "ru": "Привет, я твой новый сосед (новая соседка)!",
+     "uk": "Привіт, я твій новий сусід (твоя нова сусідка)!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:jeg-har-flyttet-inn-i-tredje-etasje",
+     "no": "Jeg har flyttet inn i tredje etasje.",
+     "ru": "Я въехал(а) на третий этаж.",
+     "uk": "Я заїхав(ла) на третій поверх.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:vi-skal-ha-fest-paa-lordag-si-fra-hvis-det-blir",
+     "no": "Vi skal ha fest på lørdag. Si fra hvis det blir for mye bråk!",
+     "ru": "У нас в субботу праздник. Скажите, если будет слишком шумно!",
+     "uk": "У нас у суботу свято. Скажіть, якщо буде надто гучно!",
+     "wordClass": "frase",
+     "description": "💡 Предупредить соседей запиской о празднике — норвежская вежливость."
+    },
+    {
+     "key": "pb:housing:musikken-er-litt-hoy-kan-du-skru-den-ned",
+     "no": "Musikken er litt høy. Kan du skru den ned?",
+     "ru": "Музыка громковата. Можешь сделать потише?",
+     "uk": "Музика трохи гучна. Можеш зробити тихіше?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:det-skal-vaere-stille-etter-klokka-elleve",
+     "no": "Det skal være stille etter klokka elleve.",
+     "ru": "После одиннадцати должно быть тихо.",
+     "uk": "Після одинадцятої має бути тихо.",
+     "wordClass": "frase",
+     "description": "💡 Правила дома (husordensregler) обычно висят в подъезде."
+    },
+    {
+     "key": "pb:housing:kan-du-ta-inn-posten-min-mens-jeg-er-bortreist",
+     "no": "Kan du ta inn posten min mens jeg er bortreist?",
+     "ru": "Можешь забирать мою почту, пока меня нет?",
+     "uk": "Можеш забирати мою пошту, поки мене немає?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:har-du-en-stige-jeg-kan-laane",
+     "no": "Har du en stige jeg kan låne?",
+     "ru": "У тебя есть стремянка, которую можно одолжить?",
+     "uk": "У тебе є драбина, яку можна позичити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:jeg-skal-flytte-i-slutten-av-maaneden",
+     "no": "Jeg skal flytte i slutten av måneden.",
+     "ru": "Я переезжаю в конце месяца.",
+     "uk": "Я переїжджаю в кінці місяця.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:housing:naar-faar-jeg-depositumet-tilbake",
+     "no": "Når får jeg depositumet tilbake?",
+     "ru": "Когда мне вернут залог?",
+     "uk": "Коли мені повернуть заставу?",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-work",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "На работе",
+   "icon": "💼",
+   "tags": [
+    "frase",
+    "jobb",
+    "arbeid"
+   ],
+   "description": "Коллеги, начальник, смены, больничный и отпуск. Начальника называют по имени и на «ты» — это нормально. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:work:god-morgen",
+     "no": "God morgen!",
+     "ru": "Доброе утро!",
+     "uk": "Доброго ранку!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-er-ny-her",
+     "no": "Jeg er ny her.",
+     "ru": "Я здесь новенький (новенькая).",
+     "uk": "Я тут новенький (новенька).",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:kan-du-vise-meg-hvordan-dette-fungerer",
+     "no": "Kan du vise meg hvordan dette fungerer?",
+     "ru": "Покажешь, как это работает?",
+     "uk": "Покажеш, як це працює?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-trenger-hjelp-med-dette",
+     "no": "Jeg trenger hjelp med dette.",
+     "ru": "Мне нужна помощь с этим.",
+     "uk": "Мені потрібна допомога з цим.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:hvem-skal-jeg-sporre-om-det",
+     "no": "Hvem skal jeg spørre om det?",
+     "ru": "Кого об этом спросить?",
+     "uk": "Кого про це спитати?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-er-ikke-sikker-paa-om-jeg-har-forstaatt-rikt",
+     "no": "Jeg er ikke sikker på om jeg har forstått riktig.",
+     "ru": "Не уверен(а), что правильно понял(а).",
+     "uk": "Не впевнений(а), що правильно зрозумів(ла).",
+     "wordClass": "frase",
+     "description": "💡 Переспросить на работе — нормально и даже ценится."
+    },
+    {
+     "key": "pb:work:kan-du-sjekke-det-jeg-har-gjort",
+     "no": "Kan du sjekke det jeg har gjort?",
+     "ru": "Можешь проверить, что я сделал(а)?",
+     "uk": "Можеш перевірити, що я зробив(ла)?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-er-ferdig-hva-skal-jeg-gjore-naa",
+     "no": "Jeg er ferdig. Hva skal jeg gjøre nå?",
+     "ru": "Я закончил(а). Что делать дальше?",
+     "uk": "Я закінчив(ла). Що робити далі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:naar-er-det-lunsj",
+     "no": "Når er det lunsj?",
+     "ru": "Когда обед?",
+     "uk": "Коли обід?",
+     "wordClass": "frase",
+     "description": "💡 Lunsj рано и коротко: около 11:30, полчаса, часто бутерброды из дома (matpakke)."
+    },
+    {
+     "key": "pb:work:skal-vi-ta-en-kaffe",
+     "no": "Skal vi ta en kaffe?",
+     "ru": "Выпьем кофе?",
+     "uk": "Вип’ємо кави?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-jobber-kveldsvakt-i-morgen",
+     "no": "Jeg jobber kveldsvakt i morgen.",
+     "ru": "Завтра я работаю в вечернюю смену.",
+     "uk": "Завтра я працюю у вечірню зміну.",
+     "wordClass": "frase",
+     "description": "💡 vakt — смена: dagvakt, kveldsvakt, nattevakt; turnus — сменный график."
+    },
+    {
+     "key": "pb:work:kan-vi-bytte-vakt-paa-fredag",
+     "no": "Kan vi bytte vakt på fredag?",
+     "ru": "Можем поменяться сменами в пятницу?",
+     "uk": "Можемо помінятися змінами в п’ятницю?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-kan-gjerne-ta-ekstravakter",
+     "no": "Jeg kan gjerne ta ekstravakter.",
+     "ru": "Я охотно возьму дополнительные смены.",
+     "uk": "Я охоче візьму додаткові зміни.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:hvor-finner-jeg-arbeidsplanen",
+     "no": "Hvor finner jeg arbeidsplanen?",
+     "ru": "Где посмотреть график работы?",
+     "uk": "Де подивитися графік роботи?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-er-syk-og-kommer-ikke-paa-jobb-i-dag",
+     "no": "Jeg er syk og kommer ikke på jobb i dag.",
+     "ru": "Я заболел(а) и сегодня не приду на работу.",
+     "uk": "Я захворів(ла) і сьогодні не прийду на роботу.",
+     "wordClass": "frase",
+     "description": "💡 Сообщите начальнику как можно раньше — обычно звонком, а не только SMS."
+    },
+    {
+     "key": "pb:work:jeg-tar-egenmelding",
+     "no": "Jeg tar egenmelding.",
+     "ru": "Я беру больничный без справки (egenmelding).",
+     "uk": "Я беру лікарняний без довідки (egenmelding).",
+     "wordClass": "frase",
+     "description": "💡 egenmelding — больничный на несколько дней без врача; сколько дней — смотрите правила вашей работы."
+    },
+    {
+     "key": "pb:work:barnet-mitt-er-sykt-saa-jeg-maa-vaere-hjemme",
+     "no": "Barnet mitt er sykt, så jeg må være hjemme.",
+     "ru": "Мой ребёнок заболел, мне нужно остаться дома.",
+     "uk": "Моя дитина захворіла, мені треба залишитися вдома.",
+     "wordClass": "frase",
+     "description": "💡 По болезни ребёнка есть отдельные дни (sykt barn-dager)."
+    },
+    {
+     "key": "pb:work:jeg-maa-gaa-litt-tidligere-i-dag-jeg-skal-hente",
+     "no": "Jeg må gå litt tidligere i dag, jeg skal hente i barnehagen.",
+     "ru": "Мне сегодня нужно уйти пораньше — забираю ребёнка из садика.",
+     "uk": "Мені сьогодні треба піти раніше — забираю дитину із садочка.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-blir-ti-minutter-forsinket",
+     "no": "Jeg blir ti minutter forsinket.",
+     "ru": "Я опоздаю на десять минут.",
+     "uk": "Я запізнюся на десять хвилин.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:kan-jeg-faa-fri-paa-mandag",
+     "no": "Kan jeg få fri på mandag?",
+     "ru": "Можно мне выходной в понедельник?",
+     "uk": "Можна мені вихідний у понеділок?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:naar-kan-jeg-ta-ferie",
+     "no": "Når kan jeg ta ferie?",
+     "ru": "Когда мне можно взять отпуск?",
+     "uk": "Коли мені можна взяти відпустку?",
+     "wordClass": "frase",
+     "description": "💡 Летний отпуск (fellesferie) — обычно три недели в июле; планы обсуждают весной."
+    },
+    {
+     "key": "pb:work:har-du-tid-til-en-kort-prat",
+     "no": "Har du tid til en kort prat?",
+     "ru": "Есть минутка поговорить?",
+     "uk": "Маєш хвилинку поговорити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:kan-vi-ta-et-mote-om-dette",
+     "no": "Kan vi ta et møte om dette?",
+     "ru": "Можем обсудить это на встрече?",
+     "uk": "Можемо обговорити це на зустрічі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-vil-gjerne-ha-tilbakemelding",
+     "no": "Jeg vil gjerne ha tilbakemelding.",
+     "ru": "Я хотел(а) бы получить обратную связь.",
+     "uk": "Я хотів(ла) б отримати зворотний зв’язок.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-tror-det-er-en-feil-i-lonnsslippen-min",
+     "no": "Jeg tror det er en feil i lønnsslippen min.",
+     "ru": "Кажется, в моём расчётном листке ошибка.",
+     "uk": "Здається, у моєму розрахунковому листі помилка.",
+     "wordClass": "frase",
+     "description": "💡 lønnsslipp — расчётный листок: зарплата, налог, отпускные."
+    },
+    {
+     "key": "pb:work:er-stillingen-fast-eller-midlertidig",
+     "no": "Er stillingen fast eller midlertidig?",
+     "ru": "Должность постоянная или временная?",
+     "uk": "Посада постійна чи тимчасова?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:jeg-jobber-deltid-seksti-prosent",
+     "no": "Jeg jobber deltid, seksti prosent.",
+     "ru": "Я работаю неполный день, на 60 % ставки.",
+     "uk": "Я працюю неповний день, на 60 % ставки.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:det-gaar-fint-jeg-fikser-det",
+     "no": "Det går fint, jeg fikser det.",
+     "ru": "Всё нормально, я разберусь.",
+     "uk": "Усе гаразд, я впораюся.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:work:takk-for-i-dag",
+     "no": "Takk for i dag!",
+     "ru": "Спасибо за сегодня!",
+     "uk": "Дякую за сьогодні!",
+     "wordClass": "frase",
+     "description": "💡 Так прощаются с коллегами в конце рабочего дня."
+    },
+    {
+     "key": "pb:work:god-helg",
+     "no": "God helg!",
+     "ru": "Хороших выходных!",
+     "uk": "Гарних вихідних!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-phone",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Телефон и запись на приём",
+   "icon": "📞",
+   "tags": [
+    "frase",
+    "telefon",
+    "time"
+   ],
+   "description": "Позвонить, представиться, записаться, перенести или отменить приём, продиктовать имя и номер. По телефону сразу называют себя. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:phone:hei-det-er-olga-ivanova",
+     "no": "Hei, det er Olga Ivanova.",
+     "ru": "Здравствуйте, это Ольга Иванова.",
+     "uk": "Добрий день, це Ольга Іванова.",
+     "wordClass": "frase",
+     "description": "💡 По телефону сначала называют себя: «Hei, det er …»."
+    },
+    {
+     "key": "pb:phone:du-snakker-med-olga",
+     "no": "Du snakker med Olga.",
+     "ru": "С вами говорит Ольга.",
+     "uk": "З вами говорить Ольга.",
+     "wordClass": "frase",
+     "description": "💡 Так часто отвечают на звонок на работе."
+    },
+    {
+     "key": "pb:phone:hvem-snakker-jeg-med",
+     "no": "Hvem snakker jeg med?",
+     "ru": "С кем я говорю?",
+     "uk": "З ким я розмовляю?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-ringer-angaaende-timen-min",
+     "no": "Jeg ringer angående timen min.",
+     "ru": "Я звоню по поводу моей записи.",
+     "uk": "Я телефоную щодо мого запису.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-vil-gjerne-bestille-time",
+     "no": "Jeg vil gjerne bestille time.",
+     "ru": "Я хотел(а) бы записаться на приём.",
+     "uk": "Я хотів(ла) б записатися на прийом.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:har-dere-en-ledig-time-denne-uken",
+     "no": "Har dere en ledig time denne uken?",
+     "ru": "Есть свободное время на этой неделе?",
+     "uk": "Є вільний час цього тижня?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:passer-det-paa-tirsdag-klokka-ni",
+     "no": "Passer det på tirsdag klokka ni?",
+     "ru": "Подходит вторник в девять?",
+     "uk": "Підходить вівторок о дев’ятій?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:ja-det-passer-fint",
+     "no": "Ja, det passer fint.",
+     "ru": "Да, подходит.",
+     "uk": "Так, підходить.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:nei-det-passer-dessverre-ikke-har-du-noe-senere",
+     "no": "Nei, det passer dessverre ikke. Har du noe senere?",
+     "ru": "Нет, к сожалению, не подходит. Есть что-нибудь попозже?",
+     "uk": "Ні, на жаль, не підходить. Є щось пізніше?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:kan-jeg-flytte-timen-til-neste-uke",
+     "no": "Kan jeg flytte timen til neste uke?",
+     "ru": "Можно перенести приём на следующую неделю?",
+     "uk": "Можна перенести прийом на наступний тиждень?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-maa-dessverre-avbestille-timen-min",
+     "no": "Jeg må dessverre avbestille timen min.",
+     "ru": "К сожалению, мне нужно отменить запись.",
+     "uk": "На жаль, мені треба скасувати запис.",
+     "wordClass": "frase",
+     "description": "💡 Отменяйте минимум за 24 часа — иначе могут взять плату за неявку."
+    },
+    {
+     "key": "pb:phone:kan-du-stave-navnet-ditt",
+     "no": "Kan du stave navnet ditt?",
+     "ru": "Можешь продиктовать своё имя по буквам?",
+     "uk": "Можеш продиктувати своє ім’я по літерах?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:etternavnet-mitt-staves-i-v-a-n-o-v-a",
+     "no": "Etternavnet mitt staves I-V-A-N-O-V-A.",
+     "ru": "Моя фамилия пишется И-В-А-Н-О-В-А.",
+     "uk": "Моє прізвище пишеться І-В-А-Н-О-В-А.",
+     "wordClass": "frase",
+     "description": "💡 Потренируйте норвежский алфавит: i, ve, a, en, o, ve, a."
+    },
+    {
+     "key": "pb:phone:nummeret-mitt-er-ni-en-to-trettifire-fem-seks-sj",
+     "no": "Nummeret mitt er ni en to, trettifire, fem seks sju.",
+     "ru": "Мой номер 912 34 567.",
+     "uk": "Мій номер 912 34 567.",
+     "wordClass": "frase",
+     "description": "💡 Номера (8 цифр) диктуют частями: 912 34 567."
+    },
+    {
+     "key": "pb:phone:kan-du-ringe-meg-tilbake",
+     "no": "Kan du ringe meg tilbake?",
+     "ru": "Можешь мне перезвонить?",
+     "uk": "Можеш мені передзвонити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:kan-jeg-legge-igjen-en-beskjed",
+     "no": "Kan jeg legge igjen en beskjed?",
+     "ru": "Можно оставить сообщение?",
+     "uk": "Можна залишити повідомлення?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:kan-du-be-henne-ringe-meg",
+     "no": "Kan du be henne ringe meg?",
+     "ru": "Можешь попросить её мне перезвонить?",
+     "uk": "Можеш попросити її мені передзвонити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:unnskyld-linjen-er-daarlig",
+     "no": "Unnskyld, linjen er dårlig.",
+     "ru": "Извините, плохая связь.",
+     "uk": "Вибачте, поганий зв’язок.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:kan-du-snakke-litt-hoyere",
+     "no": "Kan du snakke litt høyere?",
+     "ru": "Можешь говорить погромче?",
+     "uk": "Можеш говорити трохи голосніше?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-horte-ikke-kan-du-si-det-igjen",
+     "no": "Jeg hørte ikke. Kan du si det igjen?",
+     "ru": "Я не расслышал(а). Можешь повторить?",
+     "uk": "Я не почув(ла). Можеш повторити?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:er-det-mulig-aa-faa-tolk-paa-telefon",
+     "no": "Er det mulig å få tolk på telefon?",
+     "ru": "Можно переводчика по телефону?",
+     "uk": "Чи можна перекладача по телефону?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-staar-i-telefonko",
+     "no": "Jeg står i telefonkø.",
+     "ru": "Я жду на линии.",
+     "uk": "Я чекаю на лінії.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:trykk-en-for-norsk-to-for-engelsk",
+     "no": "Trykk en for norsk, to for engelsk.",
+     "ru": "Нажмите 1 для норвежского, 2 для английского.",
+     "uk": "Натисніть 1 для норвезької, 2 для англійської.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:jeg-sender-deg-en-sms-med-adressen",
+     "no": "Jeg sender deg en SMS med adressen.",
+     "ru": "Я пришлю тебе SMS с адресом.",
+     "uk": "Я надішлю тобі SMS з адресою.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:phone:takk-for-samtalen-ha-det-bra",
+     "no": "Takk for samtalen. Ha det bra!",
+     "ru": "Спасибо за разговор. До свидания!",
+     "uk": "Дякую за розмову. До побачення!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-school",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Школа и детский сад",
+   "icon": "🎒",
+   "tags": [
+    "frase",
+    "barnehage",
+    "skole"
+   ],
+   "description": "Привести и забрать ребёнка, сообщить о болезни, поговорить с учителем. Barnehage — детский сад, SFO — продлёнка после уроков. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:school:jeg-vil-soke-barnehageplass",
+     "no": "Jeg vil søke barnehageplass.",
+     "ru": "Я хочу подать заявление на место в садике.",
+     "uk": "Я хочу подати заяву на місце в садочку.",
+     "wordClass": "frase",
+     "description": "💡 Заявление подают в kommune; основной приём — до 1 марта."
+    },
+    {
+     "key": "pb:school:naar-aapner-og-stenger-barnehagen",
+     "no": "Når åpner og stenger barnehagen?",
+     "ru": "Во сколько садик открывается и закрывается?",
+     "uk": "О котрій садочок відчиняється і зачиняється?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:jeg-leverer-ham-klokka-aatte",
+     "no": "Jeg leverer ham klokka åtte.",
+     "ru": "Я приведу его в восемь.",
+     "uk": "Я приведу його о восьмій.",
+     "wordClass": "frase",
+     "description": "💡 levere — привести (сдать) ребёнка в садик; hente — забрать."
+    },
+    {
+     "key": "pb:school:jeg-henter-klokka-fire-i-dag",
+     "no": "Jeg henter klokka fire i dag.",
+     "ru": "Сегодня заберу в четыре.",
+     "uk": "Сьогодні заберу о четвертій.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:det-er-bestefaren-som-henter-i-dag",
+     "no": "Det er bestefaren som henter i dag.",
+     "ru": "Сегодня забирает дедушка.",
+     "uk": "Сьогодні забирає дідусь.",
+     "wordClass": "frase",
+     "description": "💡 Если ребёнка забирает другой человек — обязательно предупредите."
+    },
+    {
+     "key": "pb:school:hun-har-sovet-daarlig-i-natt",
+     "no": "Hun har sovet dårlig i natt.",
+     "ru": "Она плохо спала ночью.",
+     "uk": "Вона погано спала вночі.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:han-er-syk-og-blir-hjemme-i-dag",
+     "no": "Han er syk og blir hjemme i dag.",
+     "ru": "Он заболел и сегодня останется дома.",
+     "uk": "Він захворів і сьогодні залишиться вдома.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:han-hadde-feber-i-gaar-kan-han-komme-i-dag",
+     "no": "Han hadde feber i går. Kan han komme i dag?",
+     "ru": "Вчера у него была температура. Можно ему сегодня прийти?",
+     "uk": "Учора в нього була температура. Чи можна йому сьогодні прийти?",
+     "wordClass": "frase",
+     "description": "💡 Обычно после температуры ребёнок сидит дома ещё сутки."
+    },
+    {
+     "key": "pb:school:hva-trenger-barnet-i-barnehagen",
+     "no": "Hva trenger barnet i barnehagen?",
+     "ru": "Что нужно ребёнку в садике?",
+     "uk": "Що потрібно дитині в садочку?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:husk-regntoy-og-skift",
+     "no": "Husk regntøy og skift!",
+     "ru": "Не забудьте дождевик и сменную одежду!",
+     "uk": "Не забудьте дощовик і змінний одяг!",
+     "wordClass": "frase",
+     "description": "💡 Дети гуляют в любую погоду: нужны regntøy, støvler, ullundertøy (шерстяное бельё)."
+    },
+    {
+     "key": "pb:school:er-det-planleggingsdag-paa-fredag",
+     "no": "Er det planleggingsdag på fredag?",
+     "ru": "В пятницу день планирования?",
+     "uk": "У п’ятницю день планування?",
+     "wordClass": "frase",
+     "description": "💡 planleggingsdag — дни, когда садик или школа закрыты для детей."
+    },
+    {
+     "key": "pb:school:hvordan-har-dagen-vaert",
+     "no": "Hvordan har dagen vært?",
+     "ru": "Как прошёл день?",
+     "uk": "Як минув день?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:har-hun-spist-noe",
+     "no": "Har hun spist noe?",
+     "ru": "Она что-нибудь ела?",
+     "uk": "Вона щось їла?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:han-trives-godt-i-barnehagen",
+     "no": "Han trives godt i barnehagen.",
+     "ru": "Ему хорошо в садике.",
+     "uk": "Йому добре в садочку.",
+     "wordClass": "frase",
+     "description": "💡 trives — чувствовать себя хорошо, нравиться где-то."
+    },
+    {
+     "key": "pb:school:naar-er-foreldresamtalen",
+     "no": "Når er foreldresamtalen?",
+     "ru": "Когда беседа с родителями?",
+     "uk": "Коли бесіда з батьками?",
+     "wordClass": "frase",
+     "description": "💡 foreldresamtale — встреча с учителем или воспитателем о вашем ребёнке."
+    },
+    {
+     "key": "pb:school:naar-er-foreldremotet",
+     "no": "Når er foreldremøtet?",
+     "ru": "Когда родительское собрание?",
+     "uk": "Коли батьківські збори?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:kan-jeg-snakke-med-kontaktlaereren",
+     "no": "Kan jeg snakke med kontaktlæreren?",
+     "ru": "Можно поговорить с классным руководителем?",
+     "uk": "Можна поговорити з класним керівником?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:hvordan-gaar-det-med-henne-paa-skolen",
+     "no": "Hvordan går det med henne på skolen?",
+     "ru": "Как у неё дела в школе?",
+     "uk": "Як у неї справи в школі?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:han-synes-matte-er-vanskelig",
+     "no": "Han synes matte er vanskelig.",
+     "ru": "Ему трудно даётся математика.",
+     "uk": "Йому важко дається математика.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:hun-har-mye-lekser",
+     "no": "Hun har mye lekser.",
+     "ru": "У неё много домашних заданий.",
+     "uk": "У неї багато домашніх завдань.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:hvordan-kan-vi-hjelpe-ham-hjemme",
+     "no": "Hvordan kan vi hjelpe ham hjemme?",
+     "ru": "Как мы можем помочь ему дома?",
+     "uk": "Як ми можемо допомогти йому вдома?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:faar-barnet-mitt-ekstra-hjelp-i-norsk",
+     "no": "Får barnet mitt ekstra hjelp i norsk?",
+     "ru": "Мой ребёнок получает дополнительную помощь по норвежскому?",
+     "uk": "Чи отримує моя дитина додаткову допомогу з норвезької?",
+     "wordClass": "frase",
+     "description": "💡 Дети, недавно приехавшие в Норвегию, имеют право на дополнительные уроки норвежского."
+    },
+    {
+     "key": "pb:school:han-blir-mobbet-paa-skolen",
+     "no": "Han blir mobbet på skolen.",
+     "ru": "Его травят в школе.",
+     "uk": "Його цькують у школі.",
+     "wordClass": "frase",
+     "description": "💡 О травле сразу говорите учителю или директору — школа обязана действовать."
+    },
+    {
+     "key": "pb:school:hun-kan-ikke-vaere-med-paa-turen-i-morgen",
+     "no": "Hun kan ikke være med på turen i morgen.",
+     "ru": "Она не сможет пойти на завтрашнюю экскурсию.",
+     "uk": "Вона не зможе піти на завтрашню екскурсію.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:school:har-dere-sfo-etter-skolen",
+     "no": "Har dere SFO etter skolen?",
+     "ru": "Есть ли у вас продлёнка (SFO)?",
+     "uk": "Чи є у вас група продовженого дня (SFO)?",
+     "wordClass": "frase",
+     "description": "💡 SFO (в Осло — AKS) — продлёнка после уроков для 1–4 классов."
+    },
+    {
+     "key": "pb:school:hun-har-med-seg-matpakke",
+     "no": "Hun har med seg matpakke.",
+     "ru": "У неё с собой бутерброды из дома.",
+     "uk": "У неї з собою бутерброди з дому.",
+     "wordClass": "frase",
+     "description": "💡 matpakke — бутерброды из дома; горячего обеда в школе часто нет."
+    },
+    {
+     "key": "pb:school:takk-for-at-dere-passer-saa-godt-paa-henne",
+     "no": "Takk for at dere passer så godt på henne!",
+     "ru": "Спасибо, что так хорошо за ней присматриваете!",
+     "uk": "Дякую, що так добре її доглядаєте!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-emergency",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Экстренные случаи (113, 112, 110)",
+   "icon": "🚨",
+   "tags": [
+    "frase",
+    "nød",
+    "akutt"
+   ],
+   "description": "113 — скорая, 112 — полиция, 110 — пожарные, 116 117 — legevakt. Сначала скажите адрес и что случилось — потом отвечайте на вопросы. Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:emergency:ring-113",
+     "no": "Ring 113!",
+     "ru": "Звоните 113!",
+     "uk": "Телефонуйте 113!",
+     "wordClass": "frase",
+     "description": "💡 113 — скорая медицинская помощь (ambulanse)."
+    },
+    {
+     "key": "pb:emergency:ring-politiet-paa-112",
+     "no": "Ring politiet på 112!",
+     "ru": "Звоните в полицию — 112!",
+     "uk": "Телефонуйте в поліцію — 112!",
+     "wordClass": "frase",
+     "description": "💡 112 — полиция. Если не срочно — 02800."
+    },
+    {
+     "key": "pb:emergency:ring-brannvesenet-paa-110",
+     "no": "Ring brannvesenet på 110!",
+     "ru": "Звоните пожарным — 110!",
+     "uk": "Телефонуйте пожежникам — 110!",
+     "wordClass": "frase",
+     "description": "💡 110 — пожарные."
+    },
+    {
+     "key": "pb:emergency:hjelp",
+     "no": "Hjelp!",
+     "ru": "Помогите!",
+     "uk": "Допоможіть!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:det-brenner",
+     "no": "Det brenner!",
+     "ru": "Пожар!",
+     "uk": "Пожежа!",
+     "wordClass": "frase",
+     "description": "💡 Дословно «горит!»."
+    },
+    {
+     "key": "pb:emergency:det-har-skjedd-en-ulykke",
+     "no": "Det har skjedd en ulykke.",
+     "ru": "Произошёл несчастный случай.",
+     "uk": "Стався нещасний випадок.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:det-har-skjedd-en-bilulykke-paa-e18",
+     "no": "Det har skjedd en bilulykke på E18.",
+     "ru": "На трассе E18 автомобильная авария.",
+     "uk": "На трасі E18 автомобільна аварія.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:adressen-er-storgata-tolv-i-drammen",
+     "no": "Adressen er Storgata tolv i Drammen.",
+     "ru": "Адрес: Сторгата 12, Драммен.",
+     "uk": "Адреса: Сторгата 12, Драммен.",
+     "wordClass": "frase",
+     "description": "💡 Адрес — первым делом. Трубку первым не кладите."
+    },
+    {
+     "key": "pb:emergency:jeg-er-i-andre-etasje",
+     "no": "Jeg er i andre etasje.",
+     "ru": "Я на втором этаже.",
+     "uk": "Я на другому поверсі.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:han-puster-ikke",
+     "no": "Han puster ikke.",
+     "ru": "Он не дышит.",
+     "uk": "Він не дихає.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:hun-er-bevisstlos",
+     "no": "Hun er bevisstløs.",
+     "ru": "Она без сознания.",
+     "uk": "Вона непритомна.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:han-blor-mye",
+     "no": "Han blør mye.",
+     "ru": "У него сильное кровотечение.",
+     "uk": "У нього сильна кровотеча.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:hun-har-sterke-smerter-i-brystet",
+     "no": "Hun har sterke smerter i brystet.",
+     "ru": "У неё сильная боль в груди.",
+     "uk": "У неї сильний біль у грудях.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:jeg-tror-han-har-faatt-slag",
+     "no": "Jeg tror han har fått slag.",
+     "ru": "Кажется, у него инсульт.",
+     "uk": "Здається, у нього інсульт.",
+     "wordClass": "frase",
+     "description": "💡 slag (hjerneslag) — инсульт."
+    },
+    {
+     "key": "pb:emergency:er-noen-skadet",
+     "no": "Er noen skadet?",
+     "ru": "Кто-нибудь пострадал?",
+     "uk": "Хтось постраждав?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:ikke-flytt-ham",
+     "no": "Ikke flytt ham!",
+     "ru": "Не двигайте его!",
+     "uk": "Не рухайте його!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:han-er-fire-aar-gammel",
+     "no": "Han er fire år gammel.",
+     "ru": "Ему четыре года.",
+     "uk": "Йому чотири роки.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:barnet-har-svelget-noe",
+     "no": "Barnet har svelget noe.",
+     "ru": "Ребёнок что-то проглотил.",
+     "uk": "Дитина щось проковтнула.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:jeg-tror-barnet-har-spist-tabletter",
+     "no": "Jeg tror barnet har spist tabletter.",
+     "ru": "Кажется, ребёнок съел таблетки.",
+     "uk": "Здається, дитина з’їла таблетки.",
+     "wordClass": "frase",
+     "description": "💡 Отравления: Giftinformasjonen — 22 59 13 00 (круглосуточно)."
+    },
+    {
+     "key": "pb:emergency:ring-legevakten-paa-116-117",
+     "no": "Ring legevakten på 116 117.",
+     "ru": "Звоните в дежурную неотложку — 116 117.",
+     "uk": "Телефонуйте до чергової невідкладної допомоги — 116 117.",
+     "wordClass": "frase",
+     "description": "💡 116 117 — когда к врачу нужно срочно, но жизнь не под угрозой."
+    },
+    {
+     "key": "pb:emergency:ambulansen-er-paa-vei",
+     "no": "Ambulansen er på vei.",
+     "ru": "Скорая уже едет.",
+     "uk": "Швидка вже їде.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:hold-deg-rolig-hjelpen-kommer",
+     "no": "Hold deg rolig, hjelpen kommer.",
+     "ru": "Сохраняй спокойствие, помощь уже едет.",
+     "uk": "Зберігай спокій, допомога вже їде.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:hvor-er-naermeste-sykehus",
+     "no": "Hvor er nærmeste sykehus?",
+     "ru": "Где ближайшая больница?",
+     "uk": "Де найближча лікарня?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:noen-har-stjaalet-lommeboka-mi",
+     "no": "Noen har stjålet lommeboka mi.",
+     "ru": "У меня украли кошелёк.",
+     "uk": "У мене вкрали гаманець.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:jeg-vil-anmelde-et-innbrudd",
+     "no": "Jeg vil anmelde et innbrudd.",
+     "ru": "Я хочу заявить о взломе.",
+     "uk": "Я хочу заявити про злам.",
+     "wordClass": "frase",
+     "description": "💡 Не срочное заявление — на politiet.no или по номеру 02800."
+    },
+    {
+     "key": "pb:emergency:jeg-har-gaatt-meg-vill",
+     "no": "Jeg har gått meg vill.",
+     "ru": "Я заблудился (заблудилась).",
+     "uk": "Я заблукав (заблукала).",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:emergency:jeg-snakker-daarlig-norsk-snakker-du-engelsk",
+     "no": "Jeg snakker dårlig norsk. Snakker du engelsk?",
+     "ru": "Я плохо говорю по-норвежски. Ты говоришь по-английски?",
+     "uk": "Я погано розмовляю норвезькою. Ти розмовляєш англійською?",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  },
+  {
+   "id": "pb-smalltalk",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Погода и small talk",
+   "icon": "☀️",
+   "tags": [
+    "frase",
+    "vær",
+    "småprat"
+   ],
+   "description": "Погода, выходные, hytte и прогулки — о чём норвежцы говорят с соседями и коллегами. Плюс короткие реакции: «Så koselig!», «Så synd!». Перевод на русский и украинский; 💡 — когда норвежцы говорят иначе, чем мы привыкли.",
+   "cards": [
+    {
+     "key": "pb:smalltalk:saa-fint-vaer-i-dag",
+     "no": "Så fint vær i dag!",
+     "ru": "Какая сегодня хорошая погода!",
+     "uk": "Яка сьогодні гарна погода!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:for-et-vaer",
+     "no": "For et vær!",
+     "ru": "Ну и погода!",
+     "uk": "Оце так погода!",
+     "wordClass": "frase",
+     "description": "💡 Говорят и о хорошей, и о плохой погоде — решает интонация."
+    },
+    {
+     "key": "pb:smalltalk:det-regner-igjen",
+     "no": "Det regner igjen.",
+     "ru": "Опять дождь.",
+     "uk": "Знову дощ.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-skal-bli-sol-i-morgen",
+     "no": "Det skal bli sol i morgen.",
+     "ru": "Завтра обещают солнце.",
+     "uk": "Завтра обіцяють сонце.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:hva-sier-vaermeldingen",
+     "no": "Hva sier værmeldingen?",
+     "ru": "Что говорит прогноз погоды?",
+     "uk": "Що каже прогноз погоди?",
+     "wordClass": "frase",
+     "description": "💡 Прогноз норвежцы смотрят на yr.no."
+    },
+    {
+     "key": "pb:smalltalk:det-er-kaldt-ute-ta-paa-deg-lue",
+     "no": "Det er kaldt ute, ta på deg lue!",
+     "ru": "На улице холодно, надень шапку!",
+     "uk": "Надворі холодно, вдягни шапку!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-er-minus-ti-grader",
+     "no": "Det er minus ti grader.",
+     "ru": "Минус десять градусов.",
+     "uk": "Мінус десять градусів.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-har-snodd-hele-natten",
+     "no": "Det har snødd hele natten.",
+     "ru": "Всю ночь шёл снег.",
+     "uk": "Усю ніч ішов сніг.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-er-glatt-ute",
+     "no": "Det er glatt ute.",
+     "ru": "На улице скользко.",
+     "uk": "Надворі слизько.",
+     "wordClass": "frase",
+     "description": "💡 Зимой пригодятся brodder — шипы на обувь."
+    },
+    {
+     "key": "pb:smalltalk:det-blaaser-mye-i-dag",
+     "no": "Det blåser mye i dag.",
+     "ru": "Сегодня сильный ветер.",
+     "uk": "Сьогодні сильний вітер.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-er-morkt-saa-tidlig-naa",
+     "no": "Det er mørkt så tidlig nå.",
+     "ru": "Сейчас так рано темнеет.",
+     "uk": "Зараз так рано темніє.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:endelig-sommer",
+     "no": "Endelig sommer!",
+     "ru": "Наконец-то лето!",
+     "uk": "Нарешті літо!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-finnes-ikke-daarlig-vaer-bare-daarlige-klaer",
+     "no": "Det finnes ikke dårlig vær, bare dårlige klær.",
+     "ru": "Не бывает плохой погоды, бывает плохая одежда.",
+     "uk": "Не буває поганої погоди, буває поганий одяг.",
+     "wordClass": "frase",
+     "description": "💡 Любимая норвежская поговорка."
+    },
+    {
+     "key": "pb:smalltalk:hvordan-gaar-det-med-deg",
+     "no": "Hvordan går det med deg?",
+     "ru": "Как у тебя дела?",
+     "uk": "Як у тебе справи?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:det-gaar-bra-takk-det-er-travelt-paa-jobb",
+     "no": "Det går bra, takk. Det er travelt på jobb.",
+     "ru": "Хорошо, спасибо. На работе много дел.",
+     "uk": "Добре, дякую. На роботі багато справ.",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:lenge-siden",
+     "no": "Lenge siden!",
+     "ru": "Давно не виделись!",
+     "uk": "Давно не бачилися!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:hyggelig-aa-se-deg-igjen",
+     "no": "Hyggelig å se deg igjen!",
+     "ru": "Рад(а) снова тебя видеть!",
+     "uk": "Радий (рада) знову тебе бачити!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:har-du-hatt-en-fin-helg",
+     "no": "Har du hatt en fin helg?",
+     "ru": "Хорошо провёл(а) выходные?",
+     "uk": "Добре провів(ла) вихідні?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:hva-gjorde-du-i-helgen",
+     "no": "Hva gjorde du i helgen?",
+     "ru": "Что делал(а) на выходных?",
+     "uk": "Що робив(ла) на вихідних?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:vi-var-paa-hytta",
+     "no": "Vi var på hytta.",
+     "ru": "Мы были в домике (на хютте).",
+     "uk": "Ми були в будиночку (на гютті).",
+     "wordClass": "frase",
+     "description": "💡 hytte — домик в горах или у моря; «på hytta» — любимый отдых норвежцев."
+    },
+    {
+     "key": "pb:smalltalk:vi-gikk-paa-tur-i-marka",
+     "no": "Vi gikk på tur i marka.",
+     "ru": "Мы ходили гулять в лес.",
+     "uk": "Ми ходили гуляти в ліс.",
+     "wordClass": "frase",
+     "description": "💡 marka — лес и природа вокруг города; «gå på tur» — прогулка или поход."
+    },
+    {
+     "key": "pb:smalltalk:har-du-noen-planer-for-helgen",
+     "no": "Har du noen planer for helgen?",
+     "ru": "Есть планы на выходные?",
+     "uk": "Маєш плани на вихідні?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:skal-du-noe-i-sommer",
+     "no": "Skal du noe i sommer?",
+     "ru": "Куда-нибудь собираешься летом?",
+     "uk": "Кудись збираєшся влітку?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:saa-du-kampen-i-gaar",
+     "no": "Så du kampen i går?",
+     "ru": "Видел(а) вчерашний матч?",
+     "uk": "Бачив(ла) вчорашній матч?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:saa-koselig",
+     "no": "Så koselig!",
+     "ru": "Как мило! / Как уютно!",
+     "uk": "Як мило! / Як затишно!",
+     "wordClass": "frase",
+     "description": "💡 koselig — ключевое норвежское слово: уютно, приятно, мило."
+    },
+    {
+     "key": "pb:smalltalk:det-hores-fint-ut",
+     "no": "Det høres fint ut!",
+     "ru": "Звучит здорово!",
+     "uk": "Звучить чудово!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:saa-synd",
+     "no": "Så synd!",
+     "ru": "Как жаль!",
+     "uk": "Як шкода!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:gratulerer-med-dagen",
+     "no": "Gratulerer med dagen!",
+     "ru": "С днём рождения!",
+     "uk": "З днем народження!",
+     "wordClass": "frase",
+     "description": "💡 Дословно «поздравляю с днём» — так поздравляют с днём рождения и с 17 мая."
+    },
+    {
+     "key": "pb:smalltalk:god-jul-og-godt-nytt-aar",
+     "no": "God jul og godt nytt år!",
+     "ru": "С Рождеством и с Новым годом!",
+     "uk": "З Різдвом і з Новим роком!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:skal-vi-ta-en-kaffe-en-dag",
+     "no": "Skal vi ta en kaffe en dag?",
+     "ru": "Может, выпьем как-нибудь кофе?",
+     "uk": "Може, вип’ємо якось кави?",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:ha-en-fin-helg",
+     "no": "Ha en fin helg!",
+     "ru": "Хороших выходных!",
+     "uk": "Гарних вихідних!",
+     "wordClass": "frase",
+     "description": ""
+    },
+    {
+     "key": "pb:smalltalk:vi-snakkes",
+     "no": "Vi snakkes!",
+     "ru": "Ещё поговорим! / На связи!",
+     "uk": "Ще поговоримо! / На зв’язку!",
+     "wordClass": "frase",
+     "description": ""
+    }
+   ]
+  }
+ ]
+}

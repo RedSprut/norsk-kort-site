@@ -1,0 +1,2516 @@
+{
+ "version": 1,
+ "updated": "2026-11-18",
+ "attribution": "Norsk Kort — собственный материал (составлено вручную); формы глаголов сверены с Ordbøkene (Bokmålsordboka, UiB и Språkrådet).",
+ "decks": [
+  {
+   "id": "modal",
+   "name": "Модальные глаголы",
+   "icon": "🧩",
+   "tags": [
+    "grammatikk",
+    "modalverb"
+   ],
+   "description": "kan, vil, skal, må, bør, får, tør — и trenger (он НЕ модальный). Все времена с переводом. Правило: после модального глагола — инфинитив БЕЗ å.",
+   "cards": [
+    {
+     "key": "modal:kunne",
+     "no": "kan / kunne",
+     "ru": "мочь; уметь",
+     "uk": "могти; уміти",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nJeg kan svømme. (Я умею плавать.)\n💡 kan = могу (есть возможность) и умею (навык). Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Kan du hjelpe meg?",
+     "exampleRu": "Ты можешь мне помочь?",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å kunne",
+       "ru": "мочь, уметь"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg kan",
+       "ru": "я могу / умею"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg kunne",
+       "ru": "я мог(ла) / умел(а)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har kunnet",
+       "ru": "я мог(ла) / смог(ла) (всё это время)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde kunnet",
+       "ru": "я (до того) мог(ла) / смог(ла)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal kunne / jeg kommer til å kunne",
+       "ru": "я смогу"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha kunnet / jeg kunne ha",
+       "ru": "я бы смог(ла) / мог(ла) бы"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Настоящее",
+       "no": "Jeg kan snakke litt norsk.",
+       "ru": "Я немного говорю по-норвежски.",
+       "note": "kan = умею"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Jeg kunne ikke komme i går.",
+       "ru": "Я не смог(ла) прийти вчера."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har aldri kunnet svømme.",
+       "ru": "Я никогда не умел(а) плавать."
+      },
+      {
+       "label": "Условное",
+       "no": "Du kunne ha ringt!",
+       "ru": "Ты мог(ла) бы позвонить!",
+       "note": "kunne ha + причастие = мог бы (но не сделал)"
+      }
+     ]
+    },
+    {
+     "key": "modal:ville",
+     "no": "vil / ville",
+     "ru": "хотеть; (о будущем) будет",
+     "uk": "хотіти; (про майбутнє) буде",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nJeg vil lære norsk. (Я хочу выучить норвежский.)\n💡 vil ha + существительное = хочу что-то: Jeg vil ha en kaffe. Vil о будущем = «будет» (прогноз): Det vil ta tid. Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg vil lære norsk.",
+     "exampleRu": "Я хочу выучить норвежский.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å ville",
+       "ru": "хотеть"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg vil",
+       "ru": "я хочу"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg ville",
+       "ru": "я хотел(а)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har villet",
+       "ru": "я (всегда, давно) хотел(а)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde villet",
+       "ru": "я (до того) хотел(а)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å ville",
+       "ru": "я захочу"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville gjerne",
+       "ru": "я бы хотел(а) (вежливо)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Настоящее",
+       "no": "Vil du ha mer kaffe?",
+       "ru": "Хочешь ещё кофе?"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Hun ville ikke svare.",
+       "ru": "Она не хотела отвечать."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har alltid villet bo ved sjøen.",
+       "ru": "Я всегда хотел(а) жить у моря."
+      },
+      {
+       "label": "Условное",
+       "no": "Jeg ville gjerne bestille et bord.",
+       "ru": "Я бы хотел(а) заказать столик."
+      },
+      {
+       "label": "Будущее",
+       "no": "Det vil ta litt tid.",
+       "ru": "Это займёт немного времени.",
+       "note": "vil = будет (прогноз)"
+      }
+     ]
+    },
+    {
+     "key": "modal:skulle",
+     "no": "skal / skulle",
+     "ru": "собираюсь; буду (по плану); должен",
+     "uk": "збираюся; буду (за планом); маю, повинен",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nVi skal flytte til Bergen. (Мы собираемся переехать в Берген.)\n💡 skal = план, решение или обязанность. С направлением глагол движения можно не говорить: Jeg skal hjem. (Я иду домой.) Skal vi gå? = Пойдём? Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Vi skal flytte til Bergen.",
+     "exampleRu": "Мы собираемся переехать в Берген.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å skulle",
+       "ru": "собираться; быть должным"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg skal",
+       "ru": "я собираюсь / буду (по плану) / должен(на)"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg skulle",
+       "ru": "я собирался(-лась) / должен(на) был(а)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har skullet",
+       "ru": "я (давно) собирался(-лась)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde skullet",
+       "ru": "я (до того) собирался(-лась)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal reise",
+       "ru": "я поеду (так запланировано)"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg skulle ha (ringt)",
+       "ru": "мне надо было бы (позвонить)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Настоящее",
+       "no": "Skal vi gå på kino?",
+       "ru": "Пойдём в кино?"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Jeg skulle ringe deg, men jeg glemte det.",
+       "ru": "Я собирался(-лась) тебе позвонить, но забыл(а)."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har lenge skullet besøke deg.",
+       "ru": "Я давно собирался(-лась) к тебе зайти."
+      },
+      {
+       "label": "Запрет",
+       "no": "Du skal ikke røyke her.",
+       "ru": "Здесь тебе нельзя курить.",
+       "note": "skal ikke = запрет, обязанность не делать"
+      }
+     ]
+    },
+    {
+     "key": "modal:maatte",
+     "no": "må / måtte",
+     "ru": "должен; надо, приходится",
+     "uk": "мусити, повинен; треба, доводиться",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nJeg må gå nå. (Мне пора идти.)\n⚠️ må ikke = НЕЛЬЗЯ (запрет), а не «не обязан». «Не обязан, не нужно» = trenger ikke. Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg må gå nå.",
+     "exampleRu": "Мне пора идти.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å måtte",
+       "ru": "быть вынужденным, приходиться"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg må",
+       "ru": "я должен(на) / мне надо"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg måtte",
+       "ru": "мне пришлось / я должен(на) был(а)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har måttet",
+       "ru": "мне пришлось (уже, не раз)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde måttet",
+       "ru": "мне (до того) пришлось"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å måtte",
+       "ru": "мне придётся"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha måttet",
+       "ru": "мне пришлось бы"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Vi måtte vente i to timer.",
+       "ru": "Нам пришлось ждать два часа."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har måttet jobbe mye i det siste.",
+       "ru": "В последнее время мне приходилось много работать."
+      },
+      {
+       "label": "Запрет",
+       "no": "Du må ikke glemme passet.",
+       "ru": "Не вздумай забыть паспорт.",
+       "note": "må ikke = нельзя"
+      },
+      {
+       "label": "Будущее",
+       "no": "Du kommer til å måtte vente.",
+       "ru": "Тебе придётся подождать."
+      }
+     ]
+    },
+    {
+     "key": "modal:burde",
+     "no": "bør / burde",
+     "ru": "следует, стоит (совет)",
+     "uk": "слід, варто (порада)",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nDu bør gå til legen. (Тебе стоит сходить к врачу.)\n💡 bør мягче, чем må: это совет. burde ha + причастие = упрёк: Du burde ha sagt det! (Тебе следовало это сказать!) Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Du bør gå til legen.",
+     "exampleRu": "Тебе стоит сходить к врачу.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å burde",
+       "ru": "следовать (о совете)"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg bør",
+       "ru": "мне следует / стоит"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg burde",
+       "ru": "мне следовало бы / следовало"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har burdet",
+       "ru": "мне (давно) следовало (редко)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde burdet",
+       "ru": "мне (тогда уже) следовало (редко)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg bør gjøre det i morgen",
+       "ru": "мне следует сделать это завтра (своего будущего у bør нет)"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg burde ha (gjort det)",
+       "ru": "мне следовало бы (это сделать)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Vi burde dra nå.",
+       "ru": "Нам бы уже пора ехать."
+      },
+      {
+       "label": "Условное",
+       "no": "Jeg burde ha lest mer.",
+       "ru": "Мне надо было больше читать."
+      },
+      {
+       "label": "Совет",
+       "no": "Man bør ikke kjøre for fort.",
+       "ru": "Не стоит ездить слишком быстро."
+      }
+     ]
+    },
+    {
+     "key": "modal:faa",
+     "no": "får / få",
+     "ru": "можно (разрешение); удаётся; придётся",
+     "uk": "можна (дозвіл); вдається; доведеться",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после модального глагола — инфинитив БЕЗ å.",
+     "description": "📏 Правило: после модального глагола — инфинитив БЕЗ å.\nFår jeg låne telefonen din? (Можно мне взять твой телефон?)\n💡 Как модальный (без å): får = можно, разрешают; fikk ikke = не удалось / не разрешили; du får = придётся (так уж и быть). С существительным få = получать: Jeg fikk en gave. (Я получил(а) подарок.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Får jeg komme inn?",
+     "exampleRu": "Можно войти?",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å få",
+       "ru": "получать; мочь (с разрешения)"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg får",
+       "ru": "мне можно / я получаю"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg fikk",
+       "ru": "мне разрешили / мне удалось"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har fått",
+       "ru": "мне разрешили / удалось (уже)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde fått",
+       "ru": "мне (до того) разрешили / удалось"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å få",
+       "ru": "мне разрешат / я получу"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha fått",
+       "ru": "мне бы разрешили / я бы получил(а)"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "få deg en kaffe!",
+       "ru": "возьми себе кофе!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Barna fikk se på TV.",
+       "ru": "Детям разрешили посмотреть телевизор."
+      },
+      {
+       "label": "Не удалось",
+       "no": "Jeg fikk ikke sove i natt.",
+       "ru": "Этой ночью я не смог(ла) уснуть."
+      },
+      {
+       "label": "Придётся",
+       "no": "Du får gjøre det i morgen.",
+       "ru": "Придётся тебе сделать это завтра.",
+       "note": "du får = придётся (так уж и быть)"
+      },
+      {
+       "label": "Запрет",
+       "no": "Du får ikke røyke her.",
+       "ru": "Здесь нельзя курить."
+      }
+     ]
+    },
+    {
+     "key": "modal:torre",
+     "no": "tør / tørre",
+     "ru": "сметь, решаться, не бояться",
+     "uk": "сміти, наважуватися, не боятися",
+     "wordClass": "modalverb",
+     "rule": "📏 Правило: после tør инфинитив обычно БЕЗ å, как после модального (с å тоже встречается).",
+     "description": "📏 Правило: после tør инфинитив обычно БЕЗ å, как после модального (с å тоже встречается).\nJeg tør ikke hoppe. (Я боюсь прыгнуть.)\n⚠️ Прошедшее в bokmål — turte или torde («turde» — датское/старое написание). Не путайте с tørke — сушить. Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg tør ikke kjøre bil om vinteren.",
+     "exampleRu": "Я боюсь водить машину зимой.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å tørre",
+       "ru": "сметь, решаться"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg tør",
+       "ru": "я решаюсь / не боюсь"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg turte (torde)",
+       "ru": "я решился(-лась) / осмелился(-лась)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har turt (tort)",
+       "ru": "я решился(-лась) (уже)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde turt",
+       "ru": "я (до того) решился(-лась)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å tørre",
+       "ru": "я решусь"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha turt",
+       "ru": "я бы решился(-лась)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Настоящее",
+       "no": "Tør du hoppe?",
+       "ru": "Не боишься прыгнуть?"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Hun turte ikke si noe.",
+       "ru": "Она не решилась ничего сказать."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har aldri turt å si det.",
+       "ru": "Я так и не решился(-лась) это сказать.",
+       "note": "с å тоже правильно"
+      }
+     ]
+    },
+    {
+     "key": "modal:trenge",
+     "no": "trenger (ikke)",
+     "ru": "нужно; не нужно (НЕ модальный)",
+     "uk": "треба; не треба (НЕ модальне)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: trenger — НЕ модальный глагол, с инфинитивом нужен å.",
+     "description": "📏 Правило: trenger — НЕ модальный глагол, с инфинитивом нужен å.\nJeg trenger å sove. (Мне нужно поспать.)\n💡 С ikke (и в вопросе) å можно опустить: Du trenger ikke (å) komme. trenger ikke = не нужно (≠ må ikke = нельзя). С существительным: Jeg trenger hjelp. (Мне нужна помощь.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Du trenger ikke å betale.",
+     "exampleRu": "Тебе не нужно платить.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å trenge",
+       "ru": "нуждаться, быть нужным"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg trenger",
+       "ru": "мне нужно / я нуждаюсь"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg trengte",
+       "ru": "мне было нужно"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har trengt",
+       "ru": "мне было нужно (давно, всё это время)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde trengt",
+       "ru": "мне (до того) было нужно"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å trenge",
+       "ru": "мне понадобится"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha trengt",
+       "ru": "мне бы понадобилось"
+      }
+     ],
+     "examples": [
+      {
+       "label": "С существительным",
+       "no": "Jeg trenger en ny jakke.",
+       "ru": "Мне нужна новая куртка."
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Vi trengte å hvile.",
+       "ru": "Нам нужно было отдохнуть."
+      },
+      {
+       "label": "Без å",
+       "no": "Du trenger ikke gjøre det.",
+       "ru": "Тебе не нужно это делать.",
+       "note": "после ikke å можно опустить"
+      }
+     ]
+    }
+   ],
+   "group": "verb"
+  },
+  {
+   "id": "aa",
+   "name": "Глаголы с å",
+   "icon": "🔗",
+   "tags": [
+    "grammatikk",
+    "infinitiv"
+   ],
+   "description": "pleie, ønske, like, prøve, begynne, slutte, håpe, huske, glemme, klare, orke, trenge, bestemme seg for, la være, gidde. Все времена с переводом. Правило: после этих глаголов — å + инфинитив.",
+   "cards": [
+    {
+     "key": "aa:pleie",
+     "no": "pleie å",
+     "ru": "обычно (делать), иметь привычку",
+     "uk": "зазвичай (робити), мати звичку",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg pleier å lese før jeg sovner. (Перед сном я обычно читаю.)\n💡 pleier å = «обычно делаю». pleide å = «раньше (обычно) делал(а)». Прошедшее в этом значении — pleide (pleiet = ухаживал(а) за кем-то). Повелительной формы в этом значении нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg pleier å drikke kaffe om morgenen.",
+     "exampleRu": "По утрам я обычно пью кофе.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å pleie å lese",
+       "ru": "иметь привычку читать"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg pleier å lese",
+       "ru": "я обычно читаю"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg pleide å lese",
+       "ru": "раньше я обычно читал(а)"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har alltid pleid å lese",
+       "ru": "у меня всегда была привычка читать"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde pleid å lese",
+       "ru": "у меня (до того) была привычка читать"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å pleie å lese",
+       "ru": "у меня будет привычка читать (редко)"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha pleid å lese",
+       "ru": "у меня была бы привычка читать (редко)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Vi pleide å bo i Moskva.",
+       "ru": "Раньше мы жили в Москве."
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hva pleier du å gjøre i helgene?",
+       "ru": "Что ты обычно делаешь по выходным?"
+      }
+     ]
+    },
+    {
+     "key": "aa:onske",
+     "no": "ønske å",
+     "ru": "желать, хотеть (официально)",
+     "uk": "бажати, хотіти (офіційно)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg ønsker å bestille en time. (Я хочу записаться на приём.)\n💡 ønsker å — вежливее и официальнее, чем vil. Jeg skulle ønske… = Хотелось бы… / Жаль, что…\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg ønsker å bestille en time hos legen.",
+     "exampleRu": "Я хочу записаться на приём к врачу.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å ønske å lære",
+       "ru": "желать научиться"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg ønsker å lære",
+       "ru": "я хочу (желаю) научиться"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg ønsket å lære",
+       "ru": "я хотел(а) научиться"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har ønsket å lære",
+       "ru": "я (давно) хотел(а) научиться"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde ønsket å lære",
+       "ru": "я (до того) хотел(а) научиться"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å ønske å lære",
+       "ru": "я захочу научиться (редко)"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha ønsket å lære",
+       "ru": "я бы хотел(а) научиться"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "ønsk deg noe!",
+       "ru": "загадай желание!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Hun ønsket å studere i Oslo.",
+       "ru": "Она хотела учиться в Осло."
+      },
+      {
+       "label": "Мечта",
+       "no": "Jeg skulle ønske jeg kunne fly.",
+       "ru": "Вот бы мне уметь летать.",
+       "note": "skulle ønske = хотелось бы"
+      }
+     ]
+    },
+    {
+     "key": "aa:like",
+     "no": "like å",
+     "ru": "любить (делать), нравиться",
+     "uk": "любити (робити), подобатися",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg liker å lage mat. (Я люблю готовить.)\n💡 like + существительное = нравиться, любить: Jeg liker fisk. (Я люблю рыбу.) Отрицание: Jeg liker ikke å vente. (Я не люблю ждать.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg liker å lage mat.",
+     "exampleRu": "Я люблю готовить.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å like å danse",
+       "ru": "любить танцевать"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg liker å danse",
+       "ru": "я люблю танцевать"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg likte å danse",
+       "ru": "я любил(а) танцевать"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har alltid likt å danse",
+       "ru": "я всегда любил(а) танцевать"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde likt å danse",
+       "ru": "мне (до того) нравилось танцевать"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å like å danse",
+       "ru": "мне понравится танцевать"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha likt å danse",
+       "ru": "мне бы понравилось танцевать"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Отрицание",
+       "no": "Jeg liker ikke å vente.",
+       "ru": "Я не люблю ждать."
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Som barn likte jeg å tegne.",
+       "ru": "В детстве я любил(а) рисовать."
+      }
+     ]
+    },
+    {
+     "key": "aa:prove",
+     "no": "prøve å",
+     "ru": "пытаться, пробовать",
+     "uk": "намагатися, пробувати",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg prøver å forstå. (Я пытаюсь понять.)\n💡 Пишется prøve å (не «prøve og»). prøve + существительное = примерять, пробовать: Kan jeg prøve jakka? (Можно примерить куртку?)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg prøver å lære ti nye ord hver dag.",
+     "exampleRu": "Я стараюсь учить десять новых слов каждый день.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å prøve å forstå",
+       "ru": "пытаться понять"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg prøver å forstå",
+       "ru": "я пытаюсь понять"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg prøvde å forstå",
+       "ru": "я пытался(-лась) понять"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har prøvd å forstå",
+       "ru": "я пытался(-лась) понять (уже)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde prøvd å forstå",
+       "ru": "я (до того) уже пытался(-лась) понять"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal prøve å forstå",
+       "ru": "я попробую понять"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha prøvd å forstå",
+       "ru": "я бы попытался(-лась) понять"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "prøv å forstå!",
+       "ru": "попробуй понять!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Перфект",
+       "no": "Jeg har prøvd å ringe deg.",
+       "ru": "Я пытался(-лась) тебе дозвониться."
+      },
+      {
+       "label": "Повелительное",
+       "no": "Prøv å slappe av!",
+       "ru": "Постарайся расслабиться!"
+      }
+     ]
+    },
+    {
+     "key": "aa:begynne",
+     "no": "begynne å",
+     "ru": "начинать",
+     "uk": "починати",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nDet begynner å regne. (Начинается дождь.)\n💡 begynne på + существительное: begynne på skolen (пойти в школу).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Det begynner å bli kaldt.",
+     "exampleRu": "Становится холодно.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å begynne å jobbe",
+       "ru": "начинать работать"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg begynner å jobbe",
+       "ru": "я начинаю работать"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg begynte å jobbe",
+       "ru": "я начал(а) работать"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har begynt å jobbe",
+       "ru": "я начал(а) работать (и работаю)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde begynt å jobbe",
+       "ru": "я (к тому времени) уже начал(а) работать"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal begynne å jobbe",
+       "ru": "я начну работать"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha begynt å jobbe",
+       "ru": "я бы начал(а) работать"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "begynn å jobbe!",
+       "ru": "начинай работать!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Barnet begynte å gråte.",
+       "ru": "Ребёнок заплакал."
+      },
+      {
+       "label": "Перфект",
+       "no": "Jeg har begynt å lære norsk.",
+       "ru": "Я начал(а) учить норвежский."
+      }
+     ]
+    },
+    {
+     "key": "aa:slutte",
+     "no": "slutte å",
+     "ru": "перестать, бросить",
+     "uk": "перестати, кинути",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nSlutt å mase! (Перестань приставать!)\n💡 slutte å = перестать что-то делать; slutte (i jobben) = уволиться: Han har sluttet i jobben. (Он уволился.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hun sluttet å spise kjøtt for to år siden.",
+     "exampleRu": "Она перестала есть мясо два года назад.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å slutte å røyke",
+       "ru": "бросать курить"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg slutter å røyke",
+       "ru": "я бросаю курить"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg sluttet å røyke",
+       "ru": "я бросил(а) курить"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har sluttet å røyke",
+       "ru": "я бросил(а) курить (и не курю)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde sluttet å røyke",
+       "ru": "я (до того) уже бросил(а) курить"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal slutte å røyke",
+       "ru": "я брошу курить"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha sluttet å røyke",
+       "ru": "я бы бросил(а) курить"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "slutt å røyke!",
+       "ru": "брось курить!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Повелительное",
+       "no": "Slutt å mase!",
+       "ru": "Перестань приставать!"
+      },
+      {
+       "label": "Перфект",
+       "no": "Det har sluttet å regne.",
+       "ru": "Дождь кончился."
+      }
+     ]
+    },
+    {
+     "key": "aa:haape",
+     "no": "håpe å",
+     "ru": "надеяться",
+     "uk": "сподіватися",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg håper å få jobben. (Я надеюсь получить эту работу.)\n💡 håpe å — когда делает тот же человек. Иначе — håpe at: Jeg håper at du kommer. (Надеюсь, что ты придёшь.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg håper å få jobben.",
+     "exampleRu": "Я надеюсь получить эту работу.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å håpe å se deg",
+       "ru": "надеяться увидеть тебя"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg håper å se deg",
+       "ru": "я надеюсь увидеть тебя"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg håpet å se deg",
+       "ru": "я надеялся(-лась) увидеть тебя"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har lenge håpet å se deg",
+       "ru": "я давно надеялся(-лась) увидеть тебя"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde håpet å se deg",
+       "ru": "я надеялся(-лась) увидеть тебя (но не вышло)"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "vi får håpe på det beste",
+       "ru": "будем надеяться на лучшее"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha håpet å se deg",
+       "ru": "я бы надеялся(-лась) увидеть тебя (редко)"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "håp på det beste!",
+       "ru": "надейся на лучшее!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "håpe at",
+       "no": "Jeg håper at du kommer.",
+       "ru": "Надеюсь, ты придёшь."
+      },
+      {
+       "label": "Давнопрошедшее",
+       "no": "Jeg hadde håpet å se deg på festen.",
+       "ru": "Я надеялся(-лась) увидеть тебя на вечеринке."
+      }
+     ]
+    },
+    {
+     "key": "aa:huske",
+     "no": "huske å",
+     "ru": "не забыть (сделать); помнить",
+     "uk": "не забути (зробити); пам'ятати",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nHusk å ta med paraply! (Не забудь взять зонтик!)\n💡 huske å = не забыть сделать; huske + существительное = помнить: Jeg husker deg. (Я тебя помню.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Husk å ta med paraply!",
+     "exampleRu": "Не забудь взять зонтик!",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å huske å ringe",
+       "ru": "не забывать позвонить"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg husker å ringe",
+       "ru": "я не забываю позвонить"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg husket å ringe",
+       "ru": "я не забыл(а) позвонить"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har husket å ringe",
+       "ru": "я не забыл(а) позвонить (позвонил(а))"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde husket å ringe",
+       "ru": "я (тогда) не забыл(а) позвонить"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal huske å ringe",
+       "ru": "я не забуду позвонить"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha husket å ringe",
+       "ru": "я бы не забыл(а) позвонить"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "husk å ringe!",
+       "ru": "не забудь позвонить!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Будущее",
+       "no": "Jeg skal huske å kjøpe brød.",
+       "ru": "Я не забуду купить хлеб."
+      },
+      {
+       "label": "Помнить",
+       "no": "Husker du meg?",
+       "ru": "Ты меня помнишь?"
+      }
+     ]
+    },
+    {
+     "key": "aa:glemme",
+     "no": "glemme å",
+     "ru": "забыть (сделать)",
+     "uk": "забути (зробити)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg glemte å kjøpe melk. (Я забыл(а) купить молоко.)\n💡 Запрет-напоминание: Ikke glem å… / Glem ikke å… (Не забудь…)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg glemte å kjøpe melk.",
+     "exampleRu": "Я забыл(а) купить молоко.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å glemme å låse døra",
+       "ru": "забывать запереть дверь"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg glemmer å låse døra",
+       "ru": "я забываю запереть дверь"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg glemte å låse døra",
+       "ru": "я забыл(а) запереть дверь"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har glemt å låse døra",
+       "ru": "я забыл(а) запереть дверь (она открыта)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde glemt å låse døra",
+       "ru": "я (тогда) забыл(а) запереть дверь"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å glemme å låse døra",
+       "ru": "я забуду запереть дверь"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha glemt å låse døra",
+       "ru": "я бы забыл(а) запереть дверь"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "ikke glem å låse døra!",
+       "ru": "не забудь запереть дверь!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Повелительное",
+       "no": "Glem ikke å ta med passet!",
+       "ru": "Не забудь взять паспорт!"
+      },
+      {
+       "label": "Перфект",
+       "no": "Har du glemt å slå av lyset?",
+       "ru": "Ты забыл(а) выключить свет?"
+      }
+     ]
+    },
+    {
+     "key": "aa:klare",
+     "no": "klare å",
+     "ru": "суметь, справиться",
+     "uk": "змогти, впоратися",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nHun klarte å bestå eksamen. (Ей удалось сдать экзамен.)\n💡 klare å = суметь (с усилием). Jeg klarte det! (У меня получилось!) Jeg klarer meg. (Я справляюсь сам(а).) Повелительная форма в этом значении не используется.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hun klarte å bestå eksamen.",
+     "exampleRu": "Ей удалось сдать экзамен.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å klare å åpne vinduet",
+       "ru": "суметь открыть окно"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg klarer å åpne vinduet",
+       "ru": "я могу (у меня получается) открыть окно"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg klarte å åpne vinduet",
+       "ru": "мне удалось открыть окно"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har klart å åpne vinduet",
+       "ru": "мне удалось открыть окно (оно открыто)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde klart å åpne vinduet",
+       "ru": "мне (до того) удалось открыть окно"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal klare å åpne vinduet",
+       "ru": "я смогу открыть окно"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha klart å åpne vinduet",
+       "ru": "я бы смог(ла) открыть окно"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Отрицание",
+       "no": "Jeg klarer ikke å sove.",
+       "ru": "Я не могу уснуть."
+      },
+      {
+       "label": "Без глагола",
+       "no": "Jeg klarte det!",
+       "ru": "У меня получилось!"
+      }
+     ]
+    },
+    {
+     "key": "aa:orke",
+     "no": "orke å",
+     "ru": "иметь силы (чаще: нет сил)",
+     "uk": "мати сили (частіше: не мати сил)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg orker ikke å lage mat i dag. (Сегодня у меня нет сил готовить.)\n💡 orke чаще с ikke или в вопросе: Orker du å gå en tur? (Есть силы прогуляться?) В разговоре å иногда пропускают. Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg orker ikke å lage mat i dag.",
+     "exampleRu": "Сегодня у меня нет сил готовить.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å orke å gå ut",
+       "ru": "иметь силы выйти"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg orker ikke å gå ut",
+       "ru": "у меня нет сил выходить"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg orket ikke å gå ut",
+       "ru": "у меня не было сил выйти"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har ikke orket å gå ut",
+       "ru": "у меня не было сил выйти (всё это время)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde ikke orket å gå ut",
+       "ru": "у меня (тогда) не было сил выйти"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer ikke til å orke å gå ut",
+       "ru": "у меня не будет сил выйти"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ikke ha orket å gå ut",
+       "ru": "у меня бы не хватило сил выйти"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Orker du å gå en tur?",
+       "ru": "Есть силы прогуляться?"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Vi orket ikke å vente lenger.",
+       "ru": "У нас не было сил ждать дольше."
+      }
+     ]
+    },
+    {
+     "key": "aa:trenge-aa",
+     "no": "trenge å",
+     "ru": "нужно (сделать)",
+     "uk": "треба (зробити)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg trenger å sove. (Мне нужно поспать.)\n💡 trenge — не модальный, поэтому å. С ikke å можно опустить: Du trenger ikke (å) svare. (Тебе не нужно отвечать.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Du trenger ikke å bekymre deg.",
+     "exampleRu": "Тебе не нужно беспокоиться.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å trenge å hvile",
+       "ru": "нуждаться в отдыхе"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg trenger å hvile",
+       "ru": "мне нужно отдохнуть"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg trengte å hvile",
+       "ru": "мне нужно было отдохнуть"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har trengt å hvile",
+       "ru": "мне (давно) нужно было отдохнуть"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde trengt å hvile",
+       "ru": "мне (тогда) нужно было отдохнуть"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer til å trenge å hvile",
+       "ru": "мне нужно будет отдохнуть"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha trengt å hvile",
+       "ru": "мне нужно было бы отдохнуть"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Vi trengte å hvile litt.",
+       "ru": "Нам нужно было немного отдохнуть."
+      },
+      {
+       "label": "Без å",
+       "no": "Du trenger ikke svare nå.",
+       "ru": "Тебе не нужно отвечать сейчас.",
+       "note": "после ikke å можно опустить"
+      }
+     ]
+    },
+    {
+     "key": "aa:bestemme",
+     "no": "bestemme seg for å",
+     "ru": "решить (сделать)",
+     "uk": "вирішити (зробити)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив. Здесь: for å.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив. Здесь: for å.\nVi har bestemt oss for å flytte. (Мы решили переехать.)\n💡 Возвратный глагол: jeg bestemmer meg, du bestemmer deg, han/hun bestemmer seg, vi bestemmer oss, dere bestemmer dere, de bestemmer seg.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Vi har bestemt oss for å flytte til Norge.",
+     "exampleRu": "Мы решили переехать в Норвегию.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å bestemme seg for å flytte",
+       "ru": "решить переехать"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg bestemmer meg for å flytte",
+       "ru": "я решаю переехать"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg bestemte meg for å flytte",
+       "ru": "я решил(а) переехать"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har bestemt meg for å flytte",
+       "ru": "я решил(а) переехать (решение принято)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde bestemt meg for å flytte",
+       "ru": "я (к тому времени) уже решил(а) переехать"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal bestemme meg i morgen",
+       "ru": "я решу завтра"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha bestemt meg for å flytte",
+       "ru": "я бы решил(а) переехать"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "bestem deg!",
+       "ru": "решайся! / определись!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Прошедшее",
+       "no": "Hun bestemte seg for å slutte i jobben.",
+       "ru": "Она решила уволиться."
+      },
+      {
+       "label": "Повелительное",
+       "no": "Bestem deg nå!",
+       "ru": "Решай сейчас!"
+      }
+     ]
+    },
+    {
+     "key": "aa:la-vaere",
+     "no": "la være å",
+     "ru": "не делать (сознательно), воздержаться",
+     "uk": "не робити (свідомо), утриматися",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nLa være å rope! (Не кричи!)\n💡 la være å = сознательно не делать. Формы la: lar – lot – har latt. Осторожно: la = позволить — тогда без å: La meg hjelpe deg. (Давай я помогу.)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg lot være å svare.",
+     "exampleRu": "Я не стал(а) отвечать.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å la være å røre den",
+       "ru": "не трогать это"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg lar være å røre den",
+       "ru": "я это не трогаю (воздерживаюсь)"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg lot være å røre den",
+       "ru": "я не стал(а) это трогать"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har latt være å røre den",
+       "ru": "я это не трогал(а) (сознательно)"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde latt være å røre den",
+       "ru": "я (тогда) не стал(а) это трогать"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg skal la være å røre den",
+       "ru": "я не буду это трогать"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ha latt være å røre den",
+       "ru": "я бы не стал(а) это трогать"
+      },
+      {
+       "label": "Повелительное (imperativ)",
+       "no": "la være å røre den!",
+       "ru": "не трогай это!"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Повелительное",
+       "no": "La være å rope!",
+       "ru": "Не кричи!"
+      },
+      {
+       "label": "la без å",
+       "no": "La meg hjelpe deg.",
+       "ru": "Давай я помогу.",
+       "note": "la = позволить: без å"
+      }
+     ]
+    },
+    {
+     "key": "aa:gidde",
+     "no": "gidde å",
+     "ru": "охота, не лень (чаще: лень)",
+     "uk": "мати охоту, не лінуватися (частіше: ліньки)",
+     "wordClass": "verb",
+     "rule": "📏 Правило: после этого глагола — å + инфинитив.",
+     "description": "📏 Правило: после этого глагола — å + инфинитив.\nJeg gidder ikke å stå opp. (Мне лень вставать.)\n💡 Разговорное, почти всегда с ikke или в вопросе: Gidder du å hjelpe meg? (Не поможешь мне?) Прошедшее — gadd. Повелительной формы нет.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg gidder ikke å stå opp.",
+     "exampleRu": "Мне лень вставать.",
+     "forms": [
+      {
+       "label": "Инфинитив (infinitiv)",
+       "no": "å gidde å rydde",
+       "ru": "иметь охоту убираться"
+      },
+      {
+       "label": "Настоящее (presens)",
+       "no": "jeg gidder ikke å rydde",
+       "ru": "мне лень убираться"
+      },
+      {
+       "label": "Прошедшее (preteritum)",
+       "no": "jeg gadd ikke å rydde",
+       "ru": "мне было лень убираться"
+      },
+      {
+       "label": "Перфект (perfektum)",
+       "no": "jeg har ikke giddet å rydde",
+       "ru": "мне было лень убираться (так и не убрал(а))"
+      },
+      {
+       "label": "Давнопрошедшее (pluskvamperfektum)",
+       "no": "jeg hadde ikke giddet å rydde",
+       "ru": "мне (тогда) было лень убираться"
+      },
+      {
+       "label": "Будущее (futurum)",
+       "no": "jeg kommer ikke til å gidde å rydde",
+       "ru": "мне будет лень убираться"
+      },
+      {
+       "label": "Условное (kondisjonalis)",
+       "no": "jeg ville ikke ha giddet å rydde",
+       "ru": "мне было бы лень убираться"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Gidder du å hjelpe meg?",
+       "ru": "Не поможешь мне?"
+      },
+      {
+       "label": "Прошедшее",
+       "no": "Han gadd ikke å svare.",
+       "ru": "Ему было лень отвечать."
+      }
+     ]
+    }
+   ],
+   "group": "verb"
+  },
+  {
+   "id": "q",
+   "name": "Вопросительные слова",
+   "icon": "❓",
+   "tags": [
+    "grammatikk",
+    "spørreord"
+   ],
+   "description": "hva, hvem, hvor, når, hvorfor, hvordan, hvilken, hvor mye / mange / gammel / lenge / ofte, hva slags, hvem sin. Примеры вопросов и порядок слов: вопросительное слово + глагол + подлежащее.",
+   "cards": [
+    {
+     "key": "q:hva",
+     "no": "hva",
+     "ru": "что",
+     "uk": "що",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 «Как тебя зовут?» = Hva heter du? (дословно «что ты называешься»).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hva heter du?",
+     "exampleRu": "Как тебя зовут?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hva gjør du?",
+       "ru": "Что ты делаешь?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hva du gjør.",
+       "ru": "Я не знаю, что ты делаешь."
+      },
+      {
+       "label": "Подлежащее + som",
+       "no": "Jeg vet ikke hva som skjedde.",
+       "ru": "Я не знаю, что случилось."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hva heter du?",
+       "ru": "Как тебя зовут?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hva er klokka?",
+       "ru": "Который час?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hva koster det?",
+       "ru": "Сколько это стоит?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvem",
+     "no": "hvem",
+     "ru": "кто; кого",
+     "uk": "хто; кого",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Hvem ringte? — hvem здесь подлежащее, сразу глагол. Предлог уходит в конец: Hvem snakker du med? (С кем ты разговариваешь?)\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvem ringte?",
+     "exampleRu": "Кто звонил?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvem er det?",
+       "ru": "Кто это?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hvem hun er.",
+       "ru": "Я не знаю, кто она."
+      },
+      {
+       "label": "Подлежащее + som",
+       "no": "Jeg vet ikke hvem som kommer.",
+       "ru": "Я не знаю, кто придёт."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvem ringte?",
+       "ru": "Кто звонил?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvem snakker du med?",
+       "ru": "С кем ты разговариваешь?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvem bor her?",
+       "ru": "Кто здесь живёт?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor",
+     "no": "hvor",
+     "ru": "где; куда",
+     "uk": "де; куди",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 hvor = где и куда; «откуда» = hvor … fra (предлог в конце). hvor + прилагательное = «насколько»: hvor gammel, hvor lenge.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor er toalettet?",
+     "exampleRu": "Где туалет?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor bor du?",
+       "ru": "Где ты живёшь?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hvor han bor.",
+       "ru": "Я не знаю, где он живёт."
+      },
+      {
+       "label": "Откуда",
+       "no": "Hvor kommer du fra?",
+       "ru": "Откуда ты?"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor er toalettet?",
+       "ru": "Где туалет?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor skal du?",
+       "ru": "Куда ты идёшь?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor jobber du?",
+       "ru": "Где ты работаешь?"
+      }
+     ]
+    },
+    {
+     "key": "q:naar",
+     "no": "når",
+     "ru": "когда",
+     "uk": "коли",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 В рассказе об одном случае в прошлом «когда» = da: Da jeg var liten, bodde jeg i Moskva.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Når går bussen?",
+     "exampleRu": "Когда уходит автобус?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Når kommer du?",
+       "ru": "Когда ты придёшь?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke når han kommer.",
+       "ru": "Я не знаю, когда он придёт."
+      },
+      {
+       "label": "Придаточное",
+       "no": "Når jeg kommer hjem, lager jeg middag.",
+       "ru": "Когда я прихожу домой, я готовлю ужин."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Når går bussen?",
+       "ru": "Когда уходит автобус?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Når har du bursdag?",
+       "ru": "Когда у тебя день рождения?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Når begynner kurset?",
+       "ru": "Когда начинается курс?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvorfor",
+     "no": "hvorfor",
+     "ru": "почему; зачем",
+     "uk": "чому; навіщо",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Ответ — fordi + придаточное, ikke перед глаголом: …fordi jeg ikke hadde tid.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvorfor er du trøtt?",
+     "exampleRu": "Почему ты устал(а)?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvorfor lærer du norsk?",
+       "ru": "Почему ты учишь норвежский?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg forstår ikke hvorfor hun ikke kom.",
+       "ru": "Я не понимаю, почему она не пришла."
+      },
+      {
+       "label": "Ответ",
+       "no": "Fordi jeg bor i Norge.",
+       "ru": "Потому что я живу в Норвегии."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvorfor er du trøtt?",
+       "ru": "Почему ты устал(а)?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvorfor kom du ikke?",
+       "ru": "Почему ты не пришёл (не пришла)?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvordan",
+     "no": "hvordan",
+     "ru": "как",
+     "uk": "як",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 «Как тебя зовут?» — НЕ hvordan, а Hva heter du?\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvordan går det?",
+     "exampleRu": "Как дела?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvordan har du det?",
+       "ru": "Как дела?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Kan du si meg hvordan jeg kommer til stasjonen?",
+       "ru": "Подскажете, как пройти к вокзалу?"
+      },
+      {
+       "label": "Как пишется",
+       "no": "Hvordan staver man det?",
+       "ru": "Как это пишется?"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvordan går det?",
+       "ru": "Как дела?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvordan sier man det på norsk?",
+       "ru": "Как это сказать по-норвежски?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvordan kommer du deg til jobben?",
+       "ru": "Как ты добираешься до работы?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvilken",
+     "no": "hvilken / hvilket / hvilke",
+     "ru": "какой, который",
+     "uk": "який, котрий",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Форма — по роду существительного: en bil → hvilken, et hus → hvilket, мн. число → hvilke.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvilken dag er det i dag?",
+     "exampleRu": "Какой сегодня день?",
+     "forms": [
+      {
+       "label": "Мужской / женский род",
+       "no": "Hvilken bil er din?",
+       "ru": "Какая машина твоя?"
+      },
+      {
+       "label": "Средний род",
+       "no": "Hvilket hus bor dere i?",
+       "ru": "В каком доме вы живёте?"
+      },
+      {
+       "label": "Множественное",
+       "no": "Hvilke språk snakker du?",
+       "ru": "На каких языках ты говоришь?"
+      },
+      {
+       "label": "Косвенный + som",
+       "no": "Jeg vet ikke hvilken buss som går dit.",
+       "ru": "Я не знаю, какой автобус туда идёт."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvilken dag er det i dag?",
+       "ru": "Какой сегодня день?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvilket rom er ledig?",
+       "ru": "Какая комната свободна?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor-mye",
+     "no": "hvor mye",
+     "ru": "сколько (неисчисляемое)",
+     "uk": "скільки (незлічуване)",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 hvor mye — для того, что не считают штуками (вода, деньги, время); для штук — hvor mange.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor mye er klokka?",
+     "exampleRu": "Который час?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor mye koster det?",
+       "ru": "Сколько это стоит?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Vet du hvor mye det koster?",
+       "ru": "Ты знаешь, сколько это стоит?"
+      },
+      {
+       "label": "С существительным",
+       "no": "Hvor mye vann drikker du?",
+       "ru": "Сколько воды ты пьёшь?"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor mye er klokka?",
+       "ru": "Который час?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor mye tid har vi?",
+       "ru": "Сколько у нас времени?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor-mange",
+     "no": "hvor mange",
+     "ru": "сколько (штук)",
+     "uk": "скільки (штук)",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 hvor mange — для того, что считают штуками: barn, ganger, timer.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor mange bor i Oslo?",
+     "exampleRu": "Сколько людей живёт в Осло?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor mange barn har du?",
+       "ru": "Сколько у тебя детей?"
+      },
+      {
+       "label": "Косвенный + som",
+       "no": "Jeg vet ikke hvor mange som kommer.",
+       "ru": "Я не знаю, сколько человек придёт."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor mange bor i Oslo?",
+       "ru": "Сколько людей живёт в Осло?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor mange ganger har du vært her?",
+       "ru": "Сколько раз ты здесь был(а)?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor-gammel",
+     "no": "hvor gammel",
+     "ru": "сколько лет",
+     "uk": "скільки років",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Во множественном числе — hvor gamle: Hvor gamle er barna dine?\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor gammel er huset?",
+     "exampleRu": "Сколько лет этому дому?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor gammel er du?",
+       "ru": "Сколько тебе лет?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hvor gammel hun er.",
+       "ru": "Я не знаю, сколько ей лет."
+      },
+      {
+       "label": "Ответ",
+       "no": "Jeg er tretti år.",
+       "ru": "Мне тридцать лет."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor gammel er huset?",
+       "ru": "Сколько лет этому дому?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor gamle er barna dine?",
+       "ru": "Сколько лет твоим детям?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor-lenge",
+     "no": "hvor lenge",
+     "ru": "как долго, сколько времени",
+     "uk": "як довго, скільки часу",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Har du bodd…? — норвежский перфект здесь = русское настоящее («живёшь»).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor lenge varer filmen?",
+     "exampleRu": "Сколько длится фильм?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor lenge har du bodd i Norge?",
+       "ru": "Как долго ты живёшь в Норвегии?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hvor lenge jeg blir her.",
+       "ru": "Я не знаю, сколько я здесь пробуду."
+      },
+      {
+       "label": "Ответ",
+       "no": "I tre år.",
+       "ru": "Три года."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor lenge varer filmen?",
+       "ru": "Сколько длится фильм?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor lenge må jeg vente?",
+       "ru": "Сколько мне ждать?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvor-ofte",
+     "no": "hvor ofte",
+     "ru": "как часто",
+     "uk": "як часто",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 Ответы: hver dag, to ganger i uka, sjelden (редко), aldri (никогда).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvor ofte går bussen?",
+     "exampleRu": "Как часто ходит автобус?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hvor ofte trener du?",
+       "ru": "Как часто ты тренируешься?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Legen spurte hvor ofte jeg trener.",
+       "ru": "Врач спросил, как часто я тренируюсь."
+      },
+      {
+       "label": "Ответ",
+       "no": "To ganger i uka.",
+       "ru": "Два раза в неделю."
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvor ofte går bussen?",
+       "ru": "Как часто ходит автобус?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvor ofte ringer du moren din?",
+       "ru": "Как часто ты звонишь маме?"
+      }
+     ]
+    },
+    {
+     "key": "q:hva-slags",
+     "no": "hva slags",
+     "ru": "какой, что за (вид)",
+     "uk": "який, що за (вид)",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 hva slags — «какого типа», не меняется по роду; hvilken — «какой из нескольких».\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hva slags jobb har du?",
+     "exampleRu": "Кем ты работаешь?",
+     "forms": [
+      {
+       "label": "Прямой вопрос",
+       "no": "Hva slags musikk liker du?",
+       "ru": "Какую музыку ты любишь?"
+      },
+      {
+       "label": "Косвенный вопрос",
+       "no": "Jeg vet ikke hva slags bil han har.",
+       "ru": "Я не знаю, какая у него машина."
+      },
+      {
+       "label": "Сравните",
+       "no": "Hvilken bil er din?",
+       "ru": "Какая машина (из этих) твоя?"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hva slags jobb har du?",
+       "ru": "Кем ты работаешь?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hva slags mat liker du?",
+       "ru": "Какую еду ты любишь?"
+      }
+     ]
+    },
+    {
+     "key": "q:hvem-sin",
+     "no": "hvem sin (hvis)",
+     "ru": "чей",
+     "uk": "чий",
+     "wordClass": "spørreord",
+     "rule": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).",
+     "description": "📏 Вопрос: вопросительное слово + глагол + подлежащее (Hvor bor du?). Да/нет-вопрос — глагол первым (Bor du i Oslo?).\n📏 Косвенный вопрос: обычный порядок, ikke перед глаголом (Jeg vet ikke hvorfor han ikke kom). Если вопросительное слово — подлежащее, добавьте som (Jeg vet ikke hvem som kommer).\n💡 hvem sin / sitt / sine — по роду предмета: en bil → sin, et hus → sitt, мн. число → sine. Hvis — то же самое, но книжно.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hvem sin telefon er det som ringer?",
+     "exampleRu": "Чей это телефон звонит?",
+     "forms": [
+      {
+       "label": "Мужской / женский род",
+       "no": "Hvem sin bil er dette?",
+       "ru": "Чья это машина?"
+      },
+      {
+       "label": "Средний род",
+       "no": "Hvem sitt hus er det?",
+       "ru": "Чей это дом?"
+      },
+      {
+       "label": "Множественное",
+       "no": "Hvem sine sko er dette?",
+       "ru": "Чья это обувь?"
+      },
+      {
+       "label": "Книжный вариант",
+       "no": "Hvis bil er dette?",
+       "ru": "Чья это машина?"
+      }
+     ],
+     "examples": [
+      {
+       "label": "Вопрос",
+       "no": "Hvem sin telefon er det som ringer?",
+       "ru": "Чей это телефон звонит?"
+      },
+      {
+       "label": "Вопрос",
+       "no": "Hvem sin tur er det?",
+       "ru": "Чья очередь?"
+      }
+     ]
+    }
+   ],
+   "group": "other"
+  },
+  {
+   "id": "pairs",
+   "ver": 1,
+   "group": "verb",
+   "name": "Пары, которые путают",
+   "icon": "⚖️",
+   "tags": [
+    "verb",
+    "ordpar"
+   ],
+   "description": "kjenne / vite, tro / synes / tenke, legge / ligge, sette / sitte, hjem / hjemme … — в чём разница, все формы и по примеру на каждое слово.",
+   "cards": [
+    {
+     "key": "pair:kjenne-vite",
+     "no": "kjenne / vite",
+     "ru": "знать (человека, место) / знать (факт)",
+     "uk": "знати (людину, місце) / знати (факт)",
+     "wordClass": "verb",
+     "description": "📏 kjenne — знать кого-то или что-то лично, быть знакомым; vite — знать факт, информацию (часто + at / hvor / hva…).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg kjenner Ola godt.",
+     "exampleRu": "Я хорошо знаю Улу.",
+     "forms": [
+      {
+       "label": "kjenne — знать лично",
+       "no": "kjenne – kjenner – kjente – har kjent",
+       "ru": "знать, быть знакомым; чувствовать"
+      },
+      {
+       "label": "vite — знать факт",
+       "no": "vite – vet – visste – har visst",
+       "ru": "знать (что, где, когда…)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "kjenne",
+       "no": "Jeg kjenner Ola godt.",
+       "ru": "Я хорошо знаю Улу."
+      },
+      {
+       "label": "vite",
+       "no": "Jeg vet at Ola bor i Bergen.",
+       "ru": "Я знаю, что Ула живёт в Бергене."
+      }
+     ]
+    },
+    {
+     "key": "pair:tro-synes-tenke",
+     "no": "tro / synes / tenke",
+     "ru": "думать: полагать / считать (мнение) / размышлять",
+     "uk": "думати: вважати, гадати / вважати (думка) / розмірковувати",
+     "wordClass": "verb",
+     "description": "📏 tro — думать, что так есть (не уверен); synes — моё мнение, впечатление от того, что я сам видел, пробовал; tenke — размышлять, думать о чём-то (tenke på).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg tror at det blir regn i morgen.",
+     "exampleRu": "Я думаю, завтра будет дождь.",
+     "forms": [
+      {
+       "label": "tro — полагать, верить",
+       "no": "tro – tror – trodde – har trodd",
+       "ru": "думать (не знаю точно), верить"
+      },
+      {
+       "label": "synes — считать (мнение)",
+       "no": "synes – synes – syntes – har syntes",
+       "ru": "считать, находить (по опыту)"
+      },
+      {
+       "label": "tenke — размышлять",
+       "no": "tenke – tenker – tenkte – har tenkt",
+       "ru": "думать, размышлять; tenke på — думать о"
+      }
+     ],
+     "examples": [
+      {
+       "label": "tro",
+       "no": "Jeg tror at det blir regn i morgen.",
+       "ru": "Я думаю, завтра будет дождь."
+      },
+      {
+       "label": "synes",
+       "no": "Jeg synes at filmen var morsom.",
+       "ru": "По-моему, фильм был смешной."
+      },
+      {
+       "label": "tenke",
+       "no": "Jeg tenker ofte på familien min.",
+       "ru": "Я часто думаю о своей семье."
+      }
+     ]
+    },
+    {
+     "key": "pair:mote-treffe",
+     "no": "møte / treffe",
+     "ru": "встречать(ся)",
+     "uk": "зустрічати(ся)",
+     "wordClass": "verb",
+     "description": "📏 møte — встретиться (часто по договорённости), познакомиться: Hyggelig å møte deg! treffe — встретить, часто случайно; ещё «попасть» (в цель). Во многих фразах можно оба.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Vi møtes utenfor kinoen klokka sju.",
+     "exampleRu": "Встречаемся у кинотеатра в семь.",
+     "forms": [
+      {
+       "label": "møte",
+       "no": "møte – møter – møtte – har møtt",
+       "ru": "встречать(ся), знакомиться"
+      },
+      {
+       "label": "treffe",
+       "no": "treffe – treffer – traff – har truffet",
+       "ru": "встретить (случайно); попасть"
+      }
+     ],
+     "examples": [
+      {
+       "label": "møte",
+       "no": "Vi møtes utenfor kinoen klokka sju.",
+       "ru": "Встречаемся у кинотеатра в семь."
+      },
+      {
+       "label": "treffe",
+       "no": "I går traff jeg en gammel venn på bussen.",
+       "ru": "Вчера я случайно встретил(а) старого друга в автобусе."
+      }
+     ]
+    },
+    {
+     "key": "pair:legge-ligge",
+     "no": "legge / ligge",
+     "ru": "класть / лежать",
+     "uk": "класти / лежати",
+     "wordClass": "verb",
+     "description": "📏 legge — класть что-то (кто-то делает действие); legge seg — ложиться. ligge — лежать, находиться (состояние).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg legger boka på bordet.",
+     "exampleRu": "Я кладу книгу на стол.",
+     "forms": [
+      {
+       "label": "legge — класть",
+       "no": "legge – legger – la – har lagt",
+       "ru": "класть; legge seg — ложиться"
+      },
+      {
+       "label": "ligge — лежать",
+       "no": "ligge – ligger – lå – har ligget",
+       "ru": "лежать, находиться"
+      }
+     ],
+     "examples": [
+      {
+       "label": "legge",
+       "no": "Jeg legger boka på bordet.",
+       "ru": "Я кладу книгу на стол."
+      },
+      {
+       "label": "ligge",
+       "no": "Boka ligger på bordet.",
+       "ru": "Книга лежит на столе."
+      },
+      {
+       "label": "legge seg",
+       "no": "Barna legger seg klokka åtte.",
+       "ru": "Дети ложатся спать в восемь."
+      }
+     ]
+    },
+    {
+     "key": "pair:sette-sitte",
+     "no": "sette / sitte",
+     "ru": "ставить, сажать / сидеть",
+     "uk": "ставити, садити / сидіти",
+     "wordClass": "verb",
+     "description": "📏 sette — ставить, сажать (действие); sette seg — садиться. sitte — сидеть (состояние). Внимание: satt — и «поставил» (sette), и «сидел» (sitte).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Hun setter seg ved vinduet.",
+     "exampleRu": "Она садится у окна.",
+     "forms": [
+      {
+       "label": "sette — ставить",
+       "no": "sette – setter – satte – har satt",
+       "ru": "ставить; sette seg — садиться"
+      },
+      {
+       "label": "sitte — сидеть",
+       "no": "sitte – sitter – satt – har sittet",
+       "ru": "сидеть"
+      }
+     ],
+     "examples": [
+      {
+       "label": "sette seg",
+       "no": "Hun setter seg ved vinduet.",
+       "ru": "Она садится у окна."
+      },
+      {
+       "label": "sitte",
+       "no": "Hun sitter ved vinduet.",
+       "ru": "Она сидит у окна."
+      }
+     ]
+    },
+    {
+     "key": "pair:lage-gjore",
+     "no": "lage / gjøre",
+     "ru": "делать: изготовить, приготовить / делать (действие)",
+     "uk": "робити: виготовити, приготувати / робити (дію)",
+     "wordClass": "verb",
+     "description": "📏 lage — сделать, создать предмет, приготовить: lage mat, lage kaffe. gjøre — делать вообще, действие: gjøre lekser, Hva gjør du?\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg lager middag i kveld.",
+     "exampleRu": "Сегодня вечером я готовлю ужин.",
+     "forms": [
+      {
+       "label": "lage",
+       "no": "lage – lager – laget / lagde – har laget / lagd",
+       "ru": "делать (вещь), готовить"
+      },
+      {
+       "label": "gjøre",
+       "no": "gjøre – gjør – gjorde – har gjort",
+       "ru": "делать (действие)"
+      }
+     ],
+     "examples": [
+      {
+       "label": "lage",
+       "no": "Jeg lager middag i kveld.",
+       "ru": "Сегодня вечером я готовлю ужин."
+      },
+      {
+       "label": "gjøre",
+       "no": "Hva gjør du i helgen?",
+       "ru": "Что ты делаешь на выходных?"
+      }
+     ]
+    },
+    {
+     "key": "pair:vakne-vekke",
+     "no": "våkne / vekke",
+     "ru": "просыпаться / будить",
+     "uk": "прокидатися / будити",
+     "wordClass": "verb",
+     "description": "📏 våkne — просыпаться самому; vekke — будить кого-то.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg våkner klokka seks.",
+     "exampleRu": "Я просыпаюсь в шесть.",
+     "forms": [
+      {
+       "label": "våkne",
+       "no": "våkne – våkner – våknet – har våknet",
+       "ru": "просыпаться"
+      },
+      {
+       "label": "vekke",
+       "no": "vekke – vekker – vekket / vakte – har vekket / vakt",
+       "ru": "будить"
+      }
+     ],
+     "examples": [
+      {
+       "label": "våkne",
+       "no": "Jeg våkner klokka seks.",
+       "ru": "Я просыпаюсь в шесть."
+      },
+      {
+       "label": "vekke",
+       "no": "Kan du vekke meg klokka seks?",
+       "ru": "Можешь разбудить меня в шесть?"
+      }
+     ]
+    },
+    {
+     "key": "pair:hjem-hjemme",
+     "no": "hjem / hjemme",
+     "ru": "домой / дома",
+     "uk": "додому / вдома",
+     "wordClass": "adverb",
+     "description": "📏 hjem — куда? домой (движение: gå, dra, komme hjem). hjemme — где? дома (быть, сидеть, jobbe hjemme).\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Jeg går hjem nå.",
+     "exampleRu": "Я иду домой.",
+     "forms": [
+      {
+       "label": "hjem — куда?",
+       "no": "hjem",
+       "ru": "домой"
+      },
+      {
+       "label": "hjemme — где?",
+       "no": "hjemme",
+       "ru": "дома"
+      }
+     ],
+     "examples": [
+      {
+       "label": "hjem",
+       "no": "Jeg går hjem nå.",
+       "ru": "Я иду домой."
+      },
+      {
+       "label": "hjemme",
+       "no": "Jeg er hjemme hele dagen.",
+       "ru": "Я весь день дома."
+      }
+     ]
+    },
+    {
+     "key": "pair:ut-ute",
+     "no": "ut / ute",
+     "ru": "наружу / снаружи, на улице",
+     "uk": "назовні, надвір / надворі, на вулиці",
+     "wordClass": "adverb",
+     "description": "📏 ut — куда? наружу, на улицу (движение). ute — где? снаружи, на улице.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Vi går ut og leker.",
+     "exampleRu": "Мы идём на улицу играть.",
+     "forms": [
+      {
+       "label": "ut — куда?",
+       "no": "ut",
+       "ru": "наружу, на улицу"
+      },
+      {
+       "label": "ute — где?",
+       "no": "ute",
+       "ru": "снаружи, на улице"
+      }
+     ],
+     "examples": [
+      {
+       "label": "ut",
+       "no": "Vi går ut og leker.",
+       "ru": "Мы идём на улицу играть."
+      },
+      {
+       "label": "ute",
+       "no": "Barna leker ute.",
+       "ru": "Дети играют на улице."
+      }
+     ]
+    },
+    {
+     "key": "pair:inn-inne",
+     "no": "inn / inne",
+     "ru": "внутрь / внутри, в помещении",
+     "uk": "всередину / всередині, у приміщенні",
+     "wordClass": "adverb",
+     "description": "📏 inn — куда? внутрь (движение): Kom inn! inne — где? внутри, в доме.\nИсточник: Norsk Kort — собственный материал; формы сверены с Ordbøkene (UiB и Språkrådet)",
+     "example": "Kom inn, det er kaldt!",
+     "exampleRu": "Заходи, холодно!",
+     "forms": [
+      {
+       "label": "inn — куда?",
+       "no": "inn",
+       "ru": "внутрь"
+      },
+      {
+       "label": "inne — где?",
+       "no": "inne",
+       "ru": "внутри, в помещении"
+      }
+     ],
+     "examples": [
+      {
+       "label": "inn",
+       "no": "Kom inn, det er kaldt!",
+       "ru": "Заходи, холодно!"
+      },
+      {
+       "label": "inne",
+       "no": "Det er varmt inne.",
+       "ru": "Внутри тепло."
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

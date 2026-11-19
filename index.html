@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>Norsk ⇄ Русский — флеш-карточки</title>
+  <meta name="description" content="Флеш-карточки норвежский ⇄ русский: интервальные повторения, озвучка, картинки, проверка нейросетями." />
+  <meta name="theme-color" content="#0f1222" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <!-- 🛡 scripts only from the app itself and the known libraries (no script from anywhere else, no plugins, no <base> hijack) -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://cdn.sheetjs.com https://www.youtube.com https://s.ytimg.com https://www.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <!-- the free Google voice refuses requests that carry a Referer; embeds that need it set their own policy -->
+  <meta name="referrer" content="no-referrer" />
+  <!-- 🎴 loading screen: tiny CSS + script first, so it shows on the very first paint (markup at the top of <body>) -->
+  <link rel="stylesheet" href="css/preloader.css?v=2" />
+  <script src="js/preloader.js?v=2"></script>
+  <!-- installable app (iPhone / Android) -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Norsk Kort" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/styles.css?v=184" />
+  <link rel="stylesheet" href="css/news.css?v=184" />
+  <link rel="stylesheet" href="css/subs.css?v=184" />
+  <link rel="stylesheet" href="css/drills.css?v=184" />
+  <link rel="stylesheet" href="css/speech.css?v=184" />
+  <link rel="stylesheet" href="css/trnotice.css?v=184" />
+  <link rel="stylesheet" href="css/listen.css?v=184" />
+  <link rel="stylesheet" href="css/help.css?v=184" />
+  <link rel="stylesheet" href="css/gramterms.css?v=184" />
+  <link rel="stylesheet" href="css/ordtrainer.css?v=184" />
+  <link rel="stylesheet" href="css/tgvideo.css?v=184" />
+  <link rel="stylesheet" href="css/tgaudio.css?v=184" />
+  <link rel="stylesheet" href="css/audiocourse.css?v=184" />
+  <link rel="stylesheet" href="css/levels.css?v=184" />
+  <link rel="stylesheet" href="css/klokka.css?v=184" />
+  <link rel="stylesheet" href="css/reader.css?v=184" />
+  <link rel="stylesheet" href="css/prove.css?v=184" />
+  <link rel="stylesheet" href="css/bookshelf.css?v=184" />
+  <link rel="stylesheet" href="css/dialogs.css?v=184" />
+  <link rel="stylesheet" href="css/gramref.css?v=184" />
+</head>
+<body>
+  <!-- 🎴 loading screen (css/preloader.css + js/preloader.js): cards, features, subtitles → deck + cap → logo; removes itself once the app has rendered (tap / any key skips) -->
+  <div id="nkp" class="nkp" role="status" aria-label="Загрузка Norsk Kort"><div class="nkp-aur a1"></div><div class="nkp-aur a2"></div><div class="nkp-aur a3"></div><div class="nkp-stars"></div><div class="nkp-stage" aria-hidden="true"></div></div>
+  <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="topbar">
+    <button class="logo" data-action="nav" data-view="home" title="Колоды">
+      <span class="logo-flag">🇳🇴</span><span class="logo-arrows">⇄</span><span class="logo-flag">🇷🇺</span>
+      <span class="logo-text">Norsk&nbsp;<b>Kort</b></span>
+    </button>
+    <!-- 🏠 back to the main screen from anywhere (closes open windows; asks if something is unsaved) -->
+    <button type="button" class="icon-btn home-btn top-home" data-home aria-label="На главный экран" data-tip="На главный экран"><svg class="ico home-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 10.8 12 3.6l8.8 7.2"/><path d="M5.6 9.2v10.1c0 .8.6 1.4 1.4 1.4h10c.8 0 1.4-.6 1.4-1.4V9.2"/><path class="home-door" d="M10 20.7v-4.9c0-.5.4-.9.9-.9h2.2c.5 0 .9.4.9.9v4.9"/></svg></button>
+    <nav class="nav">
+      <button data-action="nav" data-view="home" class="nav-btn" data-nav="home" aria-label="Колоды">📚 <span>Колоды</span></button>
+      <button data-action="nav" data-view="stats" class="nav-btn" data-nav="stats" aria-label="Статистика">📊 <span>Статистика</span></button>
+      <button data-action="nav" data-view="settings" class="nav-btn" data-nav="settings" aria-label="Настройки">⚙️ <span>Настройки</span></button>
+    </nav>
+    <div class="topbar-right">
+      <button id="share-app-btn" class="icon-btn share-top" data-action="share-app" title="Поделиться приложением"><svg class="ico share-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.6 10.7 15.4 6.8M8.6 13.3l6.8 3.9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="18" cy="5.5" r="2.9" fill="currentColor"/><circle cx="6" cy="12" r="2.9" fill="currentColor"/><circle cx="18" cy="18.5" r="2.9" fill="currentColor"/></svg></button>
+      <button id="listen-btn" class="icon-btn listen-top" data-action="listen" data-label="Слушать" aria-label="Слушать: колоды, книги, новости — в наушниках или через динамик" title="🎧 Слушать — колоды, книги, новости: в наушниках или через динамик (можно с выключенным экраном)"></button>
+      <button id="interp-btn" class="icon-btn interp-top" data-action="interp" aria-label="Переводчик: слушает людей вокруг и переводит в наушники" title="🗣 Переводчик — это другое: слушает людей вокруг (по-норвежски) и переводит вам в наушники"></button>
+      <button id="claude-badge" class="claude-badge" data-action="ai-menu" title="Нейросеть"></button>
+      <!-- ❓ «Как пользоваться» — every topic + «▶ Показать по шагам на экране» (js/help.js); on phones (and 721–790 px) it is in the ⋯ menu -->
+      <button id="help-btn" type="button" class="icon-btn help-top" data-help="" aria-label="Как пользоваться — подсказки ко всему" data-tip="Как пользоваться"><span aria-hidden="true">?</span></button>
+      <button id="more-btn" class="icon-btn more-top" data-action="more-menu" title="Ещё: переводчик, поделиться, тема" aria-label="Ещё"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></svg></button>
+      <button id="account-btn" class="account-top" data-action="account" title="👤 Мой кабинет"></button>
+      <button class="icon-btn theme-btn" id="theme-btn" data-action="toggle-theme" title="Светлая / тёмная тема">🌞</button>
+    </div>
+  </header>
+
+  <main id="view" class="view"></main>
+
+  <!-- bottom tab bar (phones) -->
+  <nav class="tabbar" aria-label="Навигация">
+    <button data-action="nav" data-view="home" data-nav="home"><span class="ti">📚</span><span>Колоды</span></button>
+    <button data-action="study-all" class="tab-study"><span class="ti">▶</span><span>Учить</span></button>
+    <button data-action="nav" data-view="stats" data-nav="stats"><span class="ti">📊</span><span>Статистика</span></button>
+    <button data-action="nav" data-view="settings" data-nav="settings"><span class="ti">⚙️</span><span>Настройки</span></button>
+  </nav>
+
+  <!-- floating reading player (pause / continue / stop / restart) -->
+  <div id="tts-player" class="tts-player" hidden>
+    <span class="tts-wave"><i></i><i></i><i></i></span>
+    <span class="tts-label">Читаю…</span>
+    <button class="media-btn sm main" data-tts="toggle" title="Пауза / продолжить"></button>
+    <button class="media-btn sm" data-tts="restart" title="Сначала"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18.5 19.5 9 12l9.5-7.5z" fill="currentColor" stroke="none"/><path d="M5.5 5v14"/></svg></button>
+    <button class="media-btn sm tts-x" data-tts="stop" title="Остановить чтение и закрыть" aria-label="Остановить чтение и закрыть"><svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <div id="drop-overlay" class="drop-overlay"><div>📥 Отпустите файлы для импорта</div></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <input type="file" id="file-input" multiple hidden />
+
+  <script src="js/util.js?v=184"></script>
+  <script src="js/resume.js?v=184"></script>
+  <script src="js/store.js?v=184"></script>
+  <script src="js/fsrs.js?v=184"></script>
+  <script src="js/fsrs-opt.js?v=184"></script>
+  <script src="js/tts.js?v=184"></script>
+  <script src="js/voices.js?v=184"></script>
+  <script src="js/speech.js?v=184"></script>
+  <script src="js/ai.js?v=184"></script>
+  <script src="js/images.js?v=184"></script>
+  <script src="js/anki.js?v=184"></script>
+  <script src="js/importers.js?v=184"></script>
+  <script src="js/exporters.js?v=184"></script>
+  <script src="js/translators.js?v=184"></script>
+  <script src="js/glossary.js?v=184"></script>
+  <script src="js/align.js?v=184"></script>
+  <script src="js/selection.js?v=184"></script>
+  <script src="js/ordbok.js?v=184"></script>
+  <script src="js/sources.js?v=184"></script>
+  <script src="js/library.js?v=184"></script>
+  <script src="js/grammar.js?v=184"></script>
+  <script src="js/youtube.js?v=184"></script>
+  <script src="js/pairguard.js?v=184"></script>
+  <script src="js/telegram.js?v=184"></script>
+  <script src="js/photos.js?v=184"></script>
+  <script src="js/books.js?v=184"></script>
+  <script src="js/lexicon.js?v=184"></script>
+  <script src="js/textbook.js?v=184"></script>
+  <script src="js/reader.js?v=184"></script>
+  <script src="js/exams.js?v=184"></script>
+  <script src="js/news.js?v=184"></script>
+  <script src="js/langid.js?v=184"></script>
+  <script src="js/subs.js?v=184"></script>
+  <script src="js/nrk.js?v=184"></script>
+  <script src="js/nrkradio.js?v=184"></script>
+  <script src="js/drills.js?v=184"></script>
+  <script src="js/genders.js?v=184"></script>
+  <script src="js/progress.js?v=184"></script>
+  <script src="js/create.js?v=184"></script>
+  <script src="js/social.js?v=184"></script>
+  <script src="js/listen.js?v=184"></script>
+  <script src="js/listenx.js?v=184"></script>
+  <script src="js/listenui.js?v=184"></script>
+  <script src="js/interpreter.js?v=184"></script>
+  <script src="js/share.js?v=184"></script>
+  <script src="js/avatar.js?v=184"></script>
+  <script src="js/shareapp.js?v=184"></script>
+  <script src="js/guides.js?v=184"></script>
+  <script src="js/tgchan.js?v=184"></script>
+  <script src="js/tgvideo.js?v=184"></script>
+  <script src="js/tgaudio.js?v=184"></script>
+  <script src="js/audiocourse.js?v=184"></script>
+  <script src="js/frameocr.js?v=184"></script>
+  <script src="js/help.js?v=184"></script>
+  <script src="js/gramterms.js?v=184"></script>
+  <script src="js/ordtrainer.js?v=184"></script>
+  <script src="js/provenance.js?v=184"></script>
+  <script src="js/cardmaker.js?v=184"></script>
+  <script src="js/trnotice.js?v=184"></script>
+  <script src="js/sample.js?v=184"></script>
+  <script src="js/ui.js?v=184"></script>
+  <script src="js/bookshelf.js?v=184"></script>
+  <script src="js/views.js?v=184"></script>
+  <script src="js/account.js?v=184"></script>
+  <script src="js/study.js?v=184"></script>
+  <script src="js/levels.js?v=184"></script>
+  <script src="js/mycourse.js?v=184"></script>
+  <script src="js/klokka.js?v=184"></script>
+  <script src="js/prove.js?v=184"></script>
+  <script src="js/dialogs.js?v=184"></script>
+  <script src="js/gramref.js?v=184"></script>
+  <script src="js/coachmarks.js?v=184"></script>
+  <script src="js/app.js?v=184"></script>
+</body>
+</html>

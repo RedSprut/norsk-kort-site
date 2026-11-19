@@ -1,0 +1,847 @@
+{
+  "version": 1,
+  "note": "Тесты уровня A2 — собственные тексты, предложения и рисунки приложения Norsk Kort (по типам заданий курсовых тестов).",
+  "tests": [
+    {
+      "id": "a2-dyr",
+      "icon": "🐾",
+      "title": "Животные и домашние питомцы",
+      "titleNo": "Prøve: dyr og kjæledyr",
+      "level": "A2",
+      "desc": "Аудирование о питомцах, som-setninger, части тела, synes / tror, притяжательные слова и письмо по рисунку.",
+      "sections": [
+        {
+          "id": "l1", "part": "lytt", "type": "listen-short",
+          "title": "Послушайте тексты и ответьте на вопросы",
+          "titleNo": "Lytt til tekstene og svar på spørsmålene.",
+          "note": "Отвечайте коротко — одним-тремя словами. Можно слушать сколько угодно раз.",
+          "rule": "Отвечайте по смыслу текста — достаточно ключевых слов.",
+          "audio": [
+            { "id": "p1", "label": "Человек 1 — Томас", "lines": [
+              { "t": "Hei, jeg heter Tomas. Jeg vil gjerne ha en hund, men det går ikke." },
+              { "t": "Vi bor i fjerde etasje, og huseieren sier nei til hunder." },
+              { "t": "Derfor har vi to undulater. De synger hele morgenen!" } ] },
+            { "id": "p2", "label": "Человек 2 — Грете", "lines": [
+              { "t": "Jeg heter Grete. Jeg er ikke redd for dyr, men jeg liker ikke slanger og edderkopper." },
+              { "t": "Barnebarnet mitt har en slange i et glassbur." },
+              { "t": "Jeg besøker ham gjerne, men jeg går ikke inn på rommet hans!" } ] },
+            { "id": "p3", "label": "Человек 3 — Амира", "lines": [
+              { "t": "Jeg heter Amira. Vi har en gammel katt som heter Pelle." },
+              { "t": "Han er fjorten år og sover nesten hele dagen." },
+              { "t": "Om natta ligger han på puta mi og maler." } ] },
+            { "id": "p4", "label": "Человек 4 — Ларс", "lines": [
+              { "t": "Jeg heter Lars, og jeg er bonde. På gården har vi kuer, sauer og høner." },
+              { "t": "Hver morgen samler barna eggene." },
+              { "t": "Kuene gir melk, og sauene gir ull." } ] },
+            { "id": "p5", "label": "Человек 5 — Сири", "lines": [
+              { "t": "Jeg heter Siri. Jeg har en hund som heter Luna." },
+              { "t": "Luna er ikke bare et kjæledyr. Hun er førerhund." },
+              { "t": "Jeg ser dårlig, og Luna hjelper meg på bussen og i butikken." } ] }
+          ],
+          "items": [
+            { "id": "1", "n": "1", "clip": "p1", "q": "Hvorfor kan ikke Tomas ha hund?", "answer": ["huseieren sier nei", "huseieren vil ikke", "huseieren sier nei til hunder"], "keys": [["huseier", "huseieren", "utleier", "utleieren", "etasje"]] },
+            { "id": "2", "n": "2", "clip": "p1", "q": "Hvilke dyr har de?", "answer": ["to undulater", "undulater", "fugler"], "keys": [["undulat", "undulater", "undulatene", "fugl", "fugler"]] },
+            { "id": "3", "n": "1", "clip": "p2", "q": "Hva liker ikke Grete?", "answer": ["slanger og edderkopper"], "keys": [["slange", "slanger"], ["edderkopp", "edderkopper"]], "rule": "Нужно назвать обоих: slanger og edderkopper." },
+            { "id": "4", "n": "2", "clip": "p2", "q": "Hvor går hun ikke inn?", "answer": ["på rommet hans", "på rommet", "rommet til barnebarnet"], "keys": [["rommet", "rom", "rommet hans"]] },
+            { "id": "5", "n": "1", "clip": "p3", "q": "Hvor gammel er katten?", "answer": ["fjorten år", "fjorten", "14", "14 år"], "keys": [["fjorten", "14"]] },
+            { "id": "6", "n": "2", "clip": "p3", "q": "Hvor ligger katten om natta?", "answer": ["på puta hennes", "på puta", "på puten"], "keys": [["puta", "puten", "pute"]], "rule": "Амира говорит «på puta mi» — о ней: «på puta hennes»." },
+            { "id": "7", "n": "1", "clip": "p4", "q": "Hvilke dyr har Lars på gården?", "answer": ["kuer, sauer og høner"], "keys": [["ku", "kuer", "kyr", "kua"], ["sau", "sauer"], ["høne", "høner", "høns"]], "rule": "Три животных: kuer, sauer og høner." },
+            { "id": "8", "n": "2", "clip": "p4", "q": "Hva gjør barna hver morgen?", "answer": ["de samler eggene", "samler egg", "samler eggene"], "keys": [["egg", "eggene"]] },
+            { "id": "9", "n": "1", "clip": "p5", "q": "Hva slags hund er Luna?", "answer": ["førerhund", "en førerhund"], "keys": [["førerhund", "fører"]] },
+            { "id": "10", "n": "2", "clip": "p5", "q": "Hvorfor trenger Siri hunden?", "answer": ["hun ser dårlig", "fordi hun ser dårlig"], "keys": [["ser dårlig", "dårlig syn", "blind", "ser ikke"]] }
+          ]
+        },
+        {
+          "id": "l2", "part": "lytt", "type": "true-false",
+          "title": "Послушайте диалоги: верно или неверно?",
+          "titleNo": "Lytt til dialogene og sett kryss for riktig svar.",
+          "audio": [
+            { "id": "d1", "label": "Диалог 1 — новая кошка", "lines": [
+              { "who": "Mia", "t": "Jonas, se! Dyrebeskyttelsen har en katt som trenger et nytt hjem." },
+              { "who": "Jonas", "t": "Den grå? Den er søt, men den ser litt sint ut." },
+              { "who": "Mia", "t": "Nei, den er bare redd. Den heter Grå og er tre år gammel." },
+              { "who": "Jonas", "t": "Katter er mer selvstendige enn hunder. Det er bra, for vi jobber mye." },
+              { "who": "Mia", "t": "Ja! Og en katt trenger ikke å gå tur tre ganger om dagen." },
+              { "who": "Jonas", "t": "Ok. La oss hente Grå på lørdag." } ] },
+            { "id": "d2", "label": "Диалог 2 — у ветеринара", "lines": [
+              { "who": "Veterinæren", "t": "Hei, hva er problemet med kaninen din?" },
+              { "who": "Emma", "t": "Snøball spiser nesten ingenting, og han er veldig stille." },
+              { "who": "Veterinæren", "t": "La meg se. Ja, tennene hans er for lange. Det er vanlig hos kaniner." },
+              { "who": "Emma", "t": "Er det farlig?" },
+              { "who": "Veterinæren", "t": "Nei, det er ikke farlig. Jeg klipper tennene nå. Gi ham mye høy, så blir tennene kortere av seg selv." },
+              { "who": "Emma", "t": "Tusen takk!" } ] }
+          ],
+          "items": [
+            { "id": "1", "n": "1", "clip": "d1", "s": "Mia og Jonas snakker om en hund.", "answer": false, "why": "Они говорят о кошке." },
+            { "id": "2", "n": "2", "clip": "d1", "s": "Katten heter Grå.", "answer": true },
+            { "id": "3", "n": "3", "clip": "d1", "s": "Katten er fem år gammel.", "answer": false, "why": "Кошке три года." },
+            { "id": "4", "n": "4", "clip": "d1", "s": "Jonas synes at katter er mer selvstendige enn hunder.", "answer": true },
+            { "id": "5", "n": "5", "clip": "d1", "s": "De skal hente katten på søndag.", "answer": false, "why": "В субботу — på lørdag." },
+            { "id": "6", "n": "1", "clip": "d2", "s": "Kaninen spiser mye.", "answer": false, "why": "Кролик почти ничего не ест." },
+            { "id": "7", "n": "2", "clip": "d2", "s": "Kaninen er veldig stille.", "answer": true },
+            { "id": "8", "n": "3", "clip": "d2", "s": "Tennene til kaninen er for korte.", "answer": false, "why": "Зубы слишком длинные — for lange." },
+            { "id": "9", "n": "4", "clip": "d2", "s": "Veterinæren sier at det er farlig.", "answer": false, "why": "Ветеринар говорит: это не опасно." },
+            { "id": "10", "n": "5", "clip": "d2", "s": "Kaninen skal spise mye høy.", "answer": true }
+          ]
+        },
+        {
+          "id": "l3", "part": "lytt", "type": "listen-short",
+          "title": "Послушайте рассказ и коротко ответьте на вопросы",
+          "titleNo": "Lytt til teksten og svar kort på spørsmålene.",
+          "audio": [
+            { "id": "t1", "label": "Рассказ: Рекс потерялся", "lines": [
+              { "t": "På søndag gikk Karin tur i skogen med hunden sin, Rex. Det var kaldt, og det snødde litt." },
+              { "t": "Plutselig så Rex en hare og løp etter den. Karin ropte og ropte, men Rex kom ikke tilbake." },
+              { "t": "Hun gikk hjem alene og var veldig lei seg. Hun ringte politiet og skrev om Rex på Facebook." },
+              { "t": "Klokka ni om kvelden ringte en gammel mann. Han hadde funnet Rex ved en bensinstasjon." },
+              { "t": "Rex var våt og sulten, men glad. Karin ga ham en stor kjøttkake." },
+              { "t": "Neste dag kjøpte hun et nytt halsbånd med telefonnummeret sitt." } ] }
+          ],
+          "items": [
+            { "id": "1", "clip": "t1", "q": "Hvor gikk Karin tur?", "answer": ["i skogen"], "keys": [["skogen", "skog"]] },
+            { "id": "2", "clip": "t1", "q": "Hvordan var været?", "answer": ["kaldt", "det var kaldt og det snødde"], "keys": [["kaldt", "kald", "snødde", "snø"]] },
+            { "id": "3", "clip": "t1", "q": "Hvorfor løp Rex?", "answer": ["han så en hare", "etter en hare"], "keys": [["hare", "haren"]] },
+            { "id": "4", "clip": "t1", "q": "Hvem ringte Karin til?", "answer": ["politiet"], "keys": [["politiet", "politi"]] },
+            { "id": "5", "clip": "t1", "q": "Når ringte den gamle mannen?", "answer": ["klokka ni om kvelden", "klokka ni", "kl 21"], "keys": [["ni", "9", "21"]] },
+            { "id": "6", "clip": "t1", "q": "Hvor hadde mannen funnet Rex?", "answer": ["ved en bensinstasjon"], "keys": [["bensinstasjon", "bensinstasjonen"]] },
+            { "id": "7", "clip": "t1", "q": "Hvordan var Rex da Karin fikk ham tilbake?", "answer": ["våt og sulten", "våt, sulten og glad"], "keys": [["våt", "sulten", "glad"]] },
+            { "id": "8", "clip": "t1", "q": "Hva fikk Rex å spise?", "answer": ["en kjøttkake", "kjøttkake"], "keys": [["kjøttkake", "kjøttkaker"]] },
+            { "id": "9", "clip": "t1", "q": "Hva kjøpte Karin neste dag?", "answer": ["et nytt halsbånd", "halsbånd"], "keys": [["halsbånd"]] }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "transform",
+          "title": "Соедините два предложения в одно со словом som",
+          "titleNo": "Skriv som-setninger.",
+          "example": "Vi har en hund. Hunden heter Rex.",
+          "exampleAnswer": "Vi har en hund som heter Rex.",
+          "rule": "som заменяет повторяющееся слово: «…en katt. Katten liker fisk.» → «…en katt som liker fisk». Если som — дополнение, после него идёт подлежащее: «…en hest som de rir på».",
+          "items": [
+            { "id": "1", "prompt": "Jeg har en katt. Katten liker fisk.", "answer": ["Jeg har en katt som liker fisk."] },
+            { "id": "2", "prompt": "Hun kjøpte et bur. Buret var dyrt.", "answer": ["Hun kjøpte et bur som var dyrt."] },
+            { "id": "3", "prompt": "De har en hest. De rir på hesten hver helg.", "answer": ["De har en hest som de rir på hver helg."] },
+            { "id": "4", "prompt": "Ola har en papegøye. Papegøyen kan snakke.", "answer": ["Ola har en papegøye som kan snakke."], "names": ["Ola"] },
+            { "id": "5", "prompt": "Vi besøkte en gård. Vi likte gården veldig godt.", "answer": ["Vi besøkte en gård som vi likte veldig godt."] },
+            { "id": "6", "prompt": "Barna har en kanin. Kaninen bor i hagen.", "answer": ["Barna har en kanin som bor i hagen."] }
+          ]
+        },
+        {
+          "id": "g5", "part": "gram", "type": "label-image", "picture": "body", "article": true,
+          "title": "Напишите названия частей тела — с артиклем",
+          "titleNo": "Sett inn navn på kroppsdelene.",
+          "note": "Выберите артикль (en / ei / et) и напишите слово. Верное слово с неверным артиклем — полбалла.",
+          "rule": "en — мужской род, ei — женский (можно и en), et — средний. Запомните: et hode, et hår, et øye, et øre, et kne.",
+          "items": [
+            { "id": "1", "n": "1", "pt": "hode", "answer": ["et hode"], "ru": "голова" },
+            { "id": "2", "n": "2", "pt": "hår", "answer": ["et hår"], "ru": "волосы" },
+            { "id": "3", "n": "3", "pt": "øye", "answer": ["et øye"], "ru": "глаз" },
+            { "id": "4", "n": "4", "pt": "øre", "answer": ["et øre"], "ru": "ухо" },
+            { "id": "5", "n": "5", "pt": "nese", "answer": ["ei nese", "en nese"], "ru": "нос" },
+            { "id": "6", "n": "6", "pt": "munn", "answer": ["en munn"], "ru": "рот" },
+            { "id": "7", "n": "7", "pt": "hals", "answer": ["en hals"], "ru": "горло, шея (спереди)" },
+            { "id": "8", "n": "8", "pt": "skulder", "answer": ["en skulder"], "ru": "плечо" },
+            { "id": "9", "n": "9", "pt": "arm", "answer": ["en arm"], "ru": "рука" },
+            { "id": "10", "n": "10", "pt": "hånd", "answer": ["ei hånd", "en hånd"], "ru": "кисть руки" },
+            { "id": "11", "n": "11", "pt": "mage", "answer": ["en mage"], "ru": "живот" },
+            { "id": "12", "n": "12", "pt": "rygg", "answer": ["en rygg"], "ru": "спина" },
+            { "id": "13", "n": "13", "pt": "kne", "answer": ["et kne"], "ru": "колено" },
+            { "id": "14", "n": "14", "pt": "fot", "answer": ["en fot"], "ru": "стопа, нога" }
+          ]
+        },
+        {
+          "id": "g6", "part": "gram", "type": "gap",
+          "title": "Вставьте synes at или tror at",
+          "titleNo": "Sett inn synes at eller tror at.",
+          "bank": ["synes at", "tror at"],
+          "rule": "synes at — моё мнение, оценка (милый, скучный, красивый). tror at — предполагаю, точно не знаю (факт, который можно проверить).",
+          "items": [
+            { "id": "1", "n": "1", "text": "Jeg [[synes at|synes]] hunden din er veldig søt." },
+            { "id": "2", "n": "2", "text": "Jeg [[tror at|tror]] katten er ute i hagen nå." },
+            { "id": "3", "n": "3", "text": "Jeg [[synes at|synes]] det er kjedelig å gå tur når det regner." },
+            { "id": "4", "n": "4", "text": "Jeg [[tror at|tror]] butikken har hundemat på tilbud i dag." },
+            { "id": "5", "n": "5", "text": "Jeg [[synes at|synes]] hester er de vakreste dyrene." },
+            { "id": "6", "n": "6", "text": "Jeg [[tror at|tror]] veterinæren åpner klokka åtte." }
+          ]
+        },
+        {
+          "id": "g7", "part": "gram", "type": "gap",
+          "title": "Вставьте притяжательные слова",
+          "titleNo": "Sett inn eiendomsord.",
+          "bank": ["min", "mi", "mitt", "mine", "din", "di", "ditt", "dine", "hans", "hennes", "deres", "vår", "vårt", "våre"],
+          "rule": "Притяжательное слово после существительного согласуется с ним: en → min/din/vår, ei → mi/di (можно min/din), et → mitt/ditt/vårt, мн. число → mine/dine/våre. hans, hennes, deres не меняются.",
+          "items": [
+            { "id": "a", "title": "min, mi, mitt, mine", "text": "Dyrene [[mine]] er det beste i livet [[mitt]]. Hunden [[min]] heter Tufs, og høna [[mi|min]] heter Mia. Huset [[mitt]] er lite, men hagen [[min]] er stor. Om sommeren sover kaninene [[mine]] ute.",
+              "why": { "1": "dyrene — множественное число → mine", "2": "et liv → livet mitt", "4": "ei høne → høna mi (можно min)", "5": "et hus → huset mitt", "7": "kaninene — множественное число → mine" } },
+            { "id": "b", "title": "din, di, ditt, dine", "text": "Er det fuglen [[din]] som synger så fint? Og er det buret [[ditt]] som står i gangen? Jeg liker kattene [[dine]], og geita [[di|din]] er morsom!",
+              "why": { "2": "et bur → buret ditt", "3": "множественное число → dine", "4": "ei geit → geita di (можно din)" } },
+            { "id": "c", "title": "hans, hennes, deres", "text": "Per og Kari har en gård. Gården [[deres]] ligger ved sjøen. Per har en traktor. Traktoren [[hans]] er rød. Kari har to hester. Hestene [[hennes]] heter Blakken og Stjerna. Barna [[deres]] hjelper til i fjøset.",
+              "why": { "1": "Ферма обоих → deres", "2": "Трактор Пера (он) → hans", "3": "Лошади Кари (она) → hennes", "4": "Дети обоих → deres" } },
+            { "id": "d", "title": "vår, vårt, våre", "text": "Vi har flyttet med dyrene [[våre]] til et nytt hus. Det nye huset [[vårt]] har en stor hage. Hunden [[vår]] elsker hagen, og naboene [[våre]] er snille mot ham.",
+              "why": { "1": "множественное число → våre", "2": "et hus → huset vårt", "4": "множественное число → våre" } }
+          ]
+        },
+        {
+          "id": "w8", "part": "skriv", "type": "write",
+          "title": "Напишите предложения к рисунку",
+          "titleNo": "Skriv setninger til tegningen.",
+          "items": [
+            { "id": "1", "picture": "family-public", "prompt": "Skriv setninger til tegningen. Hvem er de? Hva gjør de? Hva synes du om dem?", "promptRu": "Расскажите о семье на рисунке. Попробуйте использовать synes at / tror at, sin / hans и предложение с som.", "keywords": ["familie", "odd", "kari", "liv", "ole", "bamse", "hund", "tvilling", "bestefar", "ball"], "minWords": 40,
+              "model": "På tegningen ser vi en familie. Bestefaren heter Odd. Han har briller og hvitt skjegg. Kari er dattera hans, og hun har to barn som er tvillinger: Liv og Ole. Ole holder ballen sin, og Liv står ved siden av broren sin. Familien har også en hund som heter Bamse. Jeg tror at de skal gå tur i parken. Jeg synes at Bamse ser veldig snill ut." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-helse",
+      "icon": "🩺",
+      "title": "Тело и здоровье",
+      "titleNo": "Prøve: kropp og helse",
+      "level": "A2",
+      "desc": "У врача и у зубного, части тела, неправильное множественное число, слова о болезни, придаточные с fordi / hvis / når и письмо учителю.",
+      "sections": [
+        {
+          "id": "l1", "part": "lytt", "type": "true-false",
+          "title": "Послушайте разговор у врача: верно или неверно?",
+          "titleNo": "Lytt til samtalen hos legen og sett kryss for riktig svar.",
+          "audio": [
+            { "id": "d1", "label": "У врача", "lines": [
+              { "who": "Legen", "t": "Hei, Ahmed. Hva kan jeg hjelpe deg med?" },
+              { "who": "Ahmed", "t": "Jeg har hatt vondt i ryggen i to uker. Det er verst om morgenen." },
+              { "who": "Legen", "t": "Har du løftet noe tungt?" },
+              { "who": "Ahmed", "t": "Ja, jeg jobber på et lager. Jeg løfter tunge esker hver dag." },
+              { "who": "Legen", "t": "Har du feber?" },
+              { "who": "Ahmed", "t": "Nei, ingen feber. Men jeg sover dårlig." },
+              { "who": "Legen", "t": "Jeg skriver en sykmelding for én uke. Du må gå litt hver dag og ikke ligge i senga hele tiden. Hvis det ikke blir bedre, må du komme tilbake." } ] }
+          ],
+          "items": [
+            { "id": "1", "n": "1", "clip": "d1", "s": "Ahmed har vondt i magen.", "answer": false, "why": "У него болит спина — vondt i ryggen." },
+            { "id": "2", "n": "2", "clip": "d1", "s": "Han har hatt vondt i to uker.", "answer": true },
+            { "id": "3", "n": "3", "clip": "d1", "s": "Ahmed jobber på et sykehus.", "answer": false, "why": "Он работает на складе — på et lager." },
+            { "id": "4", "n": "4", "clip": "d1", "s": "Han har feber.", "answer": false, "why": "«Ingen feber» — температуры нет." },
+            { "id": "5", "n": "5", "clip": "d1", "s": "Han får sykmelding for én uke.", "answer": true },
+            { "id": "6", "n": "6", "clip": "d1", "s": "Legen sier at han skal ligge i senga hele tiden.", "answer": false, "why": "Наоборот: надо немного ходить каждый день." }
+          ]
+        },
+        {
+          "id": "l2", "part": "lytt", "type": "listen-short",
+          "title": "Послушайте сообщение и коротко ответьте на вопросы",
+          "titleNo": "Lytt til beskjeden og svar kort på spørsmålene.",
+          "audio": [
+            { "id": "t1", "label": "Сообщение зубному врачу", "lines": [
+              { "t": "Hei, dette er Liv Hansen. Jeg ringer fordi sønnen min, Jonas, har vondt i en tann." },
+              { "t": "Han er åtte år. Han har hatt vondt siden i går kveld, og han kan ikke spise." },
+              { "t": "Kan han komme til tannlegen i dag? Vi kan komme etter klokka to, for han er på skolen til halv to." },
+              { "t": "Ring meg gjerne tilbake. Tusen takk!" } ] }
+          ],
+          "items": [
+            { "id": "1", "clip": "t1", "q": "Hvorfor ringer Liv?", "answer": ["sønnen hennes har vondt i en tann", "Jonas har vondt i en tann", "tannpine"], "keys": [["tann", "tanna", "tannen", "tannpine", "tenner"]] },
+            { "id": "2", "clip": "t1", "q": "Hvor gammel er Jonas?", "answer": ["åtte år", "åtte", "8"], "keys": [["åtte", "8"]] },
+            { "id": "3", "clip": "t1", "q": "Siden når har han hatt vondt?", "answer": ["siden i går kveld", "i går kveld", "i går"], "keys": [["går"]] },
+            { "id": "4", "clip": "t1", "q": "Hva kan han ikke gjøre?", "answer": ["spise", "han kan ikke spise"], "keys": [["spise"]] },
+            { "id": "5", "clip": "t1", "q": "Når kan de komme til tannlegen?", "answer": ["etter klokka to", "etter to", "klokka to", "kl 14"], "keys": [["to", "14", "2"]] },
+            { "id": "6", "clip": "t1", "q": "Hvor er Jonas til halv to?", "answer": ["på skolen"], "keys": [["skolen", "skole"]] }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "label-image", "picture": "body", "article": true,
+          "title": "Напишите названия частей тела — с артиклем",
+          "titleNo": "Sett inn navn på kroppsdelene.",
+          "note": "Здесь слова посложнее. Выберите артикль и напишите слово.",
+          "rule": "en — мужской род, ei — женский (можно и en), et — средний. Запомните: et kinn, et bryst, et lår.",
+          "items": [
+            { "id": "1", "n": "1", "pt": "panne", "answer": ["ei panne", "en panne"], "ru": "лоб" },
+            { "id": "2", "n": "2", "pt": "kinn", "answer": ["et kinn"], "ru": "щека" },
+            { "id": "3", "n": "3", "pt": "hake", "answer": ["en hake"], "ru": "подбородок" },
+            { "id": "4", "n": "4", "pt": "nakke", "answer": ["en nakke"], "ru": "шея (сзади)" },
+            { "id": "5", "n": "5", "pt": "skulder", "answer": ["en skulder"], "ru": "плечо" },
+            { "id": "6", "n": "6", "pt": "bryst", "answer": ["et bryst"], "ru": "грудь" },
+            { "id": "7", "n": "7", "pt": "albue", "answer": ["en albue"], "ru": "локоть" },
+            { "id": "8", "n": "8", "pt": "finger", "answer": ["en finger"], "ru": "палец" },
+            { "id": "9", "n": "9", "pt": "rumpe", "answer": ["ei rumpe", "en rumpe"], "ru": "попа" },
+            { "id": "10", "n": "10", "pt": "lår", "answer": ["et lår"], "ru": "бедро" },
+            { "id": "11", "n": "11", "pt": "legg", "answer": ["en legg"], "ru": "голень" },
+            { "id": "12", "n": "12", "pt": "hæl", "answer": ["en hæl"], "ru": "пятка" }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "gap",
+          "title": "Вставьте форму множественного числа",
+          "titleNo": "Skriv riktig flertallsform.",
+          "rule": "Неправильное множественное число: hånd → hender → hendene; finger → fingrer; fot → føtter; tå → tær; tann → tenner → tennene; kne → knær → knærne; øye → øyne; øre → ører.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Jeg har to (hånd) [[hender]] og ti (finger) [[fingrer]]." },
+            { "id": "2", "n": "2", "text": "Babyen har små (fot) [[føtter]] og ti små (tå) [[tær]]." },
+            { "id": "3", "n": "3", "text": "Tannlegen sier at (tann) [[tennene]] mine er fine." },
+            { "id": "4", "n": "4", "text": "Etter fotballkampen hadde han vondt i begge (kne) [[knærne]]." },
+            { "id": "5", "n": "5", "text": "Hun har store, blå (øye) [[øyne]]." },
+            { "id": "6", "n": "6", "text": "Katten har spisse (øre) [[ører]]." },
+            { "id": "7", "n": "7", "text": "Vask (hånd) [[hendene]] før du spiser!" }
+          ]
+        },
+        {
+          "id": "g5", "part": "gram", "type": "gap",
+          "title": "Вставьте подходящее слово",
+          "titleNo": "Sett inn riktig ord.",
+          "rule": "Полезные слова: ha vondt i … (болит), ha feber (температура), hoste (кашлять), være forkjølet (простужен), en resept (рецепт), apoteket (аптека), en sykmelding (больничный).",
+          "items": [
+            { "id": "1", "n": "1", "text": "Jeg har [[vondt]] i hodet." },
+            { "id": "2", "n": "2", "text": "Temperaturen er 39 grader. Jeg har [[feber]]." },
+            { "id": "3", "n": "3", "text": "Han [[hoster]] hele natta." },
+            { "id": "4", "n": "4", "text": "Hun er [[forkjølet]] og nyser mye." },
+            { "id": "5", "n": "5", "text": "Legen skrev en [[resept]], og jeg hentet medisinen på [[apoteket]]." },
+            { "id": "6", "n": "6", "text": "Du må bestille time hos [[legen]]." },
+            { "id": "7", "n": "7", "text": "Jeg kan ikke jobbe denne uka. Jeg har [[sykmelding]] fra legen." }
+          ]
+        },
+        {
+          "id": "g6", "part": "gram", "type": "order",
+          "title": "Составьте предложения с fordi, hvis и når",
+          "titleNo": "Lag riktige setninger.",
+          "rule": "В придаточном (fordi, hvis, når) сначала подлежащее, потом глагол: «fordi jeg er syk». ikke стоит перед глаголом: «fordi jeg ikke er frisk». Если придаточное впереди — главное начинается с глагола: «Hvis du har feber, må du…».",
+          "items": [
+            { "id": "1", "words": ["jeg", "er", "hjemme i dag", "fordi", "jeg", "er", "syk"], "answer": ["Jeg er hjemme i dag fordi jeg er syk."] },
+            { "id": "2", "words": ["hvis", "du", "har", "feber", "må", "du", "ligge i senga"], "answer": ["Hvis du har feber, må du ligge i senga.", "Du må ligge i senga hvis du har feber."] },
+            { "id": "3", "words": ["hun", "går", "til legen", "fordi", "hun", "har", "vondt i øret"], "answer": ["Hun går til legen fordi hun har vondt i øret."] },
+            { "id": "4", "words": ["når", "jeg", "er", "forkjølet", "drikker", "jeg", "mye te"], "answer": ["Når jeg er forkjølet, drikker jeg mye te.", "Jeg drikker mye te når jeg er forkjølet."] },
+            { "id": "5", "words": ["jeg", "blir", "hjemme", "fordi", "jeg", "ikke", "er", "frisk"], "answer": ["Jeg blir hjemme fordi jeg ikke er frisk."], "rule": "В придаточном ikke стоит перед глаголом: «fordi jeg ikke er frisk»." }
+          ]
+        },
+        {
+          "id": "w7", "part": "skriv", "type": "write",
+          "title": "Напишите сообщение учителю",
+          "titleNo": "Skriv en melding til læreren din.",
+          "items": [
+            { "id": "1", "picture": "sick", "prompt": "Du er syk og kan ikke komme på norskkurs. Skriv en melding til læreren din: Hva er galt? Hvor lenge blir du hjemme? Hva gjør du for å bli frisk?", "promptRu": "Вы заболели и не можете прийти на курс. Напишите учителю: что случилось, сколько дней будете дома, что делаете, чтобы выздороветь.", "keywords": ["syk", "feber", "lege", "legen", "hjemme", "kurs", "kurset", "hoste", "vondt", "frisk", "lærer", "hilsen"], "minWords": 35,
+              "model": "Hei, Kari! Jeg kan dessverre ikke komme på kurset i dag, fordi jeg er syk. Jeg har feber og vondt i halsen, og jeg hoster mye. I går var jeg hos legen. Hun sa at jeg må være hjemme i tre dager. Jeg drikker mye te med honning og sover mye. Kan du sende meg leksene på e-post? Jeg håper at jeg kommer tilbake på torsdag. Hilsen Olga" }
+          ]
+        },
+        {
+          "id": "w8", "part": "skriv", "type": "write",
+          "title": "Письмо: пригласите друга на прогулку",
+          "titleNo": "Skriv en melding til en venn.",
+          "items": [
+            {"id": "1", "prompt": "Skriv en melding til en venn og inviter ham eller henne på tur i skogen. Skriv når og hvor dere skal møtes, og hva dere skal ta med.", "promptRu": "Напишите сообщение другу или подруге и пригласите на прогулку в лес. Напишите, когда и где вы встретитесь и что взять с собой.", "minWords": 40, "need": [["tur", "skogen", "skog"], ["bli med", "vil du", "kan du", "har du lyst", "skal vi", "lyst til"], ["møtes", "treffes", "klokka", "lørdag", "søndag", "i morgen", "parkeringsplassen", "stasjonen"], ["ta med", "matpakke", "termos", "sko", "klær", "vann"], ["hei", "hallo", "kjære"]], "model": "Hei, Ali!\nVil du bli med meg på tur i skogen på søndag? Værmeldingen sier at det blir sol og ti grader. Vi kan møtes ved busstoppet klokka elleve. Først går vi til vannet, og der kan vi spise matpakke. Husk å ta med gode sko, en varm genser og noe å drikke. Jeg tar med en termos med kakao. Turen tar omtrent tre timer. Jeg synes at det er sunt å gå tur i naturen, og det er hyggelig å prate sammen. Gi meg beskjed i kveld!\nHilsen Marta"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-skole",
+      "icon": "🎓",
+      "title": "Школа, учёба и придаточные предложения",
+      "titleNo": "Prøve: skole og utdanning",
+      "level": "A2",
+      "desc": "Аудирование об учёбе, пересказ «Hun sier at…» с sin / hennes, слова об образовании, når / da и текст про Надю.",
+      "sections": [
+        {
+          "id": "l1", "part": "lytt", "type": "true-false",
+          "title": "Послушайте рассказ Фатимы: верно или неверно?",
+          "titleNo": "Lytt til teksten og sett kryss for riktig svar.",
+          "audio": [
+            { "id": "t1", "label": "Фатима рассказывает", "lines": [
+              { "t": "Hei, jeg heter Fatima, og jeg er trettifem år. Da jeg kom til Norge for fire år siden, kunne jeg ikke snakke norsk." },
+              { "t": "Først gikk jeg på norskkurs i to år. Nå tar jeg grunnskole for voksne, fordi jeg vil ta videregående skole senere." },
+              { "t": "Jeg drømmer om å bli sykepleier. Mannen min jobber som sjåfør, og vi har to barn." },
+              { "t": "Når barna sover, gjør jeg leksene mine. Det er hardt, men jeg er stolt av meg selv." } ] }
+          ],
+          "items": [
+            { "id": "1", "n": "1", "clip": "t1", "s": "Fatima kom til Norge for fire år siden.", "answer": true },
+            { "id": "2", "n": "2", "clip": "t1", "s": "Hun kunne snakke norsk da hun kom.", "answer": false, "why": "«Kunne jeg ikke snakke norsk» — не умела." },
+            { "id": "3", "n": "3", "clip": "t1", "s": "Hun gikk på norskkurs i tre år.", "answer": false, "why": "Два года — i to år." },
+            { "id": "4", "n": "4", "clip": "t1", "s": "Hun vil bli sykepleier.", "answer": true },
+            { "id": "5", "n": "5", "clip": "t1", "s": "Mannen hennes er lærer.", "answer": false, "why": "Он водитель — sjåfør." },
+            { "id": "6", "n": "6", "clip": "t1", "s": "Hun gjør leksene sine når barna sover.", "answer": true }
+          ]
+        },
+        {
+          "id": "l2", "part": "lytt", "type": "listen-short",
+          "title": "Послушайте разговор с учителем и коротко ответьте",
+          "titleNo": "Lytt til samtalen og svar kort på spørsmålene.",
+          "audio": [
+            { "id": "d1", "label": "Встреча с учителем", "lines": [
+              { "who": "Læreren", "t": "Velkommen til kontaktmøte. Hvordan synes du at Sara har det på skolen?" },
+              { "who": "Mora", "t": "Hun er glad, men hun synes at matte er vanskelig." },
+              { "who": "Læreren", "t": "Ja, men hun jobber hardt. Hun er flink i norsk og engelsk, og hun leser mye." },
+              { "who": "Mora", "t": "Hva kan vi gjøre hjemme?" },
+              { "who": "Læreren", "t": "Dere kan øve på gangetabellen ti minutter hver dag. Og husk: Foreldremøtet for hele klassen er neste torsdag klokka seks." } ] }
+          ],
+          "items": [
+            { "id": "1", "clip": "d1", "q": "Hva slags møte er det?", "answer": ["kontaktmøte", "et kontaktmøte"], "keys": [["kontaktmøte"]] },
+            { "id": "2", "clip": "d1", "q": "Hvilket fag synes Sara er vanskelig?", "answer": ["matte", "matematikk"], "keys": [["matte", "matematikk"]] },
+            { "id": "3", "clip": "d1", "q": "Hvilke fag er hun flink i?", "answer": ["norsk og engelsk"], "keys": [["norsk"], ["engelsk"]], "rule": "Два предмета: norsk og engelsk." },
+            { "id": "4", "clip": "d1", "q": "Hva kan de gjøre hjemme?", "answer": ["øve på gangetabellen"], "keys": [["gangetabell", "gangetabellen"]] },
+            { "id": "5", "clip": "d1", "q": "Når er foreldremøtet?", "answer": ["neste torsdag klokka seks", "på torsdag"], "keys": [["torsdag"]] }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "transform", "prefix": "Hun sier at",
+          "title": "Перескажите слова Нади — с правильным притяжательным словом",
+          "titleNo": "Skriv leddsetningene med riktig eiendomsord.",
+          "example": "Skolen min er stor.",
+          "exampleAnswer": "Hun sier at skolen hennes er stor.",
+          "rule": "В пересказе «мой» меняется: sin / si / sitt / sine — если владелец = подлежащее придаточного (hun liker klassen sin); hennes — если подлежащее другое (læreren hennes er snill). В подлежащем никогда не sin.",
+          "items": [
+            { "id": "1", "prompt": "Jeg liker klassen min.", "answer": ["Hun sier at hun liker klassen sin."] },
+            { "id": "2", "prompt": "Læreren min er snill.", "answer": ["Hun sier at læreren hennes er snill."], "rule": "læreren — подлежащее → hennes (не sin)." },
+            { "id": "3", "prompt": "Jeg gjør leksene mine om kvelden.", "answer": ["Hun sier at hun gjør leksene sine om kvelden."] },
+            { "id": "4", "prompt": "Dattera mi går i tredje klasse.", "answer": ["Hun sier at dattera hennes går i tredje klasse.", "Hun sier at datteren hennes går i tredje klasse."], "rule": "dattera — подлежащее → hennes (не si)." },
+            { "id": "5", "prompt": "Jeg glemte boka mi på skolen.", "answer": ["Hun sier at hun glemte boka si på skolen.", "Hun sier at hun glemte boken sin på skolen."], "rule": "ei bok, владелец = подлежащее hun → si (или boken sin)." },
+            { "id": "6", "prompt": "Jeg skal fortsette utdanningen min neste år.", "answer": ["Hun sier at hun skal fortsette utdanningen sin neste år."] }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "match",
+          "title": "Соедините слово и объяснение",
+          "titleNo": "Hva betyr det? Sett strek.",
+          "items": [
+            { "id": "1", "pairs": [
+              ["en lærer", "en som underviser", "учитель"],
+              ["en elev", "en som går på skolen", "ученик"],
+              ["lekser", "oppgaver du gjør hjemme", "домашнее задание"],
+              ["et vitnemål", "et papir med karakterene dine", "аттестат"],
+              ["en lærling", "en som lærer et yrke på en arbeidsplass", "ученик на производстве"],
+              ["et friminutt", "en pause mellom timene", "перемена"],
+              ["en karakter", "et tall som viser hvor godt du kan noe", "оценка"] ] }
+          ]
+        },
+        {
+          "id": "g5", "part": "gram", "type": "order",
+          "title": "Составьте предложения с når и da",
+          "titleNo": "Lag setninger med når og da.",
+          "note": "når — каждый раз или в будущем; da — один раз в прошлом.",
+          "rule": "В придаточном (после når, da) сначала подлежащее, потом глагол: «Når jeg kommer hjem…» — не «Når kommer jeg hjem…». Главное предложение после придаточного начинается с глагола: «…, lager jeg middag».",
+          "items": [
+            { "id": "1", "words": ["når", "jeg", "kommer", "hjem", "lager", "jeg", "middag"], "answer": ["Når jeg kommer hjem, lager jeg middag.", "Jeg lager middag når jeg kommer hjem."] },
+            { "id": "2", "words": ["da", "jeg", "gikk", "på skolen", "spilte", "jeg", "fotball"], "answer": ["Da jeg gikk på skolen, spilte jeg fotball.", "Jeg spilte fotball da jeg gikk på skolen."] },
+            { "id": "3", "words": ["når", "det", "regner", "tar", "vi", "bussen"], "answer": ["Når det regner, tar vi bussen.", "Vi tar bussen når det regner."] },
+            { "id": "4", "words": ["da", "vi", "flyttet", "til Bergen", "kjøpte", "vi", "et hus"], "answer": ["Da vi flyttet til Bergen, kjøpte vi et hus.", "Vi kjøpte et hus da vi flyttet til Bergen."] },
+            { "id": "5", "words": ["når", "jeg", "er", "ferdig med kurset", "vil", "jeg", "jobbe som kokk"], "answer": ["Når jeg er ferdig med kurset, vil jeg jobbe som kokk.", "Jeg vil jobbe som kokk når jeg er ferdig med kurset."] },
+            { "id": "6", "words": ["da", "hun", "var", "tolv år", "lærte", "hun", "å svømme"], "answer": ["Da hun var tolv år, lærte hun å svømme.", "Hun lærte å svømme da hun var tolv år."] }
+          ]
+        },
+        {
+          "id": "g6", "part": "gram", "type": "gap",
+          "title": "Вставьте sin / si / sitt / sine, hans или hennes",
+          "titleNo": "Sett inn eiendomsord.",
+          "bank": ["sin", "si", "sitt", "sine", "hans", "hennes"],
+          "rule": "sin / si / sitt / sine — когда владелец = подлежащее того же предложения; hans / hennes — когда владелец другой человек; в подлежащем никогда не sin.",
+          "items": [
+            { "id": "1", "title": "Nadia studerer", "text": "Nadia studerer for å bli ingeniør. Hun bor sammen med kjæresten [[sin]] i en liten leilighet. Kjæresten [[hennes]] heter Erik. Erik jobber mye, og jobben [[hans]] er langt unna. Nadia gjør leksene [[sine]] på biblioteket. Venninna [[hennes]] studerer også der. De hjelper hverandre med oppgavene [[sine]]. I helgen besøker Nadia foreldrene [[sine]]. Foreldrene [[hennes]] er stolte av henne. Faren [[hennes]] sier at hun må fullføre utdanningen [[sin]]. Erik blir ofte med, og han tar med gitaren [[sin]]. Gitaren [[hans]] er gammel, men den låter fint.",
+              "why": {
+                "1": "Подлежащее hun (Nadia), парень её → sin.",
+                "2": "«Kjæresten …» — подлежащее → hennes.",
+                "3": "«jobben …» — подлежащее, работа Эрика → hans.",
+                "4": "Подлежащее Nadia, её уроки → sine.",
+                "5": "«Venninna …» — подлежащее → hennes.",
+                "6": "Подлежащее de, их задания → sine.",
+                "7": "Подлежащее Nadia (после глагола), её родители → sine.",
+                "8": "«Foreldrene …» — подлежащее → hennes.",
+                "9": "«Faren …» — подлежащее → hennes.",
+                "10": "В придаточном подлежащее hun, её образование → sin.",
+                "11": "Подлежащее han (Erik), его гитара → sin.",
+                "12": "«Gitaren …» — подлежащее → hans."
+              } }
+          ]
+        },
+        {
+          "id": "w7", "part": "skriv", "type": "write",
+          "title": "Напишите о своей учёбе",
+          "titleNo": "Skriv om utdanningen din.",
+          "items": [
+            { "id": "1", "picture": "school", "prompt": "Skriv om utdanningen din. Hva gjorde du da du var ung? Hva gjør du nå? Hva vil du gjøre når du kan bedre norsk?", "promptRu": "Расскажите о своей учёбе: что было в молодости, что сейчас, что хотите делать, когда лучше выучите норвежский. Используйте предложения с da и når.", "keywords": ["skole", "skolen", "studerte", "utdanning", "norskkurs", "jobb", "lærer", "universitet", "kurs", "studere", "lære"], "minWords": 40,
+              "model": "Da jeg var ung, gikk jeg på skole i hjemlandet mitt. Jeg likte matte og fysikk best. Etter skolen studerte jeg økonomi i fire år. Da jeg flyttet til Norge, kunne jeg ikke snakke norsk. Nå går jeg på norskkurs tre dager i uka. Når jeg kommer hjem, gjør jeg leksene mine. Jeg synes at norsk grammatikk er vanskelig, men morsom. Når jeg har tatt norskprøve, vil jeg få utdanningen min godkjent og jobbe i en bank." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-familie",
+      "icon": "🏡",
+      "title": "Семья и повседневная жизнь",
+      "titleNo": "Prøve: familie og hverdag",
+      "level": "A1–A2",
+      "desc": "Диалоги о семье, диктант, родственники, множественное число, определённая форма, местоимения, порядок слов и вопросы.",
+      "sections": [
+        {
+          "id": "l1", "part": "lytt", "type": "choice",
+          "title": "Послушайте диалоги и выберите правильный ответ",
+          "titleNo": "Lytt til dialogene og sett kryss for riktig svar.",
+          "audio": [
+            { "id": "d1", "label": "Диалог 1", "lines": [
+              { "who": "Kvinnen", "t": "Hva skal du gjøre i helgen, Tor?" },
+              { "who": "Tor", "t": "Jeg skal male huset. Og du?" },
+              { "who": "Kvinnen", "t": "Jeg skal på hytta med barna. Vi skal gå på ski." } ] },
+            { "id": "d2", "label": "Диалог 2", "lines": [
+              { "who": "Jenta", "t": "Hva liker du å gjøre etter skolen, Ali?" },
+              { "who": "Ali", "t": "Jeg spiller sjakk med bestefaren min. Og du?" },
+              { "who": "Jenta", "t": "Jeg danser. Jeg går på dans tre ganger i uka." } ] },
+            { "id": "d3", "label": "Диалог 3", "lines": [
+              { "who": "Mannen", "t": "Er du gift, Linda?" },
+              { "who": "Linda", "t": "Nei, jeg er skilt. Jeg har en sønn. Han er seksten år og bor hos meg." },
+              { "who": "Mannen", "t": "Jeg er gift, og vi har tre døtre. Foreldrene mine bor i nærheten, så barna ser besteforeldrene sine ofte." } ] }
+          ],
+          "items": [
+            { "id": "1", "n": "1", "clip": "d1", "q": "Tor skal:", "options": ["male huset", "gå på ski"], "answer": 0 },
+            { "id": "2", "n": "2", "clip": "d1", "q": "Kvinnen skal:", "options": ["være hjemme", "dra på hytta"], "answer": 1 },
+            { "id": "3", "n": "1", "clip": "d2", "q": "Ali liker:", "options": ["sjakk", "dans"], "answer": 0 },
+            { "id": "4", "n": "2", "clip": "d2", "q": "Jenta liker:", "options": ["sjakk", "dans"], "answer": 1 },
+            { "id": "5", "n": "1", "clip": "d3", "q": "Linda er", "options": ["gift", "skilt"], "answer": 1 },
+            { "id": "6", "n": "2", "clip": "d3", "q": "Sønnen hennes er", "options": ["seksten år", "seks år"], "answer": 0 },
+            { "id": "7", "n": "3", "clip": "d3", "q": "Mannen har", "options": ["tre døtre", "tre sønner"], "answer": 0 },
+            { "id": "8", "n": "4", "clip": "d3", "q": "Foreldrene til mannen bor", "options": ["langt borte", "i nærheten"], "answer": 1 }
+          ]
+        },
+        {
+          "id": "l2", "part": "lytt", "type": "listen-short",
+          "title": "Диктант: послушайте слово и напишите его правильно",
+          "titleNo": "Diktat. Lytt og skriv ordene riktig.",
+          "rule": "Пишите слово точно, буква в букву.",
+          "items": [
+            { "id": "1", "say": "svigerfar", "answer": ["svigerfar"], "strict": true },
+            { "id": "2", "say": "barnebarn", "answer": ["barnebarn"], "strict": true },
+            { "id": "3", "say": "tvillinger", "answer": ["tvillinger"], "strict": true },
+            { "id": "4", "say": "husarbeid", "answer": ["husarbeid"], "strict": true },
+            { "id": "5", "say": "kjøkkenet", "answer": ["kjøkkenet"], "strict": true }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "match",
+          "title": "Соедините пары родственников",
+          "titleNo": "Sett strek til ord som passer sammen.",
+          "items": [
+            { "id": "1", "pairs": [
+              ["en onkel", "ei tante", "дядя — тётя"],
+              ["en bestefar", "ei bestemor", "дедушка — бабушка"],
+              ["en gutt", "ei jente", "мальчик — девочка"],
+              ["en svoger", "ei svigerinne", "зять / шурин — невестка / золовка"],
+              ["en fetter", "ei kusine", "двоюродный брат — двоюродная сестра"],
+              ["en nevø", "ei niese", "племянник — племянница"] ] }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "match",
+          "title": "Соедините слово и объяснение",
+          "titleNo": "Sett strek til riktig forklaring.",
+          "items": [
+            { "id": "1", "pairs": [
+              ["enebarn", "har ingen søsken", "единственный ребёнок"],
+              ["samboer", "bor sammen uten å være gift", "живёт вместе без брака"],
+              ["pensjonist", "jobber ikke lenger fordi han eller hun er gammel", "пенсионер"],
+              ["trøtt", "vil sove", "уставший, сонный"],
+              ["å vaske", "å gjøre rent", "мыть, убирать"],
+              ["arbeidsledig", "har ikke jobb", "безработный"],
+              ["tvillinger", "to søsken som er født samme dag", "близнецы"] ] }
+          ]
+        },
+        {
+          "id": "g5", "part": "gram", "type": "gap",
+          "title": "Как это во множественном числе?",
+          "titleNo": "Hva heter det i flertall?",
+          "rule": "Обычно + -er: en fetter → fettere, ei tante → tanter. Неправильные: far → fedre, mor → mødre. Односложные слова среднего рода не меняются: et hus → hus. Слова на -er: en lærer → lærere.",
+          "items": [
+            { "id": "1", "text": "en fetter — to [[fettere]]" },
+            { "id": "2", "text": "ei tante — to [[tanter]]" },
+            { "id": "3", "text": "et barnebarn — to [[barnebarn]]" },
+            { "id": "4", "text": "en onkel — to [[onkler]]" },
+            { "id": "5", "text": "en far — to [[fedre]]" },
+            { "id": "6", "text": "ei mor — to [[mødre]]" },
+            { "id": "7", "text": "et hus — to [[hus]]" },
+            { "id": "8", "text": "en lærer — to [[lærere]]" }
+          ]
+        },
+        {
+          "id": "g6", "part": "gram", "type": "gap",
+          "title": "Вставьте существительное в определённой форме",
+          "titleNo": "Sett inn substantiv bestemt form.",
+          "rule": "Определённая форма: en hund → hunden, ei hytte → hytta (или hytten), et hus → huset, мн. число: barn → barna, brødre → brødrene.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Kari har en hund. [[Hunden]] heter Rufus." },
+            { "id": "2", "n": "2", "text": "Ole har ei hytte. [[Hytta|Hytten]] ligger ved sjøen." },
+            { "id": "3", "n": "3", "text": "Vi har et hus. [[Huset]] er gult." },
+            { "id": "4", "n": "4", "text": "De har tre barn. [[Barna]] går på skolen." },
+            { "id": "5", "n": "5", "text": "Jeg har en onkel. [[Onkelen]] min bor i Tromsø." },
+            { "id": "6", "n": "6", "text": "Hun har ei venninne. [[Venninna|Venninnen]] heter Siri." },
+            { "id": "7", "n": "7", "text": "Han har to brødre. [[Brødrene]] hans er tvillinger." }
+          ]
+        },
+        {
+          "id": "g7", "part": "gram", "type": "gap",
+          "title": "Вставьте местоимение",
+          "titleNo": "Sett inn pronomen.",
+          "bank": ["jeg", "du", "han", "hun", "vi", "dere", "de", "meg", "deg", "ham", "henne", "oss", "dem"],
+          "rule": "Подлежащее: jeg, du, han, hun, vi, dere, de. После глагола и предлога (дополнение): meg, deg, ham, henne, oss, dere, dem.",
+          "items": [
+            { "id": "1", "text": "Nora og jeg er søsken. (Nora og jeg) [[Vi]] bor i Bergen. Broren vår heter Erik. (Erik) [[Han]] bor i Oslo. Vi ringer til (Erik) [[ham]] hver søndag. Nora har ei datter. (Dattera) [[Hun]] heter Ella. Jeg passer på (Ella) [[henne]] på fredager. Erik spør: «Kan (du og Nora) [[dere]] komme på besøk?» Vi svarer: «Ja, (vi) [[vi]] kommer gjerne! Kan du hente (Nora og meg) [[oss]] på stasjonen?» Erik har to katter. Ella elsker (kattene) [[dem]].",
+              "why": { "3": "После предлога til — ham (не han).", "5": "После på — henne (не hun).", "6": "Erik говорит с двумя людьми — dere.", "8": "После глагола hente — oss.", "9": "После глагола elsker — dem (не de)." } }
+          ]
+        },
+        {
+          "id": "g8", "part": "gram", "type": "order",
+          "title": "Составьте правильные предложения",
+          "titleNo": "Lag riktige setninger.",
+          "rule": "Глагол стоит на 2-м месте: «Hver dag spiser vi…». В вопросе без вопросительного слова глагол первый: «Bor foreldrene dine…?». ikke — после глагола: «Hun liker ikke…».",
+          "items": [
+            { "id": "1", "words": ["jeg", "står", "opp", "klokka sju"], "answer": ["Jeg står opp klokka sju.", "Klokka sju står jeg opp."] },
+            { "id": "2", "words": ["hva", "gjør", "du", "i helgen"], "answer": ["Hva gjør du i helgen?"] },
+            { "id": "3", "words": ["vi", "spiser", "middag", "sammen", "hver dag"], "answer": ["Vi spiser middag sammen hver dag.", "Hver dag spiser vi middag sammen."] },
+            { "id": "4", "words": ["bor", "foreldrene dine", "i Norge"], "answer": ["Bor foreldrene dine i Norge?"] },
+            { "id": "5", "words": ["hun", "liker", "ikke", "å vaske opp"], "answer": ["Hun liker ikke å vaske opp."] }
+          ]
+        },
+        {
+          "id": "g9", "part": "gram", "type": "transform",
+          "title": "Напишите вопрос к ответу",
+          "titleNo": "Skriv spørsmål til svarene.",
+          "note": "Подходит любой правильный вопрос. Если ваш вариант не засчитался, но вы уверены — нажмите «Засчитать мой ответ».",
+          "rule": "Вопрос без вопросительного слова начинается с глагола: «Har du…?». С вопросительным словом: «Hva heter…?», «Hvor bor…?», «Hvor gammel er…?».",
+          "items": [
+            { "id": "1", "prompt": "Ja, jeg har to brødre.", "answer": ["Har du søsken?", "Har du brødre?", "Har du noen søsken?", "Har du noen brødre?"] },
+            { "id": "2", "prompt": "Hun heter Siri.", "answer": ["Hva heter hun?", "Hva heter venninna di?", "Hva heter dattera di?"] },
+            { "id": "3", "prompt": "Jeg bor i Drammen.", "answer": ["Hvor bor du?"] },
+            { "id": "4", "prompt": "Han er førti år.", "answer": ["Hvor gammel er han?"] }
+          ]
+        },
+        {
+          "id": "w10", "part": "skriv", "type": "write",
+          "title": "Расскажите о семье на рисунке",
+          "titleNo": "Fortell om familien på bildet.",
+          "items": [
+            { "id": "1", "picture": "family-picnic", "prompt": "Fortell om familien på bildet. Hvem er de? Hva heter de? Hva gjør de?", "promptRu": "Расскажите, кто на рисунке, как их зовут и что они делают.", "keywords": ["familie", "jonas", "nora", "emil", "ella", "mormor", "tur", "park", "fotball", "baby"], "minWords": 30,
+              "model": "Dette er en familie på tur. Faren heter Jonas, og mora heter Nora. De har to barn: en sønn og ei datter. Sønnen heter Emil, og han spiller fotball. Dattera heter Ella. Hun er baby. Mormor er også med på turen. Hun har briller og grått hår. Familien er i parken, og sola skinner. De har det fint sammen." }
+          ]
+        },
+        {
+          "id": "w11", "part": "skriv", "type": "write",
+          "title": "Письмо: обычный день в Норвегии",
+          "titleNo": "Skriv om en vanlig dag i Norge.",
+          "items": [
+            {"id": "1", "prompt": "Fortell om en vanlig dag i Norge. Hva gjør folk om morgenen, på jobben og om kvelden? Hva er annerledes enn i hjemlandet ditt?", "promptRu": "Расскажите об обычном дне в Норвегии: что люди делают утром, на работе и вечером? Что не так, как в вашей родной стране?", "minWords": 50, "keywords": ["norge", "nordmenn", "morgen", "morgenen", "jobb", "jobben", "kveld", "kvelden", "middag", "frokost", "matpakke", "hjemlandet", "annerledes", "tidlig"], "model": "I Norge står mange opp tidlig, klokka seks eller sju. Til frokost spiser de brødskiver med ost og drikker kaffe. Barna går i barnehagen eller på skolen, og de voksne går på jobb. Nordmenn har med seg matpakke, og lunsjen er kort. Mange slutter på jobben klokka fire. Etterpå henter de barna, og familien spiser middag klokka fem. I hjemlandet mitt spiser vi middag mye senere. Om kvelden går mange nordmenn på tur, eller de trener. Jeg synes at det er fint at folk har tid til familien om ettermiddagen."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-preposisjoner",
+      "icon": "📍",
+      "title": "Предлоги места: i, på, til, hos",
+      "titleNo": "Prøve: i, på, til og hos",
+      "level": "A2",
+      "desc": "Где и куда: i Norge → til Norge, på jobb → på jobb, hos legen → til legen, hjemme → hjem.",
+      "sections": [
+        {
+          "id": "g1", "part": "gram", "type": "gap",
+          "title": "Вставьте i, på, til или hos",
+          "titleNo": "Sett inn i, på, til eller hos.",
+          "bank": ["i", "på", "til", "hos"],
+          "rule": "Где? — i (страна, город, улица), på (работа, учёба, остров), hos (у человека). Куда? — til (страна, город, человек). Но учреждения не меняют предлог: på jobb → på jobb, i banken → i banken.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Familien min bor [[i]] Polen.", "why": {"1": "Страна — где? i."} },
+            { "id": "2", "n": "2", "text": "I sommer reiser vi [[til]] Spania.", "why": {"1": "Страна — куда? til."} },
+            { "id": "3", "n": "3", "text": "Jeg er [[på]] jobb til klokka fire.", "why": {"1": "jobb — på: и где, и куда."} },
+            { "id": "4", "n": "4", "text": "Hun går [[på]] jobb klokka sju.", "why": {"1": "Идёт работать — på jobb (как и «на работе»)."} },
+            { "id": "5", "n": "5", "text": "Barna er [[i]] barnehagen nå.", "why": {"1": "barnehage — i."} },
+            { "id": "6", "n": "6", "text": "Jeg må gå [[i]] banken i morgen.", "why": {"1": "bank — i: и где, и куда."} },
+            { "id": "7", "n": "7", "text": "Jeg var [[hos]] legen i går.", "why": {"1": "У человека (у врача) — hos."} },
+            { "id": "8", "n": "8", "text": "Jeg må gå [[til]] legen i dag.", "why": {"1": "К человеку (к врачу) — til."} },
+            { "id": "9", "n": "9", "text": "Vi spiser middag [[hos]] Kari i kveld.", "why": {"1": "В гостях у кого-то — hos."} },
+            { "id": "10", "n": "10", "text": "Etter jobben går jeg [[til]] Kari.", "why": {"1": "К кому-то — til."} },
+            { "id": "11", "n": "11", "text": "Vi har ei hytte [[på]] Lofoten.", "why": {"1": "Острова — på."} },
+            { "id": "12", "n": "12", "text": "Vi flytter [[til]] Tromsø neste år.", "why": {"1": "Город — куда? til."} },
+            { "id": "13", "n": "13", "text": "Hun studerer [[på]] universitetet.", "why": {"1": "universitet — på."} },
+            { "id": "14", "n": "14", "text": "Skal vi gå [[på]] kino i kveld?", "why": {"1": "Посмотреть фильм — gå på kino."} },
+            { "id": "15", "n": "15", "text": "Kafeen ligger [[i]] Storgata.", "why": {"1": "Улица — i (не «på»!)."} },
+            { "id": "16", "n": "16", "text": "Mormor ligger [[på]] sykehuset.", "why": {"1": "sykehus — på."} },
+            { "id": "17", "n": "17", "text": "Toget står [[på]] stasjonen.", "why": {"1": "stasjon — på."} },
+            { "id": "18", "n": "18", "text": "Han jobber [[i|på]] en butikk.", "why": {"1": "butikk — i (можно и på)."} }
+          ]
+        },
+        {
+          "id": "g2", "part": "gram", "type": "choice",
+          "title": "Где или куда? Выберите правильный вариант",
+          "titleNo": "Velg riktig alternativ.",
+          "rule": "Где? — i / på / hos, hjemme, ute, inne, oppe, nede. Куда? — til, hjem, ut, inn, opp, ned.",
+          "items": [
+            { "id": "1", "n": "1", "q": "Jeg kom ___ i 2019.", "options": ["i Norge", "til Norge"], "answer": 1, "why": "kom — куда? → til Norge." },
+            { "id": "2", "n": "2", "q": "Vi bor ___ nå.", "options": ["i Bergen", "til Bergen"], "answer": 0, "why": "bor — где? → i Bergen." },
+            { "id": "3", "n": "3", "q": "Barna leker ___.", "options": ["ute", "ut"], "answer": 0, "why": "Где играют? — ute (на улице)." },
+            { "id": "4", "n": "4", "q": "Kom ___, det regner!", "options": ["inne", "inn"], "answer": 1, "why": "Куда? — inn (внутрь)." },
+            { "id": "5", "n": "5", "q": "Jeg går ___ nå. Ha det!", "options": ["hjemme", "hjem"], "answer": 1, "why": "Куда? — hjem (домой)." },
+            { "id": "6", "n": "6", "q": "Er du ___ i kveld?", "options": ["hjemme", "hjem"], "answer": 0, "why": "Где? — hjemme (дома)." },
+            { "id": "7", "n": "7", "q": "Hun sitter ___ og venter.", "options": ["hos frisøren", "til frisøren"], "answer": 0, "why": "Где? У человека — hos." },
+            { "id": "8", "n": "8", "q": "I helga kjører vi ___.", "options": ["hos besteforeldrene", "til besteforeldrene"], "answer": 1, "why": "Куда? К людям — til." },
+            { "id": "9", "n": "9", "q": "Sønnen min er ti år og går ___.", "options": ["på skolen", "til skolen"], "answer": 0, "why": "går på skolen — учится в школе; går til skolen — идёт к зданию школы." },
+            { "id": "10", "n": "10", "q": "Katten sover ___ på loftet.", "options": ["oppe", "opp"], "answer": 0, "why": "Где? — oppe (наверху)." },
+            { "id": "11", "n": "11", "q": "Hun gikk ___ i kjelleren.", "options": ["nede", "ned"], "answer": 1, "why": "Куда? — ned (вниз)." }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "transform",
+          "title": "Скажите, куда идёт человек",
+          "titleNo": "Skriv hvor personen går eller drar.",
+          "example": "Jeg er i Oslo. (reise)",
+          "exampleAnswer": "Jeg reiser til Oslo.",
+          "note": "Используйте глагол в скобках. Если ваш вариант не засчитался, но вы уверены — нажмите «Засчитать мой ответ».",
+          "rule": "i Bergen → til Bergen, hos legen → til legen, hjemme → hjem, ute → ut. Но: på kino → på kino.",
+          "items": [
+            { "id": "1", "n": "1", "prompt": "Jeg er i Bergen. (reise)", "answer": ["Jeg reiser til Bergen."], "ru": "Я еду в Берген." },
+            { "id": "2", "n": "2", "prompt": "Hun er hos legen. (gå)", "answer": ["Hun går til legen."], "ru": "Она идёт к врачу." },
+            { "id": "3", "n": "3", "prompt": "Vi er på kino. (gå)", "answer": ["Vi går på kino."], "ru": "Мы идём в кино." },
+            { "id": "4", "n": "4", "prompt": "Barna er ute. (gå)", "answer": ["Barna går ut."], "ru": "Дети выходят на улицу." },
+            { "id": "5", "n": "5", "prompt": "Han er hjemme. (dra)", "answer": ["Han drar hjem."], "ru": "Он едет домой." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-passiv",
+      "icon": "🔄",
+      "title": "Пассив: bli + причастие и форма на -s",
+      "titleNo": "Prøve: passiv",
+      "level": "A2–B1",
+      "desc": "Bilen blir vasket, huset ble bygd, rommet må vaskes: пассив с bli и s-пассив после модальных глаголов.",
+      "sections": [
+        {
+          "id": "g1", "part": "gram", "type": "gap",
+          "title": "Пассив с bli: впишите глагол",
+          "titleNo": "Skriv verbet i passiv med bli.",
+          "note": "Время смотрите по смыслу: hver dag — настоящее, i går / i 1950 — прошедшее.",
+          "rule": "Пассив — когда важно действие, а не кто его делает. bli + причастие (форма после har): blir vasket — моют (сейчас, обычно), ble vasket — помыли, har blitt vasket — (уже) помыли. Кто сделал — после av: Boka ble skrevet av Ibsen.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Bilen (vaske) [[blir vasket|vaskes]] hver lørdag.", "why": {"1": "Каждую субботу → настоящее: blir vasket (или vaskes)."} },
+            { "id": "2", "n": "2", "text": "Huset (bygge) [[ble bygd|ble bygget]] i 1950.", "why": {"1": "В 1950 году → прошедшее: ble bygd / ble bygget."} },
+            { "id": "3", "n": "3", "text": "Sykkelen min (stjele) [[ble stjålet]] i går.", "why": {"1": "Вчера → ble + stjålet."} },
+            { "id": "4", "n": "4", "text": "Butikken (åpne) [[blir åpnet|åpnes]] klokka ni hver dag.", "why": {"1": "Каждый день → blir åpnet (или åpnes)."} },
+            { "id": "5", "n": "5", "text": "Brevet (sende) [[ble sendt]] i forrige uke.", "why": {"1": "На прошлой неделе → ble sendt."} },
+            { "id": "6", "n": "6", "text": "«Et dukkehjem» (skrive) [[ble skrevet]] av Henrik Ibsen.", "why": {"1": "Давно → ble skrevet; автор — после av."} },
+            { "id": "7", "n": "7", "text": "Alle elevene (invitere) [[ble invitert]] til festen.", "why": {"1": "ble + invitert."} },
+            { "id": "8", "n": "8", "text": "Maten (spise) [[ble spist]] opp på fem minutter.", "why": {"1": "ble + spist."} },
+            { "id": "9", "n": "9", "text": "Vinduene (male) [[har blitt malt|er blitt malt|er malt]] i år.", "why": {"1": "Результат к сейчас → har blitt malt (или er blitt malt)."} },
+            { "id": "10", "n": "10", "text": "Middagen (lage) [[blir laget|blir lagd|lages]] av pappa i dag.", "why": {"1": "Сегодня → blir laget / blir lagd."} }
+          ]
+        },
+        {
+          "id": "g2", "part": "gram", "type": "gap",
+          "title": "Пассив на -s после модальных глаголов",
+          "titleNo": "Skriv verbet i s-passiv.",
+          "rule": "s-пассив: инфинитив + s (vaske → vaskes). Чаще всего после må, kan, skal, bør: Rommet må vaskes — Комнату надо помыть. Глагол на -er/-r в настоящем тоже: Her snakkes norsk.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Rommet må (vaske) [[vaskes]] før helga.", "why": {"1": "må + vaskes."} },
+            { "id": "2", "n": "2", "text": "Billetter kan (kjøpe) [[kjøpes]] på nettet.", "why": {"1": "kan + kjøpes."} },
+            { "id": "3", "n": "3", "text": "Pakken skal (sende) [[sendes]] i dag.", "why": {"1": "skal + sendes."} },
+            { "id": "4", "n": "4", "text": "Medisinen må (ta) [[tas]] tre ganger om dagen.", "why": {"1": "ta → tas."} },
+            { "id": "5", "n": "5", "text": "Her (snakke) [[snakkes]] norsk og engelsk.", "why": {"1": "Настоящее время: snakkes."} },
+            { "id": "6", "n": "6", "text": "Døra må ikke (åpne) [[åpnes]] under kjøring.", "why": {"1": "må ikke + åpnes."} },
+            { "id": "7", "n": "7", "text": "Skjemaet må (fylle) [[fylles]] ut før fredag.", "why": {"1": "fylle ut → fylles ut."} }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "transform",
+          "title": "Перепишите предложения в пассиве",
+          "titleNo": "Skriv setningene i passiv.",
+          "example": "Noen vasker bilen.",
+          "exampleAnswer": "Bilen blir vasket.",
+          "note": "Кто делает — можно не писать или написать после av. Если ваш вариант не засчитался, но вы уверены — нажмите «Засчитать мой ответ».",
+          "rule": "Дополнение становится подлежащим: Noen stjal sykkelen → Sykkelen ble stjålet. Время сохраняется: stjal → ble stjålet, leverer → blir levert, må male → må males.",
+          "items": [
+            { "id": "1", "n": "1", "prompt": "Noen stjal sykkelen min.", "answer": ["Sykkelen min ble stjålet."], "ru": "Мой велосипед украли." },
+            { "id": "2", "n": "2", "prompt": "Postbudet leverer pakken i dag.", "answer": ["Pakken blir levert i dag.", "Pakken leveres i dag.", "Pakken blir levert av postbudet i dag.", "Pakken leveres av postbudet i dag.", "Pakken blir levert i dag av postbudet.", "I dag blir pakken levert.", "I dag blir pakken levert av postbudet."], "ru": "Посылку сегодня доставят." },
+            { "id": "3", "n": "3", "prompt": "Kommunen bygde en ny skole.", "answer": ["En ny skole ble bygd.", "En ny skole ble bygget.", "En ny skole ble bygd av kommunen.", "En ny skole ble bygget av kommunen."], "ru": "Построили новую школу." },
+            { "id": "4", "n": "4", "prompt": "Vi må male huset.", "answer": ["Huset må males."], "ru": "Дом надо покрасить." },
+            { "id": "5", "n": "5", "prompt": "Legen undersøkte pasienten.", "answer": ["Pasienten ble undersøkt.", "Pasienten ble undersøkt av legen."], "ru": "Пациента осмотрели." },
+            { "id": "6", "n": "6", "prompt": "Mange leser denne boka.", "answer": ["Denne boka blir lest av mange.", "Denne boka leses av mange.", "Boka blir lest av mange.", "Boka leses av mange."], "ru": "Эту книгу читают многие." }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "choice",
+          "title": "Актив или пассив? Выберите",
+          "titleNo": "Aktiv eller passiv? Velg riktig.",
+          "rule": "Если подлежащее само делает действие — актив (Jeg vasket bilen). Если с подлежащим что-то делают — пассив (Bilen ble vasket).",
+          "items": [
+            { "id": "1", "n": "1", "q": "Bilen ___ i går.", "options": ["vasket", "ble vasket"], "answer": 1, "why": "Машина сама себя не моет → пассив: ble vasket." },
+            { "id": "2", "n": "2", "q": "Jeg ___ bilen i går.", "options": ["vasket", "ble vasket"], "answer": 0, "why": "Я делаю действие → актив: vasket." },
+            { "id": "3", "n": "3", "q": "Kaffen må ___ mens den er varm.", "options": ["drikke", "drikkes"], "answer": 1, "why": "Кофе пьют → må drikkes." },
+            { "id": "4", "n": "4", "q": "Huset ___ av en kjent arkitekt.", "options": ["tegnet", "ble tegnet"], "answer": 1, "why": "av + человек → пассив: ble tegnet." },
+            { "id": "5", "n": "5", "q": "Det ___ mye norsk på kurset.", "options": ["snakker", "snakkes"], "answer": 1, "why": "Говорят (неважно кто) → snakkes." },
+            { "id": "6", "n": "6", "q": "Hvem ___ dette huset?", "options": ["bygde", "ble bygd"], "answer": 0, "why": "Кто построил? — актив: bygde." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2-sverb-seg",
+      "icon": "🪞",
+      "title": "Глаголы на -s и возвратные глаголы",
+      "titleNo": "Prøve: s-verb og refleksive verb",
+      "level": "A2",
+      "desc": "meg / deg / seg / oss / dere, glede seg, sette seg, vi møtes, det finnes, jeg synes, jeg trives.",
+      "sections": [
+        {
+          "id": "g1", "part": "gram", "type": "gap",
+          "title": "Вставьте meg, deg, seg, oss или dere",
+          "titleNo": "Sett inn refleksivt pronomen.",
+          "bank": ["meg", "deg", "seg", "oss", "dere"],
+          "rule": "Возвратное местоимение меняется вместе с подлежащим: jeg — meg, du — deg, han / hun / de — seg, vi — oss, dere — dere. В вопросе оно стоит после подлежащего: Gleder du deg?",
+          "items": [
+            { "id": "1", "n": "1", "text": "Jeg gleder [[meg]] til ferien.", "why": {"1": "jeg → meg."} },
+            { "id": "2", "n": "2", "text": "Gleder du [[deg]] til jul?", "why": {"1": "du → deg."} },
+            { "id": "3", "n": "3", "text": "Hun setter [[seg]] ved vinduet.", "why": {"1": "hun → seg."} },
+            { "id": "4", "n": "4", "text": "Vi må skynde [[oss]], bussen går snart!", "why": {"1": "vi → oss."} },
+            { "id": "5", "n": "5", "text": "Har dere bestemt [[dere]]?", "why": {"1": "dere → dere."} },
+            { "id": "6", "n": "6", "text": "Barna legger [[seg]] klokka åtte.", "why": {"1": "barna (= de) → seg."} },
+            { "id": "7", "n": "7", "text": "Jeg føler [[meg]] ikke helt frisk i dag.", "why": {"1": "jeg → meg."} },
+            { "id": "8", "n": "8", "text": "Hvordan liker du [[deg]] i Norge?", "why": {"1": "du → deg."} },
+            { "id": "9", "n": "9", "text": "Ola og Kari gifter [[seg]] i juni.", "why": {"1": "Ola og Kari (= de) → seg."} },
+            { "id": "10", "n": "10", "text": "I går kjedet vi [[oss]] hele dagen.", "why": {"1": "vi → oss."} },
+            { "id": "11", "n": "11", "text": "Sett [[deg]], vær så snill!", "why": {"1": "Повелительное — обращаемся к du → deg."} },
+            { "id": "12", "n": "12", "text": "Han barberer [[seg]] hver morgen.", "why": {"1": "han → seg."} }
+          ]
+        },
+        {
+          "id": "g2", "part": "gram", "type": "gap",
+          "title": "Впишите s-глагол в нужной форме",
+          "titleNo": "Skriv s-verbet i riktig form.",
+          "rule": "У s-глаголов -s во всех формах: møtes — møttes — har møttes; synes — syntes — har syntes; trives — trivdes — har trivdes; finnes — fantes — har funnes; treffes — treftes — har treftes.",
+          "items": [
+            { "id": "1", "n": "1", "text": "Vi (møtes) [[møttes]] for første gang i 2020.", "why": {"1": "Прошедшее: møttes."} },
+            { "id": "2", "n": "2", "text": "Hva (synes) [[syntes]] du om filmen i går?", "why": {"1": "Прошедшее: syntes."} },
+            { "id": "3", "n": "3", "text": "Da jeg var liten, (finnes) [[fantes]] det ikke mobiltelefoner.", "why": {"1": "Прошедшее: fantes."} },
+            { "id": "4", "n": "4", "text": "Hun (trives) [[trives|trivs]] godt på den nye jobben.", "why": {"1": "Настоящее: trives."} },
+            { "id": "5", "n": "5", "text": "Vi har (treffes) [[treftes]] mange ganger.", "why": {"1": "Перфект: har treftes."} },
+            { "id": "6", "n": "6", "text": "De (trives) [[trivdes]] ikke i den gamle leiligheten.", "why": {"1": "Прошедшее: trivdes."} },
+            { "id": "7", "n": "7", "text": "Ha det! Vi (sees) [[sees|ses]] i morgen!", "why": {"1": "Настоящее: sees (ses)."} },
+            { "id": "8", "n": "8", "text": "Det (finnes) [[finnes|fins]] mange fjorder i Norge.", "why": {"1": "Настоящее: finnes (fins)."} },
+            { "id": "9", "n": "9", "text": "Jeg har alltid (synes) [[syntes]] at norsk er et vakkert språk.", "why": {"1": "Перфект: har syntes."} }
+          ]
+        },
+        {
+          "id": "g3", "part": "gram", "type": "choice",
+          "title": "Выберите правильный глагол",
+          "titleNo": "Velg riktig verb.",
+          "rule": "finne — находить, finnes — существовать (есть). synes — мнение, tro — предположение. møte noen — встретить кого-то, møtes — встретиться друг с другом.",
+          "items": [
+            { "id": "1", "n": "1", "q": "Det ___ mange museer i Oslo.", "options": ["finner", "finnes"], "answer": 1, "why": "Есть, существуют → finnes." },
+            { "id": "2", "n": "2", "q": "Jeg ___ ikke nøklene mine!", "options": ["finner", "finnes"], "answer": 0, "why": "Не могу найти → finner." },
+            { "id": "3", "n": "3", "q": "Jeg ___ at sommeren i Norge er for kort.", "options": ["synes", "tror"], "answer": 0, "why": "Это моё мнение → synes." },
+            { "id": "4", "n": "4", "q": "Jeg ___ at toget går klokka ni, men jeg er ikke sikker.", "options": ["synes", "tror"], "answer": 1, "why": "Не уверен(а), предполагаю → tror." },
+            { "id": "5", "n": "5", "q": "Vi ___ i parken klokka fem.", "options": ["møter", "møtes"], "answer": 1, "why": "Встречаемся друг с другом → møtes." },
+            { "id": "6", "n": "6", "q": "Jeg ___ læreren min på bussen i dag.", "options": ["møtte", "møttes"], "answer": 0, "why": "Встретил(а) кого-то → møtte (+ дополнение)." },
+            { "id": "7", "n": "7", "q": "Hvordan ___ du deg i den nye byen?", "options": ["liker", "likes"], "answer": 0, "why": "like seg — нравиться где-то: liker du deg." }
+          ]
+        },
+        {
+          "id": "g4", "part": "gram", "type": "order",
+          "title": "Составьте предложения",
+          "titleNo": "Lag riktige setninger.",
+          "rule": "Глагол — на 2-м месте; seg / meg / deg стоит сразу после подлежащего, если оно после глагола: I morgen gleder jeg meg… — и после глагола, если подлежащее впереди: Jeg gleder meg…",
+          "items": [
+            { "id": "1", "words": ["i morgen", "gleder", "jeg", "meg", "til", "turen"], "answer": ["I morgen gleder jeg meg til turen.", "Jeg gleder meg til turen i morgen."] },
+            { "id": "2", "words": ["hvorfor", "skynder", "du", "deg"], "answer": ["Hvorfor skynder du deg?"] },
+            { "id": "3", "words": ["vi", "møttes", "på", "et", "kurs", "i fjor"], "answer": ["Vi møttes på et kurs i fjor.", "I fjor møttes vi på et kurs."] },
+            { "id": "4", "words": ["trives", "du", "i", "Norge"], "answer": ["Trives du i Norge?"], "names": ["Norge"] },
+            { "id": "5", "words": ["hun", "føler", "seg", "ikke", "bra", "i dag"], "answer": ["Hun føler seg ikke bra i dag.", "I dag føler hun seg ikke bra."] }
+          ]
+        }
+      ]
+    }
+  ]
+}
