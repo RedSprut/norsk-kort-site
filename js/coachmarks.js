@@ -247,7 +247,7 @@
         { t: '[data-tgtab="search"]', h: '🔎 Найти по слову', x: 'Посты, видео и картинки норвежских каналов с нужным словом.' },
         { t: '[data-tgtab="vocab"]', h: '🗂 Карточки из чата', x: 'Приложение соберёт из канала пары «слово — перевод»; каждая сверяется с переводчиком.' },
         { t: '[data-tgtab="channels"]', h: '📢 Норвежские каналы', x: 'Готовый список каналов, где учат норвежский: открыть в Telegram или добавить как источник карточек.' },
-        { t: '[data-tgtab="setup"]', h: '🔐 Каналы и аккаунт', x: 'Подключите свой Telegram один раз (QR-код) — и приложение сможет читать ваши группы. Ключи остаются на устройстве.' },
+        { t: '[data-tgtab="setup"]', h: '🔐 Каналы и аккаунт', mac: true, x: 'Подключите свой Telegram один раз (QR-код) — и приложение сможет читать ваши группы. Ключи остаются на устройстве.' },
       ] },
     /* 🗣 the live interpreter (a floating panel) */
     { id: 'interp', name: 'Переводчик', ctx: 'float', topic: 'interp', when: '.ip-panel:not(.min) .ip-head',
@@ -314,7 +314,9 @@
     { id: 'audiocourse', q: true, name: 'Аудиокурсы', ctx: 'modal', modal: '.ac-modal', topic: 'audiocourse', when: '.ac-card',
       open: () => AudioCourse.open(),
       steps: [
-        { t: '[data-ac-dl]', h: '⬇ Загрузить в приложение', x: '100 уроков 50languages — внутрь приложения, один раз. Потом слушаются без интернета.' },
+        { t: '[data-ac-dl]', h: '⬇ Загрузить в приложение', mac: true, x: '100 уроков 50languages — внутрь приложения, один раз. Потом слушаются без интернета.' },
+        // off the Mac: the publisher's archive is downloaded from its site (js/audiocourse.js data-ac-get)
+        { t: '[data-ac-get]', h: '⬇ Скачать архив с сайта курса', web: true, x: 'Архив с уроками 50languages скачается на это устройство. Потом выберите его кнопкой «У меня уже скачано» — уроки появятся здесь.' },
         { t: '[data-ac-import]', h: '📂 У меня уже скачано', x: 'Есть папка, MP3 или архив .zip? Выберите их — уроки появятся здесь.' },
         { t: '[data-ac-play]', h: '▶ Слушать', x: 'Уроки один за другим — в наушниках или через динамик; место запоминается.' },
         { t: '[data-ac-view]', h: '📋 Уроки', x: 'Список уроков, повтор урока и повтор отрывка A–B.' },
@@ -358,10 +360,15 @@
 
   /* ---------------- start a coach ---------------- */
   let running = null, busyUntil = 0;
+  /** W7: steps marked mac (bridge, the personal Telegram account) only on the Mac; web — only off it */
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname));
+  /** the coach's titles: words only — the emoji in front of them are not shown (drawn icons only, never emoji) */
+  const plain = h => String(h || '').replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D\u20E3⬇↺↻▾▶■✓✎＋]+\s*/u, '');
   function steps(p, root) {
-    return p.steps.map(s => {
+    const mac = onMac();
+    return p.steps.filter(s => !(s.mac && !mac) && !(s.web && mac)).map(s => {
       const target = () => all(s.t, root);
-      return { target, title: s.h, text: typeof s.x === 'function' ? s.x() : s.x, timeout: 700 };
+      return { target, title: plain(s.h), text: typeof s.x === 'function' ? s.x() : s.x, timeout: 700 };
     }).filter(s => s.target().some(isShown));
   }
   function start(p, replay) {
@@ -383,6 +390,7 @@
     if (document.visibilityState !== 'visible') return false;
     if (Help.now && Help.now()) return false;
     if (Help._here || running || now() < busyUntil) return false;
+    if (Help.firstPending && Help.firstPending()) return false; // W7: the first start's guides come one at a time, first
     if (document.querySelector(BUSY_SEL)) return false;
     const bd = topBd(), m = modalOf(bd);
     if (m && m.matches('.hc-modal, .guide-modal, .ask-close, .narrow:not(.sp-modal)')) return false; // the help centre, a question, a guide

@@ -1,4 +1,13 @@
-/* ============ Text-to-speech: Norwegian + Russian + Ukrainian, with a player (pause / resume / stop / restart) ============ */
+/* ============ Text-to-speech: Norwegian + Russian + Ukrainian, with a player (pause / resume / stop / restart) ============
+ * The voice itself is chosen in js/voices.js (device → Norsk Kort Pro → own keys; Edge and the Google Translate voice only
+ * on the owner's Mac). This file speaks with the device's voice (speechSynthesis) and plays the clips.
+ * iPhone / Safari:
+ *   · speechSynthesis must first be used inside a tap: the first tap anywhere says an empty, silent phrase (unlock);
+ *   · the voice list arrives late (and Safari may never fire «voiceschanged»): it is asked again for a few seconds, and a
+ *     phrase waits up to ~1 s for it;
+ *   · <audio> must be unlocked by a tap too — js/voices.js keeps a few unlocked elements for clips that come later.
+ * Automated tests (navigator.webdriver, or ?nkmute=1): every voice and clip is muted (TTS.muted).
+ */
 (function () {
   const LANG = { no: 'nb-NO', ru: 'ru-RU', uk: 'uk-UA' };
   const GOOGLE_TL = { no: 'no', ru: 'ru', uk: 'uk' };
@@ -16,7 +25,11 @@
     return uk > ru ? 'uk' : ru > uk ? 'ru' : dflt;
   }
   /** the default for a Cyrillic piece that could be either: the chosen translation language */
-  const trDefault = () => (window.Store && Store.settings && Store.settings.transLang === 'uk' ? 'uk' : 'ru');
+  const trDefault = () => { try { const s = Store.settings; return (s.transLang || s.trLang) === 'uk' ? 'uk' : 'ru'; } catch (e) { return 'ru'; } };
+  /** the site / store apps: the unofficial Google Translate voice is never used there (docs/release-architecture.md S4) */
+  const publicBuild = () => !(window.NK_CONFIG && NK_CONFIG.publicBuild === false);
+  /** automated tests never make a sound */
+  const MUTED = (() => { try { return !!navigator.webdriver || /[?&]nkmute=1\b/.test(location.search) || localStorage.getItem('nk-mute') === '1'; } catch (e) { return false; } })();
   /* ---------- 🇺🇦 no Ukrainian voice on the device: say so once, with how to add one ---------- */
   const UK_HELP = [
     ['iPhone / iPad', 'Настройки → Универсальный доступ → Устный контент → Голоса → Украинский → скачайте голос «Lesya».'],
@@ -26,6 +39,22 @@
   ];
   let ukHinted = false;
   const hasSynth = () => 'speechSynthesis' in window;
+  /* iPhone: speechSynthesis works only after it was used inside a tap — the first tap says an empty, silent phrase */
+  let synthUnlocked = false;
+  function unlockSynth() {
+    if (synthUnlocked || !hasSynth()) { detachSynth(); return; }
+    synthUnlocked = true;
+    try {
+      if (!speechSynthesis.speaking && !speechSynthesis.pending) {
+        const u = new SpeechSynthesisUtterance(' ');
+        u.volume = 0; u.rate = 2;
+        speechSynthesis.speak(u);
+      }
+    } catch (e) { /* nothing to unlock */ }
+    detachSynth();
+  }
+  const SYNTH_EV = ['touchend', 'click', 'keydown'];
+  function detachSynth() { SYNTH_EV.forEach(t => document.removeEventListener(t, unlockSynth, true)); }
   const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const hasMS = () => 'mediaSession' in navigator;
   /** Chrome cuts an utterance after ~15 s: long pieces are said in parts (sentence / comma boundaries) */
@@ -237,6 +266,21 @@
       return rs[0] || null;
     } catch (e) { return null; }
   }
+  /** offsets into el.textContent → a Range over its text nodes (a sentence with italics / links / highlights inside) */
+  function rangeAt(el, a, b) {
+    try {
+      const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const r = document.createRange();
+      let n, pos = 0, started = false;
+      while ((n = w.nextNode())) {
+        const L = n.nodeValue.length;
+        if (!started && a <= pos + L) { r.setStart(n, Math.max(0, a - pos)); started = true; }
+        if (started && b <= pos + L) { r.setEnd(n, Math.max(0, b - pos)); return r; }
+        pos += L;
+      }
+      return null;
+    } catch (e) { return null; }
+  }
   function selIn(el) {
     try { const s = window.getSelection && getSelection(); return !!(s && !s.isCollapsed && s.rangeCount && el.contains(s.getRangeAt(0).commonAncestorContainer)); } catch (e) { return false; }
   }
@@ -263,11 +307,10 @@
         const done = Math.max(0, Math.min(len, (cur ? Math.min(it.done | 0, cur[0]) : it.done) | 0));
         let rect = null;
         if (this.hl) {
-          if (el.childNodes.length !== 1 || el.firstChild.nodeType !== 3) return;
-          const node = el.firstChild;
-          const rg = (a, b) => { const r = document.createRange(); r.setStart(node, a); r.setEnd(node, b); return r; };
-          if (done > 0) this.hDone.add(rg(0, done));
-          if (cur) { const r = rg(cur[0], cur[1]); this.hSay.add(r); rect = firstRect(r); }
+          const plain = el.childNodes.length === 1 && el.firstChild.nodeType === 3, node = el.firstChild;
+          const rg = (a, b) => { if (!plain) return rangeAt(el, a, b); const r = document.createRange(); r.setStart(node, a); r.setEnd(node, b); return r; };
+          const rd = done > 0 && rg(0, done); if (rd) this.hDone.add(rd);
+          if (cur) { const r = rg(cur[0], cur[1]); if (r) { this.hSay.add(r); rect = firstRect(r); } }
         } else {
           if (!this.wrapped.has(el) && [...el.childNodes].some(n => n.nodeType !== 3)) return; // not plain text: leave it alone
           keepWrap.add(el);
@@ -331,19 +374,44 @@
   };
 
   const TTS = {
-    wordsOf, Karaoke, motionOk, WordClock, split,
+    wordsOf, Karaoke, motionOk, WordClock, split, rangeAt,
     voices: [],
     _audio: null,
     _keep: null,       // looping silent clip while the system voice reads (the tab keeps «Now Playing» on macOS)
+    muted: MUTED,      // automated tests: every voice and clip is silent
     msOwner: '',       // who drives the Media Session now: 'tts' (speakText) or 'listen' (Listen player)
     IOS, silence,
     player: null,      // { segs, i, paused, mode, opts, text }
     last: null,        // last text read with speakText (for "restart")
     init() {
       if (!hasSynth()) return;
-      const load = () => { this.voices = speechSynthesis.getVoices() || []; };
+      const load = () => {
+        const v = speechSynthesis.getVoices() || [];
+        const changed = v.length !== this.voices.length;
+        this.voices = v;
+        if (changed) document.dispatchEvent(new Event('voices-changed'));
+        return v.length;
+      };
       load();
-      speechSynthesis.onvoiceschanged = () => { load(); document.dispatchEvent(new Event('voices-changed')); };
+      try { speechSynthesis.addEventListener('voiceschanged', load); } catch (e) { speechSynthesis.onvoiceschanged = load; }
+      // Safari (iPhone) fills the list late and sometimes never says so: ask again for a few seconds
+      let n = 0;
+      const poll = setInterval(() => { if (load() || ++n > 24) clearInterval(poll); }, 250);
+      if (IOS || !synthUnlocked) SYNTH_EV.forEach(t => document.addEventListener(t, unlockSynth, true));
+    },
+    /** the device's voice list, waiting up to ms for it (Safari gives an empty list at first) */
+    voicesReady(ms = 1000) {
+      if (!hasSynth() || this.voices.length) return Promise.resolve(this.voices);
+      return new Promise(res => {
+        const t0 = Date.now();
+        const tick = () => {
+          const v = speechSynthesis.getVoices() || [];
+          if (v.length) { this.voices = v; res(v); return; }
+          if (Date.now() - t0 >= ms) { res(this.voices); return; }
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
     },
     voicesFor(lang) {
       const re = LANG_RE[lang] || LANG_RE.ru;
@@ -384,8 +452,12 @@
     hasUkrainianVoice() { return this.voicesFor('uk').length > 0; },
     /** how to add a Ukrainian voice on each system (Settings → Озвучка, the one-time hint) */
     ukHelpHtml() {
+      const pro = window.Voices && Voices.nkOffered && Voices.nkOffered();
+      const instead = publicBuild()
+        ? `офлайн-голос Piper (Тетяна, Микита, Олекса)${pro ? ', голос Norsk Kort Pro' : ''} или облачный голос со своим ключом`
+        : 'онлайн-голос Google (нужен интернет) или выбранный облачный голос (Edge, Azure, Google Cloud, ElevenLabs)';
       return `<div class="small voice-steps"><b>Как добавить украинский голос:</b><br>${UK_HELP.map(([os, how]) => `<b>${os}:</b> ${U.esc(how)}`).join('<br>')}<br>
-        Пока голоса нет, украинский текст читает онлайн-голос Google (нужен интернет) или выбранный облачный голос (Edge, Azure, Google Cloud, ElevenLabs) — русским голосом украинский не читается.</div>`;
+        Пока голоса нет, украинский текст читает ${instead} — русским голосом украинский не читается.</div>`;
     },
     /** one-time friendly hint: no Ukrainian voice on this device */
     ukHint(online = true) {
@@ -393,8 +465,9 @@
       ukHinted = true;
       try { if (localStorage.getItem('nk-uk-voice-hint')) return; localStorage.setItem('nk-uk-voice-hint', '1'); } catch (e) { /* private mode: once per session */ }
       if (!window.UI || !UI.toastAction) return;
-      const msg = 'Украинского голоса на устройстве нет — ' + (online ? 'читаю украинский онлайн-голосом Google. ' : 'украинский текст пропускаю. ') + 'Голос можно добавить в настройках системы.';
-      UI.toastAction(msg, 'Как добавить', () => UI.modal({ title: '🇺🇦 Украинский голос', body: this.ukHelpHtml() + '<div class="small muted" style="margin-top:8px">После установки перезапустите браузер, затем выберите голос: Настройки → 🔊 Озвучка → «💻 Системный украинский голос 🇺🇦».</div>' }), 12000, '🇺🇦');
+      const msg = 'Украинского голоса на устройстве нет — ' + (online && !publicBuild() ? 'читаю украинский онлайн-голосом Google. ' : 'украинский текст пока пропускаю. ') + 'Голос можно добавить в настройках системы или выбрать в разделе «Голоса».';
+      const ico = window.Voices && Voices.icon ? Voices.icon('speaker', 18) : '';
+      UI.toastAction(msg, 'Как добавить', () => UI.modal({ title: 'Украинский голос', body: this.ukHelpHtml() + '<div class="small muted" style="margin-top:8px">После установки перезапустите браузер, затем выберите голос: Настройки → Озвучка → «Украинский голос».</div>' }), 12000, ico);
     },
     clean(text) {
       // links first (their «/» must not turn into pauses), then «a/b» = a pause, then the common symbol rule
@@ -673,7 +746,8 @@
       if (!text) return { text: '', lang };
       // a Ukrainian text is never said by a Russian voice (and the other way round), whoever asked
       if (!LANG[lang]) lang = /[Ѐ-ӿ]/.test(text) ? cyrLang(text, 'ru') : 'no';
-      else if (lang === 'ru' || lang === 'uk') lang = cyrLang(text, lang);
+      // a Cyrillic text that could be either («мама»): the person's translation language (callers often just say 'ru')
+      else if (lang === 'ru' || lang === 'uk') lang = cyrLang(text, lang === 'uk' ? 'uk' : trDefault());
       // 🐢 slow = word by word: a short pause after every Norwegian word (clearly different from "normal")
       if (!opts.rate && Store.settings.ttsSpeed === 'slow' && lang === 'no' && text.split(/\s+/).length <= 14) {
         text = text.replace(/([^\s,.!?;:])\s+/g, '$1, ').replace(/(^|\s)(å|en|ei|et), /gi, '$1$2 '); // "å spise", "en bil" stay together
@@ -695,7 +769,7 @@
         const id = (Voices.chain(r.lang, opts.voiceId || '', place) || [])[0];
         if (!id) return;
         const { engine, key, spk } = Voices.parse(id);
-        if (!/^(piper|edge|azure|gcloud|eleven)$/.test(engine)) return; // the device / Google / Gemini: nothing to make ahead
+        if (!/^(piper|nk|edge|azure|gcloud|eleven)$/.test(engine)) return; // the device / Google / Gemini: nothing to make ahead
         Voices.clip(engine, r.text, r.lang, opts.rate || this.currentRate(), key + (spk ? '#' + spk : '')).catch(() => {});
       } catch (e) { /* a hint only */ }
     },
@@ -722,11 +796,13 @@
         }
         return pr.then(done, e => { done(); throw e; });
       }
+      // Safari's voice list may still be empty right after the start: wait a moment for it (once)
+      if (hasSynth() && !this.voices.length && !opts._waited) return this.voicesReady(1000).then(() => { done(); return this._utter1(text, lang, Object.assign({}, opts, { _waited: true }), p, wc); });
       const voice = this.pickVoice(lang, opts.sysVoice);
-      const useBrowser = !opts.gtr && ((opts.forceBrowser && hasSynth()) || !!voice);
-      // 🇺🇦 no Ukrainian voice on the device: the online Google voice (never a Russian one) + a one-time hint
-      if (lang === 'uk' && !voice && !opts.gtr) {
-        const online = !opts.forceBrowser && navigator.onLine !== false;
+      const useBrowser = !(opts.gtr && !publicBuild()) && ((opts.forceBrowser && hasSynth()) || !!voice);
+      // no Ukrainian voice on the device: never a Russian one — the Google voice on the Mac, else a one-time hint
+      if (lang === 'uk' && !voice && !(opts.gtr && !publicBuild())) {
+        const online = !opts.forceBrowser && navigator.onLine !== false && !publicBuild();
         this.ukHint(online);
         if (!online) { done(); return Promise.resolve(); }
         return this.speakGoogle(text, lang, rate, wc).then(done, done);
@@ -741,6 +817,7 @@
           u.lang = LANG[lang];
           if (voice) u.voice = voice;
           u.rate = rate;
+          if (this.muted) u.volume = 0;
           if (opts.pitch > 0) u.pitch = Math.max(0.5, Math.min(1.6, opts.pitch)); // 🎭 another speaker with the same voice
           if (wc) try { wc.speech(u, part, kb, rate, vkey, isPaused, alive); } catch (e) { /* no word timing: the sentence highlight stays */ }
           /* safety net (some browsers never fire onend): REAL elapsed time without pauses — a background tab
@@ -774,6 +851,8 @@
     /** the free Google Translate voice: it takes ≤200 characters per request, so a longer text is read in several
      *  clips one after another (before, everything after the 200th character was silently lost) */
     async speakGoogle(text, lang, rate, wc) {
+      // the public build never calls the unofficial endpoint: the device's voice (any) says it, or a calm line once
+      if (publicBuild()) return this._noVoice(text, lang, rate);
       const parts = split(text, 190), g0 = this._gen, a0 = this._audio;
       if (wc) try { wc.spoken(text); } catch (e) { /* no word timing */ }
       let kb = 0;
@@ -793,6 +872,8 @@
         const url = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=' + GOOGLE_TL[lang] +
           '&ttsspeed=' + (rate < 0.8 ? '0.24' : '1') + '&q=' + encodeURIComponent(text.slice(0, 200));
         const a = new Audio(url);
+        a.setAttribute('playsinline', '');
+        a.muted = this.muted;
         a.playbackRate = Math.max(0.5, Math.min(1.5, rate / 0.9));
         this._audio = a;
         if (wc) try { wc.audio(a, rate, 'google', { k0, k1 }); } catch (e) { /* no word timing */ }
@@ -817,13 +898,35 @@
           if (hasSynth() && (lang !== 'uk' || v)) {
             if (this._audio === a) this._audio = null;
             const say = whole || text; // this clip and the ones after it are said by this voice
-            const u = new SpeechSynthesisUtterance(say); u.lang = LANG[lang] || LANG.ru; if (v) u.voice = v; u.rate = rate; u.onend = resolve; u.onerror = resolve;
+            const u = new SpeechSynthesisUtterance(say); u.lang = LANG[lang] || LANG.ru; if (v) u.voice = v; u.rate = rate; if (this.muted) u.volume = 0; u.onend = resolve; u.onerror = resolve;
             if (wc) { const g = this._gen; try { wc.speech(u, say, k0, rate, v ? v.voiceURI || v.name : 'sys:' + lang, () => speechSynthesis.paused, () => g === this._gen); } catch (e) { /* no word timing */ } }
             speechSynthesis.speak(u);
           } else { if (lang !== 'uk') UI.toast('Озвучка недоступна: нет голоса для ' + (LANG_NAME[lang] || 'русского') + ' языка', 'warn'); end(); } // 🇺🇦: the one-time hint already said why
         };
         a.play().catch(() => a.onerror());
       });
+    },
+    /** no voice for this language here (public build, no device voice): the browser's default voice with only the
+     *  language set (never for Ukrainian — never a Russian voice), else one calm line per language and session */
+    _noVoice(text, lang, rate) {
+      if (hasSynth() && lang !== 'uk') {
+        return new Promise(resolve => {
+          try {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = LANG[lang] || LANG.ru; u.rate = rate || 0.9; if (this.muted) u.volume = 0;
+            const t = setTimeout(resolve, 4000 + String(text).length * 160);
+            u.onend = u.onerror = () => { clearTimeout(t); resolve(); };
+            speechSynthesis.speak(u);
+          } catch (e) { resolve(); }
+        });
+      }
+      if (lang === 'uk') { this.ukHint(false); return Promise.resolve(); }
+      this._nv = this._nv || {};
+      if (!this._nv[lang] && window.UI) {
+        this._nv[lang] = 1;
+        UI.toast(`Для ${LANG_NAME[lang] || 'этого'} языка на устройстве нет голоса. Голос можно выбрать в разделе «Голоса».`, '', 5000);
+      }
+      return Promise.resolve();
     },
     hasNorwegianVoice() { return this.voicesFor('no').length > 0; },
   };

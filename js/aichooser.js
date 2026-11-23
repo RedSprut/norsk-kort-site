@@ -20,6 +20,19 @@
   const FIRST = ['gemini', 'groq'];
 
   const conf = id => { try { return AI.configured(id); } catch (e) { return false; } };
+  /** W7: off the Mac (the site, the store apps) the subscriptions, the CLI programs, Ollama and the bridge-only keys are not
+   *  listed — one calm line names them («работает только в версии для Mac») */
+  const mac = () => (window.Net && Net.onMac ? Net.onMac() : !!(AI.onMac && AI.onMac()));
+  const here = id => mac() || !AI.usableHere || AI.usableHere(id);
+  const NI = (n, s) => (window.NavIcons ? NavIcons.icon(n, s || 18) : '');
+  const proOffered = () => { try { return !!(window.Pro && Pro.offered() && !Pro.isActive()); } catch (e) { return false; } };
+  function macLine() {
+    if (mac()) return '';
+    const ids = Object.keys(AI.PROVIDERS).filter(id => !here(id));
+    if (!ids.length) return '';
+    const n = [...new Set(ids.map(id => names(id).t))];
+    return `<p class="aic-mac">${NI('laptop', 18)}<span>${esc(n.join(', '))} — работает только в версии для Mac.</span></p>`;
+  }
   /* 💻 / 🔑 a small badge on the logo: a subscription through the Mac bridge vs a paid-per-request (or free) API key —
      only where the same company has both (Claude, ChatGPT, Gemini) */
   const BADGE_SVG = {
@@ -60,7 +73,7 @@
 
   function lists() {
     const P = AI.PROVIDERS, cur = AI.available() ? AI.current() : null;
-    const ids = Object.keys(P);
+    const ids = Object.keys(P).filter(here);
     // subscriptions (Claude, ChatGPT, Gemini by account) first in both lists
     const sub = id => (P[id].sub ? 1 : 0);
     const on = ids.filter(conf).sort((a, b) => ((b === cur) - (a === cur)) || (sub(b) - sub(a)));
@@ -95,10 +108,15 @@
       let st = null; try { st = AIHub.state && AIHub.state(); } catch (e) { st = null; }
       if (st && st.run) {
         const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
-        top += `<button type="button" class="aic-row aic-run" data-aic="run"><span class="aic-ico" aria-hidden="true">${st.live ? '⏳' : '⏸'}</span>
+        top += `<button type="button" class="aic-row aic-run" data-aic="run"><span class="aic-ico" aria-hidden="true">${NI(st.live ? 'hourglass' : 'clock', 22)}</span>
           <span class="aic-t"><b>Проверка нейросетью: ${pct}%</b><small>${st.live ? 'идёт — открыть' : 'на паузе — открыть'}</small>
           <i class="aic-bar" aria-hidden="true"><i style="width:${pct}%"></i></i></span><span class="aic-chev" aria-hidden="true">›</span></button>`;
       }
+    }
+    // ⭐ Norsk Kort Pro: a neural network without own keys (the server is set up, not bought yet)
+    if (proOffered()) {
+      top += `<button type="button" class="aic-row aic-pro" data-aic="pro"><span class="aic-ico" aria-hidden="true">${NI('crown', 24)}</span>
+        <span class="aic-t"><b>Norsk Kort Pro</b><small>нейросеть без своих ключей — всё настроено</small></span><span class="aic-chev" aria-hidden="true">›</span></button>`;
     }
     return `${top ? `<div class="aic-sec aic-top">${top}</div>` : ''}
       ${on.length ? `<div class="aic-h" id="aic-h-on">Подключены · ${on.length}</div>
@@ -106,7 +124,8 @@
       <div class="aic-h" id="aic-h-off">${on.length ? 'Подключить ещё' : 'Подключить нейросеть'} · ${off.length}</div>
       ${on.length ? '' : '<p class="aic-lead">Ни одна не подключена. <b>Gemini</b> и <b>Groq</b> — бесплатно, нужен только ключ (пара минут).</p>'}
       <div class="aic-sec" role="group" aria-labelledby="aic-h-off">${off.map(id => row(id, cur)).join('')}</div>
-      <button type="button" class="aic-foot" data-aic="settings">⚙️ Все настройки нейросетей</button>`;
+      ${macLine()}
+      <button type="button" class="aic-foot ui-t" data-aic="settings">${NI('gear')}<span>Все настройки нейросетей</span></button>`;
   }
 
   /* ---------------- what a row does ---------------- */
@@ -115,6 +134,7 @@
     if (k === 'hub') return AIHub.open();
     if (k === 'run') return AIHub.showRun();
     if (k === 'settings') return toSettings(null);
+    if (k === 'pro') return Pro.require('Norsk Kort Pro', { reason: 'ai' });
     if (k === 'connect') return AI.PROVIDERS[id] && AI.PROVIDERS[id].cli ? connectCli(id) : toSettings(id);
     if (k === 'pick') {
       const p = AI.PROVIDERS[id];
@@ -241,7 +261,7 @@
   /* ---------------- the deck page's row: every AI as an icon (the same lists, the same taps as the chooser) ---------------- */
   function stripHtml() {
     if (!window.AI || !AI.PROVIDERS) return '';
-    const { cur, on, off } = lists(), n = Object.keys(AI.PROVIDERS).length;
+    const { cur, on, off } = lists(), n = on.length + off.length;
     const chip = id => {
       const p = AI.PROVIDERS[id], nm = names(id), ok = conf(id), isCur = id === cur;
       const what = isCur ? 'работает сейчас' : ok ? 'подключена — сделать активной' : `подключить${p.free ? ' (бесплатно)' : ''}${p.cli ? '' : ' — откроются Настройки'}`;
@@ -306,7 +326,7 @@
     const p = AI.PROVIDERS[id], t = CLI_TEXT[id], gpt = id === 'chatgpt';
     const B = AI.bridge || {};
     if (!AI.onMac()) {
-      return `<p class="aicc-lead">${t.lead}</p><div class="aicc-box warn">💻 Это работает только в приложении <b>на Mac</b> (через мост). На iPhone и на сайте подключите нейросеть по ключу — <b>${gpt ? 'ChatGPT · по ключу' : 'Gemini · по ключу (бесплатно)'}</b>.</div>
+      return `<p class="aicc-lead">${t.lead}</p><div class="aicc-box warn">Это работает только в версии для Mac. На iPhone и на сайте подключите нейросеть по ключу — <b>${gpt ? 'ChatGPT · по ключу' : 'Gemini · по ключу (бесплатно)'}</b>.</div>
         <div class="aicc-act"><button class="btn primary" data-cc="twin">🔑 ${gpt ? 'ChatGPT' : 'Gemini'} по ключу</button></div>`;
     }
     if (!B.up) {
@@ -458,7 +478,7 @@
           const btn = root.querySelector(`details.prov [data-act="test-prov"][data-id="${CSS.escape(id)}"]`);
           const col = btn && btn.closest('.col'); if (!col) return;
           const p = AI.PROVIDERS[id], s = AI.cliState(p.cli) || {}, ok = AI.cliReady(p.cli);
-          const state = !AI.onMac() ? 'ℹ️ Работает только в приложении на Mac (через мост). Здесь подключите нейросеть по ключу.'
+          const state = !mac() ? 'Работает только в версии для Mac.'
             : !(AI.bridge && AI.bridge.up) ? 'Мост на Mac не запущен.'
               : ok ? `✓ Установлено и вход выполнен${s.version ? ' · ' + U.esc(s.version) : ''}`
                 : s.installed ? 'Установлено — осталось войти в аккаунт.' : 'Программа ещё не установлена.';
@@ -466,7 +486,7 @@
           [...col.children].forEach(ch => { if (ch !== row) ch.remove(); });
           col.insertAdjacentHTML('afterbegin', `<div class="small muted">${U.esc(p.note || '')}</div>
             <div class="${ok ? 'aicc-ok' : 'small'}">${state}</div>
-            <div class="row"><button type="button" class="btn sm primary" data-aicli="${U.esc(id)}">${ok ? '⚙ Состояние и помощь' : '🔌 Подключить по шагам'}</button></div>`);
+            <div class="row"><button type="button" class="btn sm primary" data-aicli="${U.esc(id)}">${ok ? `${NI('gear')}<span>Состояние и помощь</span>` : `${NI('plug')}<span>Подключить по шагам</span>`}</button></div>`);
         });
       } catch (e) { console.warn('aichooser settings', e); }
       return r;

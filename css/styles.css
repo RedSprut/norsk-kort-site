@@ -890,6 +890,8 @@ table.tbl tr.dup td { opacity: .45; }
 /* toast */
 #toast-root { position: fixed; right: 18px; bottom: 18px; z-index: 300; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
 .toast { background: var(--panel-solid); border: 1px solid var(--panel-border); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 12px; box-shadow: var(--shadow); max-width: 380px; font-size: 14px; animation: toastIn .35s cubic-bezier(.2,1.3,.4,1); display: flex; gap: 10px; align-items: center; }
+.toast .toast-ico { flex: none; display: inline-flex; color: var(--accent); }
+.toast.good .toast-ico { color: var(--good); } .toast.bad .toast-ico { color: var(--bad); } .toast.warn .toast-ico { color: var(--warn); }
 .toast.good { border-left-color: var(--good); }
 .toast.bad { border-left-color: var(--bad); }
 .toast.warn { border-left-color: var(--warn); }
@@ -1555,6 +1557,9 @@ button.chip { transition: transform .15s, box-shadow .2s; }
 .count-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 4px 0 8px; }
 .count-chips .chip.active { background: linear-gradient(135deg, #7c6cff, #29c7ff); color: #fff; border-color: transparent; }
 .lib-steps { margin: 4px 0 8px; padding-left: 20px; line-height: 1.6; }
+.lib-steps .lib-lesson { display: inline-flex; align-items: center; gap: 6px; margin-right: 6px; }
+.lib-steps .lib-lesson .input { width: 5.5em; min-height: 44px; }
+.lib-steps [data-lesson-link] { min-height: 44px; display: inline-flex; align-items: center; }
 .voice-steps { margin: 4px 0; padding-left: 18px; line-height: 1.6; }
 div.voice-steps { padding-left: 0; }
 .voice-list { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
@@ -1786,7 +1791,7 @@ div.voice-steps { padding-left: 0; }
   .pg-list { max-height: 52dvh; }
   .pg-tools .btn { flex: 1 1 auto; }
 }
-@media (pointer: coarse) { .pg-row input[type="checkbox"] { width: 24px; height: 24px; } .pg-meta .btn { min-height: 34px; } .pg-tools .btn { min-height: 36px; }
+@media (pointer: coarse) { .pg-row input[type="checkbox"] { width: 24px; height: 24px; } .pg-meta .btn { min-height: 44px; } .pg-tools .btn { min-height: 44px; }
   .pg-link { display: inline-flex; align-items: center; min-height: 32px; padding-inline: 4px; } .pg-rej > summary { padding-block: 8px; } }
 [data-theme="light"] .pg-b.ok, [data-theme="light"] .tg-who.src { color: #15803d; }
 [data-theme="light"] .pg-b.unsure, [data-theme="light"] .tg-who.mt { color: #b45309; }
@@ -3243,3 +3248,104 @@ html:not(.m-phone) .topbar.tb-more .top-icons > .share-top, html:not(.m-phone) .
 .upd-banner .upd-x:hover { background: color-mix(in srgb, var(--muted) 14%, transparent); }
 html.m-phone .upd-banner, .tabbar ~ .upd-banner { bottom: calc(env(safe-area-inset-bottom) + 76px); }
 @media (max-width: 600px) { .upd-banner { left: 12px; right: 12px; transform: none; max-width: none; border-radius: 16px; animation-name: glNoteInM; } .upd-banner .upd-t { white-space: normal; line-height: 1.3; } }
+
+/* ============ W7 (2026-11-23): Settings off the Mac, Pro / consent / account, «Пожаловаться», 44 px targets, hover, motion ============ */
+.st-h1 { display: flex; }
+.st-h1 > .ui-ico { color: var(--accent); flex: none; }
+.settings-grid .panel > h3.ui-t { display: flex; }
+.settings-grid .panel > h3.ui-t > .ui-ico, .settings-grid .panel > h3.ui-t > .nk-bot { color: var(--accent); flex: none; }
+.settings-grid .btn > .ui-ico { flex: none; }
+/* one calm line instead of the Mac-only AIs (the site, the store apps) */
+.st-maconly, .aic-mac { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0 4px; padding: 10px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.4;
+  color: var(--muted); background: color-mix(in srgb, var(--muted) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--muted) 30%, transparent); }
+.st-maconly .ui-ico, .aic-mac .ui-ico { flex: none; margin-top: 1px; }
+/* «Аккаунт и Norsk Kort Pro» */
+.st-account .st-acc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; justify-content: space-between; margin: 6px 0 4px; }
+.st-account .st-acc-who { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.st-account .st-acc-who > .ui-ico { color: var(--accent); flex: none; }
+.st-account .st-acc-who b { display: block; overflow-wrap: anywhere; }
+.st-account .st-acc-who small { display: block; font-size: 12.5px; }
+.st-account .st-acc-btns { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.st-account .st-acc-btns .btn, .st-account .st-pro .btn, .st-account .aic-row .btn { min-height: 44px; }
+.st-account .st-acc-del { color: var(--bad, #ef4444); }
+.st-account .st-pro { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--panel-border); }
+.st-account .st-pro > h3 { margin: 0 0 8px; font-size: 16px; }
+.st-account .st-pro .aic-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.st-legal { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 12px 0 0; font-size: 13.5px; }
+.st-legal a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--muted); text-decoration: none; border-radius: 10px; padding: 0 4px; }
+.st-legal a:hover, .st-legal a:focus-visible { color: var(--text); text-decoration: underline; }
+/* «Удалить аккаунт?» */
+.ask-text .st-del-l { display: block; margin: 0 0 8px; }
+.ask-text .st-del-warn { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--warn, #f59e0b) 12%, transparent); }
+.ask-text .st-del-warn .ui-ico { flex: none; color: var(--warn, #f59e0b); margin-top: 1px; }
+.st-adv { margin: 8px 0 10px; }
+.st-adv > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--muted); font-size: 14px; border-radius: 10px; }
+.st-adv > summary:hover { color: var(--text); }
+.key-local { display: flex; align-items: center; gap: 6px; }
+.dc-hint-i .ui-ico { color: var(--accent); }
+
+/* ⚑ «Ответ нейросети, может ошибаться» + «Пожаловаться» — small, quiet, a 44 px target */
+.ai-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 10px; margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.ai-note-t { opacity: .85; }
+.ai-report { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; min-width: 44px; padding: 0 10px; border: 0; border-radius: 12px;
+  background: none; color: var(--muted); font: inherit; font-size: 12.5px; cursor: pointer; transition: background .15s, color .15s; }
+.ai-report:hover, .ai-report:focus-visible { color: var(--text); background: color-mix(in srgb, var(--muted) 14%, transparent); }
+.ai-report:focus-visible { outline: 2px solid var(--accent2, var(--accent)); outline-offset: 1px; }
+.ai-report.compact { padding: 0; width: 44px; flex: none; }
+.ai-report.sent, .ai-report:disabled { cursor: default; opacity: .7; }
+.ai-report.sent:hover { background: none; color: var(--muted); }
+.review-item .title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.review-item .title .grow { flex: 1; }
+.gl-redo-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.ai-note-hist { margin-top: 4px; }
+
+/* 44 px targets on touch screens — the visual size stays, the tap area grows (no layout jumps) */
+.ex-say, .say-line, .tr-fix, .prov-b, .example > .icon-btn.sm, .fg-btns .icon-btn.sm, .ob-ex .icon-btn.sm, .ob-def .icon-btn.sm, .syn-head .icon-btn.sm { position: relative; }
+@media (pointer: coarse), (hover: none) {
+  .icon-btn.sm.ex-say::after, .icon-btn.sm.say-line::after, .icon-btn.sm.tr-fix::after, .example > .icon-btn.sm::after,
+  .ob-ex .icon-btn.sm::after, .ob-def .icon-btn.sm::after, .syn-head .icon-btn.sm::after { content: ''; position: absolute; inset: -9px; border-radius: 12px; }
+  /* «Как есть / По предложениям / Слово (перевод)» (study card, examples, Ordbøkene) */
+  .ex-view.sm { align-items: stretch; }
+  .ex-view.sm button { min-height: 44px; }
+  .prov-b::after { content: ''; position: absolute; inset: -12px; border-radius: 50%; }
+  .prov-b.labeled::after { inset: -10px -6px; border-radius: 12px; }
+  /* the card's own buttons: ✎ / speaker / voice — 44 px for real */
+  .face .corner .icon-btn, :root.m-phone .study.m-focus .face .corner .icon-btn { width: 44px; height: 44px; }
+  /* «Как есть / По предложениям / Слово (перевод)» and every small segmented switch */
+  .seg-mini button, .seg button { min-height: 44px; }
+  .settings-grid .seg button { min-width: 44px; }
+  /* the sheet's drag handle: 44 px in css/mobile.css .m-grab itself */
+  /* «?» beside a title (Settings, Statistics) */
+  #view h1 .help-q.cm-q, .modal-head .help-q.cm-q { width: 44px; height: 44px; }
+  :is(#view, .modal) .btn.sm, .st-account .st-acc-btns .btn { min-height: 44px; }
+  .settings-grid details.prov > summary, .keys-note > summary { min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; }
+}
+.icon-btn .say-ico, .btn .say-ico { flex: none; }
+.ex-say small { font-size: 9px; font-weight: 800; margin-left: 1px; }
+
+/* every button answers the pointer (devices with hover only); own :hover rules stay — this is the quiet fallback */
+@media (hover: hover) {
+  :where(button, [role="button"], summary, a.btn):not(:disabled):hover { filter: brightness(1.08); }
+  :where(.btn.primary, .btn.ai, .seg-mini button.active):not(:disabled):hover { filter: brightness(1.06) saturate(1.05); }
+}
+
+/* reduced motion: everything calm (the art cards keep the motion the person switched on for them) */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.ac-scope, .ac-scope *), *:not(.ac-scope, .ac-scope *)::before, *:not(.ac-scope, .ac-scope *)::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  :where(button, .btn, .icon-btn, .prov-b, .chip):hover { transform: none !important; }
+}
+.st-account .st-pro .aic-row { cursor: default; padding: 8px 0 0; min-height: 0; }
+.st-account .st-pro .aic-row:hover { background: transparent; }
+@media (pointer: coarse), (hover: none) { .rest-day { min-width: 44px; min-height: 44px; } .settings-grid button.chip, .settings-grid .row > .btn { min-height: 44px; } }
+
+/* the final scan (iPhone 15 / Pixel 7, 320–768 px): the last small targets on the main screens — 44 px on touch screens */
+@media (pointer: coarse), (hover: none) {
+  .deck-cover-btn, .deck-cover.big .deck-cover-btn { width: 44px !important; height: 44px !important; }
+  .scroll-hint { min-height: 44px; }
+  .deck-head .help-q.in-bar { width: 44px; height: 44px; }
+  .mini-card .tools .icon-btn.sm { width: 44px; height: 44px; }
+  .books-modal [data-filter] .chip { min-width: 44px; min-height: 44px; justify-content: center; }
+}
+/* «Дни отдыха»: seven 44 px days do not fit a 320 px phone in one row — they wrap instead of running off the screen */
+@media (max-width: 400px) { .rest-days { grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); } }

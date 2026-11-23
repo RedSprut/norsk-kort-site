@@ -79,3 +79,8 @@
   .ab .ab-btn:hover { transform: none; }
   .ab-btn.busy::before, .ab-btn.busy .ui-ico { animation-duration: 2.4s; }
 }
+/* «Удалить аккаунт» (the second way to it, besides Settings): quiet, but a full 44 px button */
+.ab-del { margin: 4px 0 0; }
+.ab-del .ab-del-btn { min-height: 44px; color: var(--bad); }
+/* the credits' links on touch screens: 44 px rows (the final scan, iPhone 15 / Pixel 7) */
+@media (pointer: coarse), (hover: none) { .ab-cr-a { min-height: 44px; } }

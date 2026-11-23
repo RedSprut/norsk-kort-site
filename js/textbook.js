@@ -9,6 +9,7 @@
  */
 (function () {
   const DBN = 'norsk-kort-books';
+  const SPK = () => (window.NavIcons ? NavIcons.icon('speaker', 18, 'say-ico') : ''); // the drawn speaker (js/app.js NavIcons)
   const IMG = /\.(jpe?g|png|webp|gif|bmp|tiff?|avif)$/i;
   const CLOSED = { mobi: 'MOBI', azw: 'Kindle AZW', azw3: 'Kindle AZW3', kfx: 'Kindle KFX', djvu: 'DjVu', djv: 'DjVu', doc: 'Word 97–2003 (.doc)', pages: 'Apple Pages', lit: 'Microsoft LIT', ibooks: 'iBooks', key: 'Keynote' };
   const ACCEPT = '.pdf,.epub,.docx,.odt,.fb2,.html,.htm,.xhtml,.txt,.md,.rtf,.cbz,.zip,.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.avif,.mobi,.azw,.azw3,.kfx,.djvu,.djv,.doc,.pages,image/*,application/pdf';
@@ -458,7 +459,7 @@
           <div class="tb-drop-ico">📥</div>
           <b>Выберите файл книги или перетащите его сюда</b>
           <span class="small muted">PDF (в том числе сканы — текст распознаётся) · EPUB · DOCX · ODT · FB2 · HTML · TXT · RTF · фото страниц JPG/PNG (можно сразу много) · CBZ/ZIP</span>
-          <span class="tiny muted">MOBI / AZW (Kindle), DjVu, DOC: переведите в EPUB или PDF бесплатной программой Calibre — или сфотографируйте страницы</span>
+          <span class="tiny muted">MOBI / AZW3 (Kindle) и DjVu открываются в «📖 Читалке» (Библиотека → Мои книги). DOC: переведите в EPUB или PDF бесплатной программой Calibre — или сфотографируйте страницы</span>
         </label>
         <div class="tb-shelf">${list.map(b => {
           const pct = b.n ? Math.round((b.read || []).length / b.n * 100) : 0;
@@ -654,7 +655,7 @@
       const v = Store.settings.exView || 'asis';
       tx.className = `tb-text ${v}`;
       const c = Study.exCache();
-      const say = (t, lang) => `<button class="icon-btn sm ex-say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Только русский' : 'Произнести'}">🔊${lang === 'ru' ? '<small>RU</small>' : ''}</button>`;
+      const say = (t, lang) => `<button class="icon-btn sm ex-say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Только русский' : 'Произнести'}" aria-label="${lang === 'ru' ? 'Произнести только русский' : 'Произнести'}">${SPK()}${lang === 'ru' ? '<small>RU</small>' : ''}</button>`;
       const sent = s => {
         if (!isNo(s)) return `<span class="tb-s">${U.esc(s)}</span>`;
         const tr = Study.sentTr(s);
@@ -1004,7 +1005,7 @@
           maxTokens: 900, temperature: 0.3 }));
         if (!Array.isArray(qs) || !qs.length) throw new Error('нейросеть не вернула вопросы');
         box.innerHTML = `<div class="panel tb-quiz"><h3>✍️ Проверь себя · стр. ${rec.last} <span class="small muted">· ${U.esc(AI.name(AI.lastProvider))}</span></h3>
-          ${qs.map((q, i) => `<div class="tb-q"><div><b>${i + 1}. ${U.esc(q.q)}</b> <button class="icon-btn sm ex-say" data-say="${U.esc(q.q)}" data-lang="no">🔊</button></div>
+          ${qs.map((q, i) => `<div class="tb-q"><div><b>${i + 1}. ${U.esc(q.q)}</b> <button class="icon-btn sm ex-say" data-say="${U.esc(q.q)}" data-lang="no" title="Произнести" aria-label="Произнести">${SPK()}</button></div>
             <div class="small muted">${U.esc(q.q_ru || '')}</div>
             <input class="input" data-ans="${i}" placeholder="Ответ по-норвежски" autocomplete="off" autocapitalize="off" spellcheck="false">
             <div class="tb-fb" data-fb="${i}"></div></div>`).join('')}

@@ -22,6 +22,8 @@
  */
 (function () {
   const esc = s => U.esc(s == null ? '' : String(s));
+  /** the drawn ladder (js/app.js NavIcons) — no coloured emoji as an icon */
+  const LAD = (sz, cls) => (window.NavIcons && NavIcons.icon ? NavIcons.icon('ladder', sz || 18, 'lv-ico' + (cls ? ' ' + cls : '')) : '');
   const low = s => String(s || '').toLowerCase();
   const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
   const DATA = LEVELS;            // every level has its words now: C1 / C2 are the rarest bands of the Kelly list (see load())
@@ -334,7 +336,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
         Job.L = L; lastL = L;
         const deck = deckOf(L);
         if (!deck) { delete s.pending[L]; delete s.stat[L]; Store.save(); continue; } // the deck was deleted meanwhile
-        if (!Job.toast) Job.toast = UI.progressToast(`🪜 ${deckName(L)}: готовлю карточки…`);
+        if (!Job.toast) Job.toast = UI.progressToast(`${deckName(L)}: готовлю карточки…`);
         const batch = s.pending[L].slice(0, BATCH);
         // the free translators rest after «too many requests»: wait a little instead of asking again and again
         if (!AI.available() && Translators.gCooling && Translators.gCooling()) { Job.pause = '⏳ Переводчик Google отдыхает — перевожу другими, медленнее'; emit(); await wait(4000); }
@@ -348,7 +350,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
         if (!s2.pending[L].length) { delete s2.pending[L]; delete s2.stat[L]; }
         Store.save();
         const j = jobInfo(L);
-        if (Job.toast) Job.toast.set(j.done, j.total, `🪜 ${deckName(L)}: ${j.done} из ${j.total}`);
+        if (Job.toast) Job.toast.set(j.done, j.total, `${deckName(L)}: ${j.done} из ${j.total}`);
         emit();
         refreshViews(deck.id);
         await wait(AI.available() ? 600 : 1500);
@@ -357,7 +359,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
       console.warn('levels: job', e);
     } finally {
       Job.running = false; Job.L = ''; Job.pause = '';
-      if (Job.toast) { Job.toast.close(made ? `🪜 Готово: ${U.cards(made)} в «${deckName(lastL)}»${mt ? ' · ⚠️ перевод машинный — перепроверьте' : ''}` : '', mt ? 'warn' : 'good'); Job.toast = null; }
+      if (Job.toast) { Job.toast.close(made ? `Готово: ${U.cards(made)} в «${deckName(lastL)}»${mt ? ' · ⚠️ перевод машинный — перепроверьте' : ''}` : '', mt ? 'warn' : 'good'); Job.toast = null; }
       emit();
       if (lastL) refreshViews((deckOf(lastL) || {}).id);
     }
@@ -502,7 +504,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
     const r = await UI.choose(`🎉 Уровень ${L} пройден!`,
       `<div class="lv-cele"><div class="lv-cele-ico" aria-hidden="true">🏆</div><p>Вы выучили <b>${p.learned}</b> из ${p.total} слов уровня ${badge(L)} — это ${Math.round(p.pct * 100)}%.</p>
        ${N ? `<p><b>Открыть ${N}?</b> Колода ${badge(N)} создастся сама, слова добавятся порциями. Уровни не закрыты — можно учить любые, в любом порядке.</p>` : `<p>Это вершина лестницы — все шесть ступенек пройдены. Дальше — живой язык: новости, NRK, книги и субтитры.</p>`}</div>`,
-      N ? [{ label: 'Позже', value: null, cls: 'ghost' }, { label: `🪜 Открыть ${N}`, value: 'next', cls: 'primary' }] : [{ label: 'Отлично!', value: null, cls: 'primary' }]);
+      N ? [{ label: 'Позже', value: null, cls: 'ghost' }, { label: `${LAD()}<span>Открыть ${N}</span>`, value: 'next', cls: 'primary' }] : [{ label: 'Отлично!', value: null, cls: 'primary' }]);
     celebrating = false;
     if (r === 'next' && N) { st().current = N; Store.save(); await startLevel(N, 30); }
   }
@@ -546,7 +548,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
     okBtn.onclick = async () => {
       m.close();
       const k = await enqueue(L, nextWords(L, n, topic));
-      UI.toast(k ? `🪜 Добавляю ${k} ${U.plural(k, ['слово', 'слова', 'слов'])} в «${deckName(L)}» — карточки появятся по мере готовности` : 'Нечего добавлять', k ? 'good' : 'warn', 5000);
+      UI.toast(k ? `Добавляю ${k} ${U.plural(k, ['слово', 'слова', 'слов'])} в «${deckName(L)}» — карточки появятся по мере готовности` : 'Нечего добавлять', k ? 'good' : 'warn', 5000);
     };
   }
 
@@ -657,7 +659,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
         <p>${r.level ? `Советую начать с уровня ${badge(r.start)}.` : `Советую начать с уровня ${badge('A1')} — самые частые слова.`}${r.level === 'C2' ? ' Все ступеньки лестницы вам по силам — дальше учитесь на живом языке: новости, NRK, книги.' : ''}</p>
         <div class="lv-pl-levels">${DATA.map(L => `<div class="lv-pl-row">${badge(L)}${bar(r.by[L])}<b>${Math.round(r.by[L] * 100)}%</b></div>`).join('')}</div>
         <p class="tiny muted">Примерно: ${PER} слов на уровень. Проходите тест ещё раз когда угодно.</p>
-        <div class="lv-pl-acts"><button class="btn primary" data-start>🪜 Начать с ${r.start}</button>${(r.level || knownW.length) ? '<button class="btn" data-mark>✓ Отметить известное…</button>' : ''}<button class="btn ghost" data-done>Готово</button></div></div>`;
+        <div class="lv-pl-acts"><button class="btn primary" data-start>${LAD()}Начать с ${r.start}</button>${(r.level || knownW.length) ? '<button class="btn" data-mark>✓ Отметить известное…</button>' : ''}<button class="btn ghost" data-done>Готово</button></div></div>`;
       box.querySelector('[data-done]').onclick = () => { m.close(); if (App.view.name === 'levels') App.render(); };
       box.querySelector('[data-start]').onclick = () => { m.close(); startLevel(r.start, 30); };
       const mk = box.querySelector('[data-mark]');
@@ -668,7 +670,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
         if (lower.length) opts.push({ label: `Весь ${lower.join(', ')} (${total})`, value: 'levels', cls: 'primary' });
         const v = await UI.choose('✓ Отметить как известные?',
           `<p>${lower.length ? `Можно считать уровень ${lower.map(badge).join(' ')} пройденным: его слова будут засчитаны как выученные, новых карточек для них не будет, а уже созданные (ещё не изученные) карточки получат «знаю» — следующий повтор примерно через неделю.` : ''}
-           ${knownW.length ? ` Или отметить только слова, которые вы знали в тесте (${knownW.length}).` : ''}</p><p class="small muted">Отменить можно на экране «🪜 Лестница уровней» — «Снять отметку».</p>`, opts);
+           ${knownW.length ? ` Или отметить только слова, которые вы знали в тесте (${knownW.length}).` : ''}</p><p class="small muted">Отменить можно на экране «Лестница уровней» — «Снять отметку».</p>`, opts);
         if (!v) return;
         const n = v === 'levels' ? markKnown(knownW, lower) : markKnown(knownW, []);
         UI.toast(v === 'levels' ? `✓ Уровень ${lower.join(', ')} отмечен как пройденный${n ? ` · карточек со статусом «знаю»: ${n}` : ''}` : `✓ Отмечено слов: ${knownW.length}`, 'good', 5000);
@@ -696,13 +698,13 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
           ${j.pending ? jobHtml(L) : ''}
           <div class="lv-row-acts">${d
             ? `<button class="btn sm primary" data-lv-act="open" data-l="${L}">📂 Открыть колоду</button><button class="btn sm" data-lv-act="add" data-l="${L}">➕ Ещё слова</button>${Store.cards(d.id).length ? `<button class="btn sm" data-lv-act="study" data-l="${L}">▶ Учить</button>` : ''}`
-            : `<button class="btn sm ${L === cur ? 'primary' : ''}" data-lv-act="begin" data-l="${L}">🪜 Начать ${L}</button><button class="btn sm ghost" data-lv-act="add" data-l="${L}">➕ Выбрать слова</button>`}
+            : `<button class="btn sm ${L === cur ? 'primary' : ''}" data-lv-act="begin" data-l="${L}">${LAD()}Начать ${L}</button><button class="btn sm ghost" data-lv-act="add" data-l="${L}">➕ Выбрать слова</button>`}
             ${p.all ? `<button class="btn sm ghost" data-lv-act="unmark" data-l="${L}" title="Снова учитывать только выученные карточки">↶ Снять отметку</button>` : ''}</div>
         </div></div>`;
     }).join('');
     const pl = s.placement;
     return `<div class="lv-page">
-      <div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>🪜 Лестница уровней</h1></div>
+      <div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>${LAD()}Лестница уровней</h1></div>
       <div class="panel lv-intro">
         <p>Учите норвежский по ступенькам: <b>A1 → A2 → B1 → B2 → C1 → C2</b>. У каждой ступеньки своя колода («Колода A1»…) и свой «город тем» — «Еда», «Числа и время», «Дом»… Карточки полные: перевод, род, формы, пример, озвучка, картинка. Уровни не закрыты — можно учить любой.</p>
         <div class="lv-intro-acts"><button class="btn primary" data-lv-act="placement">🎯 Где я сейчас? — тест</button>
@@ -738,7 +740,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
     const sc = scan(), cur = currentLevel(sc), s = st();
     const started = DATA.some(L => deckOf(L)) || s.placement;
     return `<div class="panel lv-home" data-lv-home>
-      <div class="lv-home-top"><b>🪜 Лестница уровней</b><span class="grow"></span><button class="btn sm ${started ? '' : 'primary'}" data-lv-go="ladder">${started ? 'Открыть ›' : 'Начать ›'}</button></div>
+      <div class="lv-home-top"><b>${LAD()}Лестница уровней</b><span class="grow"></span><button class="btn sm ${started ? '' : 'primary'}" data-lv-go="ladder">${started ? 'Открыть ›' : 'Начать ›'}</button></div>
       <div class="lv-home-steps">${DATA.map(L => { const p = progress(L, sc); return `<button type="button" class="lv-step ${L === cur ? 'cur' : ''} ${p.pct >= PASS ? 'done' : ''}" data-lv-go="level" data-l="${L}" title="${L}: выучено ${p.learned} из ${p.total}">${badge(L)}${bar(p.pct, 5)}<small>${Math.round(p.pct * 100)}%</small></button>`; }).join('')}</div>
       ${started ? '' : '<div class="small muted">Не знаете, с чего начать? <a href="#" data-lv-go="placement">🎯 Где я сейчас? — тест на 3 минуты</a></div>'}
     </div>`;
@@ -746,7 +748,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
   function decorateHome(root) {
     const body = root.querySelector('#qa-learn');
     if (body && !body.querySelector('[data-lv-open]')) {
-      body.insertAdjacentHTML('afterbegin', '<button type="button" class="qa-tile" data-lv-open title="Колоды A1 → C2 по темам, тест «Где я сейчас?», прогресс по уровням"><span class="qa-ico" aria-hidden="true">🪜</span><span class="qa-lbl">Лестница уровней</span></button>');
+      body.insertAdjacentHTML('afterbegin', '<button type="button" class="qa-tile" data-lv-open title="Колоды A1 → C2 по темам, тест «Где я сейчас?», прогресс по уровням"><span class="qa-ico" aria-hidden="true">' + LAD(20) + '</span><span class="qa-lbl">Лестница уровней</span></button>');
       const n = root.querySelector('[data-qa-group="learn"] .qa-n'); if (n) n.textContent = body.querySelectorAll('.qa-tile').length;
       body.querySelector('[data-lv-open]').addEventListener('click', e => { e.stopPropagation(); Levels.open(); });
     }
@@ -829,7 +831,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
       if (a === 'listen') { const list = ids(); m.close(); if (window.ListenUI) ListenUI.cards(list, 0, `${deckName(L)} · ${t.name}`); return; }
       m.close();
       if (a === 'study') studyTopic(deck.id, id);
-      else if (a === 'add') enqueue(L, nextWords(L, n, id)).then(k => UI.toast(k ? `🪜 Добавляю ${k} ${U.plural(k, ['слово', 'слова', 'слов'])} темы «${t.name}» — карточки появятся по мере готовности` : 'Нечего добавлять', k ? 'good' : 'warn', 5000));
+      else if (a === 'add') enqueue(L, nextWords(L, n, id)).then(k => UI.toast(k ? `Добавляю ${k} ${U.plural(k, ['слово', 'слова', 'слов'])} темы «${t.name}» — карточки появятся по мере готовности` : 'Нечего добавлять', k ? 'good' : 'warn', 5000));
     });
     return m;
   }
@@ -847,7 +849,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
       const due = cards.filter(c => Store.isDue(c, null, now)).length, fresh = cards.filter(isNewCard).length;
       launcher.insertAdjacentHTML('afterend', `<div class="panel lv-deck" data-lv-deck>
         <div class="lv-deck-top">${badge(L)}<b>${deckName(L)} · ${NAMES[L].toLowerCase()}</b>${bar(p.pct)}<b class="lv-pct">${Math.round(p.pct * 100)}%</b><span class="small muted">выучено ${p.learned} из ${p.total} слов уровня</span>
-          <span class="grow"></span><button class="btn sm" data-lv-d="add">➕ Ещё слова</button><button class="btn sm ghost" data-lv-d="ladder">🪜 Все уровни</button></div>
+          <span class="grow"></span><button class="btn sm" data-lv-d="add">➕ Ещё слова</button><button class="btn sm ghost" data-lv-d="ladder">${LAD()}Все уровни</button></div>
         ${jobHtml(L)}
         ${cards.length ? `<div class="lv-topic-go"><button class="btn primary" data-lv-d="study">▶ Учить весь уровень</button><button class="btn" data-lv-d="listen">🎧 Слушать</button><span class="small muted">${due} к повторению · ${fresh} новых</span></div>` : ''}
         ${cityHtml(L, stats)}
@@ -886,11 +888,11 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
     if (root.querySelector('[data-lv-about]')) return;
     const res = [...root.querySelectorAll('.panel h3')].find(h => /Полезные ресурсы/.test(h.textContent));
     const after = res ? res.closest('.panel') : null;
-    const html = `<div class="panel lv-about" data-lv-about style="grid-column:1/-1"><h3>🪜 Лестница уровней — источники</h3>
+    const html = `<div class="panel lv-about" data-lv-about style="grid-column:1/-1"><h3>${LAD()}Лестница уровней — источники</h3>
       <p class="small">${ATTR_HTML}</p>
       <p class="small muted">Уровни C1 и C2 — самые редкие слова того же списка (≈ места 4400–6000 по частотности): это словарь продвинутого уровня, а не полный «словарь C1–C2» — официального открытого списка для норвежского нет. Слова из учебников (På vei, Stein på stein, Her på berget, Ny i Norge) защищены авторским правом и в приложение не копируются.</p>
       <label class="switch"><input type="checkbox" data-lv-subs-on ${st().subsHL ? 'checked' : ''}><span class="track"></span><span>🎬 Подсвечивать в субтитрах слова моего уровня</span></label>
-      <div style="margin-top:8px"><button class="btn sm" data-lv-open-ladder>🪜 Открыть лестницу</button></div></div>`;
+      <div style="margin-top:8px"><button class="btn sm" data-lv-open-ladder>${LAD()}Открыть лестницу</button></div></div>`;
     if (after) after.insertAdjacentHTML('afterend', html);
     else { const grid = root.querySelector('.panel') && root.querySelector('.panel').parentElement; if (grid) grid.insertAdjacentHTML('beforeend', html); }
     const el = root.querySelector('[data-lv-about]'); if (!el) return;
@@ -929,7 +931,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
     const s = st();
     if (!s.subsHL) {
       el.hidden = false;
-      el.innerHTML = '<button type="button" class="btn sm ghost lv-subs-on" data-lv-s="on" title="Подсветить слова вашего уровня, которых нет в карточках">🪜 Слова моего уровня</button>';
+      el.innerHTML = '<button type="button" class="btn sm ghost lv-subs-on" data-lv-s="on" title="Подсветить слова вашего уровня, которых нет в карточках">' + LAD() + 'Слова моего уровня</button>';
       el.onclick = e => { if (e.target.closest('[data-lv-s="on"]')) { e.stopPropagation(); setSubs(true); } };
       return;
     }
@@ -944,7 +946,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
       el.hidden = false;
       el.innerHTML = `<div class="lv-subs-bar">${parts.length ? parts.map(L => `<span class="lv-subs-n">${badge(L)} в этой передаче <b>${found[L].size}</b> ${U.plural(found[L].size, ['слово', 'слова', 'слов'])} уровня ${L}, которых нет в ваших карточках
           <button type="button" class="btn sm" data-lv-s="add" data-l="${L}" title="${esc([...found[L].keys()].slice(0, 40).join(', '))}">➕ Добавить</button></span>`).join('')
-          : `<span class="small muted">🪜 Слов уровня ${targets.join(' / ')}, которых нет в ваших карточках, здесь пока нет</span>`}
+          : `<span class="small muted">${LAD()}Слов уровня ${targets.join(' / ')}, которых нет в ваших карточках, здесь пока нет</span>`}
         <button type="button" class="btn sm ghost" data-lv-s="off" title="Не подсвечивать слова уровня">✕</button></div>`;
       el.onclick = async e => {
         const b = e.target.closest('[data-lv-s]'); if (!b) return;
@@ -954,7 +956,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
           const L = b.dataset.l, list = [...found[L].keys()];
           b.disabled = true;
           const k = await enqueue(L, list);
-          UI.toast(k ? `🪜 ${k} ${U.plural(k, ['слово', 'слова', 'слов'])} → «${deckName(L)}»: карточки готовятся в фоне` : 'Эти слова уже добавляются', 'good', 5000);
+          UI.toast(k ? `${k} ${U.plural(k, ['слово', 'слова', 'слов'])} → «${deckName(L)}»: карточки готовятся в фоне` : 'Эти слова уже добавляются', 'good', 5000);
         }
       };
     };
@@ -969,11 +971,11 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
    * ===================================================================== */
   Views.levels = function (root) {
     const draw = () => { root.innerHTML = ladderHtml(); checkCelebrate(); };
-    root.innerHTML = '<div class="lv-page"><div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>🪜 Лестница уровней</h1></div><div class="panel"><span class="spinner sm"></span> Загружаю список слов…</div></div>';
+    root.innerHTML = '<div class="lv-page"><div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>' + LAD() + 'Лестница уровней</h1></div><div class="panel"><span class="spinner sm"></span> Загружаю список слов…</div></div>';
     root.onclick = onLadderClick;
     root.onchange = e => { if (e.target.matches('[data-lv-subs-on]')) setSubs(e.target.checked); };
     load().then(() => { if (App.view.name === 'levels' && root.isConnected) draw(); }).catch(() => {
-      root.innerHTML = '<div class="lv-page"><div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>🪜 Лестница уровней</h1></div><div class="panel empty"><p>Не удалось загрузить список слов. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-lv-act="retry">🔄 Повторить</button></div></div>';
+      root.innerHTML = '<div class="lv-page"><div class="lv-head"><button class="icon-btn" data-lv-act="back" title="Назад" aria-label="Назад">←</button><h1>' + LAD() + 'Лестница уровней</h1></div><div class="panel empty"><p>Не удалось загрузить список слов. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-lv-act="retry">🔄 Повторить</button></div></div>';
       root.onclick = e => { if (e.target.closest('[data-lv-act="retry"]')) App.render(); else onLadderClick(e); };
     });
   };

@@ -553,3 +553,9 @@ html[data-at-motion="off"] .at-try { transition: none; }
   .at-try-x { top: 6px; margin-top: 0; }
 }
 @media (max-width: 380px) { .at-try-emo { display: none; } .at-try-act .btn { padding-inline: 8px; } }
+
+/* drawn icons instead of coloured emoji (js/apptheme.js hico / lab — NavIcons) */
+.at-lab { display: inline-flex; align-items: center; gap: .42em; }
+.at-ico { flex: none; vertical-align: -.18em; }
+.at-sw-emo .at-ico { color: var(--sw-acc, currentColor); }
+.at-b-emo .at-ico, .at-try-emo .at-ico, .at-hol-emo .at-ico { color: var(--accent); }

@@ -6,6 +6,15 @@
  * podcasts are one MP3 file. NRK has no subtitles / transcripts for radio and podcasts, so the app makes them itself
  * (NB-Whisper on this device — the same «субтитры создаёт приложение» as for NRK TV programs without subtitles);
  * then translation, «слово (перевод)», speed, cards — as usual. Every item also has «↗» to radio.nrk.no.
+ * W6 — everywhere except the Mac (the site, the store apps): NRK's catalogue (psapi) is Mac-only (decision O-6), so the
+ * window shows what works without it, and nothing that would not:
+ *  - live radio: NRK's own public direct streams (lyd.nrk.no, the links NRK publishes for radio players) in a small
+ *    player here, with the lock-screen controls (Media Session; ⏮ ⏭ = the neighbouring channel). No subtitles on air here
+ *    (those streams can't be read for speech recognition) — said plainly;
+ *  - podcasts: NRK's public RSS feeds (the server's fetch-public «rss» allow-list on the site — today Supernytt; every feed
+ *    below in the store apps, through native HTTP); an episode plays from NRK's own file in the subtitle player, the app
+ *    makes the subtitles on this device (NRK serves the files with CORS + Range), translation, cards — as on the Mac;
+ *  - whatever can't load becomes a calm link to NRK Radio. Never a geo-block workaround, never another host.
  */
 (function () {
   const esc = s => U.esc(s == null ? '' : String(s));
@@ -38,8 +47,61 @@
     ${live ? 'Строки появляются через несколько секунд после того, как прозвучали.' : 'Строки появляются чуть впереди звука — слушать для этого не обязательно.'}
     Такие строки помечены 🤖: в словах возможны ошибки, а карточки из них получат пометку «проверить».`;
 
+  /* ---------- W6: the window without the Mac bridge ---------- */
+  const IC = (n, sz) => (window.MediaIcons ? MediaIcons.icon(n, sz || 18) : '');
+  const LYD = 'https://lyd.nrk.no/';
+  // NRK's public live streams (MP3, the addresses NRK publishes for radio players) — id: radio.nrk.no/direkte/<id>
+  const LIVE = [
+    ['p1', 'NRK P1', 'nrk_radio_p1_ostlandssendingen_mp3_h', 'разговоры, новости, музыка'],
+    ['p2', 'NRK P2', 'nrk_radio_p2_mp3_h', 'культура и общество'],
+    ['p3', 'NRK P3', 'nrk_radio_p3_mp3_h', 'молодёжное радио'],
+    ['alltid_nyheter', 'NRK Nyheter', 'nrk_radio_alltid_nyheter_mp3_h', 'новости весь день'],
+    ['mp3', 'NRK mP3', 'nrk_radio_mp3_mp3_h', 'поп-музыка'],
+    ['klassisk', 'NRK Klassisk', 'nrk_radio_klassisk_mp3_h', 'классическая музыка'],
+    ['radio_super', 'NRK Super', 'nrk_radio_super_mp3_h', 'для детей — простая речь'],
+    ['p1pluss', 'NRK P1+', 'nrk_radio_p1pluss_mp3_h', 'хиты прошлых лет'],
+    ['jazz', 'NRK Jazz', 'nrk_radio_jazz_mp3_h', 'джаз'],
+    ['folkemusikk', 'NRK Folkemusikk', 'nrk_radio_folkemusikk_mp3_h', 'народная музыка'],
+    ['sport', 'NRK Sport', 'nrk_radio_sport_mp3_h', 'спорт в прямом эфире'],
+  ];
+  // NRK podcasts by their public RSS (podkast.nrk.no). srv = the id on the server's fetch-public allow-list (the site)
+  const PODS = [
+    { id: 'supernytt', title: 'Supernytt', sub: 'новости простым языком — для детей и для учеников', srv: 'supernytt' },
+    { id: 'kjapt_oppdatert', title: 'Kjapt oppdatert', sub: 'главные новости за несколько минут' },
+    { id: 'abels_taarn', title: 'Abels tårn', sub: 'вопросы слушателей о науке' },
+    { id: 'ukeslutt', title: 'Ukeslutt', sub: 'итоги недели' },
+    { id: 'loerdagsraadet', title: 'Lørdagsrådet', sub: 'юмор и разговоры' },
+    { id: 'radioresepsjonen', title: 'Radioresepsjonen', sub: 'юмор' },
+  ];
+  const feedUrl = id => `https://podkast.nrk.no/program/${encodeURIComponent(id)}.rss`;
+  /** an episode file from NRK itself (podkast.nrk.no / *.nrk.no over https) — nothing else is played */
+  const nrkFile = u => /^https:\/\/([a-z0-9-]+\.)*nrk\.no\//i.test(String(u || ''));
+  const bridgeOk = () => !!(window.Subs && Subs.macBridge && Subs.macBridge());
+  const onMacHere = () => (window.Net && Net.onMac ? Net.onMac() : /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:');
+  const itunesDur = d => { const p = String(d || '').split(':').map(Number); if (p.some(isNaN)) return 0; return p.reduce((a, x) => a * 60 + x, 0); };
+  const minTxt = s => (s ? (s >= 3600 ? `${Math.floor(s / 3600)} ч ${Math.round(s % 3600 / 60)} мин` : `${Math.max(1, Math.round(s / 60))} мин`) : '');
+  /** RSS text → { title, img, eps: [{ id, title, date, dur, url, img, link }] } (only NRK's own audio files) */
+  function parseFeed(xml, f) {
+    const doc = new DOMParser().parseFromString(String(xml || ''), 'text/xml');
+    if (!doc || doc.querySelector('parsererror')) return null;
+    const ch = doc.querySelector('channel'); if (!ch) return null;
+    const kid = (el, tag) => [...el.children].find(c => c.tagName === tag) || null;
+    const txt = (el, tag) => { const c = kid(el, tag); return c ? String(c.textContent || '').trim() : ''; };
+    const img = (el) => { const it = el.getElementsByTagName('itunes:image')[0]; const u = (it && it.getAttribute('href')) || (el.querySelector(':scope > image > url') || {}).textContent || ''; return /^https:\/\//.test(u) ? u.trim() : ''; };
+    const chImg = img(ch);
+    const eps = [...ch.getElementsByTagName('item')].map(it => {
+      const enc = it.getElementsByTagName('enclosure')[0], url = enc ? enc.getAttribute('url') || '' : '';
+      if (!nrkFile(url) || !/audio|mpeg|mp3/i.test((enc.getAttribute('type') || '') + url)) return null;
+      const durEl = it.getElementsByTagName('itunes:duration')[0];
+      return { id: txt(it, 'guid') || url, title: txt(it, 'title') || 'Выпуск', date: Date.parse(txt(it, 'pubDate')) || 0, dur: durEl ? itunesDur(durEl.textContent) : 0, url, img: img(it) || chImg };
+    }).filter(Boolean);
+    return { title: txt(ch, 'title') || f.title, img: chImg, eps };
+  }
+
   const NrkRadio = {
     open() {
+      // not on the Mac (the site, the store apps): what works without NRK's catalogue — never a dead tile
+      if (!onMacHere()) return this.openPublic();
       const m = this._m = UI.modal({
         title: '📻 NRK Радио и подкасты — слушать с субтитрами и переводом', cls: 'wide nrk-modal nrkr-modal',
         body: `<div class="nrk-top">
@@ -269,6 +331,23 @@
 
     /* ---------- play: a live channel, a podcast episode, a radio program → the subtitle player (sound only) ---------- */
     async play(o) {
+      if (o && o.kind === 'pubpod') {
+        // W6: an episode of NRK's public feed — NRK's own file, no catalogue needed
+        if (!nrkFile(o.mp3)) return;
+        Subs.openStream({
+          kind: 'nrk', radio: true, audio: true, live: false, id: o.id, title: o.title || 'Выпуск', channel: o.sub || 'NRK Radio',
+          link: o.link || RADIO, at: () => o.link || RADIO, hls: '', mp3: o.mp3, duration: o.dur || 0, cues: [], autoAsr: true, poster: o.img || '',
+          subName: 'субтитры, созданные приложением (распознавание речи)', note: NOTE(false),
+        });
+        return;
+      }
+      if (!bridgeOk() && !onMacHere()) {
+        // a programme / channel remembered from the Mac: here it opens in NRK Radio
+        const url = link(o);
+        if (UI.toastAction) UI.toastAction('Эта программа откроется в NRK Radio', 'Открыть', () => window.open(url, '_blank', 'noopener'), 8000);
+        else window.open(url, '_blank', 'noopener');
+        return;
+      }
       const kind = o.kind === 'channel' ? 'channel' : o.kind === 'pep' ? 'podcast' : 'program';
       const url = link(o);
       const busy = UI.busy ? UI.busy(kind === 'channel' ? 'Открываю прямой эфир…' : 'Открываю выпуск…') : null;
@@ -300,6 +379,171 @@
         const msg = err.lock ? err.message : NrkTV.friendly(err);
         UI.toastAction ? UI.toastAction(`${err.lock || '⚠️'} ${msg}`, '↗ Открыть в NRK', () => window.open(url, '_blank', 'noopener'), 9000, err.lock || '⚠️') : UI.toast(msg, 'warn');
       }
+    },
+
+    /* ================= W6: without the Mac bridge ================= */
+    openPublic() {
+      this.stopLive();
+      const m = this._m = UI.modal({
+        title: `${IC('radio', 24)} NRK Радио и подкасты`, cls: 'wide nrk-modal nrkr-modal nrkp-modal',
+        body: `<section class="nrk-sec nrkp-live-sec">
+            <h3 class="nrkp-h">${IC('live', 20)} Прямой эфир NRK</h3>
+            <p class="small muted nrkp-lead">Официальные потоки NRK играют прямо здесь. Субтитров у прямого эфира здесь нет — с субтитрами и переводом слушайте подкасты ниже.</p>
+            <div class="nrkp-bar" data-pbar hidden></div>
+            <div class="nrkp-live" role="list">${LIVE.map(([id, name, , sub]) => `<div class="nrkp-ch" role="listitem">
+                <button type="button" class="nrkp-chb" data-plive="${id}" aria-pressed="false" title="Слушать ${U.esc(name)} — прямой эфир">
+                  <span class="nrkp-ci" aria-hidden="true">${IC('play', 20)}</span><span class="nrkp-ct"><b>${U.esc(name)}</b><small>${U.esc(sub)}</small></span></button>
+                <a class="nrkp-out" href="${RADIO}/direkte/${encodeURIComponent(id)}" target="_blank" rel="noopener" title="Открыть ${U.esc(name)} в приложении или на сайте NRK Radio" aria-label="Открыть ${U.esc(name)} в NRK Radio">${IC('external', 18)}</a>
+              </div>`).join('')}</div>
+          </section>
+          <h3 class="nrkr-h nrkp-h">${IC('podcast', 20)} Подкасты NRK — с субтитрами и переводом</h3>
+          <div data-pods class="nrkp-pods"><div class="nrk-empty"><span class="spinner sm"></span> загружаю подкасты…</div></div>
+          <div class="tiny muted nrk-foot">Звук идёт с серверов NRK. Все программы и подкасты NRK — в приложении или на сайте <a href="${RADIO}" target="_blank" rel="noopener">NRK Radio</a>.</div>`,
+        onClose: () => { this.stopLive(); },
+      });
+      m.el.addEventListener('click', e => this.onPublicClick(e));
+      this.pods();
+      return m;
+    },
+    /* ---- live: one <audio>, the lock screen knows what plays ---- */
+    liveAudio() {
+      if (this._a) return this._a;
+      const a = this._a = new Audio();
+      a.preload = 'none';
+      const sync = () => this.liveBar();
+      ['play', 'playing', 'pause', 'waiting', 'stalled'].forEach(ev => a.addEventListener(ev, sync));
+      a.addEventListener('error', () => {
+        const c = this._live; if (!c || !a.getAttribute('src')) return;
+        this.liveBar('err');
+        const url = `${RADIO}/direkte/${encodeURIComponent(c[0])}`;
+        if (UI.toastAction) UI.toastAction(`${c[1]} сейчас не играет здесь`, 'Открыть в NRK Radio', () => window.open(url, '_blank', 'noopener'), 8000);
+        else UI.toast(`${c[1]} сейчас не играет здесь — откройте его в NRK Radio`, 'warn', 6000);
+      });
+      return a;
+    },
+    playLive(id) {
+      const c = LIVE.find(x => x[0] === id); if (!c) return;
+      const a = this.liveAudio();
+      if (this._live && this._live[0] === id && a.getAttribute('src')) { if (a.paused) { const p = a.play(); if (p && p.catch) p.catch(() => {}); } else a.pause(); return; }
+      if (window.TTS && TTS.stop) { try { TTS.stop(); } catch (e) { /* nothing spoken */ } }
+      if (window.Listen && Listen.p && Listen.stop) { try { Listen.stop(); } catch (e) { /* not playing */ } }
+      this._live = c;
+      a.src = LYD + c[2];
+      const p = a.play(); if (p && p.catch) p.catch(() => {});
+      this.liveSession(c);
+      this.liveBar();
+    },
+    liveSession(c) {
+      if (!('mediaSession' in navigator) || typeof window.MediaMetadata !== 'function') return;
+      const ms = navigator.mediaSession, a = this._a;
+      try { ms.metadata = new MediaMetadata({ title: c[1], artist: 'Прямой эфир · NRK Radio', album: 'Norsk Kort' }); } catch (e) { /* old browser */ }
+      const h = (k, f) => { try { ms.setActionHandler(k, f); } catch (e) { /* not here */ } };
+      const nb = d => { const i = LIVE.findIndex(x => x[0] === (this._live || [])[0]); this.playLive(LIVE[(i + d + LIVE.length) % LIVE.length][0]); };
+      h('play', () => { const p = a.play(); if (p && p.catch) p.catch(() => {}); });
+      h('pause', () => a.pause());
+      h('stop', () => this.stopLive());
+      h('previoustrack', () => nb(-1));
+      h('nexttrack', () => nb(1));
+      h('seekbackward', null); h('seekforward', null);
+      this._ms = true;
+    },
+    stopLive() {
+      const a = this._a;
+      if (a) { a.pause(); a.removeAttribute('src'); try { a.load(); } catch (e) { /* ignore */ } }
+      this._live = null;
+      if (this._ms && 'mediaSession' in navigator) {
+        this._ms = false;
+        const ms = navigator.mediaSession;
+        try { ms.metadata = null; ms.playbackState = 'none'; } catch (e) { /* ignore */ }
+        ['play', 'pause', 'stop', 'previoustrack', 'nexttrack'].forEach(k => { try { ms.setActionHandler(k, null); } catch (e) { /* ignore */ } });
+      }
+      this.liveBar();
+    },
+    liveBar(state) {
+      const m = this._m; if (!m || !m.el.isConnected) return;
+      const a = this._a, c = this._live, bar = m.$('[data-pbar]');
+      const on = !!(c && a && a.getAttribute('src')), playing = on && !a.paused;
+      const wait = on && !a.paused && a.readyState < 3;
+      if (bar) {
+        bar.hidden = !on;
+        if (on) bar.innerHTML = `<span class="nrkp-eq${playing && !wait ? ' on' : ''}" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="nrkp-now"><b>${U.esc(c[1])}</b><small>${state === 'err' ? 'не играет — попробуйте позже' : wait ? 'подключаюсь…' : playing ? 'в прямом эфире' : 'на паузе'}</small></span>
+          <button type="button" class="btn sm primary nrkp-pp" data-plive="${c[0]}">${playing ? IC('pause', 18) + ' Пауза' : IC('play', 18) + ' Слушать'}</button>
+          ${typeof a.webkitShowPlaybackTargetPicker === 'function' ? `<button type="button" class="btn sm ghost nrkp-air" data-pair title="AirPlay — на Apple TV или колонку">${IC('airplay', 18)} AirPlay</button>` : ''}
+          <button type="button" class="btn sm ghost nrkp-stop" data-pstop title="Выключить радио" aria-label="Выключить радио">${IC('stop', 18)}</button>`;
+      }
+      if ('mediaSession' in navigator && this._ms) { try { navigator.mediaSession.playbackState = playing ? 'playing' : on ? 'paused' : 'none'; } catch (e) { /* ignore */ } }
+      m.$$('[data-plive]').forEach(b => {
+        if (b.closest('[data-pbar]')) return;
+        const me = on && c[0] === b.dataset.plive;
+        b.classList.toggle('on', me); b.setAttribute('aria-pressed', me && playing ? 'true' : 'false');
+        const ic = b.querySelector('.nrkp-ci'); if (ic) ic.innerHTML = IC(me && playing ? 'pause' : 'play', 20);
+      });
+    },
+    /* ---- podcasts: NRK's public RSS (the server's allow-list on the site, every feed in the store apps) ---- */
+    async feed(f) {
+      if (this._feeds && this._feeds[f.id]) return this._feeds[f.id];
+      if (!window.Net || !Net.get) return null;
+      const xml = await Net.get(feedUrl(f.id), { kind: 'rss', id: f.srv || undefined, as: 'text' });
+      const r = parseFeed(xml, f);
+      if (!r || !r.eps.length) return null;
+      (this._feeds = this._feeds || {})[f.id] = r;
+      return r;
+    },
+    async pods() {
+      const box = () => this._m && this._m.el.isConnected && this._m.$('[data-pods]');
+      // the site reaches only the feeds on the server's list; the store apps fetch any feed natively
+      const native = !!(window.Net && Net.isNative && Net.isNative());
+      const server = !!(window.NKConfig && NKConfig.ready());
+      const list = PODS.filter(f => native || (server && f.srv));
+      const got = await Promise.all(list.map(f => this.feed(f).then(r => (r ? { f, r } : null)).catch(() => null)));
+      const ok = got.filter(Boolean);
+      const b = box(); if (!b) return;
+      if (!ok.length) {
+        b.innerHTML = `<div class="nkm-card"><span class="nkm-ico">${IC('podcast', 34)}</span><div class="nkm-txt"><b>Подкасты NRK слушайте в NRK Radio</b>
+            <p>Здесь подкасты сейчас не загрузились. В NRK Radio — все выпуски; а чтобы учить слова с субтитрами и переводом, откройте свой аудиофайл в разделе «Своё видео».</p>
+            <div class="nkm-acts"><a class="btn primary" href="${RADIO}/podkast" target="_blank" rel="noopener">${IC('external')} Подкасты в NRK Radio</a>
+            ${window.Subs ? `<button type="button" class="btn" data-pown>${IC('file')} Свой файл</button>` : ''}</div></div></div>`;
+        return;
+      }
+      b.innerHTML = `<div class="nrk-grid">${ok.map(({ f, r }) => `<div class="nrk-tile">
+          <button class="nrk-tile-main" data-ppod="${U.esc(f.id)}" title="Выпуски «${U.esc(r.title)}»">
+            <span class="nrk-img nrkr-img">${r.img ? `<img src="${U.esc(r.img)}" alt="" loading="lazy">` : `<span class="nrk-noimg">${IC('podcast', 34)}</span>`}<span class="nrk-tag">подкаст · ${r.eps.length} ${U.plural(r.eps.length, ['выпуск', 'выпуска', 'выпусков'])}</span></span>
+            <span class="nrk-t"><b>${U.esc(r.title)}</b><small>${U.esc(f.sub)}</small></span></button>
+          <a class="nrk-ext" href="${RADIO}/podkast/${encodeURIComponent(f.id)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте NRK Radio" aria-label="Открыть в NRK Radio">${IC('external', 18)}</a>
+        </div>`).join('')}</div>
+        ${ok.length < PODS.length ? `<div class="small muted nrkp-more">Ещё подкасты NRK — <a href="${RADIO}/podkast" target="_blank" rel="noopener">в NRK Radio</a>.</div>` : ''}`;
+    },
+    podEps(id) {
+      const f = PODS.find(x => x.id === id), r = f && this._feeds && this._feeds[id], b = this._m && this._m.$('[data-pods]');
+      if (!f || !r || !b) return;
+      b.innerHTML = `<div class="nrk-nav"><button class="btn sm ghost" data-pback>${IC('back')} Все подкасты</button></div>
+        <div class="nrk-series-head nrkr-head">${r.img ? `<img src="${U.esc(r.img)}" alt="">` : `<span class="nrk-noimg">${IC('podcast', 34)}</span>`}
+          <div><h3>${U.esc(r.title)}</h3><div class="small muted">${U.esc(f.sub)}</div>
+          <a class="btn sm ghost" href="${RADIO}/podkast/${encodeURIComponent(id)}" target="_blank" rel="noopener">${IC('external')} NRK Radio</a></div></div>
+        <div class="nrk-grid">${r.eps.slice(0, 40).map((ep, i) => `<div class="nrk-tile">
+            <button class="nrk-tile-main" data-pep="${i}" data-pid="${U.esc(id)}" title="Слушать здесь — субтитры создаст приложение, с переводом">
+              <span class="nrk-img nrkr-img">${ep.img ? `<img src="${U.esc(ep.img)}" alt="" loading="lazy">` : `<span class="nrk-noimg">${IC('podcast', 34)}</span>`}${ep.dur ? `<span class="nrk-tag">${minTxt(ep.dur)}</span>` : ''}<span class="nrk-tile-pl" aria-hidden="true">${IC('play', 22)}</span></span>
+              <span class="nrk-t"><b>${U.esc(ep.title)}</b>${ep.date ? `<small class="muted">${U.esc(new Date(ep.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }))}</small>` : ''}</span></button>
+          </div>`).join('')}</div>`;
+      b.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    },
+    /** a podcast episode from NRK's public feed → the subtitle player (sound only; the app makes the subtitles) */
+    playPod(id, i) {
+      const f = PODS.find(x => x.id === id), r = f && this._feeds && this._feeds[id], ep = r && r.eps[i];
+      if (!ep || !nrkFile(ep.url)) return;
+      this.stopLive();
+      this.play({ kind: 'pubpod', id: 'pod:' + id + ':' + String(ep.id).replace(/[^\w-]+/g, '').slice(-40), title: ep.title, sub: r.title, img: ep.img, mp3: ep.url, dur: ep.dur, link: `${RADIO}/podkast/${encodeURIComponent(id)}` });
+    },
+    onPublicClick(e) {
+      const t = e.target;
+      const lv = t.closest('[data-plive]'); if (lv) { this.playLive(lv.dataset.plive); return; }
+      if (t.closest('[data-pstop]')) { this.stopLive(); return; }
+      if (t.closest('[data-pair]')) { try { this._a.webkitShowPlaybackTargetPicker(); } catch (err) { UI.toast('AirPlay сейчас недоступен — выберите колонку в Пункте управления', 'warn', 5000); } return; }
+      const pd = t.closest('[data-ppod]'); if (pd) { this.podEps(pd.dataset.ppod); return; }
+      const ep = t.closest('[data-pep]'); if (ep) { this.playPod(ep.dataset.pid, +ep.dataset.pep); return; }
+      if (t.closest('[data-pback]')) { this.pods(); return; }
+      if (t.closest('[data-pown]')) { if (this._m) this._m.close(); Subs.open(); }
     },
 
     onClick(e) {

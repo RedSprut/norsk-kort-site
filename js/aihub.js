@@ -45,8 +45,8 @@
 
   /* ---------- card fields, in the order people read them ---------- */
   const ORDER = ['no', 'ru', 'uk', 'wordClass', 'forms', 'description', 'example', 'exampleRu', 'examples', 'synonyms', 'en', 'imagePrompt'];
-  const FNAME = { no: '🇳🇴 Норвежский', ru: '🇷🇺 Перевод', uk: '🇺🇦 Перевод на украинский', description: '📝 Объяснение', example: '💬 Пример', exampleRu: '💬 Перевод примера',
-    wordClass: '🏷 Часть речи', forms: '📚 Формы слова', examples: '💬 Примеры по формам', synonyms: '🔁 Синонимы', en: '🇬🇧 English (для картинки)', imagePrompt: '🎨 Подсказка для картинки' };
+  const FNAME = { no: 'Норвежский', ru: 'Перевод', uk: 'Перевод на украинский', description: 'Объяснение', example: 'Пример', exampleRu: 'Перевод примера',
+    wordClass: 'Часть речи', forms: 'Формы слова', examples: 'Примеры по формам', synonyms: 'Синонимы', en: 'English (для картинки)', imagePrompt: 'Подсказка для картинки' };
   /** list fields (the forms, examples, synonyms): stored as arrays, shown as text in the report */
   const ARR = f => f === 'forms' || f === 'examples' || f === 'synonyms';
   // lists compared by their content: the card store keeps a form's keys in its own order (label, tag, note, no, ru),
@@ -97,8 +97,8 @@
   const ART = s => { const m = /^\s*(en|ei|et)\s/i.exec(String(s || '')); return m ? m[1].toLowerCase() : ''; };
   /** report filters: what the person may want to look at */
   const FILTERS = [
-    ['all', 'Всё'], ['pending', '⏳ Ждут решения'], ['ru', '🇷🇺 Переводы'], ['no', '🇳🇴 Написание'], ['gender', '🌳 Род и артикль'],
-    ['description', '📝 Объяснения'], ['example', '💬 Примеры'], ['wordClass', '📚 Формы и часть речи'], ['side', '🎨 Картинка'], ['issues', '⚠️ Только ошибки'],
+    ['all', 'Всё'], ['pending', 'Ждут решения'], ['ru', 'Переводы'], ['no', 'Написание'], ['gender', 'Род и артикль'],
+    ['description', 'Объяснения'], ['example', 'Примеры'], ['wordClass', 'Формы и часть речи'], ['side', 'Картинка'], ['issues', 'Только ошибки'],
   ];
   const FILTER_FIELDS = { ru: ['ru', 'uk'], no: ['no'], description: ['description', 'synonyms'], example: ['example', 'exampleRu', 'examples'], wordClass: ['wordClass', 'forms'], side: ['en', 'imagePrompt'] };
 
@@ -114,14 +114,15 @@
     if (/связ|интернет|network|fetch|failed|load failed|не отвечает|мост|offline|timeout|timed out/i.test(m)) return 'net';
     return 'odd';
   }
+  const NI = (n, sz) => (window.NavIcons ? NavIcons.icon(n, sz || 18) : '');
   const WHY = {
-    limit: () => ({ icon: '⏳', title: 'Лимит нейросети закончился — продолжим позже', text: 'Всё, что уже проверено, сохранено. Проверка продолжится сама, когда лимит восстановится, — или подключите ещё одну бесплатную нейросеть (Gemini, Groq), тогда она пойдёт дальше сразу.' }),
-    down: () => ({ icon: '🔌', title: 'Нейросеть на этом Mac не отвечает', text: 'Похоже, программа Ollama не запущена или в ней нет нужной модели. Откройте её — проверка продолжится сама. Или выберите другую нейросеть.' }),
-    key: () => ({ icon: '🔑', title: 'Ключ нейросети не подошёл', text: 'Похоже, ключ устарел или его отозвали. Откройте ⚙️ Настройки → 🤖 Нейросети, вставьте новый ключ и нажмите «🔌 Проверить». Всё проверенное сохранено.' }),
-    auth: () => ({ icon: '🔑', title: 'Claude просит войти ещё раз', text: 'Вход Claude Code на этом Mac устарел. Ниже — что сделать, это пара минут. Всё проверенное сохранено.' }),
-    net: () => ({ icon: '📡', title: 'Нет связи с нейросетью', text: `Проверьте интернет${window.AI && AI.onMac && AI.onMac() ? ' (и запущен ли мост на Mac)' : ''} и нажмите «▶ Продолжить». Всё проверенное сохранено.` }),
-    none: () => ({ icon: '🤖', title: 'Нейросеть не подключена', text: 'Подключите её в ⚙️ Настройках (Gemini и Groq — бесплатно) и нажмите «▶ Продолжить». Всё проверенное сохранено.' }),
-    odd: () => ({ icon: '🤔', title: 'Нейросеть ответила непонятно', text: 'Так иногда бывает. Всё проверенное сохранено — нажмите «▶ Продолжить», попробуем ещё раз.' }),
+    limit: () => ({ icon: NI('hourglass'), title: 'Лимит нейросети закончился — продолжим позже', text: 'Всё, что уже проверено, сохранено. Проверка продолжится сама, когда лимит восстановится, — или подключите ещё одну бесплатную нейросеть (Gemini, Groq), тогда она пойдёт дальше сразу.' }),
+    down: () => ({ icon: NI('plug'), title: 'Нейросеть на этом Mac не отвечает', text: 'Похоже, программа Ollama не запущена или в ней нет нужной модели. Откройте её — проверка продолжится сама. Или выберите другую нейросеть.' }),
+    key: () => ({ icon: NI('key'), title: 'Ключ нейросети не подошёл', text: 'Похоже, ключ устарел или его отозвали. Откройте Настройки → Нейросети, вставьте новый ключ и нажмите «Проверить». Всё проверенное сохранено.' }),
+    auth: () => ({ icon: NI('key'), title: 'Claude просит войти ещё раз', text: 'Вход Claude Code на этом Mac устарел. Ниже — что сделать, это пара минут. Всё проверенное сохранено.' }),
+    net: () => ({ icon: NI('wifi-off'), title: 'Нет связи с нейросетью', text: `Проверьте интернет${window.AI && AI.onMac && AI.onMac() ? ' (и запущен ли мост на Mac)' : ''} и нажмите «▶ Продолжить». Всё проверенное сохранено.` }),
+    none: () => ({ icon: (window.App && App.robotSvg ? App.robotSvg(18) : ''), title: 'Нейросеть не подключена', text: `Подключите её в Настройках (${window.Pro && Pro.offered && Pro.offered() ? 'Norsk Kort Pro или бесплатно — Gemini и Groq' : 'Gemini и Groq — бесплатно'}) и нажмите «▶ Продолжить». Всё проверенное сохранено.` }),
+    odd: () => ({ icon: NI('help'), title: 'Нейросеть ответила непонятно', text: 'Так иногда бывает. Всё проверенное сохранено — нажмите «▶ Продолжить», попробуем ещё раз.' }),
   };
 
   /* ---------- small helpers about the AI ---------- */
@@ -165,7 +166,8 @@
    * what happened in plain words, the exact commands for THIS Mac (from the bridge's /api/status), a long token
    * that does not expire for about a year (tools/claude-token.sh), «Я вошёл — проверить снова», another AI.
    * ===================================================================== */
-  const ROOT_FALLBACK = '/Users/sprut/Norsk - Russisk';
+  // the app's folder on THIS Mac: the bridge says it (tokenCmd); else the opened file's folder; else the home folder
+  const ROOT_FALLBACK = (() => { try { if (location.protocol === 'file:') return decodeURIComponent(location.pathname).replace(/\/[^/]*$/, ''); } catch (e) { /* below */ } return '$HOME/Norsk - Russisk'; })();
   function authCmds() {
     const b = (window.AI && AI.bridge) || {};
     const token = b.tokenCmd || `bash "${ROOT_FALLBACK}/tools/claude-token.sh"`;
@@ -178,7 +180,7 @@
     return Object.keys(AI.PROVIDERS).filter(id => id !== 'claude' && !AI.PROVIDERS[id].noKey && AI.configured(id) && !(AI.resting && AI.resting(id)))
       .sort((a, b) => (AI.PROVIDERS[b].free ? 1 : 0) - (AI.PROVIDERS[a].free ? 1 : 0)).slice(0, 2);
   }
-  const cmdBox = cmd => `<div class="aih-cmd"><code translate="no">${esc(cmd)}</code><button type="button" class="btn sm" data-copy="${esc(cmd)}">📋 Скопировать команду</button></div>`;
+  const cmdBox = cmd => `<div class="aih-cmd"><code translate="no">${esc(cmd)}</code><button type="button" class="btn sm" data-copy="${esc(cmd)}">${NI('copy')}<span>Скопировать команду</span></button></div>`;
   function authPanelHtml() {
     const c = authCmds(), others = otherAIs(), tokenOld = c.src === 'token';
     const saved = !RUN ? 'Ничего не потерялось.' : runDone() ? `Проверено ${runDone()} из ${runTotal()} — всё сохранено, проверка продолжится с того же места.`
@@ -1062,7 +1064,7 @@
     el.className = 'aih-pill ' + st;
     el.style.setProperty('--p', p);
     const wk = st === 'limit' && RUN.wake;
-    const label = st === 'run' ? `Проверяю: ${p}%` : st === 'pausing' ? 'Ставлю на паузу…' : wk ? `⏳ Продолжу сам ${atText(RUN.wake.at)}` : st === 'limit' ? `${WHY[RUN.why || 'limit']().icon} Пауза: ${RUN.why === 'limit' ? 'лимит' : RUN.why === 'auth' ? 'нужен вход в Claude' : 'ждёт вас'}` : `⏸ На паузе: ${p}%`;
+    const label = st === 'run' ? `Проверяю: ${p}%` : st === 'pausing' ? 'Ставлю на паузу…' : wk ? `Продолжу сам ${atText(RUN.wake.at)}` : st === 'limit' ? `Пауза: ${RUN.why === 'limit' ? 'лимит' : RUN.why === 'auth' ? 'нужен вход в Claude' : 'ждёт вас'}` : `На паузе: ${p}%`;
     el.innerHTML = `<button type="button" class="aih-pill-main" data-pill="open" aria-label="Проверка нейросетью: ${p}% — открыть">
         <span class="aih-pill-ring" aria-hidden="true"><span class="aih-pill-bot">${workLogo(aiId(), { size: 30, on: st === 'run' || st === 'pausing' })}</span></span>
         <span class="aih-pill-t"><b>${esc(label)}</b><small>${esc(dn ? `«${dn}» · ` : '')}${runDone()} из ${runTotal()}</small></span></button>
@@ -1201,7 +1203,7 @@
       return fieldsOf(it).length > 0;
     };
 
-    const stChip = (st, added) => ({ pending: '<span class="aihr-st pend">⏳ ждёт решения</span>', applied: `<span class="aihr-st ok">✓ ${added ? 'добавлено' : 'исправлено'}</span>`, accepted: '<span class="aihr-st ok">✓ принято</span>',
+    const stChip = (st, added) => ({ pending: `<span class="aihr-st pend">${NI('hourglass', 14)}ждёт решения</span>`, applied: `<span class="aihr-st ok">✓ ${added ? 'добавлено' : 'исправлено'}</span>`, accepted: '<span class="aihr-st ok">✓ принято</span>',
       rejected: '<span class="aihr-st no">✕ отклонено</span>', undone: '<span class="aihr-st back">↩ откачено</span>' })[st] || '';
     const fieldRow = (it, f) => {
       const x = it.f[f];
@@ -1220,6 +1222,12 @@
           ${act ? `<div class="aihr-fact">${act}</div>` : ''}
         </div>`;
     };
+    /** ⚑ W7: «Пожаловаться» on what the neural network said about this card */
+    const reportOf = it => {
+      if (!(window.Views && Views.reportBtn)) return '';
+      const ans = [(it.issues || []).join('; '), ...ORDER.filter(f => it.f && it.f[f]).map(f => `${FNAME[f] || f}: ${it.f[f].old || '—'} → ${it.f[f].new}`)].filter(Boolean).join('\n');
+      return Views.reportBtn({ answer: ans, question: `${it.no || ''} — ${it.ru || ''}`, task: 'check', provider: (rep.by || []).map(aiName).join(', '), compact: true });
+    };
     const itemHtml = (it, d) => {
       const fs = fieldsOf(it);
       const all = ORDER.filter(f => it.f && it.f[f]);
@@ -1227,8 +1235,8 @@
       const appl = all.filter(f => it.f[f].st === 'applied' || it.f[f].st === 'accepted').length;
       return `<div class="aihr-item ${it.ok ? '' : 'bad'} ${it.gone ? 'gone' : ''}" data-card="${esc(it.id)}" data-deck="${esc(d.id)}">
           <div class="aihr-ihead"><span class="aihr-word"><b>${esc(it.no)}</b><span class="muted"> — </span><span class="aihr-ru">${esc(it.ru)}</span></span>
-            ${it.gone ? '<span class="aihr-st no">карточка удалена</span>' : `<button type="button" class="btn sm ghost" data-a="open" title="Открыть карточку в редакторе">✏️ Открыть</button>`}</div>
-          ${(it.issues || []).length ? `<div class="aihr-issues"><span class="aihr-ilabel">${it.ok ? '💬 Нейросеть заметила' : '⚠️ Что не так'}:</span><ul>${it.issues.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+            ${reportOf(it)}${it.gone ? '<span class="aihr-st no">карточка удалена</span>' : `<button type="button" class="btn sm ghost" data-a="open" title="Открыть карточку в редакторе">${NI('edit')}<span>Открыть</span></button>`}</div>
+          ${(it.issues || []).length ? `<div class="aihr-issues"><span class="aihr-ilabel ui-t">${it.ok ? `${NI('dialogue', 16)}<span>Нейросеть заметила</span>` : `${NI('alert', 16)}<span>Что не так</span>`}:</span><ul>${it.issues.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
           ${fs.map(f => fieldRow(it, f)).join('')}
           ${!all.length ? '<div class="small muted">Исправлений нет — только замечание.</div>' : ''}
           ${it.gone || (!pend && !appl) ? '' : `<div class="aihr-iact">
@@ -1243,7 +1251,7 @@
       const lim = more[d.id] || 40;
       if (filter !== 'all' || q) { if (!items.length) return ''; }
       return `<details class="aihr-deck" data-deck="${esc(d.id)}" ${isOpen ? 'open' : ''}>
-          <summary><span class="aihr-dname">🗂 ${esc(d.name)}</span>
+          <summary><span class="aihr-dname">${NI('cards', 16)}<span>${esc(d.name)}</span></span>
             <span class="aihr-dnums"><span>✓ ${d.checked}</span>${s.fixed ? `<span class="good">✎ ${s.fixed}</span>` : ''}${s.added ? `<span class="good" title="дополнено: формы и примеры">＋ ${s.added}</span>` : ''}${s.pending ? `<span class="pend">⏳ ${s.pending}</span>` : ''}${filter !== 'all' || q ? `<span class="muted">найдено: ${items.length}</span>` : ''}</span><span class="aihr-chev" aria-hidden="true">›</span></summary>
           ${isOpen ? `<div class="aihr-dbody">
             ${s.pending || s.applied ? `<div class="aihr-dact">
@@ -1261,10 +1269,10 @@
       const when = window.U && U.fmtDate ? U.fmtDate(rep.at) : new Date(rep.at).toLocaleString('ru');
       const run = isRunning();
       const minimal = `<div class="aihr-decks-min">${rep.decks.map(d => { const ds = deckSums(d); return `<button type="button" class="aihr-drow" data-a="deck-open" data-deck="${esc(d.id)}">
-          <span class="aihr-dname">🗂 ${esc(d.name)}</span><span class="aihr-dbar" style="--p:${pct(d.checked + d.skipped, d.total)}"><i></i></span>
+          <span class="aihr-dname">${NI('cards', 16)}<span>${esc(d.name)}</span></span><span class="aihr-dbar" style="--p:${pct(d.checked + d.skipped, d.total)}"><i></i></span>
           <span class="aihr-dnums"><span>✓ ${d.checked}${d.total > d.checked ? `<small> из ${d.total}</small>` : ''}</span>${ds.fixed ? `<span class="good">✎ ${ds.fixed}</span>` : ''}${ds.added ? `<span class="good" title="дополнено: формы и примеры">＋ ${ds.added}</span>` : ''}${ds.pending ? `<span class="pend">⏳ ${ds.pending}</span>` : ''}</span><span class="aihr-chev" aria-hidden="true">›</span></button>`; }).join('')}</div>`;
       m.$('[data-rep]').innerHTML = `
-        <div class="aihr-meta">${esc(when)}${by ? ` · ${by}` : ''} · ${rep.mode === 'auto' ? '✍️ исправлялось сразу' : '🙋 сначала показать'}${run ? ` · <b class="aihr-live">${workLogo(aiId(), { size: 20, on: live })} проверка ещё идёт</b>` : rep.status === 'stopped' ? ' · остановлена' : rep.status === 'paused' ? ' · на паузе' : ''}</div>
+        <div class="aihr-meta">${esc(when)}${by ? ` · ${by}` : ''} · ${rep.mode === 'auto' ? 'исправлялось сразу' : 'сначала показать'}${run ? ` · <b class="aihr-live">${workLogo(aiId(), { size: 20, on: live })} проверка ещё идёт</b>` : rep.status === 'stopped' ? ' · остановлена' : rep.status === 'paused' ? ' · на паузе' : ''}</div>
         <div class="aihr-big">
           <div class="aihr-n"><b>${s.checked}</b><small>проверено</small></div>
           <div class="aihr-n fix"><b>${rep.mode === 'auto' || s.fixed ? s.fixed : s.pendingCards}</b><small>${rep.mode === 'auto' || s.fixed ? 'исправлено' : 'с предложениями'}</small></div>
@@ -1272,13 +1280,14 @@
           <div class="aihr-n good"><b>${s.ok}</b><small>без замечаний</small></div>
           ${s.skipped ? `<div class="aihr-n skip"><b>${s.skipped}</b><small>не ответила — проверим потом</small></div>` : ''}
         </div>
-        ${tokTotal(rep.tok) ? `<div class="aihr-tok">🔢 Токены: ${rep.tok.est ? '≈ ' : ''}<b>${fmtN(tokTotal(rep.tok))}</b> (запрос — ${fmtN(rep.tok.in)}, ответ — ${fmtN(rep.tok.out)}${rep.tok.req ? `, ${rep.tok.req} ${plural(rep.tok.req, ['запрос', 'запроса', 'запросов'])}` : ''}${s.checked ? `, ≈ ${fmtN(tokTotal(rep.tok) / s.checked)} на карточку` : ''}) · ${esc(costLine(rep.tok))}
+        ${window.Views && Views.aiNote ? Views.aiNote({ cls: 'ai-note-top' }) : ''}
+        ${tokTotal(rep.tok) ? `<div class="aihr-tok">Токены: ${rep.tok.est ? '≈ ' : ''}<b>${fmtN(tokTotal(rep.tok))}</b> (запрос — ${fmtN(rep.tok.in)}, ответ — ${fmtN(rep.tok.out)}${rep.tok.req ? `, ${rep.tok.req} ${plural(rep.tok.req, ['запрос', 'запроса', 'запросов'])}` : ''}${s.checked ? `, ≈ ${fmtN(tokTotal(rep.tok) / s.checked)} на карточку` : ''}) · ${esc(costLine(rep.tok))}
           <small>${rep.tok.est ? 'Часть сервисов не сообщает число токенов — там посчитано примерно (≈ 4 знака на токен). ' : ''}Живой показ токенов не тратит — анимацию рисует приложение.</small></div>` : ''}
-        ${s.pending ? `<div class="aihr-pending">⏳ <span>Ждут вашего решения: <b>${s.pending}</b> ${plural(s.pending, ['исправление', 'исправления', 'исправлений'])} в ${s.pendingCards} ${plural(s.pendingCards, ['карточке', 'карточках', 'карточках'])}. Зачёркнуто — как было, <span class="aihr-new">зелёным</span> — как предлагает нейросеть.</span></div>` : ''}
+        ${s.pending ? `<div class="aihr-pending">${NI('hourglass')} <span>Ждут вашего решения: <b>${s.pending}</b> ${plural(s.pending, ['исправление', 'исправления', 'исправлений'])} в ${s.pendingCards} ${plural(s.pendingCards, ['карточке', 'карточках', 'карточках'])}. Зачёркнуто — как было, <span class="aihr-new">зелёным</span> — как предлагает нейросеть.</span></div>` : ''}
         ${!detail ? `<div class="aihr-label">По колодам</div>${minimal}
-          <button type="button" class="btn lg aihr-more-btn" data-a="detail">🔎 Показать подробности${s.items ? ` · ${s.items} ${plural(s.items, ['карточка', 'карточки', 'карточек'])} с замечаниями` : ''}</button>`
+          <button type="button" class="btn lg aihr-more-btn" data-a="detail">Показать подробности${s.items ? ` · ${s.items} ${plural(s.items, ['карточка', 'карточки', 'карточек'])} с замечаниями` : ''}</button>`
         : `<div class="aihr-tools">
-            <label class="aihr-search"><span aria-hidden="true">🔎</span><input type="search" data-q placeholder="Найти слово…" value="${esc(q)}" aria-label="Найти слово в отчёте"></label>
+            <label class="aihr-search"><span aria-hidden="true">${NI('search', 16)}</span><input type="search" data-q placeholder="Найти слово…" value="${esc(q)}" aria-label="Найти слово в отчёте"></label>
             <div class="aihr-filters" role="tablist" aria-label="Что показать">${FILTERS.map(([k, l]) => `<button type="button" class="aihr-chip ${filter === k ? 'on' : ''}" data-filter="${k}" role="tab" aria-selected="${filter === k}">${l}</button>`).join('')}</div>
           </div>
           <div class="aihr-decks">${rep.decks.map(deckHtml).join('') || '<p class="muted center">По этому фильтру ничего нет.</p>'}</div>
@@ -1407,7 +1416,7 @@
       const runCard = RUN ? `<button type="button" class="aih-runcard" data-h="run"><span class="aih-pill-ring" style="--p:${pct(runDone(), runTotal())}" aria-hidden="true"><span class="aih-pill-bot">${bot(live)}</span></span>
           <span><b>${live ? `Идёт проверка: ${pct(runDone(), runTotal())}%` : RUN.status === 'limit' ? `${WHY[RUN.why || 'limit']().icon} Проверка ждёт: ${pct(runDone(), runTotal())}%` : `⏸ Проверка на паузе: ${pct(runDone(), runTotal())}%`}</b>
           <small>${runDone()} из ${runTotal()} · нажмите, чтобы ${live ? 'посмотреть' : 'продолжить'}</small></span><span class="aih-go" aria-hidden="true">›</span></button>` : '';
-      return `${o.welcome && on ? `<div class="aih-welcome"><span class="aih-party" aria-hidden="true">🎉</span><div><b>Готово! ${esc(aiName(aiId()))} подключена.</b><span>Вот что она умеет в приложении. Начните с первой кнопки — «Проверить все колоды».</span></div></div>` : ''}
+      return `${o.welcome && on ? `<div class="aih-welcome"><span class="aih-party" aria-hidden="true">${NI('sparkle', 34)}</span><div><b>Готово! ${esc(aiName(aiId()))} подключена.</b><span>Вот что она умеет в приложении. Начните с первой кнопки — «Проверить все колоды».</span></div></div>` : ''}
         ${statusHtml()}
         ${runCard}
         ${!on ? `<div class="aih-connect"><p>Нейросеть проверяет перевод, исправляет ошибки и пишет объяснения. Подключить её можно <b>бесплатно за 2 минуты</b> — Google Gemini или Groq.</p>
@@ -1624,7 +1633,7 @@
       ['⏸', 'Пока идёт проверка, можно учить дальше. <b>«Пауза»</b> и <b>«Продолжить»</b> — в любой момент, даже завтра.'],
       ['📊', 'В <b>«Отчёте»</b>: зачёркнуто — как было, зелёным — как стало. <b>«Принять»</b> или <b>«↩ Откатить»</b>.']],
     expect: 'Все колоды проверены: перевод точный, род и артикли на месте, опечатки исправлены. Вы видите каждое изменение и решаете сами.',
-    limits: 'Нейросеть тоже ошибается — поэтому сначала она показывает, что хочет исправить. У бесплатных нейросетей есть дневной лимит, а Claude по подписке тратит общий лимит Claude Code: кончился лимит — проверка встанет на паузу и продолжится с того же места. Отчёты хранятся на этом устройстве (последние 6).',
+    limits: 'Нейросеть тоже ошибается — поэтому сначала она показывает, что хочет исправить. У каждой нейросети есть свой лимит (у бесплатных — дневной): кончился лимит — проверка встанет на паузу и продолжится с того же места. Отчёты хранятся на этом устройстве (последние 6).',
     open: ['🤖 Открыть Центр нейросети', () => open()],
     demo: DEMO,
   };

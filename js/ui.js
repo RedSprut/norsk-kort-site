@@ -1,5 +1,9 @@
 /* ============ UI helpers ============ */
 (function () {
+  /** a toast's icon: a NavIcons name → the drawn icon; an emoji that callers pass (toastAction(…, '🔑')) → its drawn twin;
+   *  anything else (an <svg>, a w.icon from js/aihub.js) as given */
+  const TOAST_EMO = { '🗑': 'trash', '🔑': 'key', '✅': 'check', '⏹': 'stop', '⚠️': 'alert', 'ℹ️': 'info', '⛔': 'ban', '✓': 'check' };
+  const toastIco = n => (window.NavIcons && NavIcons.icon && NavIcons.icon(n, 20)) || (/^[a-z-]+$/.test(n) ? '' : n);
   const UI = {
     /* ---------- rich text: keeps text exactly as is, adds light formatting ---------- */
     rich(s) {
@@ -32,12 +36,12 @@
      *  UI.friendlyError(e, 'Перевод') → «Перевод: нет интернета — попробуйте, когда связь появится» */
     friendlyError(e, context) { return U.niceErr(e, context); },
 
-    /* ---------- toasts ---------- */
+    /* ---------- toasts: a drawn icon of the NavIcons family in front (no coloured emoji) ---------- */
     toast(msg, type = '', ms = 3200) {
       msg = U.calm(msg); // never «Failed to fetch» / «NetworkError…» on screen (js/util.js)
       const el = document.createElement('div');
       el.className = 'toast ' + type;
-      el.innerHTML = `<span>${type === 'good' ? '✅' : type === 'bad' ? '⛔' : type === 'warn' ? '⚠️' : 'ℹ️'}</span><span>${U.esc(msg)}</span>`;
+      el.innerHTML = `<span class="toast-ico">${toastIco(type === 'good' ? 'check' : type === 'bad' ? 'ban' : type === 'warn' ? 'alert' : 'info')}</span><span>${U.esc(msg)}</span>`;
       document.getElementById('toast-root').appendChild(el);
       const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 300); };
       if (ms) setTimeout(close, ms);
@@ -49,7 +53,7 @@
       msg = U.calm(msg);
       const el = document.createElement('div');
       el.className = 'toast warn toast-action';
-      el.innerHTML = `<span>${icon}</span><span>${U.esc(msg)}</span><button class="btn sm primary">${label}</button><span class="toast-timer"></span>`;
+      el.innerHTML = `<span class="toast-ico">${toastIco(TOAST_EMO[icon] || icon)}</span><span>${U.esc(msg)}</span><button class="btn sm primary">${label}</button><span class="toast-timer"></span>`;
       document.getElementById('toast-root').appendChild(el);
       el.querySelector('.toast-timer').style.animationDuration = ms + 'ms';
       let done = false;

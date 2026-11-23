@@ -1,7 +1,9 @@
 /* ============ 🖼 Photo picker: deck covers (and any picture) from anywhere ============
  * - search the web: Wikimedia Commons + Wikipedia article photos (free licences, no key, browser-friendly)
  * - your device: file / gallery / camera (phone), drag & drop
- * - Pinterest or any site: copy the picture and paste here (⌘V), or paste a link (a pin link works through the Mac bridge)
+ * - Pinterest or any site: copy the picture and paste here (⌘V), or paste a link to the picture itself. A link to a PAGE (a pin)
+ *   is read by the user's own device: the Mac bridge on the owner's Mac, native HTTP in the store apps (Net.native). Never
+ *   through the Norsk Kort server (docs/release-architecture.md §1.4 P7); on the site — copy the picture instead.
  * The chosen picture is stored inside the app (compressed), so it works offline.
  */
 (function () {
@@ -34,13 +36,26 @@
     }
     return { items: res, next: more ? off + 25 : null };
   }
-  /** a Pinterest pin / any page link -> its main picture (og:image), through the bridge */
+  /** a Pinterest pin / any page link -> its main picture (og:image): the Mac bridge, or native HTTP in the store apps */
   async function pageImage(url) {
     if (/\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(url) || /pinimg\.com/.test(url)) return url;
-    if (!(window.AI && AI.bridge.up)) throw new Error('Чтобы взять картинку по ссылке на страницу, нужен мост на Mac. Или скопируйте саму картинку и вставьте её (⌘V)');
-    const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
-    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'страница не открылась'); }
-    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    if (!/^https:\/\//i.test(url)) throw new Error('Вставьте ссылку, которая начинается с https://');
+    const mac = window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up);
+    let html = '';
+    if (mac) {
+      const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
+      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || 'страница не открылась'); }
+      html = await r.text();
+    } else if (window.Net && Net.isNative && Net.isNative()) {
+      const r = await Net.native(url, { method: 'GET', headers: { accept: 'text/html' } }).catch(() => null);
+      if (!r || !r.ok) throw new Error('Страница не открылась — скопируйте саму картинку и вставьте её сюда');
+      html = await r.text();
+    } else {
+      const here = window.Net && Net.onMac && Net.onMac();
+      throw Object.assign(new Error(here ? 'Чтобы взять картинку по ссылке на страницу, нужен мост на Mac. Или скопируйте саму картинку и вставьте её (⌘V)'
+        : 'По ссылке на страницу картинку берёт приложение для iPhone и Android. Здесь скопируйте саму картинку (долгое нажатие → «Скопировать») и нажмите «Вставить скопированное»'), { friendly: true });
+    }
+    const doc = new DOMParser().parseFromString(html, 'text/html');
     const og = doc.querySelector('meta[property="og:image"], meta[name="og:image"], meta[name="twitter:image"]');
     if (!og || !og.content) throw new Error('на странице не нашлось картинки');
     return og.content;

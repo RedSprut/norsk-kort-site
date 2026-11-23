@@ -22,11 +22,12 @@
     check: 'проверил', explain: 'добавил объяснение', generate: 'создал карточку', fill: 'заполнил поля',
     forms: 'заполнил формы слова', examples: 'добавил примеры по формам', synonyms: 'добавил синонимы',
   };
-  const FIELD = { no: '🇳🇴 Норвежский', ru: '🇷🇺 Русский', uk: '🇺🇦 Перевод на украинский', description: '📝 Объяснение', example: '💬 Пример', exampleRu: '💬 Перевод примера', wordClass: 'Часть речи', en: 'English', imagePrompt: 'Картинка', tags: 'Теги', forms: '📚 Формы слова', examples: '💬 Примеры по формам', synonyms: '🔁 Синонимы' };
+  // W7: plain words — the history is a list, no emoji as icons
+  const FIELD = { no: 'Норвежский', ru: 'Русский', uk: 'Перевод на украинский', description: 'Объяснение', example: 'Пример', exampleRu: 'Перевод примера', wordClass: 'Часть речи', en: 'English', imagePrompt: 'Картинка', tags: 'Теги', forms: 'Формы слова', examples: 'Примеры по формам', synonyms: 'Синонимы' };
   /** labels for history entries that are not compared by diff() by default */
-  const LABEL = Object.assign({}, FIELD, { formsTr: '📚 Переводы форм слова (🇷🇺 / 🇺🇦)', exampleUk: '💬 🇺🇦 Перевод примера на украинский' });
+  const LABEL = Object.assign({}, FIELD, { formsTr: 'Переводы форм слова (RU / UA)', exampleUk: 'Перевод примера на украинский' });
   /** a form's / example's translation: «ru · 🇺🇦 uk» (the Ukrainian one only when there is one) */
-  const trOf = x => [x.ru, x.uk && String(x.uk).trim() !== String(x.ru || '').trim() ? '🇺🇦 ' + x.uk : ''].filter(Boolean).join(' · ');
+  const trOf = x => [x.ru, x.uk && String(x.uk).trim() !== String(x.ru || '').trim() ? 'UA: ' + x.uk : ''].filter(Boolean).join(' · ');
   /** forms/examples arrays <-> readable text (for history and the editor) */
   const listText = (arr, withNote) => (arr || []).map(x => `${x.label ? x.label + ': ' : ''}${x.no}${trOf(x) ? ' (' + trOf(x) + ')' : ''}${withNote && x.note ? ' — ' + x.note : ''}`).join('\n');
   const MAX = 40;
@@ -50,9 +51,9 @@
       if (k === 'tr' && Translators.LIST[id]) {
         const t = Translators.LIST[id];
         if (t.emoji) return Translators.icon(id, size);
-        return t.ai ? BOT(size) : `<img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${t.domain}&sz=64" width="${size}" height="${size}" alt="${U.esc(t.name)}" onerror="this.replaceWith(document.createTextNode('🌐'))">`;
+        return t.ai ? BOT(size) : `<img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${t.domain}&sz=64" width="${size}" height="${size}" alt="${U.esc(t.name)}" onerror="this.style.visibility='hidden'">`;
       }
-      return '❔';
+      return window.NavIcons ? NavIcons.icon('help', size) : '';
     },
     entry(by, a, fields, note) {
       const e = { t: Date.now(), by, a };
@@ -109,8 +110,8 @@
         .map(x => ({ t: x.t, by: 'ai:' + x.p, a: 'check', n: x.m ? 'модель ' + x.m : '' }));
       const all = (card.history || []).concat(legacy).sort((a, b) => b.t - a.t);
       const m = UI.modal({
-        title: '🧾 Происхождение и история карточки', cls: 'wide',
-        body: `<div class="hist-card"><b>${UI.rich(String(card.no).split('\n')[0].slice(0, 120))}</b> — ${UI.rich(String(card.ru || '').split('\n')[0].slice(0, 120))}${String(card.uk || '').trim() ? ` <span lang="uk">· 🇺🇦 ${UI.rich(String(card.uk).split('\n')[0].slice(0, 120))}</span>` : ''}</div>
+        title: 'Происхождение и история карточки', cls: 'wide',
+        body: `<div class="hist-card"><b>${UI.rich(String(card.no).split('\n')[0].slice(0, 120))}</b> — ${UI.rich(String(card.ru || '').split('\n')[0].slice(0, 120))}${String(card.uk || '').trim() ? ` <span lang="uk">· UA: ${UI.rich(String(card.uk).split('\n')[0].slice(0, 120))}</span>` : ''}</div>
           <div class="row" style="gap:6px" data-filters>
             <button class="chip ${filter === 'all' ? 'active' : ''}" data-f="all">Все (${all.length})</button>
             ${src.map(by => `<button class="chip ${filter === by ? 'active' : ''}" data-f="${U.esc(by)}">${this.icon(by, 15)} ${U.esc(this.name(by))} (${all.filter(h => h.by === by).length})</button>`).join('')}
@@ -122,6 +123,12 @@
       // a version can be restored if it changed text fields and nothing was cut off when saving it
       // "explanation added below" stores only the added part — reverting it would wipe the whole text, so not offered
       const revertable = h => h.f && !(h.a === 'explain' && !/заменено/.test(h.n || '')) && Object.entries(h.f).some(([k, v]) => TEXT.includes(k) && v.old !== v.new && !(String(v.old).length > 600));
+      // ⚑ what a neural network wrote (a topic deck, a check, an explanation): «может ошибаться» + «Пожаловаться» (W7)
+      const aiNote = h => {
+        if (!/^ai:/.test(h.by) || !(window.Views && Views.aiNote) || !h.f) return '';
+        const ans = Object.entries(h.f).map(([k, v]) => `${LABEL[k] || k}: ${v.new}`).join('\n');
+        return Views.aiNote({ answer: ans, question: `${String(card.no || '').slice(0, 200)} — ${String(card.ru || '').slice(0, 200)}`, task: h.a, provider: this.name(h.by), cls: 'ai-note-hist' });
+      };
       const draw = () => {
         const items = all.filter(h => filter === 'all' || h.by === filter);
         m.$('[data-list]').innerHTML = items.length ? items.map(h => `
@@ -131,6 +138,7 @@
               ${revertable(h) ? `<button class="btn sm" data-revert="${h.t}" title="Вернуть значения, которые были до этого изменения">↶ Вернуть как было</button>` : ''}</div>
             ${h.n ? `<div class="small muted">${U.esc(h.n)}</div>` : ''}
             ${h.f ? Object.entries(h.f).map(([k, v]) => `<div class="change"><b>${LABEL[k] || k}</b><span>${v.old ? `<span class="old">${UI.rich(v.old)}</span><br>` : ''}<span class="new">${UI.rich(v.new)}</span></span></div>`).join('') : ''}
+            ${aiNote(h)}
           </div>`).join('') : '<div class="muted center" style="padding:20px">Нет записей</div>';
       };
       draw();
@@ -140,7 +148,7 @@
         const h = all.find(x => String(x.t) === b.dataset.revert); if (!h) return;
         const fields = Object.entries(h.f).filter(([k, v]) => TEXT.includes(k) && String(v.old).length <= 600);
         const list = fields.map(([k, v]) => `<b>${LABEL[k] || k}</b>: ${UI.rich(v.old || '— пусто —')}`).join('<br>');
-        if (!(await UI.confirm(`Вернуть как было до изменения «${U.esc(this.name(h.by))}»?<br><br>${list}`, { ok: '↶ Вернуть' }))) return;
+        if (!(await UI.confirm(`Вернуть как было до изменения «${U.esc(this.name(h.by))}»?<br><br>${list}`, { ok: 'Вернуть' }))) return;
         const cur = Store.card(cardId); if (!cur) return;
         const patch = {}, diff = {};
         fields.forEach(([k, v]) => { patch[k] = v.old; diff[k] = { old: cur[k] || '', new: v.old }; });

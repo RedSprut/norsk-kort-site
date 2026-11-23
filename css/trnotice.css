@@ -109,3 +109,14 @@
 .trb-still.busy .trb-ring, .trb-still.swap .trb-ico { animation: none; }
 .trb-up { z-index: 60 !important; }
 .trb-wrap.trb-up { z-index: 60; }
+/* W7: «Norsk Kort Pro» — a neural network without own keys, above the list */
+.tn-pro { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; cursor: pointer; text-align: left;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--panel-border)); background: color-mix(in srgb, var(--accent) 9%, var(--panel)); color: var(--text); font: inherit; }
+.tn-pro:hover, .tn-pro:focus-visible { background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+.tn-pro:focus-visible { outline: 2px solid var(--accent2, var(--accent)); outline-offset: 1px; }
+.tn-pro > .ui-ico { color: var(--accent); flex: none; }
+.tn-pro > span { flex: 1; min-width: 0; }
+.tn-pro b, .tn-pro small { display: block; }
+.tn-pro small { color: var(--muted); font-size: 12.5px; }
+.tn-safe { display: flex; gap: 6px; align-items: flex-start; }
+.tn-safe .ui-ico { flex: none; margin-top: 2px; }

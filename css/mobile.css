@@ -114,7 +114,8 @@ html.m-phone .launcher.m-launch > .row { padding: 0 4px 4px; }
 @keyframes mFade { from { opacity: 0; } to { opacity: 1; } }
 .m-grab {
   position: absolute; top: 0; left: 50%; translate: -50% 0; z-index: 3; /* `translate`: a press / hover `transform` keeps it centred */
-  width: 120px; height: 26px; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; display: grid; place-items: center;
+  /* the whole top strip is the handle: a 44 px target (the bar inside stays small) */
+  width: 160px; height: 44px; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; display: grid; place-items: center;
 }
 .m-grab i { display: block; width: 38px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--text) 26%, transparent); transition: background .2s, width .2s; }
 .m-grab:hover i, .m-grab:focus-visible i { background: color-mix(in srgb, var(--text) 50%, transparent); width: 46px; }

@@ -90,7 +90,13 @@
     const n = unquote(no);
     const isWord = words(n).length <= 2;
     const meta = isMeta(ru);
-    if (!mt) return meta ? { st: 'bad', why: 'служебная фраза канала, не перевод', score: null } : { st: 'unsure', why: 'не удалось сверить (нет связи с переводчиком)', score: null };
+    if (!mt) {
+      if (meta) return { st: 'bad', why: 'служебная фраза канала, не перевод', score: null };
+      // W7: no translator can work here (the public build without Pro / a key) — not «проверьте» on every pair: calm
+      const setup = !!(window.Translators && Translators.needSetup && Translators.needSetup());
+      return setup ? { st: 'unsure', calm: true, why: 'сверка с переводчиком появится с Norsk Kort Pro или вашей нейросетью', score: null }
+        : { st: 'unsure', why: 'не удалось сверить (нет связи с переводчиком)', score: null };
+    }
     if (meta && sim(ru, mt) < 0.34 && !Translators.agrees(mt, ru)) return { st: 'bad', why: 'служебная фраза канала, не перевод', score: sim(ru, mt) };
     if (NEG_NO.test(n) !== NEG_RU.test(ru) && !isWord) return { st: 'unsure', why: 'отрицание не совпадает («ikke» ↔ «не»)', score: sim(ru, mt) };
     if (isWord) {
@@ -134,7 +140,7 @@
         try { res = await Translators.translateMany(part.map(r => r.no), 'no', 'ru'); } catch (e) { res = null; }
         part.forEach((r, i) => {
           const mt = res ? String(res.out[i] || '').trim() : '';
-          Object.assign(r, judge(r.no, r.ru, mt), { mt, mtBy: res ? res.by || [] : [] });
+          Object.assign(r, { calm: false }, judge(r.no, r.ru, mt), { mt, mtBy: res ? res.by || [] : [] });
         });
         if (onProgress) onProgress(Math.min(k + B, rows.length), rows.length);
       }
@@ -161,6 +167,7 @@
       if (r.st === 'ok') return `<span class="pg-b ok" title="${U.esc(r.why || '')}">✓ перевод подтверждён</span>`;
       if (r.st === 'ai') return `<span class="pg-b ok" title="Проверила нейросеть">${BOT()} проверено</span>`;
       if (r.st === 'aifix') return `<span class="pg-b ai" title="Нейросеть исправила перевод автора">${BOT()} исправлено</span>`;
+      if (r.st === 'unsure' && r.calm) return `<span class="pg-b calm" title="${U.esc(r.why || '')}">не сверено</span>`;
       if (r.st === 'unsure') return `<span class="pg-b unsure" title="${U.esc(r.why || '')}">? проверьте</span>`;
       if (r.st === 'bad') return `<span class="pg-b bad" title="${U.esc(r.why || '')}">✗ ${U.esc(r.why || 'не перевод')}</span>`;
       return '<span class="pg-b"><span class="spinner sm"></span> проверяю…</span>';

@@ -34,7 +34,7 @@
   const KINDS = ['deck', 'card', 'log', 'set', 'ls', 'utr'];
   // settings that never leave the device (on top of Store.SECRET_KEYS and the name / value checks below)
   const NEVER_SET = new Set(['aiCfg', 'aiMode', 'bridgeModel', 'bridgeUrl', 'plusToken', 'plusProxy', 'plusEnabled', 'vkToken', 'vkExtra',
-    'tgExtra', 'tgOff', 'castAppId', 'asrQuality', 'cloudUrl', 'cloudAnon']);
+    'tgExtra', 'tgOff', 'castAppId', 'asrQuality', 'cloudUrl', 'cloudAnon', 'nk-pro']); // nk-pro: Pro state per account + device (js/pro.js)
   const SECRET_NAME = /key|token|secret|passw|anon|bridge|proxy|cookie|session|auth|cred|^tg|^vk|telegram/i;
   const SECRET_VAL = /^(sk-|sk_|rk_|pk_live|AIza|ghp_|gho_|github_pat_|xox[abpr]-|hf_|gsk_|AKIA|eyJ[\w-]{8,}\.[\w-]{8,}\.)|^[0-9a-f-]{30,}:fx$/i;
   const DATA_URL = /^data:(image|audio)\/[a-z0-9.+-]+;base64,/i;
@@ -290,10 +290,12 @@
     },
     ls: {
       tomb: false, blend: true,
-      each(fn) { LS_KEYS.forEach(k => { const v = lsRead(k); if (v) fn(k, v, 0); }); },
-      get(id) { if (!LS_KEYS.includes(id)) return null; const v = lsRead(id); return v ? { obj: v, own: 0 } : null; },
-      exists: id => LS_KEYS.includes(id) && !!lsRead(id),
+      each(fn) { LS_KEYS.forEach(k => { const v = lsRead(k); if (v) fn(k, v, 0); }); EXT.forEach(x => x.p.each(fn)); },
+      get(id) { const p = extOf(id); if (p) { const v = p.get(id); return v ? { obj: v, own: 0 } : null; } if (!LS_KEYS.includes(id)) return null; const v = lsRead(id); return v ? { obj: v, own: 0 } : null; },
+      exists: id => { const p = extOf(id); return p ? !!p.get(id) : LS_KEYS.includes(id) && !!lsRead(id); },
       apply(id, data, o) {
+        const p = extOf(id);
+        if (p) { if (isObj(data)) { p.apply(id, data, o); cyc().ext = true; } return; } // a module's own records (CloudSync.extend): it merges them itself
         if (!LS_KEYS.includes(id) || !isObj(data)) return;
         const L = lsRead(id);
         const v = L && (o.dirty || LS_MERGE_ALWAYS.has(id)) ? LS_MERGE[id](L, data, o.rWins) : data;
@@ -301,7 +303,7 @@
         cyc().ls = (cyc().ls || new Set()).add(id);
       },
       remove() { /* kept */ },
-      unionFor: id => LS_MERGE_ALWAYS.has(id),
+      unionFor: id => LS_MERGE_ALWAYS.has(id) || !!extOf(id),
     },
     utr: {
       tomb: true,
@@ -327,6 +329,11 @@
       },
     },
   };
+  /* ---------- records of other modules (📖 reader: bookmarks, highlights, notes, the place in a book — js/rdsync.js) ----------
+   * CloudSync.extend(prefix, { each(fn(id, obj)), get(id) → obj | null, apply(id, data) (merges itself), after?(), wipe?() }):
+   * rows of kind «ls» whose id starts with the prefix; always merged (a union — the merged result goes back up). */
+  const EXT = [];
+  const extOf = id => { const s = String(id); for (const x of EXT) if (s.startsWith(x.prefix)) return x.p; return null; };
   function utrIndex() {
     const k = cyc();
     if (!k.utrIdx) { k.utrIdx = new Map(); C.utr.each((id, obj) => k.utrIdx.set(id, obj)); }
@@ -370,7 +377,9 @@
   let meta = null, metaKey = '';
   function freshMeta() { return { v: 1, first: false, cursor: 0, items: {}, dirty: {}, logX: {}, up: {}, inl: {}, pend: {}, last: 0 }; }
   async function loadMeta(uid) {
-    const key = 'cloudsync:' + h53(String(Store.settings.cloudUrl || '').trim().replace(/\/+$/, '')) + ':' + uid;
+    // the project in use (js/config.js: built in, or Settings → Облако) — W2
+    const P = window.NKConfig && NKConfig.project();
+    const key = 'cloudsync:' + h53(String((P && P.url) || Store.settings.cloudUrl || '').trim().replace(/\/+$/, '')) + ':' + uid;
     if (meta && metaKey === key) return meta;
     let m = null;
     try { m = await Store.idbGet(key); } catch (e) { /* no IndexedDB: memory only */ }
@@ -530,6 +539,7 @@
     if (k.logSort) Store.state.log.sort((p, q) => p.ts - q.ts);
     try { if (window.FSRS && FSRS.Load) FSRS.Load.invalidate(); } catch (e) { /* ignore */ }
     if (k.utr && window.Study) Study._glVer = (Study._glVer || 0) + 1;
+    if (k.ext) EXT.forEach(x => { try { if (x.p.after) x.p.after(); } catch (e) { /* the module's own problem */ } });
     if (k.ls) {
       if (k.ls.has('nk-learnby') && window.LearnBy && LearnBy._sync) LearnBy._sync.reload();
       if (k.ls.has('nk-xp')) { try { window.dispatchEvent(new CustomEvent('nk-xp', { detail: { added: 0 } })); } catch (e) { /* old browser */ } }
@@ -802,6 +812,7 @@
       st.trash = []; st.userTr = { s: {}, g: {} };
       st.settings.avatar = '';
       LS_KEYS.forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } });
+      EXT.forEach(x => { try { if (x.p.wipe) x.p.wipe(); } catch (e) { /* ignore */ } });
       if (window.LearnBy && LearnBy._sync) LearnBy._sync.reload();
       try { if (window.FSRS) FSRS.Load.invalidate(); } catch (e) { /* ignore */ }
       if (metaKey) { try { await Store.idbSet(metaKey, null); } catch (e) { /* ignore */ } }
@@ -811,6 +822,10 @@
     /** changes waiting to go up (after a scan) */
     pending() { if (!meta) return 0; scan(); return Object.keys(meta.dirty).length; },
     text, statusHtml, kindOf,
+    /** another module syncs its own records (see EXT above) */
+    extend(prefix, p) { if (!prefix || !p || EXT.some(x => x.prefix === prefix)) return; EXT.push({ prefix: String(prefix), p }); if (uid) this.soon(1500); },
+    /** the private bucket of the signed-in user (📖 book files, js/rdsync.js) — null when nobody is signed in */
+    get media() { return sb && uid ? { sb, uid, bucket: BUCKET } : null; },
     /** what never leaves the device — shown in «Мой кабинет» */
     LS_KEYS,
     _t: { h53, stable, toJson, resolve, scan: () => scan(), get meta() { return meta; }, settingSyncs, mySecrets, untouchedSample, LS_MERGE, C },

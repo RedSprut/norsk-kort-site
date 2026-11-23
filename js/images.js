@@ -189,6 +189,10 @@
     lastSource: '',
 
     async translate(text, pair) {
+      // W7: MyMemory is an unofficial free translator — only in the app on the Mac (as Google gtx / Mozhi, js/translators.js);
+      // elsewhere the picture is found by the card's own words (no request leaves the device for it)
+      const pub = window.NK_CONFIG ? !!NK_CONFIG.publicBuild : !(window.Net && Net.onMac && Net.onMac());
+      if (pub) throw Object.assign(new Error('Перевод для поиска картинки есть только в версии для Mac'), { macOnly: true });
       const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.slice(0, 400)) + '&langpair=' + pair;
       const r = await fetch(url);
       const j = await r.json();

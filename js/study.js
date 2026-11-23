@@ -2,6 +2,9 @@
 (function () {
   const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   let S = null; // current session
+  /** W7: drawn line icons on the card buttons (js/app.js NavIcons) — never emoji as icons */
+  const NI = (n, sz, cls) => (window.NavIcons ? NavIcons.icon(n, sz || 18, cls) : '');
+  const SPK = () => NI('speaker', 18, 'say-ico');
 
   /* =====================================================================
    * 🎚 PHOTO SETTINGS of a card picture (card.imageFx) — like a camera: frame, rotation, mirror, light, colour, styles.
@@ -214,15 +217,15 @@
           <button class="top-btn home-btn study-home" data-home aria-label="На главный экран" data-tip="На главный экран">${UI.HOME_SVG(18)}</button>
           <div class="progress lg"><div class="fill" data-progress></div><div class="label" data-plabel></div></div>
           ${S.mode === 'listen' ? '' : `<div class="dir-switch" title="Направление: что на лицевой стороне">
-            ${[['nr', `🇳🇴→${this.trFlag()}`, 'Норвежское слово → вспомнить перевод'], ['rn', `${this.trFlag()}→🇳🇴`, 'Перевод → вспомнить норвежское слово'], ['mix', '🔀', 'Вперемешку']].map(([v, l, t]) =>
+            ${[['nr', this.dirMark('nr'), 'Норвежское слово → вспомнить перевод'], ['rn', this.dirMark('rn'), 'Перевод → вспомнить норвежское слово'], ['mix', NI('sort'), 'Вперемешку']].map(([v, l, t]) =>
               `<button class="${(S.opts.dir || 'nr') === v ? 'active' : ''}" data-act="dir" data-dir="${v}" title="${t}">${l}</button>`).join('')}</div>`}
           <button class="top-btn hints-btn ${Store.settings.hints === false ? 'off' : ''}" data-act="hints" title="Подсказки на лицевой стороне (картинка, часть речи, значки)">${UI.icon(Store.settings.hints === false ? 'bulbOff' : 'bulb', 18)}<span>Подсказки</span></button>
           <button class="top-btn layout-btn" data-act="layout" title="Расположение кнопок">${UI.icon('layout', 18)}<span>Раскладка</span></button>
           <button class="top-btn" data-act="undo" title="Отменить последний ответ (Z)">${UI.icon('undo', 18)}<span>Отменить</span></button>
         </div>
         <div class="session-tools">
-          <button class="btn sm" data-act="all-cards" title="Быстро посмотреть все карты этой сессии и перейти к любой">🗂 Все карты · ${S.allIds.length}</button>
-          <button class="btn sm" data-act="reshuffle" title="Перемешать оставшиеся карты">🔀 Перемешать</button>
+          <button class="btn sm" data-act="all-cards" title="Быстро посмотреть все карты этой сессии и перейти к любой">${NI('cards')}<span>Все карты · ${S.allIds.length}</span></button>
+          <button class="btn sm" data-act="reshuffle" title="Перемешать оставшиеся карты">${NI('sort')}<span>Перемешать</span></button>
           ${S.mode === 'listen' ? '' : this.trSegHtml('study-trseg')}
           ${window.ArtCards ? ArtCards.studyToggleHtml(S) : ''}
         </div>
@@ -308,10 +311,18 @@
       if (l === 'both' && this.ukOf(card)) return '<span class="lt-both">🇷🇺<span class="lt-w"> РУССКИЙ</span> + 🇺🇦<span class="lt-w"> УКРАЇНСЬКА</span></span>';
       return '🇷🇺 РУССКИЙ';
     },
+    /** W7: «NO → RU» with drawn language marks (the direction switch of the session) */
+    dirMark(d) {
+      const LM = l => (window.Voices && Voices.langMark ? Voices.langMark(l) : l.toUpperCase());
+      const tr = this.trLang() === 'uk' ? LM('uk') : this.trLang() === 'both' ? LM('ru') + LM('uk') : LM('ru');
+      return d === 'rn' ? `${tr}<span aria-hidden="true">→</span>${LM('no')}` : `${LM('no')}<span aria-hidden="true">→</span>${tr}`;
+    },
     /** the small 🇷🇺 · 🇺🇦 · 🇷🇺+🇺🇦 switch (study session, launcher) */
     trSegHtml(cls = '') {
       const cur = this.trLang();
-      return `<div class="seg-mini tr-seg ${cls}" role="group" aria-label="Язык перевода">${[['ru', '🇷🇺 Русский', 'Перевод на русский'], ['uk', '🇺🇦 Українська', 'Перевод на украинский (если у карточки его нет — показан русский с пометкой 🇷🇺)'], ['both', '🇷🇺+🇺🇦 Оба', 'Оба перевода: русский и украинский']].map(([v, l, t]) =>
+      const LM = l => (window.Voices && Voices.langMark ? Voices.langMark(l) : l.toUpperCase()); // W7: drawn language marks, no flags
+      if (window.Voices && Voices.ensureCss) { try { Voices.ensureCss(); } catch (e) { /* plain letters */ } }
+      return `<div class="seg-mini tr-seg ${cls}" role="group" aria-label="Язык перевода">${[['ru', `${LM('ru')} Русский`, 'Перевод на русский'], ['uk', `${LM('uk')} Українська`, 'Перевод на украинский (если у карточки его нет — показан русский с пометкой RU)'], ['both', `${LM('ru')}${LM('uk')} Оба`, 'Оба перевода: русский и украинский']].map(([v, l, t]) =>
         `<button type="button" class="${cur === v ? 'active' : ''}" data-act="trlang" data-v="${v}" aria-pressed="${cur === v}" title="${t}">${l}</button>`).join('')}</div>`;
     },
     /** a text (several lines, or longer than a couple of sentences) — not a single word / phrase / sentence */
@@ -759,20 +770,20 @@
     picBtn(has) {
       const l = has ? 'Заменить фото' : 'Добавить фото';
       return `<div class="pic-btns ${has ? 'on-img' : ''}">`
-        + `<button type="button" class="pic-btn pic-pin ${has ? 'on-img' : ''}" data-act="pin" aria-label="Галерея картинок, как в Pinterest" title="📌 Галерея картинок, как в Pinterest: фото по слову и норвежским темам — прямо здесь"><span aria-hidden="true">📌</span><span class="pic-l">Галерея</span></button>`
-        + `<button type="button" class="pic-btn ${has ? 'on-img' : 'pic-add'}" data-act="pic" aria-label="${l}" title="${l}: галерея, Wikimedia, нейросеть, исторические фото, с устройства…"><span aria-hidden="true">🖼</span><span class="pic-l">${l}</span></button>`
+        + `<button type="button" class="pic-btn pic-pin ${has ? 'on-img' : ''}" data-act="pin" aria-label="Галерея картинок, как в Pinterest" title="Галерея картинок, как в Pinterest: фото по слову и норвежским темам — прямо здесь"><span aria-hidden="true">${NI('pin')}</span><span class="pic-l">Галерея</span></button>`
+        + `<button type="button" class="pic-btn ${has ? 'on-img' : 'pic-add'}" data-act="pic" aria-label="${l}" title="${l}: галерея, Wikimedia, нейросеть, исторические фото, с устройства…"><span aria-hidden="true">${NI('image')}</span><span class="pic-l">${l}</span></button>`
         // 🎚 «Настроить фото» — only over a picture (js/photofx.js, loaded on first use)
-        + (has ? '<button type="button" class="pic-btn on-img pic-fx" data-act="fx" style="width:44px;padding:0" aria-label="Настроить фото" title="🎚 Настроить фото: кадр, поворот, яркость, цвет, готовые стили"><span aria-hidden="true">🎚</span></button>' : '')
+        + (has ? `<button type="button" class="pic-btn on-img pic-fx" data-act="fx" style="width:44px;padding:0" aria-label="Настроить фото" title="Настроить фото: кадр, поворот, яркость, цвет, готовые стили"><span aria-hidden="true">${NI('sliders')}</span></button>` : '')
         + '</div>';
     },
     /** 🗣 the voice of this side right on the card (js/voices.js opens the chooser on any [data-voices-open]; the card doesn't flip) */
     voiceBtn(side) {
       if (!(window.Voices && Voices.openChooser)) return '';
       const l = side === 'no' ? 'no' : (this.trLang() === 'uk' ? 'uk' : 'ru');
-      return `<button type="button" class="icon-btn sm card-voice" data-voices-open="${l}" data-voices-place="cards" aria-label="Голос для карточек — выбрать" title="Голос для карточек: ${l === 'no' ? 'норвежский' : l === 'uk' ? 'украинский' : 'русский'} — выбрать">🗣</button>`;
+      return `<button type="button" class="icon-btn sm card-voice" data-voices-open="${l}" data-voices-place="cards" aria-label="Голос для карточек — выбрать" title="Голос для карточек: ${l === 'no' ? 'норвежский' : l === 'uk' ? 'украинский' : 'русский'} — выбрать">${NI('user')}</button>`;
     },
     /** ✏️ the editor right on the card (the same as «✏️ Редактировать» in the side panel and the E key) */
-    editBtn() { return '<button type="button" class="icon-btn sm card-edit" data-act="edit" aria-label="Редактировать карточку" title="Редактировать карточку (E)">✏️</button>'; },
+    editBtn() { return `<button type="button" class="icon-btn sm card-edit" data-act="edit" aria-label="Редактировать карточку" title="Редактировать карточку (E)">${NI('edit')}</button>`; },
     imgHtml(card, show) {
       if (!show) return '';
       // 🎚 the photo settings (PhotoFxCore above) — without them the picture is drawn exactly as always
@@ -824,7 +835,7 @@
           ${this.viewBarHtml(card)}
           ${window.Gram && !listen ? Gram.badges(card) : ''}
           ${this.extrasHtml(card)}
-          ${card.example ? `<div class="example">${UI.rich(card.example)} <button class="icon-btn sm" data-act="speak-ex" title="Прослушать пример">🔊</button>${card.exampleRu ? `<span class="tr">${UI.rich(card.exampleRu)}</span>` : ''}</div>` : ''}
+          ${card.example ? `<div class="example">${UI.rich(card.example)} <button class="icon-btn sm" data-act="speak-ex" title="Прослушать пример">${SPK()}</button>${card.exampleRu ? `<span class="tr">${UI.rich(card.exampleRu)}</span>` : ''}</div>` : ''}
         </div>`;
       const longFront = !listen && this.isText(this.faceText(card, promptSide));
       const longBack = tvB || UI.isLong(ans) || String(card.description || '').length > 200 || (card.forms || []).length > 0 || (card.examples || []).length > 0 || (card.synonyms || []).length > 0;
@@ -861,13 +872,13 @@
               <div class="face front ${longFront ? 'long' : ''}${tvF ? ' tv-face' : ''} ${hints && Object.keys(Translators.activity(card)).length ? 'has-rail' : ''}">
                 <div class="lang-tag">${listen ? '🎧 АУДИРОВАНИЕ' : flag(promptSide)} ${UI.statusChip(status)}${hints ? Prov.badges(card, 17, ['manual', 'import'], true) : ''}${!listen && window.AIHub ? AIHub.markHtml(card, promptSide === 'no' ? 'no' : 'tr', { cls: 'aim-study' }) : ''}</div>
                 ${hints ? Translators.activeRailsHtml(card) : ''}
-                <div class="corner">${listen ? '' : this.editBtn()}${window.Subs && promptSide === 'no' ? Subs.audioBtnHtml(card) : ''}${this.voiceBtn(promptSide)}<button class="icon-btn sm" data-act="speak-front" title="Прослушать (S)">🔊</button></div>
+                <div class="corner">${listen ? '' : this.editBtn()}${window.Subs && promptSide === 'no' ? Subs.audioBtnHtml(card) : ''}${this.voiceBtn(promptSide)}<button class="icon-btn sm" data-act="speak-front" title="Прослушать (S)">${SPK()}</button></div>
                 ${front}
                 ${(S.mode === 'flip' || listen) && hints ? `<div class="tap-hint">${this.hintText()}</div>` : ''}
               </div>
               <div class="face back has-rail ${longBack ? 'long' : ''}${tvB ? ' tv-face' : ''}">
                 <div class="lang-tag">${flag(answerSide)}${Prov.badges(card, 17, ['manual', 'import'], true)}${window.AIHub ? AIHub.markHtml(card, answerSide === 'no' ? 'no' : 'tr', { cls: 'aim-study' }) : ''}</div>
-                <div class="corner">${this.editBtn()}${window.Subs ? Subs.audioBtnHtml(card) : ''}<button class="icon-btn sm" data-act="grammar" title="📐 Грамматика к этому слову (grammatikk.com)">📐</button><button class="icon-btn sm" data-act="youtube" title="Видео про это слово на YouTube">${YouTube.YT_SVG(16)}</button><button class="icon-btn sm" data-act="copy-card" title="Скопировать весь текст карточки">📋</button>${this.voiceBtn(answerSide)}<button class="icon-btn sm" data-act="speak-back" title="Прочитать эту сторону (S)">🔊</button></div>
+                <div class="corner">${this.editBtn()}${window.Subs ? Subs.audioBtnHtml(card) : ''}<button class="icon-btn sm" data-act="grammar" title="Грамматика к этому слову (grammatikk.com)" aria-label="Грамматика к этому слову">${NI('book')}</button><button class="icon-btn sm" data-act="youtube" title="Видео про это слово на YouTube">${YouTube.YT_SVG(16)}</button><button class="icon-btn sm" data-act="copy-card" title="Скопировать весь текст карточки" aria-label="Скопировать весь текст карточки">${NI('copy')}</button>${this.voiceBtn(answerSide)}<button class="icon-btn sm" data-act="speak-back" title="Прочитать эту сторону (S)">${SPK()}</button></div>
                 ${Translators.aiRailHtml('vertical card-rail left', card)}
                 ${Translators.railHtml('vertical card-rail right', card)}
                 ${back}
@@ -881,15 +892,15 @@
         <div class="kbd-help"><kbd>Пробел</kbd> перевернуть · <kbd>→</kbd>/<kbd>2</kbd> знаю · <kbd>←</kbd>/<kbd>1</kbd> не знаю · <kbd>S</kbd> озвучить · <kbd>P</kbd> пауза · <kbd>E</kbd> редактировать · <kbd>Z</kbd> отменить · <kbd>Esc</kbd> выход</div>
         </div>
         <aside class="study-tools tools-read" data-read-tools>
-          <div class="tools-title">🔊 Озвучка</div>
-          ${[['all', '🔊 Читать всё'], ['no', '🇳🇴 Только норвежский'], ['ru', '🇷🇺 Только русский']].map(([m, l]) =>
+          <div class="tools-title ui-t">${NI('speaker')}<span>Озвучка</span></div>
+          ${[['all', `${NI('speaker')}<span>Читать всё</span>`], ['no', `${NI('speaker')}<span>Только норвежский</span>`], ['ru', `${NI('speaker')}<span>Только русский</span>`]].map(([m, l]) =>
             `<button class="btn sm ${st.readMode === m ? 'primary' : ''}" data-act="read" data-mode="${m}" title="Прочитать видимую сторону карточки">${l}</button>`).join('')}
           <button class="btn sm listen-btn listen-cta" data-act="listen-deck" data-listen-btn data-label="Слушать колоду" title="🎧 Слушать всю колоду вслух — через динамик или в наушниках"></button>
           ${window.Voices && Voices.langButtons ? Voices.langButtons('cards') : ''}
-          <button class="btn sm" data-speech-pron="${U.esc(String(card.no).split('\n')[0].slice(0, 300))}" data-ru="${U.esc(String(card.ru).split('\n')[0].slice(0, 300))}" title="Скажите это вслух — приложение распознает речь прямо на устройстве и покажет, какие слова прозвучали верно">🗣 Произношение</button>
-          <button class="btn sm" data-act="native" title="Слово голосом настоящего носителя языка (запись Lingua Libre, если она есть), а дальше — вся карточка синтезированным голосом. Пауза / стоп / сначала — кнопками ниже">🎙 Живой голос</button>
+          <button class="btn sm" data-speech-pron="${U.esc(String(card.no).split('\n')[0].slice(0, 300))}" data-ru="${U.esc(String(card.ru).split('\n')[0].slice(0, 300))}" title="Скажите это вслух — приложение распознает речь прямо на устройстве и покажет, какие слова прозвучали верно">${NI('mic')}<span>Произношение</span></button>
+          <button class="btn sm" data-act="native" title="Слово голосом настоящего носителя языка (запись Lingua Libre, если она есть), а дальше — вся карточка синтезированным голосом. Пауза / стоп / сначала — кнопками ниже">${NI('user')}<span>Живой голос</span></button>
           <div class="speed-seg" data-speed-seg title="Скорость озвучки">
-            ${[['slow', '🐢', 'Медленно'], ['normal', '🚶', 'Обычно'], ['fast', '🐇', 'Быстро']].map(([v, ic, l]) =>
+            ${[['slow', '', 'Медленно'], ['normal', '', 'Обычно'], ['fast', '', 'Быстро']].map(([v, ic, l]) =>
               `<button class="${(st.ttsSpeed || 'normal') === v ? 'active' : ''}" data-act="speed" data-speed="${v}" title="${l}"><span class="sp-ic">${ic}</span><span class="sp-l">${l}</span></button>`).join('')}
           </div>
           <span class="tts-ctl media-row" data-tts-ctl>
@@ -899,24 +910,24 @@
           </span>
         </aside>
         <aside class="study-tools tools-card">
-          <div class="tools-title">🛠 Карточка</div>
-          <button class="btn sm" data-act="edit">✏️ Редактировать</button>
-          <button class="btn sm" data-act="copy-card" title="Скопировать весь текст карточки: слово, перевод, описание, формы, примеры">📋 Копировать текст</button>
-          <button class="btn sm gk-btn" data-act="grammar" title="Грамматика к этому слову / фразе: темы grammatikk.com с переводом на русский — нужное можно добавить в карточку">📐 Грамматика</button>
+          <div class="tools-title ui-t">${NI('cards')}<span>Карточка</span></div>
+          <button class="btn sm" data-act="edit">${NI('edit')}<span>Редактировать</span></button>
+          <button class="btn sm" data-act="copy-card" title="Скопировать весь текст карточки: слово, перевод, описание, формы, примеры">${NI('copy')}<span>Копировать текст</span></button>
+          <button class="btn sm gk-btn" data-act="grammar" title="Грамматика к этому слову / фразе: темы grammatikk.com с переводом на русский — нужное можно добавить в карточку">${NI('book')}<span>Грамматика</span></button>
           <button class="btn sm" data-act="telegram" title="Посты, видео, карточки-картинки и файлы из Telegram-каналов по этому слову">${Telegram.TG_SVG(18)} Telegram</button>
-          <button class="btn sm" data-act="social" title="Подкасты с расшифровкой, ВКонтакте, TikTok, Instagram, Pinterest, Reddit — по этому слову">🌐 Ещё источники</button>
+          <button class="btn sm" data-act="social" title="Подкасты с расшифровкой, ВКонтакте, TikTok, Instagram, Pinterest, Reddit — по этому слову">${NI('globe')}<span>Ещё источники</span></button>
           <button class="btn sm yt-btn" data-act="youtube" title="Видео про это слово / выражение: поиск на YouTube и на каналах учителей норвежского">${YouTube.YT_SVG(18)} YouTube</button>
           <button class="btn sm lib-btn" data-act="library" title="Библиотека устойчивых выражений — создать колоду выражений из открытых источников">${Library.CARDS_SVG(18)} Выражения</button>
-          <button class="btn sm" data-act="pic" title="Все источники картинки: поиск фото, Pinterest, нейросеть, исторические фото, с устройства, без фото">🖼 ${card.image ? 'Заменить фото' : 'Добавить фото'}</button>
-          <button class="btn sm pin-btn" data-act="pin" title="Галерея картинок, как в Pinterest, — прямо здесь: фото по слову и норвежским темам">📌 Галерея картинок</button>
-          <button class="btn sm" data-act="redraw" title="Нарисовать новую картинку по смыслу">🎨 Перерисовать</button>
-          <button class="btn sm ai" data-act="enrich" data-kind="forms" title="Все формы слова, у каждой — свой перевод">📚 Формы слова</button>
-          <button class="btn sm ai" data-act="enrich" data-kind="examples" title="Примеры на каждую форму/время с переводом и подсказкой, когда так говорят">💬 Примеры по формам</button>
-          <button class="btn sm ai" data-act="enrich" data-kind="synonyms" title="Синонимы с переводом и объяснением разницы (без нейросети — из словаря Ordbøkene)">🔁 Синонимы</button>
-          <button class="btn sm ai" data-act="add-explain" title="Нейросеть допишет в карточку формы, примеры и выражения — перевод в скобках">➕ Добавить объяснение</button>
+          <button class="btn sm" data-act="pic" title="Все источники картинки: поиск фото, Pinterest, нейросеть, исторические фото, с устройства, без фото">${NI('image')}<span>${card.image ? 'Заменить фото' : 'Добавить фото'}</span></button>
+          <button class="btn sm pin-btn" data-act="pin" title="Галерея картинок, как в Pinterest, — прямо здесь: фото по слову и норвежским темам">${NI('pin')}<span>Галерея картинок</span></button>
+          <button class="btn sm" data-act="redraw" title="Нарисовать новую картинку по смыслу">${NI('palette')}<span>Перерисовать</span></button>
+          <button class="btn sm ai" data-act="enrich" data-kind="forms" title="Все формы слова, у каждой — свой перевод">${NI('book')}<span>Формы слова</span></button>
+          <button class="btn sm ai" data-act="enrich" data-kind="examples" title="Примеры на каждую форму/время с переводом и подсказкой, когда так говорят">${NI('dialogue')}<span>Примеры по формам</span></button>
+          <button class="btn sm ai" data-act="enrich" data-kind="synonyms" title="Синонимы с переводом и объяснением разницы (без нейросети — из словаря Ordbøkene)">${NI('fallback')}<span>Синонимы</span></button>
+          <button class="btn sm ai" data-act="add-explain" title="Нейросеть допишет в карточку формы, примеры и выражения — перевод в скобках">${NI('plus')}<span>Добавить объяснение</span></button>
           <button class="btn sm ai" data-act="explain">${AI.icon(AI.current(), 14) || BOT(14)} Объяснить</button>
           <button class="btn sm ai" data-act="ai-check">${AI.icon(AI.current(), 14) || (window.AIHub ? AIHub.bot(true) : '')} Проверить карту (${U.esc(AI.name())})</button>
-          <button class="btn sm" data-act="ordbok">📖 Ordbøkene</button>
+          <button class="btn sm" data-act="ordbok">${NI('book')}<span>Ordbøkene</span></button>
         </aside>
       </div>`;
       // 🎨 art style (js/artcards.js): the same card, flip and buttons — only the faces become art cards
@@ -980,7 +991,7 @@
         if (this.isSrcLine(l)) return `<div class="desc-line desc-src">${UI.rich(l)}</div>`;
         const no = this.sayPart(l);
         const pre = warn && !placed && DICT.test(l) ? note() : '';
-        const say = no ? ` <button class="icon-btn sm say-line" data-act="say" data-say="${U.esc(no)}" title="Произнести">🔊</button>` : '';
+        const say = no ? ` <button class="icon-btn sm say-line" data-act="say" data-say="${U.esc(no)}" title="Произнести">${SPK()}</button>` : '';
         const own = this.ruPart(l), mine = no ? this.userSent(no) : undefined;
         const ru = mine || own || (v === 'word' && no ? this.sentTr(no) || '' : '');
         if (no && v === 'word') {
@@ -998,7 +1009,7 @@
     ruPart(l) { const m = String(l).match(/\(([^()]*[а-яё][^()]*)\)[\s.:;,]*$/i); return m ? m[1].trim() : ''; },
     /** the bullet / numbering in front of a line */
     leadPart(l) { return (String(l).match(/^\s*(?:[•·▸\-–*]|\d+[.)])?\s*/) || [''])[0]; },
-    sayRu(t) { return t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="ru" title="Произнести только русский">🔊<small>RU</small></button>` : ''; },
+    sayRu(t) { return t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="ru" title="Произнести только русский">${SPK()}<small>RU</small></button>` : ''; },
     /** Norwegian words, each followed by its (translation) in blue; names stay as they are.
      *  ru: the sentence translation the reader sees (the words follow it); a tap on a (translation) corrects it */
     glossHtml(s, ru) {
@@ -1065,7 +1076,7 @@
       const plain = `<div class="hint">${U.esc(q)}</div>${answerSide === 'no' ? this.wordHtml(card.no) : this.trHtml(card)}`;
       const v = Store.settings.exView || 'asis', no = this.mainNo(card);
       if (v === 'asis' || !no) return plain + this.checkedHtml(card);
-      const say = t => ` <button class="icon-btn sm say-line" data-act="say" data-say="${U.esc(t)}" title="Произнести">🔊</button>`;
+      const say = t => ` <button class="icon-btn sm say-line" data-act="say" data-say="${U.esc(t)}" title="Произнести">${SPK()}</button>`;
       const sents = this.splitSent(no).filter(s => /\p{L}/u.test(s));
       if (v === 'sent') {
         if (sents.length < 2) return plain + this.checkedHtml(card); // one sentence: «as is» is already sentence by sentence
@@ -1092,7 +1103,20 @@
     },
     reglossHtml(card) {
       const ico = window.NavIcons && NavIcons.icon ? NavIcons.icon('refresh', 15) : '';
-      return `<div class="gl-redo-row"><button type="button" class="btn sm ghost gl-redo" data-regloss data-cid="${U.esc(card.id)}" title="Нейросеть заново подпишет перевод под каждым словом этой карточки — по смыслу предложения (прежние подписи не используются)">${ico}<span>Подписать заново</span></button></div>`;
+      return `<div class="gl-redo-row"><button type="button" class="btn sm ghost gl-redo" data-regloss data-cid="${U.esc(card.id)}" title="Нейросеть заново подпишет перевод под каждым словом этой карточки — по смыслу предложения (прежние подписи не используются)">${ico}<span>Подписать заново</span></button>${this.glossReportBtn(card)}</div>`;
+    },
+    /** ⚑ W7: the card's AI glosses and «Дословно» lines can be reported (only when a neural network made some) */
+    glossReportBtn(card) {
+      if (!(window.Views && Views.reportBtn) || !Views.canReport || !Views.canReport()) return '';
+      const c = this.exCache(), lines = [];
+      this.glossSents(card).forEach(({ s }) => {
+        const g = c['g:' + s];
+        if (!g || Array.isArray(g)) return;
+        const rest = Object.assign({}, g); ['h', 'pv', 't', 'at', 'by'].forEach(k => delete rest[k]);
+        lines.push(`${s} → ${JSON.stringify(rest).slice(0, 400)}`);
+      });
+      if (!lines.length) return '';
+      return Views.reportBtn({ answer: lines.join('\n').slice(0, 3500), question: String(card.no || '').slice(0, 600), task: 'gloss', compact: true });
     },
     /** every sentence of the card's word view: [{ s, ru }] (the same list fillExamples glosses) */
     glossSents(card) {
@@ -1300,7 +1324,7 @@
       this.tvCss(); // the forms layout lives in css/studyx.css
       const html = `<div class="forms-box fg-v2" data-forms-box data-cid="${U.esc(card.id)}"><div class="fb-title">📚 Формы слова ${this.madeBy(card, 'forms')}</div>${this.formGenderHtml(card)}
         ${f.map((x, i) => `<div class="fg-row" data-fi="${i}"><span class="fg-label">${this.formLabelHtml(x)}</span><span class="fg-no" lang="nb">${UI.rich(x.no)}</span><span class="fg-dash" aria-hidden="true">—</span>${this.formTrCell(card, x, i, busy)}
-          <span class="fg-btns"><button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">🔊</button><button class="icon-btn sm fg-edit" data-ffix="${i}" title="Исправить перевод этой формы" aria-label="Исправить перевод формы ${U.esc(x.no)}">✎</button></span></div>`).join('')}</div>`;
+          <span class="fg-btns"><button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">${SPK()}</button><button class="icon-btn sm fg-edit" data-ffix="${i}" title="Исправить перевод этой формы" aria-label="Исправить перевод формы ${U.esc(x.no)}">✎</button></span></div>`).join('')}</div>`;
       // translations that are still missing are made once, when the table is really in front of the user
       if (!busy && this.formsNeed(card).length && !(this._ffTried && this._ffTried.has(card.id + '|' + this.trLang()))) this.formsSoon(card.id);
       return html;
@@ -1651,7 +1675,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? 
       return `<div class="forms-box syn-box"><div class="fb-title">🔁 Синонимы ${this.madeBy(card, 'synonyms')}</div>
         <div class="syn-list">${s.map(x => `<div class="syn-item">
           <div class="syn-head"><span class="syn-no">${UI.rich(x.no)}</span>${x.ru ? `<span class="syn-ru">${UI.rich('(' + x.ru + ')')}</span>` : ''}
-            <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">🔊</button></div>
+            <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">${SPK()}</button></div>
           ${x.note ? `<div class="ex-note">💡 ${UI.rich(x.note)}</div>` : ''}</div>`).join('')}</div></div>`;
     },
     /* ---------- 💬 examples: as is / sentence + (translation) / word (translation) ---------- */
@@ -1880,7 +1904,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? 
       const e = card.examples || [];
       if (!e.length) return '';
       const v = Store.settings.exView || 'asis';
-      const say = (t, lang) => t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Произнести только русский' : 'Произнести по-норвежски'}">🔊${lang === 'ru' ? '<small>RU</small>' : ''}</button>` : '';
+      const say = (t, lang) => t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Произнести только русский' : 'Произнести по-норвежски'}">${SPK()}${lang === 'ru' ? '<small>RU</small>' : ''}</button>` : '';
       const c = this.exCache();
       let mt = false;
       const body = x => {
@@ -2054,19 +2078,21 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? 
       const googleDown = /google/i.test(f.error || '');
       const cur = Translators.dictMain();
       // every translator and every neural network: can it translate right now, and if not — what it needs
+      const mac = window.Net && Net.onMac ? Net.onMac() : AI.onMac();
+      const here = id => { const t = Translators.LIST[id]; return !!t && !t.hidden && (mac || (!t.web && id !== 'deepl')); };
       const TR = [
-        ['google', 'Google Переводчик', googleDown ? '⛔ сейчас отказывает вам' : '✓ бесплатно, без ключа', !googleDown],
+        ['google', 'Google Переводчик', googleDown ? 'сейчас отказывает вам' : '✓ бесплатно, без ключа', !googleDown],
         ['mozhi', 'Mozhi (Google через открытый сервер)', '✓ бесплатно, без ключа — переводит со своего сервера, ограничение вашего адреса на него не действует', true],
         ['mymemory', 'MyMemory', '✓ бесплатно, без ключа · до ≈5000 символов в день', true],
-        ['deepl', 'DeepL', (S.deeplKey || '').trim() ? '✓ ключ есть' : '🔑 нужен бесплатный ключ (500 000 символов в месяц) и мост на Mac', !!(S.deeplKey || '').trim()],
-        ['microsoft', 'Microsoft Translator', (S.msKey || '').trim() ? '✓ ключ есть' : '🔑 нужен ключ Azure (2 млн символов в месяц бесплатно)', !!(S.msKey || '').trim()],
-      ];
-      const AIs = Object.entries(AI.PROVIDERS).filter(([id]) => id !== 'custom').map(([id, p]) => {
+        ['deepl', 'DeepL', (S.deeplKey || '').trim() ? '✓ ключ есть' : 'нужен бесплатный ключ (500 000 символов в месяц) и мост на Mac', !!(S.deeplKey || '').trim()],
+        ['microsoft', 'Microsoft Translator', (S.msKey || '').trim() ? '✓ ключ есть' : 'нужен ключ Azure (2 млн символов в месяц бесплатно)', !!(S.msKey || '').trim()],
+      ].filter(([id]) => here(id));
+      const AIs = Object.entries(AI.PROVIDERS).filter(([id]) => id !== 'custom' && (mac || !AI.usableHere || AI.usableHere(id))).map(([id, p]) => {
         // a program on the Mac (Ollama) needs no key, so «configured» is always true — it counts only once it was chosen
         const ok = AI.configured(id) && (!p.noKey || AI.current() === id);
         const why = ok ? '✓ подключена — переводит по смыслу, без ограничений Google'
-          : id === 'claude' ? (AI.bridge && AI.bridge.up ? '🔐 войдите в Claude Code (в Терминале: claude → /login)' : (AI.onMac && AI.onMac() ? '🖥 нужен мост на Mac и подписка Claude' : '🖥 только в приложении на Mac'))
-          : p.noKey ? '🖥 установите программу на Mac' : `🔑 нужен ключ${p.free ? ' — бесплатный' : ''}${p.limits ? ' · ' + p.limits : ''}${p.proxyOnly ? '' : ''}`;
+          : id === 'claude' ? (AI.bridge && AI.bridge.up ? 'войдите в Claude Code (в Терминале: claude → /login)' : (mac ? 'нужен мост на Mac и подписка Claude' : 'работает только в версии для Mac'))
+          : p.noKey ? 'установите программу на Mac' : `нужен ключ${p.free ? ' — бесплатный' : ''}${p.limits ? ' · ' + p.limits : ''}`;
         return [id, p.name, why, ok];
       }).sort((a, b) => b[3] - a[3]);
       const item = (kind, [id, name, why, ok]) => `<button class="tr-pick ${ok ? 'ok' : 'need'} ${(kind === 'tr' && id === cur) || (kind === 'ai' && cur === 'ai' && id === AI.current()) ? 'cur' : ''}" data-pick="${kind}:${id}">
@@ -2074,15 +2100,15 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? 
           <span class="tr-pick-txt"><b>${U.esc(name)}</b><small>${U.esc(why)}</small></span>
           <span class="tr-pick-go">${ok ? 'Выбрать' : kind === 'tr' && id === 'google' ? 'Повторить' : 'Подключить'}</span></button>`;
       const m = UI.modal({
-        title: googleDown ? '⛔ Google Переводчик сейчас не работает' : '⚠️ Перевод не пришёл', cls: 'tr-fail-modal',
-        body: `${googleDown ? `<div class="mt-warn"><span>⛔</span><span><b>Google временно перестал переводить для вашего адреса</b> — слишком много переводов за короткое время. Это ограничение самого Google (не книги и не приложения); обычно снимается через 5–15 минут. <b>Выберите другой переводчик или нейросеть ниже</b> — перевод сразу продолжится.</span></div>` : ''}
+        title: googleDown ? 'Google Переводчик сейчас не работает' : 'Перевод не пришёл', cls: 'tr-fail-modal',
+        body: `${googleDown ? `<div class="mt-warn">${NI('alert', 18)}<span><b>Google временно перестал переводить для вашего адреса</b> — слишком много переводов за короткое время. Это ограничение самого Google (не книги и не приложения); обычно снимается через 5–15 минут. <b>Выберите другой переводчик или нейросеть ниже</b> — перевод сразу продолжится.</span></div>` : ''}
           <div class="fail-hero">
             <button class="media-btn main fail-retry" data-retry title="Повторить перевод" aria-label="Повторить перевод">${UI.icon('retry', 30)}</button>
             <b>Повторить перевод</b>
             <span class="small muted">Не переведено: ${f.missing} ${U.plural(f.missing, ['строка', 'строки', 'строк'])}${googleDown ? '' : ` · причина: ${U.esc(f.error)}`}</span>
           </div>
-          <div class="tr-pick-title">🔁 Переводчики</div>
-          <div class="tr-pick-list">${TR.map(x => item('tr', x)).join('')}</div>
+          ${TR.length ? `<div class="tr-pick-title ui-t">${NI('translate')}<span>Переводчики</span></div>
+          <div class="tr-pick-list">${TR.map(x => item('tr', x)).join('')}</div>` : ''}
           <div class="tr-pick-title">${BOT()} Нейросети — точнее всего (переводят по смыслу предложения)</div>
           <div class="tr-pick-list">${AIs.map(x => item('ai', x)).join('')}</div>
           <p class="tiny muted">Выбор сохраняется (Настройки → «Переводчик для статей словарей»). Если выбранный не ответит — приложение само попробует следующий.</p>`,
@@ -2100,7 +2126,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? 
           Store.setSetting('dictTranslator', id);
           UI.toast(`Теперь переводит: ${Translators.LIST[id].name}`, 'good');
         } else {
-          if (!b.classList.contains('ok')) { toSettings(id === 'claude' ? (AI.onMac && AI.onMac() ? 'Claude: запустите мост и войдите в Claude Code (claude → /login), затем выберите его вверху' : 'Claude по подписке работает только в приложении на Mac — выберите другую нейросеть (Gemini или Groq — бесплатно)') : AI.PROVIDERS[id].noKey ? `${AI.PROVIDERS[id].short}: установите программу на Mac, затем выберите её в Настройках → «Нейросети»` : `${AI.PROVIDERS[id].name}: впишите ключ в Настройках → «Нейросети»`); return; }
+          if (!b.classList.contains('ok')) { toSettings(id === 'claude' ? (mac ? 'Claude: запустите мост и войдите в Claude Code (claude → /login), затем выберите его вверху' : 'Claude по подписке работает только в приложении на Mac — выберите другую нейросеть (Gemini или Groq — бесплатно)') : AI.PROVIDERS[id].noKey ? `${AI.PROVIDERS[id].short}: установите программу на Mac, затем выберите её в Настройках → «Нейросети»` : `${AI.PROVIDERS[id].name}: впишите ключ в Настройках → «Нейросети»`); return; }
           Store.setSetting('aiProvider', id); Store.setSetting('dictTranslator', 'ai'); App.updateBadge();
           UI.toast(`Теперь переводит нейросеть: ${AI.PROVIDERS[id].name}`, 'good');
         }
@@ -3016,7 +3042,7 @@ ${JSON.stringify(items)}`;
         const p = (no, ru) => v === 'word' ? `${this.glossHtml(no, ru || undefined)}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}</div>` : ''}${this.litHtml([[no, ru || undefined]])}`
           : v === 'sent' ? `${UI.rich(no)}${ru ? ` <span class="ex-ru-in">(${U.esc(ru)})</span>` : ''}`
           : `${UI.rich(no)}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}</div>` : ''}`;
-        const say = no => `<button class="icon-btn sm" data-act="say" data-say="${U.esc(no)}" title="Произнести">🔊</button>`;
+        const say = no => `<button class="icon-btn sm" data-act="say" data-say="${U.esc(no)}" title="Произнести">${SPK()}</button>`;
         const bar = `<div class="view-bar"><span class="small muted">Перевод:</span><span class="seg-mini ex-view sm">${this.EXV.map(([id, l, t]) => `<button class="${v === id ? 'active' : ''}" data-act="ob-view" data-v="${id}" title="${t}">${l}</button>`).join('')}</span></div>`;
         const trNames = (r.translatedBy || []).map(id => id === 'ai' ? AI.name(Translators.lastAI) : (Translators.LIST[id] || {}).name || id).join(' + ');
         const aiOn = AI.available() && !(r.translatedBy || []).includes('ai');
@@ -3031,7 +3057,7 @@ ${JSON.stringify(items)}`;
             ${d.examples.map(x => `<div class="ob-ex">• ${p(x.no, x.ru)} ${say(x.no)}</div>`).join('')}</li>`).join('')}</ol>
           ${r.expressions.length ? `<div class="small muted">Выражения (uttrykk):</div>${r.expressions.map(x => `<div class="ob-ex">• ${p(x.no, x.ru)} ${say(x.no)}</div>`).join('')}` : ''}
           ${this._bubble.forms.length ? `<div class="tr-forms"><div class="small muted" style="margin:6px 0 4px">📚 Формы слова:</div>${this._bubble.forms.map(f => `<div class="fg-row fg-v2r"><span class="fg-label">${this.formLabelHtml(f)}</span><span class="fg-no" lang="nb">${UI.rich(f.no)}</span><span class="fg-dash" aria-hidden="true">—</span><span class="fg-ru">${UI.rich(f.ru)}</span>
-            <button class="icon-btn sm" data-act="say" data-say="${U.esc(f.no)}">🔊</button></div>`).join('')}</div>` : ''}
+            <button class="icon-btn sm" data-act="say" data-say="${U.esc(f.no)}">${SPK()}</button></div>`).join('')}</div>` : ''}
           <div class="row" style="gap:8px">
             <button class="btn sm primary" data-act="ob-add">➕ Добавить статью в карточку</button>
             ${this._bubble.forms.length ? '<button class="btn sm ai" data-act="tr-save-forms">📚 Формы → в карточку</button>' : ''}
@@ -3059,7 +3085,7 @@ ${JSON.stringify(items)}`;
         stage.insertAdjacentHTML('beforeend', `<div class="tr-bubble ok ob-bubble">
           <button class="tr-bubble-x" data-act="bubble-close" title="Закрыть">✕</button>
           <div class="tr-bubble-head">${Translators.icon('tatoeba', 24)} <b>Tatoeba — живые примеры</b><span class="chip">переведены людьми</span></div>
-          <div class="ob-defs" style="padding-left:0">${ex.map(x => `<div class="ob-ex">• ${UI.rich(`${x.no} (${x.ru})`)} <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}">🔊</button></div>`).join('')}</div>
+          <div class="ob-defs" style="padding-left:0">${ex.map(x => `<div class="ob-ex">• ${UI.rich(`${x.no} (${x.ru})`)} <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}">${SPK()}</button></div>`).join('')}</div>
           <div class="row" style="gap:8px">
             <button class="btn sm primary" data-act="tt-add">➕ Добавить в примеры карточки</button>
             ${Listen.hereBtn('.ob-bubble', 'Tatoeba — примеры', 'Слушать')}
@@ -3083,7 +3109,7 @@ ${JSON.stringify(items)}`;
       this.tvCss();
       box.innerHTML = `<div class="small muted" style="margin-bottom:4px">📚 Формы слова с переводом:</div>
         ${f.items.map(x => `<div class="fg-row fg-v2r"><span class="fg-label">${this.formLabelHtml(x)}</span><span class="fg-no" lang="nb">${UI.rich(x.no)}</span><span class="fg-dash" aria-hidden="true">—</span><span class="fg-ru">${UI.rich(x.ru)}</span>
-          <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">🔊</button></div>`).join('')}`;
+          <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">${SPK()}</button></div>`).join('')}`;
       document.querySelector('[data-bactions]').insertAdjacentHTML('beforeend', '<button class="btn sm ai" data-act="tr-save-forms">📚 Сохранить формы в карточку</button>');
     },
     addVariant(card, by, res) {
@@ -3583,7 +3609,8 @@ ${JSON.stringify(items)}`;
             const txt = await AI.explain(card);
             if (this.current() && this.current().card.id === card.id) {
               box.innerHTML = `<div class="panel explain-box"><div class="row"><h3>${AI.icon(AI.lastProvider, 18)} Объяснение · ${U.esc(AI.name(AI.lastProvider))}</h3><span class="grow"></span>${Listen.hereBtn('.explain-box', 'Объяснение', 'Слушать')}
-                <button class="btn sm primary" data-act="explain-save">➕ Добавить в карточку</button></div><div class="content">${UI.rich(txt)}</div></div>`;
+                <button class="btn sm primary" data-act="explain-save">${NI('plus')}<span>Добавить в карточку</span></button></div><div class="content">${UI.rich(txt)}</div>
+                ${window.Views && Views.aiNote ? Views.aiNote({ answer: txt, question: `${String(card.no || '').slice(0, 300)} — ${String(card.ru || '').slice(0, 300)}`, task: 'explain', provider: AI.name(AI.lastProvider) }) : ''}</div>`;
               box.dataset.text = txt;
             }
           } catch (err) { box.innerHTML = ''; UI.toast(err.message, 'bad', 6000); }
@@ -3621,7 +3648,7 @@ ${JSON.stringify(items)}`;
           const v = ['ru', 'uk', 'both'].includes(a.dataset.v) ? a.dataset.v : 'ru';
           Store.setSetting('transLang', v);
           document.querySelectorAll('.tr-seg button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
-          document.querySelectorAll('.dir-switch button').forEach(b => { const d = b.dataset.dir; if (d === 'nr') b.textContent = `🇳🇴→${this.trFlag()}`; else if (d === 'rn') b.textContent = `${this.trFlag()}→🇳🇴`; });
+          document.querySelectorAll('.dir-switch button').forEach(b => { const d = b.dataset.dir; if (d === 'nr' || d === 'rn') b.innerHTML = this.dirMark(d); });
           S.flipped = false; S.answeredType = null; S.quizDone = false; TTS.stop();
           this.renderCard(false);
           break;

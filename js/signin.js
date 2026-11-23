@@ -2,7 +2,10 @@
  * SignIn.open()  — a full-screen sheet: a dimmed, slowly drifting collage of the app's OWN pictures (the loading-screen
  *   word cards, art-card templates drawn by js/artcards.js, «Фраза дня» scenes drawn by js/phraseday.js — no stock
  *   people), the logo + the promise, and the sign-in buttons. Never opened by itself: only from «👤 Мой кабинет».
- * Backend: js/account.js (Supabase, the owner's own project: Settings → ☁️ Облако → Project URL + anon key).
+ * Backend: js/account.js (Supabase: the app's built-in project from js/config.js, or Settings → ☁️ Облако as an override,
+ *   or the local dev API — localhost + ?nkdev=1 only, e-mail code stand-in).
+ * SignIn.open({ reason: 'pro', feature, onClose(signedIn) }) — js/pro.js opens it before the paywall: the headline says why,
+ *   and onClose tells whether the person is now signed in (the paywall / the blocked action then continue).
  *   Only providers the project really has switched on are shown — GET <url>/auth/v1/settings (public, anon key) says
  *   which ones; a provider that is off is hidden, never shown as a broken button. No cloud → the sheet says plainly
  *   «Аккаунт не нужен», offers the backup file, and shows the sign-in row as not available yet.
@@ -84,8 +87,10 @@
   let provCache = null;
   async function providers() {
     const A = ACC();
-    if (!A || !A.cloudReady()) return null;
-    const url = Store.settings.cloudUrl.trim().replace(/\/+$/, ''), key = Store.settings.cloudAnon.trim();
+    const P = window.NKConfig ? NKConfig.project() : null;
+    if (!A || !A.cloudReady() || !P) return null;
+    if (P.devAuth) return { email: true, google: false, apple: false, other: [], signup: true, dev: true }; // the local dev API: e-mail code only
+    const url = P.url, key = P.key;
     if (provCache && provCache.url === url && Date.now() - provCache.t < 10 * 60e3) return provCache.v;
     const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 7000);
     let v;
@@ -105,9 +110,10 @@
   /* ---------- the sheet ---------- */
   let cur = null;
   function open(o = {}) {
-    if (cur) return cur;
+    if (cur) { if (o.onClose) (cur.waiters = cur.waiters || []).push(o.onClose); return cur; }
     const A = ACC();
     const ready = !!(A && A.cloudReady());
+    const forPro = o.reason === 'pro' && ready;
     const opener = document.activeElement;
     const bd = document.createElement('div');
     bd.className = 'modal-backdrop si-bd';
@@ -117,8 +123,8 @@
       <button type="button" class="si-x" data-si="close" aria-label="Закрыть">${IC('close', 20)}</button>
       <section class="si-panel" role="dialog" aria-modal="true" aria-labelledby="si-h" aria-describedby="si-sub">
         <div class="si-brand"><img src="icons/icon.svg" alt="" width="44" height="44"><span>Norsk <b>Kort</b></span></div>
-        <h2 id="si-h">${ready ? 'Ваши карточки — на&nbsp;всех устройствах' : 'Аккаунт не&nbsp;нужен'}</h2>
-        <p id="si-sub" class="si-sub">${ready ? 'Войдите — и колоды, карточки, прогресс и настройки появятся на всех ваших устройствах. Вход — по желанию: без него всё работает на этом устройстве.' : 'Всё хранится на этом устройстве — колоды, прогресс и настройки. Работает без регистрации и без интернета.'}</p>
+        <h2 id="si-h">${forPro ? 'Войдите, чтобы подключить Pro' : ready ? 'Ваши карточки — на&nbsp;всех устройствах' : 'Аккаунт не&nbsp;нужен'}</h2>
+        <p id="si-sub" class="si-sub">${forPro ? `Norsk Kort Pro привязывается к аккаунту — так он работает на всех ваших устройствах${o.feature ? `, а «${esc(o.feature)}» продолжится сразу после входа` : ''}. Колоды и прогресс тоже будут в облаке.` : ready ? 'Войдите — и колоды, карточки, прогресс и настройки появятся на всех ваших устройствах. Вход — по желанию: без него всё работает на этом устройстве.' : 'Всё хранится на этом устройстве — колоды, прогресс и настройки. Работает без регистрации и без интернета.'}</p>
         <div class="si-body" data-si-body aria-live="polite"></div>
         <button type="button" class="si-later" data-si="close">Не сейчас</button>
       </section>`;
@@ -134,8 +140,11 @@
       bd.classList.add('closing');
       document.removeEventListener('keydown', onKey, true);
       setTimeout(() => { bd.remove(); document.documentElement.classList.remove('si-open'); }, 200);
+      const waiters = [o.onClose].concat((cur && cur.waiters) || []).filter(f => typeof f === 'function');
       cur = null;
       try { if (opener && opener.isConnected) opener.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+      const inNow = !!(A && A.user);
+      waiters.forEach(f => { try { f(inNow); } catch (e) { console.warn('signin onClose', e); } });
     };
     const focusFirst = () => { const f = body.querySelector('input, button:not([disabled])') || $('.si-later'); if (f) f.focus({ preventScroll: true }); };
     // Escape closes; Tab stays inside the sheet
@@ -151,7 +160,11 @@
     };
     document.addEventListener('keydown', onKey, true);
 
-    const legal = `<p class="si-legal">Данные синхронизируются через ваш собственный облачный проект: колоды, карточки, прогресс и настройки. Ключи API и токены никогда не покидают устройство. Выйти можно в любой момент — данные на устройстве останутся.</p>`;
+    const P = window.NKConfig ? NKConfig.project() : null;
+    const own = P && P.source === 'own';
+    const C = window.NK_CONFIG || {};
+    const links = !own && (C.termsUrl || C.privacyUrl) ? ` <a href="${esc(C.termsUrl || '')}" target="_blank" rel="noopener">Условия</a> · <a href="${esc(C.privacyUrl || '')}" target="_blank" rel="noopener">Конфиденциальность</a>` : '';
+    const legal = `<p class="si-legal">${own ? 'Данные синхронизируются через ваш собственный облачный проект' : 'Данные синхронизируются через облако Norsk Kort'}: колоды, карточки, прогресс и настройки. Ключи API и токены никогда не покидают устройство. Выйти можно в любой момент — данные на устройстве останутся.${links}</p>`;
 
     /* steps */
     function stepStart(pv) {
@@ -198,7 +211,7 @@
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { m.setAttribute('aria-invalid', 'true'); m.focus(); UI.toast('Введите почту', 'warn'); return; }
         const go = body.querySelector('[data-si-go]'); go.disabled = true;
         try {
-          if (withPass) { await A.signInEmail(email, body.querySelector('#si-pass').value); if (A.user) { close(); UI.toast('Вы вошли', 'good'); } }
+          if (withPass) { await A.signInEmail(email, body.querySelector('#si-pass').value); if (A.user) { close(); if (!forPro) UI.toast('Вы вошли', 'good'); } }
           else {
             const r = await A.sendCode(email);
             if (r && r.error) { UI.toast(r.error, 'bad', 6000); } else { stepCode(); return; }
@@ -227,7 +240,7 @@
         const go = body.querySelector('[data-si-go]'); go.disabled = true;
         const r = await A.verifyCode(email, code);
         if (r && r.error) { if (go.isConnected) go.disabled = false; c.setAttribute('aria-invalid', 'true'); UI.toast(r.error, 'bad', 6000); return; }
-        close(); UI.toast('Вы вошли', 'good');
+        close(); if (!forPro) UI.toast('Вы вошли', 'good');
       };
       focusFirst();
     }
@@ -235,7 +248,13 @@
     bd.addEventListener('input', e => { if (e.target.matches('.si-in')) e.target.removeAttribute('aria-invalid'); });
     bd.addEventListener('click', async e => {
       const ob = e.target.closest('[data-oauth]');
-      if (ob) { ob.disabled = true; try { await A.signInOAuth(ob.dataset.oauth); } finally { ob.disabled = false; } return; }
+      if (ob) {
+        ob.disabled = true;
+        // the page leaves for the provider and comes back: js/pro.js reopens the paywall after the return
+        if (forPro) { try { sessionStorage.setItem('nk-pro-pending', JSON.stringify({ feature: o.feature || '', t: Date.now() })); } catch (x) { /* ignore */ } }
+        try { await A.signInOAuth(ob.dataset.oauth); } finally { ob.disabled = false; }
+        return;
+      }
       const b = e.target.closest('[data-si]'); if (!b || b.disabled) return;
       switch (b.dataset.si) {
         case 'close': close(); break;
@@ -249,7 +268,7 @@
       }
     });
 
-    cur = { el: bd, close, tryClose: async () => { close(); return true; }, dismissable: true };
+    cur = { el: bd, close, tryClose: async () => { close(); return true; }, dismissable: true, waiters: [] };
     bd._m = cur; // «🏠 на главный» closes every window through it
     stepStart(null);
     focusFirst();

@@ -1,7 +1,12 @@
 /* ============ ✈️ Telegram: posts, videos, picture-cards and files about the card's word -> inside the app -> cards ============
- * Two ways in (both read-only):
- *  1) public channels — web preview t.me/s/<channel>?q=<word> (no login), fetched through the Mac bridge (t.me sends no CORS)
- *  2) YOUR account (closed groups, forum topics like «Словарный запас», PDF / MP3 files) — bridge/tg.py (Telethon), one-time login
+ * Three ways in (all read-only):
+ *  1) on the owner's Mac: public channels — web preview t.me/s/<channel>?q=<word> (no login), fetched through the Mac bridge
+ *  2) on the owner's Mac: YOUR account (closed groups, forum topics like «Словарный запас», PDF / MP3 files) — bridge/tg.py
+ *     (Telethon), one-time login. Never anywhere else.
+ *  3) everywhere else (the site, the store apps, phones): the Norsk Kort server's tg-public (docs/api-contract.md) — ONLY the
+ *     curated channels of data/tg-channels.json (posts as JSON: safe HTML, link, picture), «Google Docs» word lists through
+ *     fetch-public kind gdoc-txt. Any other channel (not_curated) is never shown inside the app: «Открыть в Телеграме».
+ *     No server set up yet → Telegram's own links and widgets (js/tgchan.js), as before.
  * Everything taken from Telegram keeps its source: channel, post link, the Telegram icon on the card (provenance 'tr:telegram').
  * Translations written by teachers in the channels are human translations — no machine-translation warning.
  */
@@ -20,9 +25,17 @@
   ];
   const enc = encodeURIComponent;
   const st = () => Store.settings;
-  /** the owner's own machine (localhost, *.localhost, the app opened as a file): only there the Mac bridge is mentioned.
-   *  On the site (GitHub Pages) visitors never see «запустите мост» — they get what works without it. */
-  const home = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$|\.localhost$/i.test(location.hostname);
+  /** the owner's own machine (localhost, *.localhost, the app opened as a file — never the store apps): only there the Mac
+   *  bridge is mentioned. On the site and in the apps visitors never see «запустите мост» — they get what works without it. */
+  const native = () => !!(window.Net && Net.isNative && Net.isNative());
+  const home = () => !native() && (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$|\.localhost$/i.test(location.hostname));
+  /** the Mac bridge answered (js/net.js) — the ONLY case for /api/proxy and /api/tg/* */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  /** the Norsk Kort server is set up (js/config.js) — tg-public works */
+  const serverOn = () => !!(window.Net && Net.callFn && window.NKConfig && NKConfig.ready());
+  /** off the Mac with the server: the curated channels come through tg-public */
+  const pubMode = () => !macBridge() && !home() && serverOn();
+  const IC = (n, sz) => (window.NavIcons && NavIcons.icon ? NavIcons.icon(n, sz) : '');
   /** «📢 Норвежские каналы» of the Telegram window (js/tgchan.js), from another tab */
   const toChannels = el => { const t = el && el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]'); if (t) t.click(); else Telegram.open(null, 'channels'); };
   const myChannels = () => {
@@ -44,6 +57,54 @@
     return j;
   }
   const mediaUrl = (chat, msg, extra = '') => `/api/tg/media?chat=${enc(chat)}&msg=${enc(msg)}${extra}`;
+
+  /* ---------------- 🌐 off the Mac: the Norsk Kort server's tg-public (curated channels only) ---------------- */
+  let curP = null;
+  /** the curated channels of data/tg-channels.json (the same list the server allows): [{ username, title }] */
+  function curatedList() {
+    if (!curP) {
+      curP = fetch('data/tg-channels.json', { cache: 'no-cache' }).then(r => (r.ok ? r.json() : [])).catch(() => [])
+        .then(a => (Array.isArray(a) ? a : []).map(c => ({ username: String((c && c.username) || ''), title: String((c && c.title) || '') }))
+          .filter(c => /^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(c.username)).slice(0, 100));
+    }
+    return curP;
+  }
+  async function isCurated(u) { const k = String(u || '').toLowerCase(); return (await curatedList()).some(c => c.username.toLowerCase() === k); }
+  const okHttps = u => (/^https:\/\/[^\s"'<>]+$/i.test(String(u || '')) ? String(u) : '');
+  /** GET tg-public → { channel: {title, about, photo}, posts: [the shape of parsePreview + html (safe, from the server)], next }.
+   *  Throws a NetError with a calm .message; not_curated → err.link (https://t.me/<channel>) — open it with Net.linkOut(err). */
+  async function tgPublic(u, o = {}) {
+    const j = await Net.callFn('tg-public', null, { query: { u, q: o.q || '', before: o.before || '' }, signal: o.signal });
+    const ch = j && j.channel ? j.channel : {};
+    const title = String(ch.title || '') || '@' + u;
+    const posts = (j && Array.isArray(j.posts) ? j.posts : []).filter(p => p && +p.id > 0).map(p => {
+      const m = p.media && typeof p.media === 'object' ? p.media : {};
+      const thumb = okHttps(m.thumb);
+      return {
+        src: 'public', ch: u, chatTitle: title, id: +p.id, post: `${u}/${+p.id}`, date: String(p.date || ''),
+        link: /^https:\/\/t\.me\/[A-Za-z0-9_]+\/\d+$/.test(String(p.link || '')) ? String(p.link) : `https://t.me/${u}/${+p.id}`,
+        text: String(p.text || ''), html: String(p.html_safe || ''), // html_safe: b strong i em u s code pre br + https links only (server)
+        photos: m.kind === 'photo' && thumb ? [thumb] : [],
+        video: m.kind === 'video' ? { thumb, url: '' } : null,
+        file: m.kind === 'document' || m.kind === 'audio' ? { name: m.kind === 'audio' ? 'Аудио' : 'Файл', audio: m.kind === 'audio' } : null,
+      };
+    });
+    return { channel: { title, about: String(ch.about || ''), photo: okHttps(ch.photo) }, posts, next: +(j && j.next) || 0 };
+  }
+  /** the curated channels searched for a word through tg-public — gently: two at a time, ~2 requests a second */
+  async function searchCurated(q, onPart, stop) {
+    const list = await curatedList();
+    let k = 0, halt = false;
+    await Promise.all([0, 1].map(async () => {
+      while (k < list.length && !halt && !(stop && stop())) {
+        const { username: u } = list[k++];
+        try { onPart((await tgPublic(u, { q })).posts, u); }
+        catch (e) { if (e && (e.code === 'rate_limited' || e.code === 'offline' || e.code === 'not_configured')) halt = e; onPart([], u, e); }
+        await new Promise(r => setTimeout(r, 450));
+      }
+    }));
+    if (halt) throw halt;
+  }
 
   /* ---------------- public channel web preview -> posts ---------------- */
   /** 🏷 the title a nameless deck may take: a chat's name; for own photos / texts / books only the name inside «…» (not «мой текст», «3 фото») */
@@ -141,10 +202,10 @@
 
   /* ---------------- UI ---------------- */
   const Telegram = {
-    TG_SVG, CHANNELS, parsePreview, pairs, home,
+    TG_SVG, CHANNELS, parsePreview, pairs, home, macBridge, pubMode, tgPublic, curatedList, isCurated,
     status: null,
     async accStatus() {
-      if (!AI.bridge.up) return (this.status = { bridge: false });
+      if (!macBridge()) return (this.status = { bridge: false });
       try { this.status = Object.assign({ bridge: true }, await acc('status')); } catch (e) { this.status = { bridge: true, error: U.niceErr(e) }; }
       return this.status;
     },
@@ -166,21 +227,23 @@
       const site = !s.bridge && !home();
       if (site) {
         const saved = !!(window.TgAudio && TgAudio.saved && TgAudio.saved.list().length);
-        for (let i = tabs.length - 1; i >= 0; i--) if (!['channels', 'search'].concat(saved ? ['audio'] : []).includes(tabs[i][0])) tabs.splice(i, 1);
+        // 🌐 the Norsk Kort server: words from the curated channels into cards («Создать карточки из чата») work here too
+        const keep = ['channels', 'search'].concat(serverOn() ? ['vocab'] : [], saved ? ['audio'] : []);
+        for (let i = tabs.length - 1; i >= 0; i--) if (!keep.includes(tabs[i][0])) tabs.splice(i, 1);
       }
       const shell = cur => `<div class="tg-tabs">${tabs.map(([k, l]) => `<button class="chip ${k === cur ? 'active' : ''}" data-tgtab="${k}">${l}</button>`).join('')}
-          <span class="grow"></span><span class="small muted">${s.bridge ? (s.authorized ? `✓ аккаунт: ${U.esc(s.me || 'подключён')}` : 'публичные каналы') : site ? '🙌 без входа в Телеграм' : '⚠️ мост не запущен'}</span></div><div data-tgbody></div>`;
+          <span class="grow"></span><span class="small muted">${s.bridge ? (s.authorized ? `✓ аккаунт: ${U.esc(s.me || 'подключён')}` : 'публичные каналы') : site ? `<span class="tg-state">${IC('check', 15)} без входа в Телеграм</span>` : `<span class="tg-state">${IC('alert', 15)} мост на Mac не запущен</span>`}</span></div><div data-tgbody></div>`;
       const go = t => { box.innerHTML = shell(t); this['tab_' + t](box.querySelector('[data-tgbody]'), card, m); };
       box.addEventListener('click', e => { const t = e.target.closest('[data-tgtab]'); if (t) go(t.dataset.tgtab); });
       const ok = tabs.some(t => t[0] === tab) ? tab : tabs[0][0];
       // 🎵 saved audio plays without the bridge; on the site a word from a card opens the search links, the rest — the channels
-      go(s.bridge ? ok : site ? (tab === 'search' && card ? 'search' : ok === 'audio' ? 'audio' : (tabs.find(t => t[0] === 'channels') || tabs[0])[0]) : tab !== 'channels' && tab !== 'audio' ? 'setup' : tab);
+      go(s.bridge ? ok : site ? (tab === 'search' && card ? 'search' : ok === 'audio' || (ok === 'vocab' && tab === 'vocab') ? ok : (tabs.find(t => t[0] === 'channels') || tabs[0])[0]) : tab !== 'channels' && tab !== 'audio' ? 'setup' : tab);
     },
 
     noBridge(el, q) {
       if (!home()) { this.siteSearch(el, q); return; }
-      el.innerHTML = `<div class="mt-warn">⚠️ <span><b>Нужен мост на Mac.</b> Telegram не даёт сайтам читать каналы напрямую, поэтому окно работает через мост: в Терминале
-        <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> и откройте приложение по адресу http://localhost:8787.</span></div>
+      el.innerHTML = `<div class="mt-warn">${IC('info', 18)} <span><b>Нужен мост на Mac.</b> Telegram не даёт сайтам читать каналы напрямую, поэтому окно работает через мост: в Терминале, в папке приложения,
+        <code style="user-select:all">python3 bridge/server.py</code> и откройте приложение по адресу http://localhost:8787.</span></div>
         ${q ? `<div class="small muted" style="margin:8px 0 4px">Пока можно открыть поиск в самих каналах (откроется сайт Telegram):</div><div class="yt-links">${myChannels().map(([u, n, f]) => `<a class="chip" target="_blank" rel="noopener" href="https://t.me/s/${enc(u)}?q=${enc(q)}">${f} ${U.esc(n)} ↗</a>`).join('')}</div>` : ''}`;
     },
 
@@ -208,11 +271,12 @@
     /* ---- 🔎 search by the card's word: videos / texts / pictures / files, the user picks what to open ---- */
     tab_search(el, card, m) {
       const q0 = card ? Ordbok.bare(card.no) : '';
-      if (!AI.bridge.up) { this.noBridge(el, q0); return; }
-      const s = this.status;
-      el.innerHTML = `<div class="row" style="gap:8px"><input class="input grow" data-tgq value="${U.esc(q0)}" placeholder="слово или выражение"><button class="btn primary" data-tggo>🔎 Искать</button></div>
-        <div class="small muted" style="margin:4px 0">Поиск в ${myChannels().length} публичных каналах${s.authorized ? ' и в ваших чатах/группах (аккаунт)' : ''}. Telegram ищет по целым словам (snakke, snakker…). Картинки без подписи так не находятся — их можно взять во вкладке «Создать карточки из чата».</div>
-        <div class="tg-kinds" data-kinds></div><div data-res class="tg-res"></div>`;
+      const pub = pubMode(); // 🌐 off the Mac: the curated channels through the Norsk Kort server
+      if (!macBridge() && !pub) { this.noBridge(el, q0); return; }
+      const s = pub ? {} : this.status;
+      el.innerHTML = `<div class="row" style="gap:8px"><input class="input grow" data-tgq value="${U.esc(q0)}" placeholder="слово или выражение" lang="nb" aria-label="Слово для поиска"><button class="btn primary" data-tggo>🔎 Искать</button></div>
+        <div class="small muted" style="margin:4px 0">${pub ? 'Поиск в проверенных каналах о норвежском — прямо здесь, без входа в Телеграм.' : `Поиск в ${myChannels().length} публичных каналах${s.authorized ? ' и в ваших чатах/группах (аккаунт)' : ''}.`} Telegram ищет по целым словам (snakke, snakker…). Картинки без подписи так не находятся — их можно взять во вкладке «Создать карточки из чата».</div>
+        <div class="tg-kinds" data-kinds></div><div data-res class="tg-res"></div>${pub ? '<div class="tg-more-links" data-tgother></div>' : ''}`;
       let all = [], filter = 'all', stop = false;
       const render = () => {
         const count = k => all.filter(p => k === 'all' || kindOf(p) === k).length;
@@ -231,7 +295,9 @@
         res.insertAdjacentHTML('afterbegin', '<div class="small muted" data-prog><span class="spinner sm"></span> ищу…</div>');
         const seen = new Set();
         const add = posts => { posts.forEach(p => { const k = p.link; if (!seen.has(k)) { seen.add(k); all.push(p); } }); all.sort((a, b) => String(b.date).localeCompare(String(a.date))); render(); };
-        const jobs = [searchPublic(q, (posts) => add(posts), () => stop)];
+        let halted = null;
+        const jobs = [pub ? searchCurated(q, posts => add(posts), () => stop).catch(e => { halted = e; }) : searchPublic(q, (posts) => add(posts), () => stop)];
+        if (pub) this.otherLinks(el.querySelector('[data-tgother]'), q);
         if (s.authorized) {
           jobs.push((async () => {
             try {
@@ -242,7 +308,8 @@
         }
         await Promise.all(jobs);
         render();
-        if (!all.length) el.querySelector('[data-res]').innerHTML = `<div class="small muted">По «${U.esc(q)}» ничего не нашлось. Попробуйте другую форму слова или русский перевод.</div>`;
+        if (!all.length) el.querySelector('[data-res]').innerHTML = halted && halted.nk ? `<div class="small muted">${U.esc(halted.message)}</div>`
+          : `<div class="small muted">По «${U.esc(q)}» ничего не нашлось. Попробуйте другую форму слова или русский перевод.</div>`;
       };
       el.addEventListener('click', e => {
         const k = e.target.closest('[data-kind]'); if (k) { filter = k.dataset.kind; render(); return; }
@@ -271,7 +338,7 @@
         ${p.text ? `<div class="tg-text" data-tgact="more" data-i="${i}">${hl(p.text)}</div>` : ''}
         ${p.photos.length ? `<div class="tg-photos">${p.photos.slice(0, 6).map(u => `<img src="${U.esc(u)}" alt="" loading="lazy" data-tgact="photo" data-url="${U.esc(u)}" data-i="${i}">`).join('')}</div>` : ''}
         ${p.video ? `<div class="tg-video" data-player>${p.video.thumb ? `<img src="${U.esc(p.video.thumb)}" alt="" loading="lazy">` : ''}<button class="btn sm primary" data-tgact="watch" data-i="${i}">▶ Смотреть здесь</button></div>` : ''}
-        ${p.file ? `<div class="tg-file">${p.file.audio ? '🎧' : '📄'} ${U.esc(p.file.name || 'файл')}${p.file.url ? ` · <a href="${U.esc(p.file.url)}" target="_blank">открыть</a> · <a href="${U.esc(p.file.url)}&dl=1">скачать</a>` : ' · откройте в Telegram ↗ (файлы — через аккаунт)'}
+        ${p.file ? `<div class="tg-file">${p.file.audio ? '🎧' : '📄'} ${U.esc(p.file.name || 'файл')}${p.file.url ? ` · <a href="${U.esc(p.file.url)}" target="_blank">открыть</a> · <a href="${U.esc(p.file.url)}&dl=1">скачать</a>` : home() ? ' · откройте в Telegram ↗ (файлы — через аккаунт)' : ` · <a href="${U.esc(p.link)}" target="_blank" rel="noopener noreferrer">открыть в Телеграме ↗</a>`}
           ${p.file.audio && p.file.url ? `<audio controls preload="none" src="${U.esc(p.file.url)}"></audio>` : ''}</div>` : ''}
         <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm ai" data-tgact="card" data-i="${i}">➕ В карточку</button>${p.text ? Listen.hereBtn('.tg-post', 'Telegram · ' + (p.chatTitle || ''), 'Слушать') : ''}${p.text && p.text.length > 260 ? `<button class="btn sm ghost" data-tgact="more" data-i="${i}">развернуть</button>` : ''}</div>
       </div>`;
@@ -533,16 +600,18 @@
 
     /* ---- 🗂 whole chat / forum topic («Словарный запас») -> all pairs -> deck ---- */
     async tab_vocab(el, card) {
-      if (!AI.bridge.up) { if (home()) this.noBridge(el); else this.siteAlt(el, 'vocab'); return; }
-      const s = this.status;
+      const pub = pubMode(); // 🌐 off the Mac: the curated channels through the Norsk Kort server (tg-public + gdoc-txt)
+      if (!macBridge() && !pub) { if (home()) this.noBridge(el); else this.siteAlt(el, 'vocab'); return; }
+      const s = pub ? {} : this.status;
+      const srcList = pub ? (await curatedList()).map(c => [c.username, c.title || '@' + c.username, '']) : myChannels();
       el.innerHTML = `<div class="small">Соберу все пары «норвежский — перевод» из канала или темы группы (например, «Норвежский? Легко!» → «Словарный запас») — и ссылки на Google-документы со списками слов.</div>
         <div class="field-row">
           <label class="field"><span>Откуда</span><select class="input" data-src><option value="">— выберите —</option>
-            <optgroup label="Публичные каналы">${myChannels().map(([u, n, f]) => `<option value="pub:${U.esc(u)}">${f} ${U.esc(n)}</option>`).join('')}</optgroup>
+            <optgroup label="${pub ? 'Проверенные каналы о норвежском' : 'Публичные каналы'}">${srcList.map(([u, n, f]) => `<option value="pub:${U.esc(u)}">${f ? f + ' ' : ''}${U.esc(n)}</option>`).join('')}</optgroup>
             ${s.authorized ? '<optgroup label="Мои чаты и группы (аккаунт)" data-acc><option disabled>загружаю…</option></optgroup>' : ''}</select></label>
           <label class="field" data-topic-wrap hidden><span>Тема</span><select class="input" data-topic></select></label>
           <label class="field"><span>Сколько последних сообщений</span><input class="input" type="number" data-lim value="300" min="20" max="3000"></label></div>
-        ${s.authorized ? '' : '<div class="small muted">Закрытые группы и темы форумов — после входа в аккаунт (вкладка «Каналы и аккаунт»).</div>'}
+        ${s.authorized ? '' : pub ? '<div class="small muted">Посты читает сервер Norsk Kort — только из проверенных каналов, без входа в Телеграм.</div>' : '<div class="small muted">Закрытые группы и темы форумов — после входа в аккаунт (вкладка «Каналы и аккаунт»).</div>'}
         ${UI.switchHtml('tg-docs', true, 'Открывать ссылки на Google Документы со списками слов')}
         ${UI.switchHtml('tg-pics', false, 'Распознавать текст на картинках (дольше)')}
         <div class="row" style="gap:8px"><button class="btn primary" data-collect>🗂 Собрать слова</button><span class="small muted" data-log></span></div>
@@ -577,12 +646,21 @@
             let before = '';
             while (posts.length < lim) {
               log(`читаю @${u}: ${posts.length}…`);
-              const html = await getVia(`https://t.me/s/${enc(u)}${before ? '?before=' + before : ''}`);
-              const part = parsePreview(html, u);
-              if (!part.length) break;
-              posts = posts.concat(part);
-              title = part[0].chatTitle;
-              before = Math.min(...part.map(x => x.id));
+              let part;
+              if (pub) {
+                const r = await tgPublic(u, { before });
+                part = r.posts; title = r.channel.title;
+                posts = posts.concat(part);
+                if (!part.length || !r.next || r.next === before) break;
+                before = r.next;
+              } else {
+                const html = await getVia(`https://t.me/s/${enc(u)}${before ? '?before=' + before : ''}`);
+                part = parsePreview(html, u);
+                if (!part.length) break;
+                posts = posts.concat(part);
+                title = part[0].chatTitle;
+                before = Math.min(...part.map(x => x.id));
+              }
               await new Promise(r => setTimeout(r, 500));
             }
           } else {
@@ -600,7 +678,9 @@
             const docs = [...new Set(posts.flatMap(p => (p.text.match(/https:\/\/docs\.google\.com\/document\/d\/[\w-]+/g) || [])))].slice(0, 15);
             for (const d of docs) {
               log(`Google Документ ${docs.indexOf(d) + 1}/${docs.length}…`);
-              try { pairs(await getVia(d + '/export?format=txt')).forEach(r => rows.push(Object.assign(r, { link: d }))); } catch (e) { /* closed document */ }
+              // off the Mac: the server's fetch-public kind gdoc-txt (only documents seen in a curated channel's post)
+              const txt = () => (pub ? Net.get(d + '/export?format=txt', { kind: 'gdoc-txt', id: d.split('/d/')[1], as: 'text' }) : getVia(d + '/export?format=txt'));
+              try { pairs(await txt()).forEach(r => rows.push(Object.assign(r, { link: d }))); } catch (e) { /* closed document */ }
             }
           }
           if (on('tg-pics')) {
@@ -615,7 +695,7 @@
           rows.forEach(r => { const k = U.norm(r.no); if (r.ru && !seen.has(k)) { seen.add(k); fresh.push(r); } });
           log('');
           this.vocabPreview(el.querySelector('[data-out]'), fresh, title || 'Telegram', rows.length);
-        } catch (e) { log(''); UI.toast(e.message, 'bad', 6000); }
+        } catch (e) { log(''); UI.toast(e && e.nk ? e.message : U.niceErr(e), 'warn', 6000); }
       };
     },
     /**
@@ -760,7 +840,7 @@
 
     /* ---- 📎 books (PDF) and audio (MP3) of a chat — account only ---- */
     async tab_files(el) {
-      if (!AI.bridge.up) { if (home()) this.noBridge(el); else this.siteAlt(el, 'files'); return; }
+      if (!macBridge()) { if (home()) this.noBridge(el); else this.siteAlt(el, 'files'); return; }
       if (!this.status.authorized) {
         el.innerHTML = `<div class="mt-warn">ℹ️ <span>Файлы (книги PDF, аудио MP3, голосовые) Telegram отдаёт только вашему аккаунту — веб-версия каналов их не показывает. Подключите аккаунт во вкладке «⚙️ Каналы и аккаунт» (один раз, 2 минуты).</span></div>`;
         return;
@@ -815,6 +895,14 @@
       });
     },
 
+    /** 🌐 off the Mac: the user's own (not curated) channels are never read inside the app — Telegram's own search, one link each */
+    async otherLinks(box, q) {
+      if (!box) return;
+      const cur = new Set((await curatedList()).map(c => c.username.toLowerCase()));
+      const other = myChannels().filter(([u]) => !cur.has(String(u).toLowerCase()));
+      box.innerHTML = q && other.length ? `<details class="tg-other"><summary>Ещё ${other.length} ${U.plural(other.length, ['канал', 'канала', 'каналов'])} из вашего списка — поиск откроется в Телеграме</summary>
+          <div class="yt-links">${other.map(([u, n, f]) => `<a class="chip tg-site-link" target="_blank" rel="noopener noreferrer" href="https://t.me/s/${enc(u)}?q=${enc(q)}">${f} ${U.esc(n)} ↗</a>`).join('')}</div></details>` : '';
+    },
     /** the site (no bridge): what to do instead — kind, friendly, no technical words */
     siteAlt(el, what) {
       const t = {
@@ -832,7 +920,7 @@
       if (!s.bridge && !home()) { this.siteAlt(el, 'setup'); return; }
       const off = new Set(st().tgOff || []);
       el.innerHTML = `
-        ${s.bridge ? '' : `<div class="mt-warn">⚠️ <span><b>Мост на Mac не запущен.</b> В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> — и откройте http://localhost:8787. На iPhone через GitHub Pages окно Telegram работает только как ссылки.</span></div>`}
+        ${s.bridge ? '' : `<div class="mt-warn">${IC('info', 18)} <span><b>Мост на Mac не запущен.</b> В Терминале, в папке приложения: <code style="user-select:all">python3 bridge/server.py</code> — и откройте http://localhost:8787. На телефоне свой Telegram не подключается — там открытые каналы читаются без входа.</span></div>`}
         <h3 style="margin:10px 0 4px">📢 Публичные каналы (без входа)</h3>
         <div class="tg-chlist">${CHANNELS.concat((st().tgExtra || []).map(u => [u, '@' + u, '➕'])).map(([u, n, f]) => `<label class="switch"><input type="checkbox" data-ch="${U.esc(u)}" ${off.has(u) ? '' : 'checked'}><span class="track"></span><span>${f} ${U.esc(n)} <a class="small" href="https://t.me/${U.esc(u)}" target="_blank" rel="noopener">@${U.esc(u)}</a></span></label>`).join('')}</div>
         <div class="row" style="gap:6px;margin-top:6px"><input class="input" data-newch placeholder="добавить канал: @username или ссылка t.me/…" style="max-width:340px"><button class="btn sm" data-addch>＋ Добавить</button></div>
@@ -1025,12 +1113,31 @@
       box.querySelector('[data-tgsite]').onclick = () => { m.close(); Telegram.open(null, 'channels'); };
       return;
     }
-    if (!s.bridge) { box.innerHTML = '<div class="tgl-card">⚠️ Подключение работает через мост на Mac — запустите его и откройте приложение через него (http://localhost:8787).</div>'; return; }
+    if (!s.bridge) { box.innerHTML = `<div class="tgl-card">${IC('info', 18)} Подключение работает через мост на Mac — запустите его (в папке приложения: python3 bridge/server.py) и откройте приложение через него (http://localhost:8787).</div>`; return; }
     if (s.authorized) showDone(s.me);
     else if (s.installed === false) showInstall();
     else if (s.configured) showLogin();
     else showKeys();
   };
+
+  /* touch targets ≥ 44 px on phones and the state line (phone audit 2026-11-23). The window's main styles live in css/tgvideo.css
+   * (another workstream's file) — these few rules are scoped to the Telegram / «Ещё источники» windows and added once. */
+  (function style() {
+    if (typeof document === 'undefined' || document.getElementById('nk-tg-touch')) return;
+    const st = document.createElement('style');
+    st.id = 'nk-tg-touch';
+    st.textContent = `@media (pointer: coarse) {
+  .tg-modal .tg-tabs .chip, .social-modal .tg-tabs .chip, .tg-modal .tg-kinds .chip, .tg-modal .btn.sm, .social-modal .btn.sm,
+  .tg-modal .tcn-foot .btn, .tg-modal .tgc-acts .btn, .tg-modal .yt-links .chip, .tg-modal .tcn-more, .tg-modal .tcn-open { min-height: 44px; }
+  .tg-modal .tg-tabs .chip, .social-modal .tg-tabs .chip, .tg-modal .yt-links .chip, .tg-modal .tcn-open { display: inline-flex; align-items: center; }
+}
+.tg-state { display: inline-flex; align-items: center; gap: 5px; }
+.tg-state .ui-ico { flex: none; }
+.tg-other { margin-top: 10px; }
+.tg-other > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--muted); }
+.tg-other > summary:hover { color: var(--text); }`;
+    (document.head || document.documentElement).appendChild(st);
+  })();
 
   window.Telegram = Telegram;
 })();

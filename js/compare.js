@@ -26,6 +26,8 @@
     lexin: 'Словарь LEXIN работает только на своём сайте. Слово скопируем — останется вставить его в поиск.',
     forvo: 'Записи носителей можно послушать только на самом Forvo.',
     yandex: 'Яндекс не даёт приложениям бесплатный доступ — только на своём сайте.',
+    google: 'Google Переводчик переводит прямо в приложении только на Mac. Здесь откроется его сайт с этим словом.',
+    deepl: 'DeepL не принимает запросы из браузера. Откроется его сайт с этим словом; в приложении для iPhone и Android DeepL переводит с вашим ключом.',
   };
   const CLS_RU = { NOUN: 'существительное', VERB: 'глагол', ADJ: 'прилагательное', ADV: 'наречие', ADP: 'предлог', PRON: 'местоимение', CCONJ: 'союз', SCONJ: 'союз', INTJ: 'междометие', DET: 'определитель', EXPR: 'выражение' };
   const FORM_RU = {
@@ -41,7 +43,11 @@
 
   const cache = new Map();
   const esc = s => U.esc(String(s == null ? '' : s));
-  const bridgeUp = () => !!(window.AI && AI.bridge && AI.bridge.up);
+  /** the Mac bridge answered (js/net.js Net.isMacBridge — the only case for /api/proxy) */
+  const bridgeUp = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  const isNative = () => !!(window.Net && Net.isNative && Net.isNative());
+  /** the public build (the site, the store apps): Google / MyMemory / Mozhi are the Mac's only (T1, T4) */
+  const pub = () => !!(window.NK_CONFIG && NK_CONFIG.publicBuild);
   const plural = (n, one, few, many) => { const a = Math.abs(n) % 100, b = a % 10; return a > 10 && a < 20 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many; };
   const ofN = n => `${n} ${plural(n, 'сервиса', 'сервисов', 'сервисов')}`;
   const pct = (k, n) => n ? Math.round(k / n * 100) : 0;
@@ -57,8 +63,10 @@
     })]).finally(() => clearTimeout(t));
   }
   const proxyGet = (url, signal) => fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }), signal });
-  /** GET JSON; the browser cannot reach it (CORS, blocker) and the Mac bridge runs → the bridge asks (allowed hosts only) */
+  /** GET JSON; the browser cannot reach it (CORS, blocker) → kind (allow-listed on the server, e.g. 'tatoeba'): Net.get —
+   *  the store apps' native HTTP, the Mac bridge, the server's fetch-public; no kind: the Mac bridge when bridgeOk */
   async function getJSON(url, signal, bridgeOk) {
+    if (typeof bridgeOk === 'string' && window.Net && Net.get) return Net.get(url, { kind: bridgeOk, as: 'json', signal });
     let r;
     try { r = await fetch(url, { signal }); } catch (e) {
       if ((signal && signal.aborted) || !bridgeOk || !bridgeUp()) throw e;
@@ -106,6 +114,7 @@
   /* ---------- the services ---------- */
   const R = {
     async google(e, signal) {
+      if (pub()) throw new Error(SITE_WHY.google); // T1: the Mac only
       const T = Translators, bridge = bridgeUp();
       const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${e.from}&tl=${e.to}&dt=t&dt=bd&q=${encodeURIComponent(e.text)}`;
       let r = null, via = '';
@@ -137,6 +146,7 @@
       return { text: main, alts, via };
     },
     async mymemory(e, signal) {
+      if (pub()) throw new Error('MyMemory переводит только в приложении на Mac'); // T4: the Mac only
       const c = { no: 'nb', ru: 'ru' };
       const j = await getJSON(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(e.text)}&langpair=${c[e.from]}|${c[e.to]}`, signal, false);
       const main = j && j.responseData && j.responseData.translatedText;
@@ -221,7 +231,7 @@
       const single = !/\s/.test(word);
       const [sl, tl] = e.from === 'no' ? ['nob', 'rus'] : ['rus', 'nob'];
       const url = `https://api.tatoeba.org/v1/sentences?lang=${sl}&q=${encodeURIComponent(single ? '=' + word.toLowerCase() : word)}&trans:lang=${tl}&showtrans=matching&sort=relevance&limit=6`;
-      const j = await getJSON(url, signal, true);
+      const j = await getJSON(url, signal, 'tatoeba');
       const flat = t => Array.isArray(t) ? t.flatMap(flat) : (t ? [t] : []);
       const pairs = (j.data || []).map(s => ({ a: String(s.text || '').trim(), b: flat(s.translations).filter(t => t && t.lang === tl).map(t => String(t.text || '').trim()).filter(Boolean) }))
         .filter(p => p.a && p.b.length);
@@ -234,7 +244,7 @@
   function plan(e) {
     const en = Translators.enabled();
     const words = e.text.trim().split(/\s+/).length;
-    const tr = TR_ORDER.filter(id => en.includes(id)).map(id => ({ id, kind: 'tr', name: Translators.LIST[id].name, brand: id, what: id === 'mymemory' ? 'база переводов' : 'переводчик' }));
+    const tr = TR_ORDER.filter(id => en.includes(id) && !Translators.LIST[id].web && !Translators.LIST[id].hidden).map(id => ({ id, kind: 'tr', name: Translators.LIST[id].name, brand: id, what: id === 'mymemory' ? 'база переводов' : 'переводчик' }));
     const ai = (window.AI ? AI.chain() : []).filter(id => AI.PROVIDERS[id]).slice(0, 4)
       .map(id => ({ id: 'ai:' + id, aiId: id, kind: 'ai', name: AI.PROVIDERS[id].short, brand: 'ai:' + id, what: 'нейросеть' }));
     const dict = [];
@@ -270,7 +280,7 @@
     // no key yet: the in-app key window, never «open the site»
     if (d.id === 'deepl' && !(S.deeplKey || '').trim()) { set({ state: 'key' }); return; }
     if (d.id === 'microsoft' && !(S.msKey || '').trim()) { set({ state: 'key' }); return; }
-    if (d.id === 'deepl' && !AI.onMac()) { set({ state: 'off', err: 'DeepL не принимает запросы из браузера — он работает в приложении на Mac (через мост Norsk Kort)' }); return; }
+    if (d.id === 'deepl' && !AI.onMac() && !isNative()) { set({ state: 'off', err: 'DeepL не принимает запросы из браузера — он работает в приложении на Mac (через мост Norsk Kort)' }); return; }
     if (d.kind === 'ai' && !force && AI.resting(d.aiId)) { set({ state: 'fail', err: `${AI.name(d.aiId)} отдыхает после лимита запросов — повторите через несколько минут` }); return; }
     if (d.kind === 'dict') {
       if (d.id !== 'tatoeba') {
@@ -751,7 +761,7 @@ ${dl.length ? 'Данные словарей:\n' + dl.join('\n') : ''}
       const k = t.closest('[data-cmp-key]');
       if (k) { keyDialog(k.dataset.cmpKey, () => { const d = P.all.find(x => x.id === k.dataset.cmpKey); if (d && m.el.isConnected) run(e, d, true); }); return; }
       if (t.closest('[data-cmp-reverdict]')) { maybeVerdict(e, true); return; }
-      if (t.closest('[data-cmp-ai-connect]')) { if (window.Guides && Guides.needAI) Guides.needAI('Сравнение переводов: объяснение'); else App.go('settings'); return; }
+      if (t.closest('[data-cmp-ai-connect]')) { if (window.AI && AI.need) AI.need('Сравнение переводов: объяснение'); else if (window.Guides && Guides.needAI) Guides.needAI('Сравнение переводов: объяснение'); else App.go('settings'); return; }
       const pk = t.closest('[data-cmp-pick]');
       if (pk && onPick) {
         const r = e.rows[pk.dataset.cmpPick]; if (!r || r.state !== 'ok') return;
@@ -799,7 +809,7 @@ ${dl.length ? 'Данные словарей:\n' + dl.join('\n') : ''}
         <a class="btn sm cmp-btn" href="${esc(t.keyUrl)}" target="_blank" rel="noopener">${deepl ? 'Получить ключ DeepL ↗' : 'Как получить ключ ↗'}</a>
         <label class="field"><span>Ключ</span><input class="input" type="password" data-k value="${esc(deepl ? S.deeplKey || '' : S.msKey || '')}" placeholder="${deepl ? 'xxxxxxxx-…:fx' : 'ключ Azure'}" autocomplete="off" spellcheck="false"></label>
         ${deepl ? '' : `<label class="field"><span>Регион</span><input class="input" data-r value="${esc(S.msRegion || '')}" placeholder="westeurope" autocomplete="off" spellcheck="false"></label>`}
-        ${deepl ? `<p class="small muted" style="margin:0">${AI.onMac() ? 'DeepL не принимает запросы прямо из браузера — переводит через мост Norsk Kort на этом Mac.' : 'DeepL не принимает запросы прямо из браузера — перевод появится в приложении на Mac (через мост). Здесь сохраните ключ на будущее.'}</p>` : ''}
+        ${deepl ? `<p class="small muted" style="margin:0">${AI.onMac() ? 'DeepL не принимает запросы прямо из браузера — переводит через мост Norsk Kort на этом Mac.' : isNative() ? 'DeepL переводит прямо в этом приложении — ключ остаётся на устройстве.' : 'DeepL не принимает запросы прямо из браузера — перевод появится в приложении на Mac (через мост). Здесь сохраните ключ на будущее.'}</p>` : ''}
         <div class="small" data-st></div>`,
       foot: '<button class="btn ghost" data-x>Позже</button><button class="btn primary" data-save>Сохранить и перевести</button>',
     });

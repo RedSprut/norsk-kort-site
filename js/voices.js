@@ -1,21 +1,30 @@
-/* ============ 🔊 Voices: one voice per language (🇳🇴 🇺🇦 🇷🇺), free first, then services with your own key ============
- * Engines: Piper (offline, on the device) · Google Translate (online) · Microsoft Edge neural (free, via the Mac bridge)
- *          · Azure Speech (free 500 000 chars/month, F0 cannot bill) · Google Cloud TTS (Chirp 3 HD: all 30 star voices, our own
- *          monthly ceiling 950 000 — Google would bill past 1 M) · Gemini TTS (an AI Studio key, for yourself, a few dozen
- *          phrases a day, no Ukrainian) · ElevenLabs · the device's voices.
- * Limits (📏 Limits): 75 % — a quiet line in «Голоса», 90 % — one toast, 100 % — one friendly window per engine and month
+/* ============ Voices: one voice per language (no / uk / ru), free first, then Pro, then services with your own key ============
+ * Engines: the device's voices (speechSynthesis) · Piper (offline, on the device) · Norsk Kort Pro ('nk': Google Cloud TTS on
+ *          the Norsk Kort server, POST tts — Pro only, cached clips) · Azure Speech · Google Cloud TTS · Gemini TTS ·
+ *          ElevenLabs (your own key, straight from the device) · and only on the owner's Mac: Microsoft Edge (bridge) and
+ *          the unofficial Google Translate voice ('gtr').
+ * Where (docs/release-architecture.md §1.3, §3.2, §3.4):
+ *   · public build (the site, the store apps, every phone): no bridge voices, no 'gtr' — hidden with one calm line;
+ *     Piper voices without a commercial-OK licence are hidden too. «Авто» = a good device voice → Norsk Kort Pro (Pro +
+ *     AI consent given) → your own keys → downloaded Piper voices → a weak device voice (a Pro user with a poor device
+ *     voice hears Pro first).
+ *   · the Mac with the bridge (Net.isMacBridge()): Edge → own keys → Pro → device / Piper → Google Translate (as before).
+ *   · a free user never makes a paid call: 'nk' is available only when Pro.isActive(); Net.callFn('tts') asks the AI
+ *     consent by itself; the auto chain uses 'nk' only once the consent was given.
+ * Limits (Limits): 75 % — a quiet line in «Голоса», 90 % — one toast, 100 % — one friendly window per engine and month
  *   (waits for a pause in playback); the fallback chain switches at once and keeps the voice's gender when it can.
- * Model: Store.settings.voices = { no: { pick: 'edge:nb-NO-FinnNeural', chain: 'auto' | [ids] }, uk: …, ru: …, _v: 1 }
+ * Model: Store.settings.voices = { no: { pick: 'nk:nb-NO-Wavenet-F', chain: 'auto' | [ids] }, uk: …, ru: …, _v: 1 }
  *   voice id = 'engine:key' ('piper:no_NO-nvcc-medium#KNN' = model + speaker; 'sys:Милена'; 'gtr:ru'); pick '' = «Авто»
- *   (the best free voice that works here right now, see recommend()).
+ *   (the best voice that works here right now, see recommend()).
  * Speaking: TTS._utter1 → Voices.speak(): the chosen voice, then the fallback chain of the same language — a voice that
  *   fails or is silent for ~4 s is replaced by the next one quietly (one calm line, once per session). A Ukrainian
  *   text is never read by a Russian voice.
  * Cloud audio is kept on the device (Cache API «norsk-kort-tts-clips», ≤ 60 МБ, oldest out first), so a card is
- *   synthesised once — not again after every start (free quotas last longer). Keys stay sealed on the device (Store).
- * The «🔊 Голоса» window itself is js/voicepicker.js + css/voicepicker.css, loaded on first use: Voices.openChooser(lang).
- * 📍 Places: every place that speaks (cards, reader, listen, dialogues, video, news, interpreter, pronunciation, Telegram)
- *   may have its own voice per language — Store.settings.voicesBy = { reader: { no: 'piper:…', ru: 'edge:…' }, … }; a
+ *   synthesised once — not again after every start. Keys stay sealed on the device (Store).
+ * The «Голоса» window itself is js/voicepicker.js + css/voicepicker.css, loaded on first use: Voices.openChooser(lang).
+ * Icons: drawn line icons only (Voices.icon(name) → NavIcons.icon, or the same family drawn here) — never emoji.
+ * Places: every place that speaks (cards, reader, listen, dialogues, video, news, interpreter, pronunciation, Telegram)
+ *   may have its own voice per language — Store.settings.voicesBy = { reader: { no: 'piper:…', ru: 'nk:…' }, … }; a
  *   language without an entry reads «как везде» (Store.settings.voices). The place comes with the call
  *   (TTS.speak(text, lang, { place: 'reader' }), ctx is an alias) or is read from the screen: Voices.place().
  *   Its voice is tried first, then the voice «как везде», then the language's fallback chain.
@@ -23,12 +32,17 @@
 (function () {
   const F = '♀', M = '♂';
   const MB = 1048576;
-  /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — not on the site */
-  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  /** the app runs on the owner's Mac (file / localhost, never the store apps) — js/net.js is the one answer */
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname));
+  /** …and the bridge answered: the ONLY case for /api/* paths (Edge voices, install, restart) */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : onMac() && !!(window.AI && AI.bridge && AI.bridge.up));
+  /** the site / store apps / phones: no bridge voices, no unofficial Google voice (NK_CONFIG.publicBuild, js/config.js) */
+  const publicBuild = () => !(window.NK_CONFIG && NK_CONFIG.publicBuild === false);
   const online = () => navigator.onLine !== false;
   const LANGS = ['no', 'uk', 'ru'];
   const LANG_NAME = { no: 'Норвежский', uk: 'Украинский', ru: 'Русский' };
-  const FLAG = { no: '🇳🇴', uk: '🇺🇦', ru: '🇷🇺' };
+  const FLAG = { no: '🇳🇴', uk: '🇺🇦', ru: '🇷🇺' };  // kept for old callers; the UI draws Voices.langMark(l) instead
+  const LC = { no: 'NO', uk: 'UA', ru: 'RU' };
   const LOC = { no: 'nb-NO', uk: 'uk-UA', ru: 'ru-RU' };
   const SAMPLE = {
     no: 'Hei! I dag lærer vi tjue nye ord på norsk.',
@@ -72,33 +86,44 @@
   const EDGE_VOICES = { no: MS_VOICES.no.filter(v => !EDGE_ONLY_AZURE[v[0]]), ru: MS_VOICES.ru.filter(v => !EDGE_ONLY_AZURE[v[0]]), uk: MS_VOICES.uk };
   /** the Microsoft voice the app suggests first (plan: Finn for Norwegian, Svetlana, Polina) */
   const MS_DEFAULT = { no: 'nb-NO-FinnNeural', ru: 'ru-RU-SvetlanaNeural', uk: 'uk-UA-PolinaNeural' };
+  /** Norsk Kort Pro: Google Cloud TTS on our server (docs/api-contract.md «POST tts» allow-list). WaveNet always;
+   *  Chirp 3 HD only while the server says health.providers.tts_premium = 'chirp3-hd' (owner decision O-5) */
+  const NK_HD = ['Kore', 'Aoede', 'Charon', 'Puck'];
+  const nkHd = loc => NK_HD.map(n => [loc + '-Chirp3-HD-' + n, n, STAR[n].g]);
+  const NK_VOICES = {
+    no: [['nb-NO-Wavenet-F', 'Женский голос', F], ['nb-NO-Wavenet-G', 'Мужской голос', M]].concat(nkHd('nb-NO')),
+    uk: [['uk-UA-Wavenet-B', 'Женский голос', F]].concat(nkHd('uk-UA')),
+    ru: [['ru-RU-Wavenet-A', 'Женский голос', F], ['ru-RU-Wavenet-B', 'Мужской голос', M], ['ru-RU-Wavenet-E', 'Женский голос 2', F], ['ru-RU-Wavenet-D', 'Мужской голос 2', M]].concat(nkHd('ru-RU')),
+  };
+  const isHd = key => /-Chirp3-HD-/.test(String(key || ''));
   const ENGINES = {
-    system: { name: 'Голоса устройства', short: 'Голос устройства', icon: '📱', free: true },
-    sys: { name: 'Голоса устройства', short: 'Голос устройства', icon: '📱', free: true, hue: 262 },
-    gtr: { name: 'Google Переводчик', short: 'Google Переводчик', icon: '🌐', free: true, hue: 145 },
-    google: { name: 'Google Переводчик', short: 'Google Переводчик', icon: '🌐', free: true },
-    piper: { name: 'Piper — офлайн-голоса', short: 'Piper · на устройстве', icon: '📴', free: true, offline: true, hue: 28 },
+    system: { name: 'Голоса устройства', short: 'Голос устройства', icon: 'phone', free: true },
+    sys: { name: 'Голоса устройства', short: 'Голос устройства', icon: 'phone', free: true, hue: 262 },
+    nk: { name: 'Голоса Norsk Kort Pro', short: 'Norsk Kort Pro', icon: 'crown', pro: true, hue: 268, voices: NK_VOICES },
+    gtr: { name: 'Google Переводчик', short: 'Google Переводчик', icon: 'globe', free: true, hue: 145 },
+    google: { name: 'Google Переводчик', short: 'Google Переводчик', icon: 'globe', free: true },
+    piper: { name: 'Piper — офлайн-голоса', short: 'Piper · на устройстве', icon: 'cloud-off', free: true, offline: true, hue: 28 },
     edge: {
-      name: 'Microsoft Edge — нейроголоса', short: 'Microsoft Edge', icon: '💻', free: true, bridge: true, hue: 200,
+      name: 'Microsoft Edge — нейроголоса', short: 'Microsoft Edge', icon: 'laptop', free: true, bridge: true, hue: 200,
       voices: EDGE_VOICES,
     },
     azure: {
-      name: 'Microsoft Azure Speech', short: 'Microsoft Azure', icon: '🔑', hue: 214,
+      name: 'Microsoft Azure Speech', short: 'Microsoft Azure', icon: 'key', hue: 214,
       keyUrl: 'https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices',
       voices: MS_VOICES, freeChars: 500000,
     },
     gcloud: {
-      name: 'Google Cloud Text-to-Speech', short: 'Google Cloud', icon: '🔑', hue: 120,
+      name: 'Google Cloud Text-to-Speech', short: 'Google Cloud', icon: 'key', hue: 120,
       keyUrl: 'https://console.cloud.google.com/apis/library/texttospeech.googleapis.com',
       voices: G_VOICES, freeChars: 1000000,
     },
     gemini: {
-      name: 'Google Gemini — ключ AI Studio', short: 'Gemini', icon: '🔑', hue: 330, perDay: true,
+      name: 'Google Gemini — ключ AI Studio', short: 'Gemini', icon: 'key', hue: 330, perDay: true,
       keyUrl: 'https://aistudio.google.com/apikey',
       voices: GEM_VOICES,
     },
     eleven: {
-      name: 'ElevenLabs', short: 'ElevenLabs', icon: '🔑', hue: 290,
+      name: 'ElevenLabs', short: 'ElevenLabs', icon: 'key', hue: 290,
       keyUrl: 'https://elevenlabs.io/app/settings/api-keys',
       // premade voices usable on free accounts (ElevenLabs may retire them — «Загрузить мои голоса» shows what your account has)
       voices: {
@@ -123,22 +148,22 @@
     'uk_UA-ukrainian_tts-medium': { lang: 'uk', name: 'Ukrainian TTS', g: '', q: 3, about: 'Три голоса в одной модели, читает буквы (без espeak). Запись CC0.',
       speakers: { lada: 'Лада ♀', tetiana: 'Тетяна ♀', mykyta: 'Микита ♂' } },
   };
-  const AUDIO = ['piper', 'edge', 'azure', 'gcloud', 'gemini', 'eleven'];  // engines that make audio files
-  const NET = ['edge', 'azure', 'gcloud', 'gemini', 'eleven'];             // …over the network: kept on the device, 4-s timeout
+  const AUDIO = ['piper', 'nk', 'edge', 'azure', 'gcloud', 'gemini', 'eleven'];  // engines that make audio files
+  const NET = ['nk', 'edge', 'azure', 'gcloud', 'gemini', 'eleven'];              // …over the network: kept on the device, 4-s timeout
   const KEYED = ['azure', 'gcloud', 'gemini', 'eleven'];
   const CLOUD = AUDIO;
   const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   /** 📍 the places that speak (order = the rows of «Где какой голос») */
   const PLACES = [
-    { id: 'cards', ico: '🃏', name: 'Карточки', sub: 'занятия, арт-карточки, тесты, упражнения', for: 'для карточек' },
-    { id: 'reader', ico: '📖', name: 'Читалка', sub: 'книги и учебник', for: 'для читалки' },
-    { id: 'listen', ico: '🎧', name: 'Слушать', sub: 'колоды вслух, плеер «Слушать»', for: 'для «Слушать»' },
-    { id: 'dialogs', ico: '💬', name: 'Диалоги', sub: 'диалоги по ролям', for: 'для диалогов' },
-    { id: 'video', ico: '📺', name: 'Видео и субтитры', sub: 'YouTube, NRK TV, свои субтитры', for: 'для видео' },
-    { id: 'news', ico: '📰', name: 'Новости и радио', sub: 'новости простым языком, NRK Радио', for: 'для новостей и радио' },
-    { id: 'interpreter', ico: '🗣', name: 'Переводчик', sub: 'переводчик в наушниках', for: 'для переводчика' },
-    { id: 'speech', ico: '✍️', name: 'Произношение', sub: 'проверка произношения, диктант', for: 'для произношения' },
-    { id: 'telegram', ico: '✈️', name: 'Telegram-каналы', sub: 'посты, аудио и видео авторов', for: 'для Telegram' },
+    { id: 'cards', ico: 'cards', name: 'Карточки', sub: 'занятия, арт-карточки, тесты, упражнения', for: 'для карточек' },
+    { id: 'reader', ico: 'book', name: 'Читалка', sub: 'книги и учебник', for: 'для читалки' },
+    { id: 'listen', ico: 'headphones', name: 'Слушать', sub: 'колоды вслух, плеер «Слушать»', for: 'для «Слушать»' },
+    { id: 'dialogs', ico: 'dialogue', name: 'Диалоги', sub: 'диалоги по ролям', for: 'для диалогов' },
+    { id: 'video', ico: 'tv', name: 'Видео и субтитры', sub: 'YouTube, NRK TV, свои субтитры', for: 'для видео' },
+    { id: 'news', ico: 'news', name: 'Новости и радио', sub: 'новости простым языком, NRK Радио', for: 'для новостей и радио' },
+    { id: 'interpreter', ico: 'translate', name: 'Переводчик', sub: 'переводчик в наушниках', for: 'для переводчика' },
+    { id: 'speech', ico: 'mic', name: 'Произношение', sub: 'проверка произношения, диктант', for: 'для произношения' },
+    { id: 'telegram', ico: 'send', name: 'Telegram-каналы', sub: 'посты, аудио и видео авторов', for: 'для Telegram' },
   ];
   const PLACE_IDS = PLACES.map(p => p.id);
   /** other names a caller may use */
@@ -192,6 +217,93 @@
   }
   const b64blob = (b64, type) => { const bin = atob(b64 || ''); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type }); };
   const err = (kind, message) => Object.assign(new Error(message), { kind });
+
+  /* ---------- drawn line icons (the family of NavIcons.icon, js/app.js: 24×24, a 1.9 line in the colour of the text,
+   * round ends, `f` = lightly filled, `dot` = solid). NavIcons.icon first; the voice-only ones are drawn here ---------- */
+  const ICO = {
+    speaker: '<path class="f" d="M4.5 9.4h2.9l4.3-3.6c.55-.46 1.3-.07 1.3.64v11.12c0 .71-.75 1.1-1.3.64L7.4 14.6H4.5c-.6 0-1-.4-1-1V10.4c0-.6.4-1 1-1z"/><path d="M16.2 9.2a4 4 0 0 1 0 5.6"/><path d="M18.8 6.6a7.6 7.6 0 0 1 0 10.8"/>',
+    play: '<path class="f" d="M8 5.7v12.6c0 .8.88 1.28 1.55.85l9.8-6.3c.62-.4.62-1.3 0-1.7l-9.8-6.3C8.88 4.42 8 4.9 8 5.7z"/>',
+    stop: '<rect class="f" x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4"/>',
+    key: '<circle class="f" cx="8.2" cy="15.6" r="4"/><path d="M11.1 12.7 19.6 4.2"/><path d="M16.7 7.1l2.3 2.3M14.5 9.3l1.7 1.7"/>',
+    phone: '<rect class="f" x="6.6" y="3.4" width="10.8" height="17.2" rx="2.6"/><path d="M10.6 17.4h2.8"/>',
+    globe: '<circle class="f" cx="12" cy="12" r="8.4"/><path d="M3.8 12h16.4"/><path d="M12 3.6c2.3 2.4 3.4 5.2 3.4 8.4s-1.1 6-3.4 8.4c-2.3-2.4-3.4-5.2-3.4-8.4S9.7 6 12 3.6z"/>',
+    laptop: '<rect class="f" x="5" y="5.2" width="14" height="10.2" rx="1.8"/><path d="M3 18.8h18"/>',
+    star: '<path class="f" d="M12 3.9l2.47 5.02 5.53.8-4 3.9.94 5.5L12 16.53 7.06 19.12 8 13.62l-4-3.9 5.53-.8z"/>',
+    crown: '<path class="f" d="M4.4 8.2l3.7 3.3L12 5.6l3.9 5.9 3.7-3.3-1.5 9.3H5.9z"/><path d="M6 20.2h12"/>',
+    pin: '<path class="f" d="M12 20.6s6.4-5.6 6.4-10.6a6.4 6.4 0 0 0-12.8 0c0 5 6.4 10.6 6.4 10.6z"/><circle cx="12" cy="10" r="2.3"/>',
+    fallback: '<path d="M4.6 7.6h9.2a5.6 5.6 0 0 1 0 11.2H9"/><path d="M8.1 4.1 4.6 7.6l3.5 3.5"/>',
+    clock: '<circle class="f" cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2"/>',
+    edit: '<path class="f" d="M4.6 19.4l.9-4L15.8 5.1a2 2 0 0 1 2.8 0l.3.3a2 2 0 0 1 0 2.8L8.6 18.5z"/><path d="M13.8 7.1l3.1 3.1"/>',
+    user: '<circle class="f" cx="12" cy="8.4" r="3.8"/><path d="M4.8 20c.8-3.6 3.6-5.6 7.2-5.6s6.4 2 7.2 5.6"/>',
+    sort: '<path d="M8 4.6v14.8M4.8 7.8 8 4.6l3.2 3.2"/><path d="M16 19.4V4.6M12.8 16.2l3.2 3.2 3.2-3.2"/>',
+    back: '<path d="M19.4 12H5"/><path d="M10.5 6.5 5 12l5.5 5.5"/>',
+    up: '<path d="M12 19.4V5"/><path d="M6.5 10.5 12 5l5.5 5.5"/>',
+    down: '<path d="M12 4.6V19"/><path d="M6.5 13.5 12 19l5.5-5.5"/>',
+    disk: '<path class="f" d="M5.6 4.4h10.2l3.8 3.8v10.4c0 .55-.45 1-1 1H5.6c-.55 0-1-.45-1-1V5.4c0-.55.45-1 1-1z"/><path d="M8.2 4.4v4.4h6.6V4.4"/><rect x="8" y="13.2" width="8" height="6.2" rx="1"/>',
+    chevron: '<path d="M6.5 9.5 12 15l5.5-5.5"/>',
+    dialogue: '<path class="f" d="M4 6.2C4 5 5 4 6.2 4h7.6C15 4 16 5 16 6.2v4.6c0 1.2-1 2.2-2.2 2.2H9l-3.4 2.6c-.4.3-.9 0-.9-.4V13h-.5C4 13 4 12 4 10.8z"/><path d="M18.6 9.4h.2c.66 0 1.2.54 1.2 1.2v5.2c0 .66-.54 1.2-1.2 1.2H18v1.8c0 .4-.47.63-.79.38L14.6 17.2H11c-.66 0-1.2-.54-1.2-1.2v-.6"/>',
+    cards: '<rect class="f" x="3.5" y="7" width="13" height="13.5" rx="2.4"/><path d="M7.5 3.5h10.2c1.6 0 2.8 1.2 2.8 2.8v10.2"/>',
+    book: '<path class="f" d="M4 5.6c2.7-1 5.3-1 8 .8v13c-2.7-1.8-5.3-1.8-8-.8z"/><path d="M20 5.6c-2.7-1-5.3-1-8 .8v13c2.7-1.8 5.3-1.8 8-.8z"/>',
+    headphones: '<path d="M4.5 15v-2.5a7.5 7.5 0 0 1 15 0V15"/><rect class="f" x="3.5" y="13.4" width="4.6" height="6.6" rx="1.8"/><rect class="f" x="15.9" y="13.4" width="4.6" height="6.6" rx="1.8"/>',
+    tv: '<rect class="f" x="3.5" y="5.4" width="17" height="11.6" rx="2.2"/><path d="M8.5 20.2h7"/><path d="M10.7 9.1v4.3l3.7-2.15z"/>',
+    news: '<path class="f" d="M5.5 4.5h10c.55 0 1 .45 1 1v13c0 .83.67 1.5 1.5 1.5H6.5a2 2 0 0 1-2-2V5.5c0-.55.45-1 1-1z"/><path d="M16.5 9H19c.55 0 1 .45 1 1v8.5a1.5 1.5 0 0 1-3 0"/><path d="M7.8 8.6h5.4M7.8 12h5.4M7.8 15.4h3.4"/>',
+    translate: '<path d="M4 6h8.2M8.1 4v2M10.6 6c-.6 3.4-2.9 6.2-6.3 7.8"/><path d="M6.2 9.3c1 1.8 2.6 3.3 4.6 4.3"/><path d="M12.6 20.2 16.1 11.6l3.5 8.6M13.9 17.1h4.4"/>',
+    mic: '<rect class="f" x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.8 11.5a6.2 6.2 0 0 0 12.4 0"/><path d="M12 17.7v2.8"/>',
+    send: '<path class="f" d="M20.1 4.3 3.9 10.6c-.72.28-.68 1.31.06 1.53l4.3 1.3 1.6 5c.22.7 1.12.88 1.6.32l2.3-2.5 4.2 3.1c.6.44 1.45.1 1.57-.63L21.6 5.5c.12-.8-.7-1.43-1.5-1.2z"/><path d="m8.3 13.4 8.4-5.6"/>',
+    plug: '<path d="M9 3.8v4M15 3.8v4"/><path class="f" d="M6.6 7.8h10.8v3.4a5.4 5.4 0 0 1-10.8 0z"/><path d="M12 16.6v3.6"/>',
+  };
+  const paint = s => s.replace(/class="f"/g, 'class="f" fill="currentColor" fill-opacity=".22"').replace(/class="dot"/g, 'class="dot" fill="currentColor" stroke="none"');
+  /** a drawn icon: NavIcons.icon(name) when js/app.js has it, else ours (same look); '' for an unknown name */
+  function icon(name, size, cls) {
+    const nav = window.NavIcons && NavIcons.icon && NavIcons.ICONS && NavIcons.ICONS.includes(name) ? NavIcons.icon(name, size, cls) : '';
+    if (nav) return nav;
+    const p = ICO[name];
+    if (!p) return '';
+    const sz = size || 18;
+    return `<svg class="ico ui-ico ui-ico-${name}${cls ? ' ' + cls : ''}" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${paint(p)}</svg>`;
+  }
+  /** the language as a small drawn badge (instead of a flag emoji) */
+  const langMark = (l, cls) => `<span class="vs-lc vs-lc-${l}${cls ? ' ' + cls : ''}" aria-hidden="true">${LC[l] || ''}</span>`;
+  /** the voices window's stylesheet (also styles the summary rows and language buttons in other screens) */
+  function ensureCss() {
+    if (document.querySelector('link[data-voicepicker]')) return;
+    const v = (document.querySelector('script[src*="js/voices.js"]') || {}).src || '';
+    const q = (v.match(/\?v=[^&]+/) || [''])[0];
+    const l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = 'css/voicepicker.css' + q; l.setAttribute('data-voicepicker', '');
+    document.head.appendChild(l);
+  }
+
+  /* ---------- Norsk Kort Pro voices (engine 'nk'): server state, the one place that decides «may it speak» ----------
+   * premium: Chirp 3 HD allowed by the server (health.providers.tts_premium === 'chirp3-hd'); unknown → hidden.
+   * server: health.providers.tts ('google' | 'mock' | 'missing'). declined: the AI consent was declined this session —
+   * the auto chain stops asking. hdOut: the monthly Chirp 3 HD characters are used up (until resetsAt). */
+  const NK = {
+    premium: null, server: '', checked: 0, busy: null, declined: false, hdOut: 0,
+    init() { const c = ls.get('nk-tts-health', null); if (c && c.t && Date.now() - c.t < 6 * 3600000) { this.premium = !!c.premium; this.server = c.server || ''; this.checked = c.t; } },
+    offered() { return !!(window.Pro && Pro.offered && Pro.offered() && window.Net && Net.callFn) && this.server !== 'missing'; },
+    pro() { return !!(this.offered() && Pro.isActive && Pro.isActive()); },
+    consent() { return !window.AIConsent || !AIConsent.granted || AIConsent.granted(); },
+    /** GET health once in a while (public, free): which server voices are switched on */
+    health(force) {
+      if (!this.offered() && !(window.Pro && Pro.offered && Pro.offered())) return Promise.resolve(this);
+      if (this.busy) return this.busy;
+      if (!force && this.checked && Date.now() - this.checked < 6 * 3600000) return Promise.resolve(this);
+      this.busy = Net.callFn('health', null, { method: 'GET', auth: false, retries: 0, timeout: 8000 }).then(j => {
+        const pv = (j && j.providers) || {};
+        const was = this.premium + '|' + this.server;
+        this.premium = pv.tts_premium === 'chirp3-hd';
+        this.server = String(pv.tts || '');
+        this.checked = Date.now();
+        ls.set('nk-tts-health', { t: this.checked, premium: this.premium, server: this.server });
+        if (was !== this.premium + '|' + this.server) document.dispatchEvent(new CustomEvent('voices-changed'));
+      }).catch(() => { this.checked = Date.now() - 5 * 3600000; /* ask again in an hour */ }).then(() => { this.busy = null; return this; });
+      return this.busy;
+    },
+    /** the server's speed: the app's 0.9 = natural (1.0), 0.05 steps (the server rounds the same way — better cache reuse) */
+    rate(rate) { return Math.max(0.5, Math.min(1.5, Math.round(((+rate || 0.9) / 0.9) * 20) / 20)); },
+  };
+  NK.init();
 
   /* ---------- 💾 cloud clips kept on the device (fixes: every start spent the free quota again) ---------- */
   const Clips = {
@@ -254,10 +366,10 @@
       const b = this.brk[engine];
       return b && b.until > Date.now() ? 'down' : '';
     },
-    mark(engine, why) {
+    mark(engine, why, until) {
       if (why === 'badkey' || why in SAVED_FOR) {
         const all = this.saved();
-        all[engine] = { why, fp: fnv(keyOf(engine)), until: why === 'badkey' ? 0 : why === 'quota' ? (engine === 'gemini' ? GEM.resetAt() : nextMonth()) : Date.now() + SAVED_FOR[why] };
+        all[engine] = { why, fp: fnv(keyOf(engine)), until: why === 'badkey' ? 0 : until > Date.now() ? until : why === 'quota' ? (engine === 'gemini' ? GEM.resetAt() : nextMonth()) : Date.now() + SAVED_FOR[why] };
         ls.set('nk-voice-health', all);
         return;
       }
@@ -423,8 +535,9 @@
     const busy = window.TTS ? TTS._audio : null;
     // the one used longest ago (a word clock of the clip before may still look at the last one for a moment)
     let a = Pool.els.filter(x => x._nkOk && x !== busy && x.paused && !x._nkTry).sort((x, y) => (x._nkUsed || 0) - (y._nkUsed || 0))[0];
-    if (a) { a.onended = a.onerror = a.onstalled = null; a.loop = false; a.muted = false; a.src = url; a._nkUsed = Date.now(); }
-    else a = new Audio(url);
+    if (a) { a.onended = a.onerror = a.onstalled = null; a.loop = false; a.src = url; a._nkUsed = Date.now(); }
+    else { a = new Audio(url); a.setAttribute('playsinline', ''); }
+    a.muted = !!(window.TTS && TTS.muted); // automated tests: never a sound
     return a;
   }
 
@@ -458,21 +571,38 @@
     return base;
   }
 
+  /** a Piper voice whose recording may be used in a paid app (CC0 / CC BY / Apache / MIT) — the public build shows only these */
+  const piperLicence = key => { const sp = window.Speech && Speech.piper && Speech.piper.VOICES ? Speech.piper.VOICES[key] : null; return sp ? String(sp[3] || '') : PIPER[key] && /неизвестн|личного/.test(PIPER[key].about) ? 'неизвестна' : ''; };
+  const piperCommercial = key => /^(CC0|CC[- ]BY(?!-NC)|Apache|MIT)/i.test(piperLicence(key));
+
   function entries(lang) {
     const out = [];
     const add = o => out.push(Object.assign({ lang, g: '', q: 3, about: '' }, o));
-    // 📴 Piper (offline)
+    const pub = publicBuild();
+    // Norsk Kort Pro (server voices) — when the server is set up; Chirp 3 HD only while the server allows it
+    if (NK.offered()) {
+      NK_VOICES[lang].forEach(([key, name, g]) => {
+        if (isHd(key) && NK.premium !== true) return;
+        const st = isHd(key) ? STAR[name] : null;
+        add({ id: 'nk:' + key, engine: 'nk', key, name, g, ch: st ? st.c : '', q: isHd(key) ? 5 : 4, group: 'pro', hd: isHd(key),
+          about: isHd(key) ? `Голос Google Chirp 3 HD${st ? ' — ' + st.c : ''}: один из самых естественных. Работает на любом устройстве, без ключей. Входит в Norsk Kort Pro.`
+            : 'Живой голос Google (WaveNet) на сервере Norsk Kort: работает на любом устройстве, без ключей и настроек. Озвученная фраза остаётся на устройстве. Входит в Norsk Kort Pro.' });
+      });
+    }
+    // Piper (offline) — the public build: only voices whose licence allows a paid app
     Object.entries(PIPER).forEach(([key, p]) => {
       if (p.lang !== lang) return;
+      if (pub && !piperCommercial(key)) return;
       const sp = window.Speech && Speech.piper && Speech.piper.VOICES ? Speech.piper.VOICES[key] : null;
       add({ id: 'piper:' + key, engine: 'piper', key, name: p.name, g: p.g, q: p.q, about: p.about, size: sp ? sp[1] + sp[2] : 0,
         licence: sp ? sp[3] : '', speakers: p.speakers || null, stress: !!p.stress, group: 'offline' });
     });
-    // 🌐 Google Translate (online, free, one voice)
-    add({ id: 'gtr:' + lang, engine: 'gtr', key: lang, name: 'Google', g: F, q: 3, group: 'online', about: 'Голос Google Переводчика: один на язык, без выбора. Неофициальный — изредка может не отвечать.' });
-    // 💻 Edge via the Mac bridge
-    EDGE_VOICES[lang].forEach(([key, name, g]) => add({ id: 'edge:' + key, engine: 'edge', key, name, g, q: 5, group: 'mac', about: 'Нейроголос Microsoft — бесплатно, через мост на Mac. Неофициальный сервис, для личного использования.' }));
-    // 🔑 your own key
+    if (!pub) {
+      // Google Translate (online, unofficial) and Edge (the Mac bridge, unofficial): only on the owner's Mac
+      add({ id: 'gtr:' + lang, engine: 'gtr', key: lang, name: 'Google', g: F, q: 3, group: 'online', about: 'Голос Google Переводчика: один на язык, без выбора. Неофициальный — изредка может не отвечать. Только в версии для Mac.' });
+      EDGE_VOICES[lang].forEach(([key, name, g]) => add({ id: 'edge:' + key, engine: 'edge', key, name, g, q: 5, group: 'mac', about: 'Нейроголос Microsoft — бесплатно, через мост на Mac. Неофициальный сервис, для личного использования.' }));
+    }
+    // your own key
     MS_VOICES[lang].forEach(([key, name, g]) => add({ id: 'azure:' + key, engine: 'azure', key, name, g, q: 5, group: 'key', about: 'Официальный нейроголос Microsoft Azure.' }));
     gList(lang).forEach(([key, name, g]) => {
       const st = /Chirp3-HD-/.test(key) ? STAR[name] : null;
@@ -483,7 +613,7 @@
     GEM_VOICES[lang].forEach(([key, name, g]) => add({ id: 'gemini:' + key, engine: 'gemini', key, name, g, ch: (STAR[name] || {}).c || '', q: 5, group: 'key',
       about: `Голос Google через Gemini — ${(STAR[name] || {}).c || 'живой'} голос. Тот же голос, что в Google Cloud, но по ключу AI Studio без карты. Только для себя: бесплатно лишь несколько десятков новых фраз в день.` }));
     ((Voices.custom.eleven && Voices.custom.eleven[lang]) || ENGINES.eleven.voices[lang]).forEach(([key, name, g]) => add({ id: 'eleven:' + key, engine: 'eleven', key, name, g, q: 5, group: 'key', about: 'Очень живой голос ElevenLabs (модель Flash v2.5, говорит на 32 языках).' }));
-    // 📱 the device
+    // the device
     sysList(lang).forEach(v => {
       const q = TTS.voiceQuality(v);
       add({ id: 'sys:' + v.name, engine: 'sys', key: v.name, name: v.name.replace(/\s*\((улучшенный|высшего качества|Enhanced|Premium)\)\s*/i, ''), g: gOf(v.name + ' ' + v.voiceURI),
@@ -539,8 +669,12 @@
   function byPlace() { const b = S().voicesBy; return b && typeof b === 'object' && !Array.isArray(b) ? b : {}; }
 
   const Voices = {
-    ENGINES, CLOUD, AUDIO, NET, KEYED, LANGS, LANG_NAME, FLAG, SAMPLE, QUALITY, PIPER, MS_DEFAULT, MONTHS, MONTHS_IN,
-    Clips, Usage, Health, Edge, parse, onMac, PLACES, normPlace, Limits, GEM, STAR, G_VOICES, Gate,
+    ENGINES, CLOUD, AUDIO, NET, KEYED, LANGS, LANG_NAME, FLAG, LC, SAMPLE, QUALITY, PIPER, MS_DEFAULT, MONTHS, MONTHS_IN,
+    Clips, Usage, Health, Edge, parse, onMac, macBridge, publicBuild, PLACES, normPlace, Limits, GEM, STAR, G_VOICES, Gate,
+    NK, NK_VOICES, icon, langMark, ensureCss, piperCommercial,
+    /** Norsk Kort Pro voices: the server is set up here / this person has Pro now */
+    nkOffered() { return NK.offered(); },
+    nkPro() { return NK.pro(); },
     /** an <audio> that may start even long after the tap (see «🔓» above) — for any voice clip of the app */
     audio: takeAudio,
     custom: {}, // ElevenLabs: voices loaded from the user's own library
@@ -561,12 +695,13 @@
       const v = window.Store && Store.state ? model()[lang] : null;
       if (v && v.pick) { const p = parse(v.pick); if (p.engine === engine) return p.key + (p.spk ? '#' + p.spk : ''); }
       const pref = ((S().cloudVoices || {})[engine] || {})[lang];
-      if (pref) return pref;
+      if (pref && !(engine === 'nk' && isHd(pref) && NK.premium !== true)) return pref;
       if (engine === 'piper') {
         const ks = Object.keys(PIPER).filter(k => PIPER[k].lang === lang);
         return ks.find(k => this.piperReady(k)) || ks[0] || '';
       }
       if (engine === 'edge' || engine === 'azure') return MS_DEFAULT[lang] || '';
+      if (engine === 'nk') { const l = NK_VOICES[lang] || []; const ok = l.find(x => !isHd(x[0]) || NK.premium === true); return ok ? ok[0] : ''; }
       const list = (this.custom[engine] && this.custom[engine][lang]) || ((ENGINES[engine] || {}).voices || {})[lang] || [];
       return (list[0] || [])[0] || '';
     },
@@ -575,7 +710,9 @@
     ready(engine) {
       const s = S();
       if (engine === 'piper') return !!(window.Speech && Speech.piper.available());
-      if (engine === 'edge') return onMac() && !!(window.AI && AI.bridge.up) && !Edge.old && Edge.installed !== false;
+      if (engine === 'edge') return !publicBuild() && macBridge() && !Edge.old && Edge.installed !== false;
+      if (engine === 'nk') return NK.pro();
+      if (engine === 'gtr') return !publicBuild();
       if (engine === 'azure') return !!(s.azureKey || '').trim() && !!(s.azureRegion || '').trim();
       if (engine === 'gcloud') return !!(s.gcloudKey || '').trim();
       if (engine === 'gemini') return !!(s.geminiKey || '').trim();
@@ -584,18 +721,33 @@
     },
     /** can this voice speak right now? → { ok, why } — why: site | bridge | install | key | badkey | quota | down |
      *  offline | download | nosupport | nosys | old (the Mac bridge must be restarted once) | stale (Edge must be updated) |
-     *  billing (Google Cloud: no billing account) | blocked (ElevenLabs paused the free plan) | region | nolang (Gemini: no Ukrainian) */
+     *  billing (Google Cloud: no billing account) | blocked (ElevenLabs paused the free plan) | region | nolang (Gemini: no Ukrainian)
+     *  public (a Mac-only voice in the public build) | licence (a Piper voice not for a paid app) | noserver | nopremium
+     *  (Chirp 3 HD switched off on the server) | pro (Norsk Kort Pro needed) | consent (declined this session) | hdquota */
     avail(id, lang) {
       const { engine, key } = parse(id);
       if (engine === 'sys') return (key ? sysList(lang || 'no').some(v => v.name === key) : !!(window.TTS && TTS.pickVoice(lang || 'no'))) ? { ok: true } : { ok: false, why: 'nosys' };
-      if (engine === 'gtr') return online() ? { ok: true } : { ok: false, why: 'offline' };
+      if (engine === 'gtr') return publicBuild() ? { ok: false, why: 'public' } : online() ? { ok: true } : { ok: false, why: 'offline' };
       if (engine === 'piper') {
+        if (publicBuild() && !piperCommercial(key)) return { ok: false, why: 'licence' };
         if (!window.Speech || !Speech.piper || !Speech.piper.available()) return { ok: false, why: 'nosupport' };
         return Speech.piper.isReady(key) ? { ok: true } : { ok: false, why: 'download' };
       }
+      if (engine === 'nk') {
+        // a free user never reaches the server: no Pro → not available (nothing is sent)
+        if (!NK.offered()) return { ok: false, why: 'noserver' };
+        if (isHd(key) && NK.premium !== true) return { ok: false, why: 'nopremium' };
+        if (!NK.pro()) return { ok: false, why: 'pro' };
+        if (NK.declined) return { ok: false, why: 'consent' };
+        if (isHd(key) && NK.hdOut > Date.now()) return { ok: false, why: 'hdquota' };
+        if (!online()) return { ok: false, why: 'offline' };
+        const h = Health.state('nk');
+        return h ? { ok: false, why: h } : { ok: true };
+      }
       if (engine === 'edge') {
+        if (publicBuild()) return { ok: false, why: 'public' };
         if (!onMac()) return { ok: false, why: 'site' };
-        if (!(window.AI && AI.bridge.up)) return { ok: false, why: 'bridge' };
+        if (!macBridge()) return { ok: false, why: 'bridge' };
         if (Edge.old) return { ok: false, why: 'old' };
         if (Edge.installed === false) return { ok: false, why: 'install' };
         if (Edge.stale) return { ok: false, why: 'stale' };
@@ -669,31 +821,52 @@
     sysKey(lang, place) { const p = parse(this.current(lang, place)); return p.engine === 'sys' ? p.key : ''; },
     /** the best free voice that works here right now (plan §4) */
     recommend(lang) {
-      return this.autoChain(lang).find(id => this.avail(id, lang).ok) || (lang === 'uk' ? 'gtr:uk' : 'sys:');
+      return this.autoChain(lang).find(id => this.avail(id, lang).ok) || (lang === 'uk' && !publicBuild() ? 'gtr:uk' : 'sys:');
     },
+    /** may «Авто» use Norsk Kort Pro now (Pro + the AI consent already given — the auto chain never opens a sheet) */
+    nkAuto() { return NK.pro() && NK.consent() && !NK.declined; },
     /**
-     * «Авто» order (research §5.5): Edge (Mac, free without a limit) → keyed services (Azure → Google Cloud → ElevenLabs →
-     * Gemini; one over 90 % of its limit goes last, to keep the rest for the places that chose it) → the device's best
-     * Apple voice (premium / enhanced; Ukrainian: after Piper) → downloaded Piper voices → Google Translate → a weak
-     * device voice. g: the gender to keep when a service's voice was not chosen by hand (♀ stays ♀).
+     * «Авто» order.
+     * The Mac with the bridge (as before): Edge (free without a limit) → keyed services (Azure → Google Cloud → ElevenLabs →
+     *   Gemini; one over 90 % of its limit goes last) → Norsk Kort Pro → the device's best Apple voice (premium / enhanced;
+     *   Ukrainian: after Piper) → downloaded Piper voices → Google Translate → a weak device voice.
+     * Everywhere else (phones, the site, the store apps): a good device voice → Norsk Kort Pro (Pro + consent) → own keys →
+     *   downloaded Piper voices → a weak device voice (on the Mac without the bridge: Google Translate before it).
+     *   A Pro user whose device voice is poor hears Pro first.
+     * g: the gender to keep when a service's voice was not chosen by hand (♀ stays ♀).
      */
     autoChain(lang, g) {
       const out = [];
-      // Edge only once the bridge said edge-tts is there (a missing module is never tried «just in case»)
-      if (onMac() && Edge.installed === true) out.push('edge:' + this.voiceOfEngine('edge', lang, g));
+      const mac = macBridge() && !publicBuild();
       const keyed = ['azure', 'gcloud', 'eleven', 'gemini'].filter(e => this.ready(e) && this.voice(e, lang));
       const late = e => (Limits.pct(Limits.meter(e, this.voice(e, lang))) >= 0.9 ? 1 : 0);
-      keyed.sort((a, b) => late(a) - late(b)).forEach(e => out.push(e + ':' + this.voiceOfEngine(e, lang, g)));
+      keyed.sort((a, b) => late(a) - late(b));
+      const nk = this.nkAuto() && this.voice('nk', lang) ? 'nk:' + this.voiceOfEngine('nk', lang, g) : '';
       const sv = window.TTS && TTS.pickVoice(lang);
       const sq = sv ? TTS.voiceQuality(sv) : 0;
-      const sysFirst = sv && (sq >= 4 || (sq >= 3 && lang !== 'uk'));
-      if (sysFirst) out.push('sys:' + sv.name);
       const pg = k => (g && PIPER[k].g === g ? 1 : 0);
-      Object.keys(PIPER).filter(k => PIPER[k].lang === lang && this.piperReady(k)).sort((a, b) => PIPER[b].q - PIPER[a].q || pg(b) - pg(a))
-        .forEach(k => out.push('piper:' + k + (this._spkOf(k) ? '#' + this._spkOf(k) : '')));
-      if (sv && sq >= 3 && !sysFirst) out.push('sys:' + sv.name);
-      out.push('gtr:' + lang);
-      if (sv && sq < 3) out.push('sys:' + sv.name);
+      const pipers = Object.keys(PIPER).filter(k => PIPER[k].lang === lang && this.piperReady(k) && (!publicBuild() || piperCommercial(k)))
+        .sort((a, b) => PIPER[b].q - PIPER[a].q || pg(b) - pg(a)).map(k => 'piper:' + k + (this._spkOf(k) ? '#' + this._spkOf(k) : ''));
+      if (mac) {
+        // Edge only once the bridge said edge-tts is there (a missing module is never tried «just in case»)
+        if (Edge.installed === true) out.push('edge:' + this.voiceOfEngine('edge', lang, g));
+        keyed.forEach(e => out.push(e + ':' + this.voiceOfEngine(e, lang, g)));
+        if (nk) out.push(nk);
+        const sysFirst = sv && (sq >= 4 || (sq >= 3 && lang !== 'uk'));
+        if (sysFirst) out.push('sys:' + sv.name);
+        pipers.forEach(id => out.push(id));
+        if (sv && sq >= 3 && !sysFirst) out.push('sys:' + sv.name);
+        out.push('gtr:' + lang);
+        if (sv && sq < 3) out.push('sys:' + sv.name);
+        return out;
+      }
+      const sysGood = sv && sq >= 3;
+      if (sysGood) out.push('sys:' + sv.name);
+      if (nk) out.push(nk);
+      keyed.forEach(e => out.push(e + ':' + this.voiceOfEngine(e, lang, g)));
+      pipers.forEach(id => out.push(id));
+      if (!publicBuild()) out.push('gtr:' + lang);
+      if (sv && !sysGood) out.push('sys:' + sv.name);
       return out;
     },
     /** the voice of an engine for a language; g: a voice of this gender when the engine's voice was never chosen by hand */
@@ -704,7 +877,8 @@
       const pk = window.Store && Store.state ? parse(model()[lang].pick) : { engine: '' };
       const mine = !!(((S().cloudVoices || {})[engine] || {})[lang]) || pk.engine === engine;
       if (g && !mine && engine !== 'piper') {
-        const list = (this.custom[engine] && this.custom[engine][lang]) || (engine === 'gcloud' ? gList(lang) : ((ENGINES[engine] || {}).voices || {})[lang]) || [];
+        let list = (this.custom[engine] && this.custom[engine][lang]) || (engine === 'gcloud' ? gList(lang) : ((ENGINES[engine] || {}).voices || {})[lang]) || [];
+        if (engine === 'nk') list = list.filter(x => !isHd(x[0]) || NK.premium === true);
         const cur = list.find(x => x[0] === v);
         if (cur && cur[2] && cur[2] !== g) { const same = list.find(x => x[2] === g); if (same) v = same[0]; }
       }
@@ -785,8 +959,9 @@
     /** text -> { url, marks? } — memory, then the device's clip store, then the engine (with a time limit) */
     async clip(engine, text, lang, rate, voiceOverride, limitMs) {
       const voice = voiceOverride || this.voice(engine, lang);
-      // Gemini has no speed setting: one clip for every speed (played faster / slower) — the day's few requests last longer
-      const key = [engine, voice, lang, engine === 'gemini' ? '0.90' : (+rate || 0.9).toFixed(2), text].join('|');
+      // Gemini and Chirp 3 HD (Pro) have no speed setting: one clip for every speed (played faster / slower)
+      const fixed = engine === 'gemini' || (engine === 'nk' && isHd(voice));
+      const key = [engine, voice, lang, fixed ? '0.90' : engine === 'nk' ? (NK.rate(rate) * 0.9).toFixed(2) : (+rate || 0.9).toFixed(2), text].join('|');
       if (mem.has(key)) return mem.get(key);
       if (!inflight.has(key)) {
         const job = (async () => {
@@ -794,12 +969,16 @@
             const hit = await Clips.get(key);
             if (hit) { const r = { url: URL.createObjectURL(hit.blob), marks: hit.marks || null, cached: true }; mem.set(key, r); return r; }
           }
-          const { blob, marks } = await this._make(engine, text, lang, rate, voice);
+          const made = await this._make(engine, text, lang, rate, voice);
+          // a Pro clip whose file could not be read here: its signed link (1 hour) plays directly, it is just not kept
+          if (!made.blob) return { url: made.url, marks: null, remote: true };
+          const { blob, marks } = made;
           const r = { url: URL.createObjectURL(blob), marks: marks || null };
           mem.set(key, r);
           if (NET.includes(engine)) {
             Clips.put(key, blob, marks);
-            if (engine !== 'edge') { const mt = Limits.meter(engine, voice); Usage.add(mt, text.length); this.limitCheck(mt); }
+            // our own count only for keys on this device (the Pro server counts its own characters)
+            if (engine !== 'edge' && engine !== 'nk') { const mt = Limits.meter(engine, voice); Usage.add(mt, text.length); this.limitCheck(mt); }
           }
           return r;
         })();
@@ -880,6 +1059,7 @@
         return { blob: b64blob(j.audioContent, 'audio/mpeg') };
       }
       if (engine === 'gemini') return this._gemini(text, lang, voice);
+      if (engine === 'nk') return this._nk(text, lang, rate, voice);
       if (engine === 'eleven') {
         // with timestamps: the words light up exactly (character alignment → word starts)
         const r = await net(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}/with-timestamps?output_format=mp3_44100_128`, {
@@ -902,6 +1082,41 @@
         return { blob: b64blob(j.audio_base64, 'audio/mpeg'), marks };
       }
       throw err('voice', 'неизвестный голос');
+    },
+    /** Norsk Kort Pro: POST tts (Net asks the AI consent itself) → the signed link → the clip as a blob (kept on the device) */
+    async _nk(text, lang, rate, voice) {
+      if (!window.Net || !Net.callFn) throw err('noserver', 'голоса сервера недоступны');
+      if (!NK.pro()) throw err('pro', 'нужен Norsk Kort Pro'); // never a paid call for a free user
+      if (text.length > 1500) throw err('voice', 'слишком длинный текст для одного фрагмента');
+      const hd = isHd(voice);
+      let j;
+      try { j = await Net.callFn('tts', { text, lang, voice, rate: hd ? 1 : NK.rate(rate) }, { feature: 'Голоса Norsk Kort Pro' }); }
+      catch (e) { throw this._nkErr(e, hd); }
+      if (!j || typeof j.url !== 'string' || !/^https?:/.test(j.url)) throw err('net', 'сервер не прислал звук');
+      try {
+        const r = await fetch(j.url, { cache: 'no-store', credentials: 'omit' });
+        if (!r.ok) throw new Error('clip');
+        const blob = await r.blob();
+        if (blob.size < 200) throw new Error('clip');
+        return { blob };
+      } catch (e) { return { url: j.url }; }
+    },
+    /** the server's NetError → why (the person never sees technical text) */
+    _nkErr(e, hd) {
+      const c = (e && e.code) || '';
+      if (c === 'no_entitlement') return err('pro', 'нужен Norsk Kort Pro');
+      if (c === 'consent') return err('consent', 'без согласия голоса сервера не используются');
+      if (c === 'signed_out' || c === 'unauthenticated') return err('signin', 'нужно войти');
+      if (c === 'cap_reached') {
+        const t = Date.parse((e && (e.resetsAt || (e.details && e.details.resets_at))) || '');
+        if (e.details && e.details.cap === 'tts_premium') { NK.hdOut = Number.isFinite(t) ? t : nextMonth(); return Object.assign(err('hdquota', 'лимит голосов HD на месяц исчерпан'), { resetsAt: NK.hdOut }); }
+        return Object.assign(err('quota', 'месячный лимит голосов Pro исчерпан'), { resetsAt: Number.isFinite(t) ? t : nextMonth() });
+      }
+      if (c === 'rate_limited') return err('rate', 'слишком много запросов подряд');
+      if (c === 'bad_input' && e.key === 'err.badVoice') { if (hd) { NK.premium = false; ls.set('nk-tts-health', { t: Date.now(), premium: false, server: NK.server }); } return err('voice', 'этот голос сейчас недоступен'); }
+      if (c === 'offline') return err('offline', 'нет интернета');
+      if (c === 'not_configured') return err('noserver', 'голоса сервера недоступны');
+      return err('net', 'сервер сейчас не ответил');
     },
     /** Google Cloud's error answer → why. 429 is a per-minute limit (Google has no «month is over»: it bills) */
     _gErr(status, j) {
@@ -971,7 +1186,7 @@
         const a = takeAudio(c.url);
         // ElevenLabs speed is limited to 0.7–1.2: the rest by playback speed
         if (engine === 'eleven') a.playbackRate = Math.max(0.5, Math.min(1.6, (rate / 0.9) / Math.max(0.7, Math.min(1.2, rate / 0.9))));
-        if (engine === 'gemini') a.playbackRate = Math.max(0.5, Math.min(2, (+rate || 0.9) / 0.9));
+        if (engine === 'gemini' || (engine === 'nk' && isHd(voiceKey))) a.playbackRate = Math.max(0.5, Math.min(2, (+rate || 0.9) / 0.9));
         TTS._audio = a;
         // marks are in the clip's own seconds — currentTime too, whatever the playback speed
         if (wc) try { wc.audio(a, rate, engine, { marks: c.marks }); } catch (e) { /* no word timing: the sentence highlight stays */ }
@@ -1034,6 +1249,7 @@
     _noted: false,
     /** a voice failed: remember why (bad key / quota / short break); quiet = no note (a preview, or not the main voice) */
     _fail(engine, e, id, lang, quiet) {
+      if (engine === 'nk') return this._nkFail(e, id, lang, quiet);
       const kind = (e && e.kind) || 'net';
       let modal = false;
       if (kind === 'badkey' || kind in SAVED_FOR) Health.mark(engine, kind);
@@ -1047,7 +1263,7 @@
       const ent = this.entry(id, lang), nm = ent ? `«${ent.name}» (${(ENGINES[engine] || {}).short || engine})` : (ENGINES[engine] || {}).short || 'Голос';
       const mt = Limits.meter(engine, parse(id).key);
       const msg = kind === 'quota' ? `Бесплатный лимит ${(ENGINES[engine] || {}).short || ''} ${Limits.period(mt)} закончился — до ${Limits.resetText(mt)} читает запасной голос.`
-        : kind === 'badkey' ? `${(ENGINES[engine] || {}).short || 'Сервис'} не принял ключ — пока читает запасной голос. Проверить: 🔊 Голоса.`
+        : kind === 'badkey' ? `${(ENGINES[engine] || {}).short || 'Сервис'} не принял ключ — пока читает запасной голос. Проверить можно в разделе «Голоса».`
         : kind === 'billing' ? 'Google Cloud просит подключить оплату — подключите её в консоли Google Cloud (деньги не спишутся, пока вы в бесплатном лимите). Пока читает запасной голос.'
         : kind === 'blocked' ? 'ElevenLabs приостановил бесплатный тариф (так бывает, если включён VPN) — пока читает запасной голос.'
         : kind === 'region' ? 'Бесплатный Gemini недоступен из этой страны — пока читает запасной голос.'
@@ -1055,18 +1271,34 @@
         : `Голос ${nm} сейчас не ответил — читает запасной.`;
       UI.toast(msg, '', kind === 'billing' ? 9000 : 5000);
     },
-    /** 💻 Edge answered 403 (Microsoft changed its protection): one quiet offer to update the voices on the Mac */
+    /** Norsk Kort Pro failed: remember why (month used up / no Pro any more / consent declined / a short break), one calm line */
+    _nkFail(e, id, lang, quiet) {
+      const kind = (e && e.kind) || 'net';
+      if (kind === 'quota') Health.mark('nk', 'quota', e.resetsAt);
+      else if (kind === 'pro') {
+        // the server says «no Pro» (expired / refunded): rest 10 minutes and ask the server again — never a loop of paid calls
+        Health.brk.nk = { fails: 2, until: Date.now() + 10 * 60000 };
+        try { if (window.Pro && Pro.refresh) Pro.refresh({ force: true }); } catch (x) { /* ignore */ }
+      } else if (kind === 'consent') NK.declined = true;
+      else if (['net', 'timeout', 'rate', 'play'].includes(kind)) Health.mark('nk', kind === 'rate' ? 'rate' : 'net');
+      if (quiet || !window.UI) return;
+      const when = t => { const d = new Date(t || nextMonth()); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
+      if (kind === 'quota' && Notes.once('100', 'nk')) UI.toast(`Месячный лимит голосов Norsk Kort Pro закончился — до ${when(e.resetsAt)} читает голос устройства.`, '', 7000);
+      else if (kind === 'hdquota' && Notes.once('100', 'nk-hd')) UI.toast(`Голоса HD на этот месяц закончились — до ${when(e.resetsAt)} читают обычные голоса Pro.`, '', 6000);
+      else if (!this._noted && (kind === 'net' || kind === 'timeout')) { this._noted = true; UI.toast('Голос Norsk Kort Pro сейчас не ответил — читает запасной.', '', 4000); }
+    },
+    /** Edge answered 403 (Microsoft changed its protection): one quiet offer to update the voices on the Mac */
     offerEdgeUpdate() {
       if (this._edgeOffer || !window.UI || !UI.toastAction) return;
       this._edgeOffer = true;
-      UI.toastAction('Голоса Edge перестали отвечать — похоже, Microsoft поменяла защиту. Пока читает запасной голос. Обновить голоса Edge на Mac?', '⬇ Обновить', async () => {
+      UI.toastAction('Голоса Edge перестали отвечать — похоже, Microsoft поменяла защиту. Пока читает запасной голос. Обновить голоса Edge на Mac?', 'Обновить', async () => {
         const t = UI.toast('Обновляю голоса Edge… обычно меньше минуты', '', 0);
         const r = await this.installEdge();
         t.close();
-        if (r.ok) { Edge.stale = false; UI.toast('✓ Голоса Edge обновлены', 'good', 3500); }
-        else if (r.restart) UI.toast('Голоса обновлены — осталось перезапустить мост: 🔊 Голоса → «Через мост на Mac».', '', 7000);
+        if (r.ok) { Edge.stale = false; UI.toast('Голоса Edge обновлены', 'good', 3500); }
+        else if (r.restart) UI.toast('Голоса обновлены — осталось перезапустить мост: «Голоса» → «Через мост на Mac».', '', 7000);
         else UI.toast((r.error || 'Не получилось обновить голоса.') + ' Пока читают другие голоса.', 'warn', 6000);
-      }, 15000, '💻');
+      }, 15000, icon('laptop', 18));
     },
 
     /* ---------- 📏 limits: 75 % (a quiet line in «Голоса»), 90 % (one toast), 100 % (one friendly window) ---------- */
@@ -1096,7 +1328,7 @@
       const el = document.createElement('div');
       el.className = 'toast warn toast-action vl-toast';
       el.setAttribute('role', 'status');
-      el.innerHTML = `<span aria-hidden="true">⏳</span><span>${U.esc(`Голос ${this._vName(u.lang, u.id)}: потрачено 90 % бесплатного лимита ${Limits.period(meter)}${y ? ` — потом буду читать голосом ${this._vName(u.lang, y)}` : ''}.`)}</span>
+      el.innerHTML = `<span aria-hidden="true">${icon('clock', 18)}</span><span>${U.esc(`Голос ${this._vName(u.lang, u.id)}: потрачено 90 % бесплатного лимита ${Limits.period(meter)}${y ? ` — потом буду читать голосом ${this._vName(u.lang, y)}` : ''}.`)}</span>
         <span class="vl-btns"><button type="button" class="btn sm" data-vl-ok>Понятно</button><button type="button" class="btn sm primary" data-vl-pick>Выбрать заранее</button></span>`;
       const root = document.getElementById('toast-root');
       if (!root) return;
@@ -1148,9 +1380,9 @@
       const head = one
         ? `На голосе <b>${U.esc(this._vName(one.lang, one.id))}</b> закончился бесплатный лимит ${Limits.period(one.meter)} — переключаю на <b>${U.esc(one.to ? this._vName(one.lang, one.to) : 'голос устройства')}</b>.`
         : `На голосах ${U.esc([...new Set(rows.map(r => (ENGINES[r.engine] || {}).short))].join(' и '))} закончился бесплатный лимит${per ? ' ' + per : ''} — переключаю:`;
-      const list = one ? '' : `<ul class="vl-list">${rows.map(r => `<li><span aria-hidden="true">${FLAG[r.lang]}</span> <b>${LANG_NAME[r.lang]} голос:</b> ${U.esc(this._vName(r.lang, r.id))} → <b>${U.esc(r.to ? this._vName(r.lang, r.to) : 'голос устройства')}</b></li>`).join('')}</ul>`;
+      const list = one ? '' : `<ul class="vl-list">${rows.map(r => `<li>${langMark(r.lang)} <b>${LANG_NAME[r.lang]} голос:</b> ${U.esc(this._vName(r.lang, r.id))} → <b>${U.esc(r.to ? this._vName(r.lang, r.to) : 'голос устройства')}</b></li>`).join('')}</ul>`;
       const m = UI.modal({
-        title: '⏳ Бесплатный лимит закончился', cls: 'narrow vl-modal',
+        title: 'Бесплатный лимит закончился', cls: 'narrow vl-modal',
         body: `<p>${head}</p>${list}<p class="muted">Лимит вернётся ${U.esc(when)}.${meters.some(mt => mt.startsWith('gcloud')) ? ' Деньги не спишутся: приложение само остановилось на вашем потолке.' : ''}</p>`,
         foot: '<button type="button" class="btn primary" data-vl-ok>Хорошо</button><button type="button" class="btn" data-vl-pick>Выбрать другой голос</button>',
       });
@@ -1164,7 +1396,7 @@
 
     /** 💻 ask the Mac bridge whether edge-tts is installed (GET /api/tts/status — always a fresh answer) */
     checkEdge(force) {
-      if (!onMac() || !(window.AI && AI.bridge.up)) return Promise.resolve(Edge);
+      if (publicBuild() || !macBridge()) return Promise.resolve(Edge);
       if (Edge.busy) return force ? Edge.busy.then(() => this.checkEdge(true)) : Edge.busy;
       if (!force && Edge.checked && Date.now() - Edge.checked < 5 * 60000) return Promise.resolve(Edge);
       Edge.busy = fetch('/api/tts/status?t=' + Date.now(), { cache: 'no-store' }).then(async r => {
@@ -1184,7 +1416,7 @@
     /** 💻 «⬇ Установить голоса Edge»: the bridge installs edge-tts for its own python (POST /api/tts/install).
      *  → { ok } | { old: true } (a bridge from before: restart it once) | { restart: true } | { ok: false, error } */
     async installEdge() {
-      if (!onMac() || !(window.AI && AI.bridge.up)) return { ok: false, error: 'Мост на Mac не запущен.' };
+      if (publicBuild() || !macBridge()) return { ok: false, error: 'Мост на Mac не запущен.' };
       Edge.installing = true;
       let j = null;
       try {
@@ -1209,6 +1441,7 @@
     },
     /** ↻ the bridge starts itself again (POST /api/restart) → true when it answers again */
     async restartBridge() {
+      if (publicBuild() || !onMac()) return false;
       try {
         const r = await fetch('/api/restart', { method: 'POST', cache: 'no-store', headers: { 'content-type': 'application/json' }, body: '{}' });
         if (r.status === 404 || r.status === 405) return false;
@@ -1234,7 +1467,8 @@
       if (ls.get('nk-voice-nudge', 0)) return;
       ls.set('nk-voice-nudge', 1);
       const what = lang === 'ru' ? 'Русский' : lang === 'uk' ? 'Украинский' : 'Норвежский';
-      setTimeout(() => UI.toastAction(`${what} голос этого устройства звучит «по-роботски». Есть живые голоса — бесплатно.`, '🔊 Выбрать', () => this.openChooser(lang), 12000, '🔊'), 1200);
+      const better = NK.pro() ? 'Есть живые голоса — они уже входят в ваш Norsk Kort Pro.' : 'Есть голоса живее — бесплатно.';
+      setTimeout(() => UI.toastAction(`${what} голос этого устройства звучит «по-роботски». ${better}`, 'Выбрать', () => this.openChooser(lang), 12000, icon('speaker', 18)), 1200);
     },
 
     /** ElevenLabs: voices from the user's own library */
@@ -1417,14 +1651,15 @@
       return out;
     },
 
-    /** 🇳🇴 🇺🇦 🇷🇺 three buttons «Норвежский голос / Украинский голос / Русский голос» for a place — always in this order */
+    /** three buttons «Норвежский голос / Украинский голос / Русский голос» for a place — always in this order */
     langButtons(place, o) {
       o = o || {};
+      ensureCss();
       const pl = this.placeInfo(place), langs = o.langs || LANGS;
       return `<div class="vs-langs" role="group" aria-label="Голоса${pl ? ' ' + U.esc(pl.for) : ''}">${langs.map(l => {
         const nm = this.label(l, '', place);
         return `<button type="button" class="btn sm vs-lang" data-voices-open="${l}"${place ? ` data-voices-place="${U.esc(place)}"` : ''} aria-label="${LANG_NAME[l]} голос${pl ? ' ' + U.esc(pl.for) : ''}: ${U.esc(nm)}. Выбрать" title="${U.esc(nm)}">`
-          + `<span aria-hidden="true">${FLAG[l]}</span> <b>${LANG_NAME[l]} голос</b>${o.names ? `<small>${U.esc(nm)}</small>` : ''}</button>`;
+          + `${langMark(l)} <b>${LANG_NAME[l]} голос</b>${o.names ? `<small>${U.esc(nm)}</small>` : ''}</button>`;
       }).join('')}</div>`;
     },
 
@@ -1434,11 +1669,7 @@
       if (this._ui) return this._ui;
       const v = (document.querySelector('script[src*="js/voices.js"]') || {}).src || '';
       const q = (v.match(/\?v=[^&]+/) || [''])[0];
-      if (!document.querySelector('link[data-voicepicker]')) {
-        const l = document.createElement('link');
-        l.rel = 'stylesheet'; l.href = 'css/voicepicker.css' + q; l.setAttribute('data-voicepicker', '');
-        document.head.appendChild(l);
-      }
+      ensureCss();
       this._ui = window.VoicePicker ? Promise.resolve(window.VoicePicker) : new Promise((res, rej) => {
         const s = document.createElement('script');
         s.src = 'js/voicepicker.js' + q; s.async = true;
@@ -1463,20 +1694,20 @@
         const id = this.current(l), e = this.entry(id, l), act = this.chain(l)[0] || id, fb = act !== id;
         const q = e ? e.q : 2;
         return `<button type="button" class="vs-row" data-voices-open="${l}" aria-label="${LANG_NAME[l]} голос: ${U.esc(this.label(l))}. Выбрать">
-          <span class="vs-flag" aria-hidden="true">${FLAG[l]}</span>
+          <span class="vs-flag" aria-hidden="true">${langMark(l)}</span>
           <span class="vs-main"><span class="vs-lname">${LANG_NAME[l]} голос</span><b>${U.esc(this.label(l, id))}</b><small>${this.pickOf(l) ? '' : 'Авто · '}${'★'.repeat(q)}${'☆'.repeat(5 - q)} ${QUALITY[q] || ''}${fb ? ` · сейчас читает запасной: ${U.esc(this.label(l, act))}` : ''}</small></span>
           <span class="vs-go" aria-hidden="true">›</span></button>`;
       };
       const np = this.placeCount();
       const places = `<button type="button" class="vs-row" data-voices-open="no" data-voices-section="places" aria-label="Где какой голос: ${np ? 'свой голос в ' + np + ' ' + (np === 1 ? 'месте' : 'местах') : 'везде одинаково'}. Настроить">
-          <span class="vs-flag" aria-hidden="true">📍</span>
-          <span class="vs-main"><b>Где какой голос</b><small>${np ? `Свой голос: ${PLACES.filter(p => LANGS.some(l => this.placePick(p.id, l))).map(p => p.ico + ' ' + p.name).join(', ')}` : 'Везде одинаково · можно дать читалке, видео, карточкам свой голос'}</small></span>
+          <span class="vs-flag" aria-hidden="true">${icon('pin', 22)}</span>
+          <span class="vs-main"><b>Где какой голос</b><small>${np ? `Свой голос: ${PLACES.filter(p => LANGS.some(l => this.placePick(p.id, l))).map(p => p.name).join(', ')}` : 'Везде одинаково · можно дать читалке, видео, карточкам свой голос'}</small></span>
           <span class="vs-go" aria-hidden="true">›</span></button>`;
       return `<div class="vs-sum">
-          <div class="small muted">Для каждого языка — свой голос. Лучшие бесплатные — сверху; сервисы с ключом (Azure, Google Cloud, Gemini, ElevenLabs) подключаются там же.</div>
+          <div class="small muted">Для каждого языка — свой голос. Бесплатно читают голоса этого устройства и офлайн-голоса${NK.offered() ? '; с Norsk Kort Pro — живые голоса сервера' : ''}. Сервисы со своим ключом (Azure, Google Cloud, Gemini, ElevenLabs) подключаются там же.</div>
           <div class="vs-rows">${LANGS.map(row).join('')}${places}</div>
-          <div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn primary vs-open" data-voices-open="no">🔊 Выбрать голоса</button>
-            <button type="button" class="btn ghost" data-voices-open="no" data-voices-section="keys">🔑 Подключить Azure, Google и другие</button></div>
+          <div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn primary vs-open" data-voices-open="no">${icon('speaker', 18)} Выбрать голоса</button>
+            <button type="button" class="btn ghost" data-voices-open="no" data-voices-section="keys">${icon('key', 18)} Подключить свой ключ</button></div>
         </div>`;
     },
   };
@@ -1492,7 +1723,10 @@
     Voices.openChooser(b.getAttribute('data-voices-open') || 'no', { section: b.getAttribute('data-voices-section') || '', place: b.getAttribute('data-voices-place') || '' });
   }, true);
   // the Mac bridge is found at start (js/app.js): then ask it once whether the Edge voices are installed
-  setTimeout(() => { if (onMac() && window.AI && AI.bridge.up) Voices.checkEdge(); }, 3000);
+  setTimeout(() => { if (!publicBuild() && macBridge()) Voices.checkEdge(); }, 3000);
+  // Norsk Kort Pro: which server voices are on (free, public GET health) — once at start, again when Pro changes
+  setTimeout(() => { if (NK.offered()) NK.health(); }, 4000);
+  window.addEventListener('nk-pro', () => { roleMemo.clear(); if (NK.pro()) { NK.declined = false; Health.forget('nk'); NK.health(); } document.dispatchEvent(new CustomEvent('voices-changed')); });
   // back online / bridge found: voices that were skipped can be tried again
   window.addEventListener('online', () => { Object.keys(Health.brk).forEach(k => delete Health.brk[k]); });
 

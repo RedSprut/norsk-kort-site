@@ -1,7 +1,12 @@
 /* ============ ▶ YouTube: videos about the word / expression on the current card ============
- * - search links (whole YouTube, pronunciation, subtitles via Filmot) — no key needed
+ * - search links (whole YouTube, pronunciation; subtitles via Filmot — only on the Mac, NK_CONFIG.publicBuild) — no key needed
  * - every Norwegian teacher channel opens ITS OWN search for this word (handles verified 2026-11)
  * - with a free YouTube Data API key (Settings): results right in the app with a built-in player
+ * W6: a channel's latest videos — the Mac bridge (Mac only), else the server's `yt-feed` (the official YouTube Data API,
+ *   docs/api-contract.md), else a calm link to the channel on YouTube; «Видео из YouTube · Условия YouTube» under them.
+ *   A video plays in YouTube's official IFrame player (js/subs.js — nothing of ours over it). Its subtitles come only
+ *   through the Mac bridge; elsewhere the person may add their own .srt / .vtt file, or watch with subtitles on YouTube.
+ *   Nothing is downloaded from YouTube, no sound is taken from its player.
  */
 (function () {
   const CHANNELS = [
@@ -66,7 +71,20 @@
     ['magic_norway', 'Magic Norway', 'uk', 'родина з України: влоги + серія «Норвезька мова з нуля» (діалоги)', '7.3K'],
     ['NorskLett', 'Норвежский? Легко! (українською)', 'uk', 'вебінари українською для тих, хто живе в Норвегії', '6.2K'],
   ];
-  const LANG = { no: ['🇳🇴', 'Учителя на норвежском'], en: ['🇬🇧', 'Объясняют по-английски'], ru: ['🇷🇺', 'Объясняют по-русски'], uk: ['🇺🇦', 'Пояснюють українською'] };
+  const LANG = { no: ['NO', 'Учителя на норвежском'], en: ['EN', 'Объясняют по-английски'], ru: ['RU', 'Объясняют по-русски'], uk: ['UA', 'Пояснюють українською'] };
+  const IC = (n, s) => (window.MediaIcons ? MediaIcons.icon(n, s || 18) : '');
+  const TERMS = 'https://www.youtube.com/t/terms';
+  const termsLine = () => `<div class="tiny muted yt-terms">Видео из YouTube · <a href="${TERMS}" target="_blank" rel="noopener">Условия использования YouTube</a></div>`;
+  /** the server's yt-feed takes a channel id or a plain ASCII @handle (docs/api-contract.md) */
+  const feedOk = h => /^[A-Za-z0-9._-]{3,30}$/.test(String(h || ''));
+  const bridgeOk = () => !!(window.Subs && Subs.macBridge && Subs.macBridge());
+  const onMacHere = () => !!(window.Net && Net.onMac && Net.onMac());
+  const serverOk = () => !!(window.NKConfig && NKConfig.ready() && window.Net && Net.callFn);
+  const pill = (t, cls) => `<span class="yt-pill ${cls || ''}">${t}</span>`;
+  const groupHead = (lg, flag, title) => `<div class="yt-group-head"><span class="yt-lang" aria-hidden="true">${flag}</span> ${title}</div>`;
+  /** a channel tile of the catalogue / of the search (q: its own search on YouTube) */
+  const chTile = (yt, [h, n, , focus, subs, idioms, top], q) => `<a class="yt-ch ${top ? 'top' : ''}" href="${U.esc(yt.channelUrl(h, q || ''))}" target="_blank" rel="noopener" data-ch="${U.esc(h)}" data-n="${U.esc(n)}"${q ? ` data-q="${U.esc(q)}"` : ''} title="${U.esc(n)} — видео канала здесь${q ? ` (с «${U.esc(q)}» в названии — первыми)` : ', с субтитрами и переводом'}">
+      <span class="yt-ch-ico">${YT_SVG(20)}</span><span class="grow"><b>${U.esc(n)}</b>${top || idioms ? `<span class="yt-pills">${top ? pill('рекомендуем', 'top') : ''}${idioms ? pill('выражения', 'idi') : ''}</span>` : ''}<small>${U.esc(focus)} · ${U.esc(subs)}</small></span><span class="yt-go" data-out title="Открыть канал в приложении или на сайте YouTube" aria-label="Открыть на YouTube">${IC('external', 18)}</span></a>`;
   const YT_SVG = (s = 18) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="4.5" width="21" height="15" rx="4.5" fill="#ff0033"/><path d="M10 8.8v6.4l5.6-3.2z" fill="#fff"/></svg>`;
   const enc = encodeURIComponent;
   /* results are remembered for 30 days (localStorage): every word costs at most ONE search of the daily quota */
@@ -116,13 +134,13 @@
         if (!q) {
           // the catalogue: every teacher channel (opens its videos) and a search field for any word or topic
           box.innerHTML = `
-            <div class="row" style="gap:8px"><input class="input grow" data-q value="" placeholder="Слово, фраза или тема: «å ha lyst til», «uttale», «Norskprøve B1»…"><button class="btn primary" data-act="yt-go">🔎 Искать</button></div>
-            <div class="small muted">Нажмите на канал — его видео откроются здесь, с норвежскими субтитрами и переводом (↗ — открыть в YouTube). Впишите слово — найдём его на YouTube и у учителей. Или вставьте ссылку на видео — оно откроется здесь.</div>
-            ${Object.entries(LANG).map(([lg, [flag, title]]) => `<div class="yt-group"><div class="yt-group-head">${flag} ${title}</div><div class="yt-grid">
-              ${CHANNELS.filter(c => c[2] === lg).sort((a, b) => (b[6] ? 1 : 0) - (a[6] ? 1 : 0)).map(([h, n, , focus, subs, idioms, top]) => `<a class="yt-ch ${top ? 'top' : ''}" href="${U.esc(this.channelUrl(h, ''))}" target="_blank" rel="noopener" data-ch="${U.esc(h)}" data-n="${U.esc(n)}" title="${U.esc(n)} — видео канала здесь, с субтитрами и переводом">
-                <span class="yt-ch-ico">${YT_SVG(20)}</span><span class="grow"><b>${top ? '🏅 ' : ''}${U.esc(n)}${idioms ? ' ⭐' : ''}</b><small>${U.esc(focus)} · ${U.esc(subs)}</small></span><span class="yt-go" data-out title="Открыть канал в приложении или на сайте YouTube">↗</span></a>`).join('')}
+            <div class="row yt-qrow"><input class="input grow" data-q value="" placeholder="Слово, фраза или тема: «å ha lyst til», «uttale», «Norskprøve B1»…" enterkeyhint="search"><button class="btn primary" data-act="yt-go">${IC('search')} Искать</button></div>
+            <div class="small muted">Нажмите на канал — его последние видео откроются здесь (значок со стрелкой — открыть в YouTube). Впишите слово — найдём его на YouTube и у учителей. Или вставьте ссылку на видео — оно откроется здесь.</div>
+            ${Object.entries(LANG).map(([lg, [flag, title]]) => `<div class="yt-group">${groupHead(lg, flag, title)}<div class="yt-grid">
+              ${CHANNELS.filter(c => c[2] === lg).sort((a, b) => (b[6] ? 1 : 0) - (a[6] ? 1 : 0)).map(c => chTile(this, c, '')).join('')}
               </div></div>`).join('')}
-            <div class="tiny muted">⭐ — есть серия про устойчивые выражения · 🏅 — особенно рекомендуем.</div>`;
+            <div class="tiny muted">«выражения» — есть серия про устойчивые выражения · «рекомендуем» — особенно советуем начать с них.</div>
+            ${termsLine()}`;
           setTimeout(() => { const i = box.querySelector('[data-q]'); if (i && !('ontouchstart' in window)) i.focus(); }, 80);
           return;
         }
@@ -132,20 +150,21 @@
           ['Что значит (hva betyr)', `https://www.youtube.com/results?search_query=${enc('hva betyr ' + q)}`],
           ['Произношение (uttale)', `https://www.youtube.com/results?search_query=${enc(q + ' uttale')}`],
           ...(ru ? [[`«${ru}» по-норвежски`, `https://www.youtube.com/results?search_query=${enc(ru + ' по-норвежски')}`]] : []),
-          ['🎬 В субтитрах видео (Filmot)', `https://filmot.com/search/${enc(q)}/1?lang=no`],
+          // Filmot (a third-party subtitle search) — only on the Mac (docs/release-architecture.md M2)
+          ...(window.NK_CONFIG && NK_CONFIG.publicBuild === false ? [['В субтитрах видео (Filmot)', `https://filmot.com/search/${enc(q)}/1?lang=no`]] : []),
         ];
         box.innerHTML = `
-          <div class="row yt-qrow" style="gap:8px"><input class="input grow" data-q value="${U.esc(q)}" title="Можно изменить, что искать"><button class="btn primary" data-act="yt-go">🔎 Искать</button>
+          <div class="row yt-qrow"><input class="input grow" data-q value="${U.esc(q)}" title="Можно изменить, что искать" enterkeyhint="search"><button class="btn primary" data-act="yt-go">${IC('search')} Искать</button>
             ${card ? '' : CardMaker.btn('➕ Создать карточку', 'btn', 'data-act="yt-card"')}</div>
-          <div class="yt-links">${links.map(([l, u]) => `<a class="chip" href="${U.esc(u)}" target="_blank" rel="noopener">${YT_SVG(14)} ${U.esc(l)} ↗</a>`).join('')}</div>
-          <div data-yt-results>${key ? '<div class="small muted"><span class="spinner sm"></span> ищу видео…</div>' : `<div class="mt-warn ok" style="margin:6px 0">💡 <span><b>Видео прямо здесь, со встроенным плеером:</b> добавьте бесплатный ключ YouTube Data API (≈100 поисков в день) — <a href="#" data-act="yt-key">Настройки → YouTube</a>. Без ключа поиск открывается на сайте YouTube.</span></div>`}</div>
-          <h3 style="margin:14px 0 4px">👩‍🏫 Учителя норвежского — поиск «${U.esc(q)}» на их каналах</h3>
-          <div class="small muted" style="margin-bottom:6px">Нажмите на канал — откроется поиск этого слова среди его видео. ⭐ — есть серия про устойчивые выражения. 🏅 — особенно рекомендуем.</div>
-          ${Object.entries(LANG).map(([lg, [flag, title]]) => `<div class="yt-group"><div class="yt-group-head">${flag} ${title}</div><div class="yt-grid">
-            ${CHANNELS.filter(c => c[2] === lg).sort((a, b) => (b[6] ? 1 : 0) - (a[6] ? 1 : 0)).map(([h, n, , focus, subs, idioms, top]) => `<a class="yt-ch ${top ? 'top' : ''}" href="${U.esc(this.channelUrl(h, q))}" target="_blank" rel="noopener" data-ch="${U.esc(h)}" data-n="${U.esc(n)}" data-q="${U.esc(q)}" title="${U.esc(n)} — видео канала здесь (с «${U.esc(q)}» в названии — первыми)">
-              <span class="yt-ch-ico">${YT_SVG(20)}</span><span class="grow"><b>${top ? '🏅 ' : ''}${U.esc(n)}${idioms ? ' ⭐' : ''}</b><small>${U.esc(focus)} · ${U.esc(subs)}</small></span><span class="yt-go" data-out title="Искать «${U.esc(q)}» на канале — в приложении или на сайте YouTube">↗</span></a>`).join('')}
+          <div class="yt-links">${links.map(([l, u]) => `<a class="chip" href="${U.esc(u)}" target="_blank" rel="noopener">${YT_SVG(14)} ${U.esc(l)} ${IC('external', 14)}</a>`).join('')}</div>
+          <div data-yt-results>${key ? '<div class="small muted"><span class="spinner sm"></span> ищу видео…</div>' : `<div class="mt-warn ok yt-keytip"><span>${IC('info')}</span><span><b>Видео прямо здесь, со встроенным плеером:</b> добавьте бесплатный ключ YouTube Data API (≈100 поисков в день) — <a href="#" data-act="yt-key">Настройки → YouTube</a>. Без ключа поиск открывается на сайте YouTube.</span></div>`}</div>
+          <h3 class="yt-h3">Учителя норвежского — поиск «${U.esc(q)}» на их каналах</h3>
+          <div class="small muted yt-sub">Нажмите на канал — его последние видео откроются здесь, с «${U.esc(q)}» в названии первыми.</div>
+          ${Object.entries(LANG).map(([lg, [flag, title]]) => `<div class="yt-group">${groupHead(lg, flag, title)}<div class="yt-grid">
+            ${CHANNELS.filter(c => c[2] === lg).sort((a, b) => (b[6] ? 1 : 0) - (a[6] ? 1 : 0)).map(c => chTile(this, c, q)).join('')}
             </div></div>`).join('')}
-          <div class="tiny muted">На русских и украинских каналах поиск находит слово, только если оно есть в названии или описании видео.</div>`;
+          <div class="tiny muted">На русских и украинских каналах поиск находит слово, только если оно есть в названии или описании видео.</div>
+          ${termsLine()}`;
         if (key) this.results(box.querySelector('[data-yt-results]'), q, key);
       };
       render(q0);
@@ -195,58 +214,80 @@
       return m ? m[1] : '';
     },
 
-    /** ▶ a channel's latest videos right in the app (the bridge reads the channel's public feed — no key needed) */
+    /** ▶ a channel's latest videos right in the app: the Mac bridge (Mac only) → the server's yt-feed (official YouTube Data
+     *  API) → a calm link to the channel on YouTube. Never a dead list: whatever can't load becomes «Открыть на YouTube». */
     async channel(box, handle, name, q) {
       box._back = box._q || '';
       const tile = v => `<div class="nrk-tile">
-          <button class="nrk-tile-main" data-act="yt-watch" data-id="${U.esc(v.id)}" data-title="${U.esc(v.title)}" data-ch="${U.esc(name)}" title="Смотреть здесь — с субтитрами и переводом">
-            <span class="nrk-img"><img src="https://i.ytimg.com/vi/${enc(v.id)}/mqdefault.jpg" alt="" loading="lazy"></span>
+          <button class="nrk-tile-main" data-act="yt-watch" data-id="${U.esc(v.id)}" data-title="${U.esc(v.title)}" data-ch="${U.esc(name)}" title="Смотреть здесь">
+            <span class="nrk-img"><img src="${U.esc(/^https:\/\/i\.ytimg\.com\//.test(v.thumb || '') ? v.thumb : `https://i.ytimg.com/vi/${enc(v.id)}/mqdefault.jpg`)}" alt="" loading="lazy"><span class="nrk-tile-pl" aria-hidden="true">${IC('play', 22)}</span></span>
             <span class="nrk-t"><b>${U.esc(v.title)}</b>${v.published ? `<small class="muted">${U.esc(new Date(v.published).toLocaleDateString('ru-RU'))}</small>` : ''}</span>
           </button>
-          <a class="nrk-ext" href="https://www.youtube.com/watch?v=${enc(v.id)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте YouTube">↗</a>
+          <a class="nrk-ext" href="https://www.youtube.com/watch?v=${enc(v.id)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте YouTube" aria-label="Открыть на YouTube">${IC('external', 18)}</a>
         </div>`;
-      box.innerHTML = `<div class="yt-chan-head"><button class="btn sm ghost" data-act="yt-back">← Все каналы</button>
+      const chUrl = this.channelUrl(handle, q);
+      box.innerHTML = `<div class="yt-chan-head"><button class="btn sm ghost" data-act="yt-back">${IC('back')} Все каналы</button>
           <b class="grow">${YT_SVG(18)} ${U.esc(name)}</b>
-          <a class="btn sm ghost" href="${U.esc(this.channelUrl(handle, q))}" target="_blank" rel="noopener" title="Открыть канал в приложении или на сайте YouTube">↗ YouTube</a></div>
+          <a class="btn sm ghost" href="${U.esc(chUrl)}" target="_blank" rel="noopener" title="Открыть канал в приложении или на сайте YouTube">${IC('external')} YouTube</a></div>
         <div data-ytv><div class="nrk-empty"><span class="spinner sm"></span> загружаю видео канала…</div></div>`;
       const out = box.querySelector('[data-ytv]');
+      /** the calm alternative: the channel on YouTube (+ how to watch a video of it here) */
+      const calm = (why) => {
+        out.innerHTML = `<div class="nkm-card"><span class="nkm-ico">${YT_SVG(34)}</span><div class="nkm-txt"><b>${U.esc(why || 'Видео этого канала откройте на YouTube')}</b>
+            <p>Понравилось видео? Скопируйте ссылку на него и вставьте в поиск на прошлом экране — оно откроется здесь, и к нему можно будет добавить свой файл субтитров.</p>
+            ${onMacHere() && !bridgeOk() ? '<p class="small muted">На этом Mac видео каналов и их субтитры загружает мост — запустите его, и они появятся здесь.</p>' : ''}
+            <a class="btn primary" href="${U.esc(chUrl)}" target="_blank" rel="noopener">${IC('external')} Открыть канал на YouTube</a></div></div>${termsLine()}`;
+      };
+      let vids = null;
       try {
-        const r = await Subs.api('yt-channel', { ch: handle });
-        if (!out.isConnected) return;
-        let vids = r.videos || [];
-        let note = '';
-        if (q) {
-          const k = U.norm(q);
-          const hit = vids.filter(v => U.norm(v.title + ' ' + (v.desc || '')).includes(k));
-          note = hit.length ? `Видео с «${U.esc(q)}» — первыми.` : `Среди последних видео канала «${U.esc(q)}» не нашлось — ниже все последние; поиск по всему каналу — <a href="${U.esc(this.channelUrl(handle, q))}" target="_blank" rel="noopener">на YouTube ↗</a>.`;
-          vids = hit.concat(vids.filter(v => !hit.includes(v)));
-        }
-        out.innerHTML = vids.length ? `${note ? `<div class="small muted" style="margin:4px 0 8px">${note}</div>` : ''}<div class="nrk-grid">${vids.map(tile).join('')}</div>
-            <div class="tiny muted nrk-foot">Последние ${vids.length} видео канала. Нажмите на видео — оно откроется здесь с норвежскими субтитрами и переводом. Более старые — <a href="${U.esc(this.channelUrl(handle, ''))}" target="_blank" rel="noopener">на YouTube ↗</a>.</div>`
-          : '<div class="nrk-empty muted">У канала пока нет видео.</div>';
+        if (bridgeOk()) vids = (await Subs.api('yt-channel', { ch: handle })).videos || [];
+        else if (serverOk() && feedOk(handle)) vids = ((await Net.callFn('yt-feed', null, { method: 'GET', auth: false, query: { ch: '@' + handle }, timeout: 15000 })) || {}).videos || [];
       } catch (err) {
         if (!out.isConnected) return;
-        out.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>Видео канала не загрузились: ${U.esc(U.niceErr(err, '', true))}.</b> Канал можно открыть <a href="${U.esc(this.channelUrl(handle, q))}" target="_blank" rel="noopener">на YouTube ↗</a>. Если скопировать оттуда ссылку на видео и вставить в поиск выше — оно откроется здесь с субтитрами.</span></div>`;
+        calm(err && err.code === 'offline' ? 'Нет интернета — видео канала загрузятся, когда он появится' : 'Видео канала сейчас не загрузились — откройте его на YouTube');
+        return;
       }
+      if (!out.isConnected) return;
+      if (vids == null) { calm(''); return; }
+      let note = '';
+      if (q) {
+        const k = U.norm(q);
+        const hit = vids.filter(v => U.norm(v.title + ' ' + (v.desc || '')).includes(k));
+        note = hit.length ? `Видео с «${U.esc(q)}» — первыми.` : `Среди последних видео канала «${U.esc(q)}» не нашлось — ниже все последние; поиск по всему каналу — <a href="${U.esc(chUrl)}" target="_blank" rel="noopener">на YouTube</a>.`;
+        vids = hit.concat(vids.filter(v => !hit.includes(v)));
+      }
+      out.innerHTML = vids.length ? `${note ? `<div class="small muted yt-note">${note}</div>` : ''}<div class="nrk-grid">${vids.map(tile).join('')}</div>
+          <div class="tiny muted nrk-foot">Последние ${vids.length} видео канала. Более старые — <a href="${U.esc(this.channelUrl(handle, ''))}" target="_blank" rel="noopener">на YouTube</a>.</div>${termsLine()}`
+        : `<div class="nrk-empty muted">У канала пока нет видео.</div>${termsLine()}`;
     },
 
     /**
-     * ▶ watch a video in the app's subtitle player: Norwegian subtitles (the bridge; manual ones first, then
-     * YouTube's automatic ones — marked as such), the Russian line from the translator, tap a word → card.
+     * ▶ watch a video in the app's subtitle player (YouTube's official IFrame player): on the Mac with its bridge —
+     * Norwegian subtitles (manual ones first, then YouTube's automatic ones — marked as such), the Russian line from the
+     * translator, tap a word → card. Elsewhere YouTube gives apps no subtitles: an honest note, «свой файл субтитров».
      */
     async watch(id, title = '', channel = '') {
       const link = 'https://www.youtube.com/watch?v=' + enc(id);
       let cues = [], note = '', subName = 'без субтитров';
+      const own = `<span class="subs-asr-row"><button class="btn sm primary" data-k="ownsub">${IC('file')} Добавить свой файл субтитров</button></span>`;
+      if (!bridgeOk()) {
+        // the site / the store apps (and the Mac with its bridge off): no YouTube subtitles here — said kindly, with a way on
+        note = `<b>Субтитры YouTube здесь не загружаются</b> — YouTube не разрешает приложениям их скачивать. Видео играет как обычно.
+          Есть файл субтитров к этому видео (.srt или .vtt)? Добавьте его — появятся строки с переводом, нажатие на слово и карточки.
+          Или смотрите с субтитрами в самом YouTube (кнопка «YouTube» под видео).${onMacHere() ? ' <span class="small muted">На этом Mac субтитры загружает мост — запустите его.</span>' : ''}${own}`;
+        Subs.openStream({ kind: 'youtube', id, title: title || 'Видео YouTube', channel, link, at: t => `${link}&t=${Math.floor(t)}s`, cues, subName, note, noSubs: true });
+        return;
+      }
       const busy = UI.busy ? UI.busy('Загружаю субтитры видео…') : null;
       try {
         const c = await Subs.api('yt-captions', { v: id });
         title = title || c.title || ''; channel = channel || c.channel || '';
         cues = c.cues || [];
-        if (!cues.length) note = `${U.esc(c.note || 'У этого видео нет норвежских субтитров')} — видео играет без них. Создать субтитры самому приложение здесь не может: YouTube не даёт приложению звук видео (у передач NRK — может). Попробуйте другое видео этого канала.`;
-        else if (c.auto) { subName = 'автоматические субтитры YouTube'; note = '<b>Это автоматические субтитры YouTube</b> — их распознала машина, в словах бывают ошибки. Прежде чем учить слово, проверьте его: 🔊, перевод и «✍️ Выбрать…» → редактор со словарями.'; }
+        if (!cues.length) note = `${U.esc(c.note || 'У этого видео нет норвежских субтитров')} — видео играет без них. Создать субтитры самому приложение здесь не может: YouTube не даёт приложению звук видео (у передач NRK — может). Попробуйте другое видео этого канала или добавьте свой файл.${own}`;
+        else if (c.auto) { subName = 'автоматические субтитры YouTube'; note = '<b>Это автоматические субтитры YouTube</b> — их распознала машина, в словах бывают ошибки. Прежде чем учить слово, проверьте его: озвучка, перевод и «Выбрать…» → редактор со словарями.'; }
         else subName = 'субтитры YouTube (от автора)';
       } catch (err) {
-        note = `Субтитры не загрузились: ${U.esc(U.niceErr(err, '', true))}. Видео играет без них.`;
+        note = `Субтитры не загрузились: ${U.esc(U.niceErr(err, '', true))}. Видео играет без них.${own}`;
       } finally { if (busy) busy.close(); }
       Subs.openStream({ kind: 'youtube', id, title: title || 'Видео YouTube', channel, link, at: t => `${link}&t=${Math.floor(t)}s`, cues, subName, note });
     },
@@ -256,7 +297,7 @@
       try {
         let items = cache.get(q);
         if (!items && quotaOut()) {
-          el.innerHTML = '<div class="mt-warn ok">⏳ <span>Бесплатный лимит поисков YouTube на сегодня исчерпан — он обновится завтра сам. Уже найденные слова показываются из памяти; для этого слова — ссылки выше и каналы учителей ниже.</span></div>';
+          el.innerHTML = `<div class="mt-warn ok"><span>${IC('info')}</span><span>Бесплатный лимит поисков YouTube на сегодня исчерпан — он обновится завтра сам. Уже найденные слова показываются из памяти; для этого слова — ссылки выше и каналы учителей ниже.</span></div>`;
           return;
         }
         if (!items) {
@@ -267,7 +308,7 @@
             const reason = ((((j.error || {}).errors || [])[0]) || {}).reason || '';
             if (r.status === 403 && /quota|rateLimit/i.test(reason + ' ' + ((j.error || {}).message || ''))) {
               markQuotaOut();
-              el.innerHTML = '<div class="mt-warn ok">⏳ <span>Бесплатный лимит поисков YouTube на сегодня исчерпан — обновится завтра сам, ничего делать не нужно. Пока работают ссылки выше и каналы учителей ниже; уже найденные слова показываются из памяти.</span></div>';
+              el.innerHTML = `<div class="mt-warn ok"><span>${IC('info')}</span><span>Бесплатный лимит поисков YouTube на сегодня исчерпан — обновится завтра сам, ничего делать не нужно. Пока работают ссылки выше и каналы учителей ниже; уже найденные слова показываются из памяти.</span></div>`;
               return;
             }
             throw new Error((j.error && j.error.message) || 'ошибка ' + r.status);
@@ -283,7 +324,7 @@
             <img src="${U.esc(th)}" alt="" loading="lazy"><span class="yt-vid-t">${s.title || ''}</span><small>${U.esc(s.channelTitle || '')}</small></a>`;
         }).join('')}</div>`;
       } catch (e) {
-        el.innerHTML = `<div class="mt-warn">⚠️ <span>YouTube: ${U.esc(U.niceErr(e, '', true))}. Проверьте ключ в Настройках (и что в Google Cloud включён «YouTube Data API v3»). Ссылки выше работают и без ключа.</span></div>`;
+        el.innerHTML = `<div class="mt-warn"><span>${IC('alert')}</span><span>YouTube: ${U.esc(U.niceErr(e, '', true))}. Проверьте ключ в Настройках (и что в Google Cloud включён «YouTube Data API v3»). Ссылки выше работают и без ключа.</span></div>`;
       }
     },
   };

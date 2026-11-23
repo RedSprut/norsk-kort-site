@@ -15,6 +15,8 @@
  *    progress, the device's free space is checked, 🗑 deletes. Saved audio plays without the network and is listed in
  *    «💾 Мои аудио» (here, in the Telegram window and in «Что послушать?»), with where it came from.
  * Everything from Telegram is shown as text (U.esc).
+ * W6: off the Mac (the site, the store apps) — no personal Telegram: «Мои аудио» (saved here) + the curated public
+ * channels' posts with a sound (TgVideo.preview(el, 'audio'), Telegram's own widget). The bridge's words only on the Mac.
  */
 (function () {
   const enc = encodeURIComponent;
@@ -35,7 +37,7 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   // the site (no bridge there): never «запустите мост» to a visitor
   const NOBR = () => (window.Telegram && Telegram.home && !Telegram.home() ? 'Эта запись сейчас недоступна здесь — откройте канал в Телеграме' : 'Мост на Mac не отвечает — запустите его и попробуйте снова');
-  const OLD = 'Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 …/bridge/server.py)';
+  const OLD = (window.Telegram && Telegram.home && !Telegram.home()) ? 'Эта запись сейчас недоступна здесь — откройте канал в Телеграме' : 'Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 bridge/server.py)';
 
   const streamUrl = (chat, msg) => `/api/tg/stream?chat=${enc(chat)}&msg=${enc(msg)}`;
   const m4aUrl = (chat, msg) => `/api/tg/audio?chat=${enc(chat)}&msg=${enc(msg)}`;
@@ -241,6 +243,11 @@
     async gate(el) {
       const up = window.AI && AI.bridge && AI.bridge.up;
       const n = Saved.list().length;
+      if (!up && !(window.Telegram && Telegram.home ? Telegram.home() : true) && window.TgVideo && TgVideo.preview) {
+        // the site / the store apps: the saved audio above + the curated public channels' posts with a sound
+        TgVideo.preview(el, 'audio');
+        return false;
+      }
       if (!up && !(window.Telegram && Telegram.home ? Telegram.home() : true)) {
         // the site: no bridge, no account — what plays here: the saved audio above and the posts of the channels
         el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Аудио из норвежских каналов</b>
@@ -258,7 +265,7 @@
         el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Аудио из каналов открываются через приложение на Mac</b>
           <p>Telegram показывает файлы каналов только вашему аккаунту. Его читает «мост» — маленькая программа на вашем Mac: запустите её и откройте приложение по адресу <b>http://localhost:8787</b>.</p>
           ${n ? '<p><b>Сохранённые аудио</b> (выше) играют и без моста — даже без интернета.</p>' : ''}
-          <p class="small muted">В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code></p></div>`;
+          <p class="small muted">В Терминале, в папке приложения: <code style="user-select:all">python3 bridge/server.py</code></p></div>`;
         return false;
       }
       if (window.Telegram && (!Telegram.status || Telegram.status.authorized === undefined)) { try { await Telegram.accStatus(); } catch (e) { /* shown below */ } }

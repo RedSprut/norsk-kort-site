@@ -31,7 +31,7 @@
 (function () {
   const st = () => Store.settings;
   /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — on the site its hints are not shown */
-  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname));
   const KEY = 'nk-listen2', POS = 'nk-listen-pos', DL = 'nk-listen-dl';
   const load = k => { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } };
   const keep = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* full / private mode */ } };
@@ -311,7 +311,8 @@
       if (this.complete(deckId)) return Object.assign({ state: 'done' }, e);
       return Object.assign({ state: e.done ? 'other' : 'partial' }, e);
     },
-    /** one phrase as audio: the cloud voice; else the Google voice (through the Mac bridge, or directly where it is allowed) */
+    /** one phrase as audio: the cloud voice; else — on the owner's Mac only (S4) — the Google voice (through the Mac bridge,
+     *  or directly where it is allowed). The public build has no Google voice: no audio voice → nothing to save (nosource). */
     async fetchClip(it, rate) {
       const eng = this.cloud(it.lang);
       if (eng && Voices.ready(eng)) {
@@ -322,10 +323,11 @@
           if (blob.size > 200) return { blob, sig: `${eng}:${vk}`, b: rate.toFixed(2) };
         } catch (e) { /* the Google voice below */ }
       }
+      if (window.NK_CONFIG && NK_CONFIG.publicBuild) throw new Error('voice');
       const parts = [];
       for (const url of Listen.googleUrls(it.text, it.lang, rate)) {
         let r;
-        if (window.AI && AI.bridge && AI.bridge.up) r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
+        if (window.Net && Net.isMacBridge ? Net.isMacBridge() : (window.AI && AI.bridge && AI.bridge.up)) r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
         else r = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
         if (!r.ok) throw new Error('voice');
         parts.push(await r.arrayBuffer());
@@ -899,7 +901,7 @@
           ctl = null;
           if (m.el.isConnected) paint();
           if (err.nosource) {
-            if (m.el.isConnected) stEl.innerHTML = `<span class="lxd-bad">Голос не отдал звук для сохранения.</span> Бесплатный голос Google в браузере можно только слушать, а не сохранять. Подключите облачный голос (Настройки → Озвучка: Azure — бесплатно 500 000 символов в месяц)${onMac() ? ' или откройте приложение на Mac с мостом' : ''} — и скачайте снова.`;
+            if (m.el.isConnected) stEl.innerHTML = `<span class="lxd-bad">Голос не отдал звук для сохранения.</span> ${onMac() ? 'Бесплатный голос Google в браузере можно только слушать, а не сохранять. ' : 'Голос устройства можно только слушать, а не сохранять. '}Подключите голос, который делает звуковые файлы (Настройки → Озвучка: ${window.Pro && Pro.offered && Pro.offered() ? 'голоса Norsk Kort Pro или ' : ''}Azure — бесплатно 500 000 символов в месяц)${onMac() ? ' или откройте приложение на Mac с мостом' : ''} — и скачайте снова.`;
           } else UI.toast(err.friendly ? err.message : 'Не удалось сохранить озвучку — проверьте интернет и попробуйте ещё раз', 'warn', 6000);
         }
       });

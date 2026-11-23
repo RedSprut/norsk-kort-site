@@ -527,3 +527,9 @@ body:has(.np-modal) #listen-bar { display: none !important; }
 .lxv-lang { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 8px; }
 .lxv-lang .seg button { min-height: 44px; padding: 8px 14px; }
 .lxv-lang .seg button:not(.active):hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); color: var(--text); }
+
+/* touch targets ≥ 44 px on phones (phone audit 2026-11-23) */
+@media (pointer: coarse) {
+  .np-modal .btn.sm, .np-modal .seg-mini button, .deck-card .actions [data-act="deck-menu"], .deck-card .actions [data-act="open"] { min-height: 44px; }
+  .deck-card .actions [data-act="deck-menu"] { width: 44px; }
+}

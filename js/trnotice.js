@@ -16,7 +16,8 @@
   const esc = s => U.esc(String(s == null ? '' : s));
   const usable = id => {
     const p = AI.PROVIDERS[id]; if (!p) return false;
-    if (p.proxyOnly && !(AI.bridge && AI.bridge.up)) return false; // the browser cannot reach these without the Mac bridge
+    if (AI.usableHere && !AI.usableHere(id)) return false; // W7: off the Mac only what can work here
+    if (p.proxyOnly && !(AI.bridge && AI.bridge.up) && !(window.Net && Net.isNative && Net.isNative())) return false; // the browser cannot reach these without the Mac bridge
     return true;
   };
 
@@ -62,21 +63,27 @@
           <div class="tn-body" hidden></div></div>`;
       };
       let off = false; try { off = !!localStorage.getItem(OFF_KEY); } catch (e) { /* ok */ }
+      const NI = (n, sz) => (window.NavIcons ? NavIcons.icon(n, sz || 18) : '');
+      const setup = !!(Translators.needSetup && Translators.needSetup()); // W7: nothing translates here yet (public build)
+      const pro = (() => { try { return !!(window.Pro && Pro.offered() && !Pro.isActive()); } catch (e) { return false; } })();
       const m = UI.modal({
-        title: '🌐 Кто переводит субтитры', cls: 'tn-modal',
+        title: `${NI('translate', 22)} Кто переводит субтитры`, cls: 'tn-modal',
         body: `${w.ai ? `<div class="mt-warn ok"><span>${BOT(20)}</span><span>Сейчас переводит нейросеть <b>${esc(w.name)}</b>: целую фразу по смыслу, а потом раскладывает этот смысл по словам. Можно выбрать другую ниже.</span></div>`
-          : `<div class="mt-warn"><span>🌐</span><span>Сейчас субтитры переводит <b>${esc(w.name)}</b> — бесплатный машинный переводчик. Общий смысл он передаёт хорошо, но <b>может ошибаться</b>: в идиомах и в переводе отдельных слов в скобках.</span></div>
+          : setup ? `<div class="mt-warn">${NI('translate')}<span>Чтобы субтитры переводились прямо здесь, подключите <b>Norsk Kort Pro</b> или свою нейросеть — это пара минут.</span></div>`
+          : `<div class="mt-warn">${NI('translate')}<span>Сейчас субтитры переводит <b>${esc(w.name)}</b> — бесплатный машинный переводчик. Общий смысл он передаёт хорошо, но <b>может ошибаться</b>: в идиомах и в переводе отдельных слов в скобках.</span></div>
           <p class="tn-lead"><b>Для точного перевода подключите нейросеть.</b> Она переводит фразу целиком по смыслу и раскладывает этот смысл по словам — «ønska (хотел)», а не «ønska (желание)».</p>`}
-          <div class="tn-safe">🔐 Ключ хранится <b>только на этом устройстве, в зашифрованном виде</b>, и уходит только в выбранную нейросеть. Мы его не видим. Платите вы самой компании — и только если выбрали платную; у бесплатных есть дневной лимит.</div>
+          ${pro ? `<button type="button" class="tn-pro" data-tn-pro>${NI('crown', 24)}<span><b>Norsk Kort Pro</b><small>нейросеть без своих ключей — всё уже настроено</small></span><span class="tn-go" aria-hidden="true">›</span></button>` : ''}
+          <div class="tn-safe">${NI('lock', 16)} Ключ хранится <b>только на этом устройстве, в зашифрованном виде</b>, и уходит только в выбранную нейросеть. Мы его не видим. Платите вы самой компании — и только если выбрали платную; у бесплатных есть дневной лимит.</div>
           <div class="tn-title">Выберите нейросеть</div>
           <div class="tn-list">${ids.map(row).join('')}</div>
-          ${AI.bridge && AI.bridge.up ? '<p class="tiny muted">Есть подписка Claude? Она подключается через мост на Mac — Настройки → «Нейросети».</p>' : ''}`,
+          ${AI.bridge && AI.bridge.up && window.Net && Net.onMac && Net.onMac() ? '<p class="tiny muted">Есть подписка Claude? Она подключается через мост на Mac — Настройки → «Нейросети».</p>' : ''}`,
         foot: `<label class="tn-off"><input type="checkbox" data-off ${off ? 'checked' : ''}> больше не показывать перед передачами</label>
-          <button class="btn ${w.ai ? 'primary' : 'ghost'}" data-later>${w.ai ? 'Готово' : 'Продолжить с бесплатным переводом'}</button>`,
+          <button class="btn ${w.ai ? 'primary' : 'ghost'}" data-later>${w.ai ? 'Готово' : setup ? 'Позже' : 'Продолжить с бесплатным переводом'}</button>`,
       });
       m.$('[data-later]').onclick = () => m.close();
       m.$('[data-off]').onchange = e => { try { if (e.target.checked) localStorage.setItem(OFF_KEY, '1'); else localStorage.removeItem(OFF_KEY); } catch (_) { /* ok */ } };
       m.el.addEventListener('click', async e => {
+        if (e.target.closest('[data-tn-pro]')) { m.close(); Pro.require('Перевод субтитров', { reason: 'translate' }); return; }
         const h = e.target.closest('[data-open]');
         if (h) { this.expand(m, h.dataset.open); return; }
         const go = e.target.closest('[data-connect]');
@@ -117,7 +124,7 @@
         Store.setSetting('aiProvider', id);
         if (window.App && App.updateBadge) App.updateBadge();
         if (st) st.innerHTML = `<span class="good-t">✓ Подключено — теперь переводит ${esc(AI.PROVIDERS[id].short)}</span>`;
-        UI.toast(`🤖 Подключено: ${AI.PROVIDERS[id].name}. Новые строки переводятся по смыслу.`, 'good', 4500);
+        UI.toast(`Подключено: ${AI.PROVIDERS[id].name}. Новые строки переводятся по смыслу.`, 'good', 4500);
         this.badge();
         setTimeout(() => m.close(), 900);
       } catch (e) {
@@ -161,8 +168,13 @@
     } catch (e) { /* settings not loaded */ }
     return !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
-  const tile = key => (key && T() && T().brand ? T().brand(key) : waitTile('🌐'));
-  const waitTile = emoji => `<span class="tool-chip trb-wait" style="--chip-bg:linear-gradient(160deg, #9aa1ad, #6b7280);--gs:62%"><span class="tool-emoji">${emoji}</span></span>`;
+  const NI = (n, sz) => (window.NavIcons ? NavIcons.icon(n, sz || 18) : '');
+  const tile = key => (key && T() && T().brand ? T().brand(key) : waitTile(NI('translate')));
+  // a grey tile with a drawn icon (W7: never an emoji)
+  const waitTile = ico => `<span class="tool-chip trb-wait" style="--chip-bg:linear-gradient(160deg, #9aa1ad, #6b7280);--gs:62%"><span class="tool-emoji">${ico}</span></span>`;
+  /** W7: nothing that can translate here is set up (the public build without Pro / a key) — not «busy»: a calm hint */
+  const needSetup = () => { try { return !!(T() && T().needSetup && T().needSetup()); } catch (e) { return false; } };
+  const SETUP_FULL = 'Чтобы переводить прямо здесь, подключите Norsk Kort Pro или свою нейросеть (Gemini и Groq — бесплатно)';
   const hhmm = t => new Date(t).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   /** «до 14:20» / «завтра в 09:10» */
   const when = t => { const d = new Date(t), n = new Date(); return d.toDateString() === n.toDateString() ? `до ${hhmm(t)}` : `до завтра, ${hhmm(t)}`; };
@@ -173,14 +185,19 @@
   function stateOf(b) {
     const now = T().nowWho && T().nowWho();
     if (navigator.onLine === false) return { none: true, reason: 'offline' };
+    if (needSetup()) return { none: true, reason: 'setup' };
     if (now && now.none) return { none: true, reason: now.reason || 'busy' };
     if (now && now.id) return { id: now.id, key: now.key, name: now.short };
     const c = T().chain(b.place).find(x => x.state === 'work');
     return c ? { id: c.id, key: c.key, name: c.name } : { none: true, reason: 'busy' };
   }
+  const noneName = r => (r === 'offline' ? 'нет интернета' : r === 'setup' ? 'подключите переводчик' : 'переводчики заняты');
+  const noneFull = r => (r === 'offline' ? 'Нет интернета — перевод продолжится, когда связь вернётся' : r === 'setup' ? SETUP_FULL : 'Переводчики ненадолго заняты — перевод продолжится сам');
+  const noneIco = r => NI(r === 'offline' ? 'wifi-off' : r === 'setup' ? 'translate' : 'hourglass');
   /** the short caption of a switch, in plain words ('' — nothing to say) */
   function capText(d) {
     const to = d.name, from = d.prevName;
+    if (d.none && needSetup()) return SETUP_FULL;
     if (d.none) return d.reason === 'offline' ? 'Нет интернета — перевод продолжится, когда связь вернётся'
       : `Переводчики ненадолго заняты — перевод продолжится сам${d.restUntil ? `, примерно в ${hhmm(d.restUntil)}` : ''}`;
     switch (d.reason) {
@@ -199,15 +216,15 @@
     const sig = s.none ? 'none:' + s.reason : s.key;
     const btn = b.el.querySelector('.trb');
     btn.classList.toggle('none', !!s.none);
-    const lab = s.none ? 'Перевод ждёт:' : 'Переводит', name = s.none ? (s.reason === 'offline' ? 'нет интернета' : 'переводчики заняты') : s.name;
+    const lab = s.none ? (s.reason === 'setup' ? 'Перевод:' : 'Перевод ждёт:') : 'Переводит', name = s.none ? noneName(s.reason) : s.name;
     b.el.querySelector('.trb-lab').textContent = lab;
     b.el.querySelector('.trb-name').textContent = name;
-    const full = s.none ? (s.reason === 'offline' ? 'Нет интернета — перевод продолжится, когда связь вернётся' : 'Переводчики ненадолго заняты — перевод продолжится сам')
+    const full = s.none ? noneFull(s.reason)
       : `Переводит ${s.name}${kindOf(s.id) ? ' (' + kindOf(s.id) + ')' : ''}`;
     btn.title = `${full}. Нажмите — кто переводит по очереди и кого просить первым`;
     btn.setAttribute('aria-label', `${full}. Очередь переводчиков и выбор`);
     if (b.sig === sig) return;
-    const html = s.none ? waitTile(s.reason === 'offline' ? '📡' : '⏳') : tile(s.key);
+    const html = s.none ? waitTile(noneIco(s.reason)) : tile(s.key);
     const [x, y] = b.el.querySelectorAll('.trb-t');
     const shown = x.classList.contains('out') ? y : x, next = shown === x ? y : x;
     if (!b.sig || !animate || !motion()) {
@@ -381,7 +398,7 @@
     const quiet = d.reason === 'back' && d.wasOffline && Date.now() - onlineCapAt < 20000;
     list.forEach(b => {
       if (d.place && b.place && d.place !== b.place) return;
-      paint(b, d.none ? { none: true, reason: d.reason } : { id: d.who, key: d.key, name: d.name }, true);
+      paint(b, d.none ? { none: true, reason: needSetup() ? 'setup' : d.reason } : { id: d.who, key: d.key, name: d.name }, true);
       if (!quiet) caption(b, capText(d));
       if (TrBadge._open === b) TrBadge.update(b);
     });

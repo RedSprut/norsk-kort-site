@@ -9,6 +9,9 @@
  *                           until listening has really been started once.
  */
 (function () {
+  /** a drawn icon (js/app.js NavIcons) · the app runs on this Mac (file / localhost — js/net.js) */
+  const NI = (n, sz) => (window.NavIcons && NavIcons.icon ? NavIcons.icon(n, sz || 20) : '');
+  const onMacNow = () => (window.Net && Net.onMac ? Net.onMac() : !!(window.AI && AI.onMac && AI.onMac()));
   const KEY = 'nk-listen-ui';
   const state = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } };
   const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* full / private mode */ } };
@@ -162,35 +165,37 @@
           <span class="lc-name"><b>${d ? U.esc(d.name) : 'Все колоды подряд'}</b><small>${U.cards(n)}${off(d) ? ' · <span class="lc-off">✓ офлайн</span>' : ''}</small></span>
           <span class="lc-go" aria-hidden="true">${HP(20, true)}</span></button>`;
       const cont = X && X.lastResume();
-      const src = (k, icon, t, sub) => `<button class="lc-src" data-lc-src="${k}"><span class="lc-ic">${icon}</span><span><b>${t}</b><small>${sub}</small></span></button>`;
+      const src = (k, icon, t, sub) => `<button class="lc-src" data-lc-src="${k}"><span class="lc-ic">${NI(icon, 22) || icon}</span><span><b>${t}</b><small>${sub}</small></span></button>`;
+      const hd = (icon, t) => `<h3 class="lc-h">${NI(icon, 20) ? `<span class="ui-t">${NI(icon, 20)}<span>${t}</span></span>` : t}</h3>`;
+      // what the sheet promises depends on where the app runs: on this Mac (the bridge) — NRK's whole catalogue and your own
+      // Telegram; on the site / in the store apps — Supernytt (the server's RSS allow-list) and our curated public channels
+      const mac = onMacNow();
       const m = UI.modal({
         title: `${HP(26, true)} Что послушать?`, cls: 'wide lc-modal',
         body: `<p class="lc-lead">Звучит <b>в наушниках</b>, если они подключены, или <b>вслух через динамик</b> — на телефоне и на компьютере. Экран можно затемнить или заблокировать.</p>
           ${cont ? `<button class="lc-now lc-cont" data-lc="cont"><span class="lc-cont-ic" aria-hidden="true">${UI.icon('play', 18)}</span><span><b>Продолжить: ${U.esc(cont.title)}</b><small>${cont.kind === 'book' ? `со стр. ${cont.page}${cont.pages ? ` из ${cont.pages}` : ''}` : cont.kind === 'media' ? `с ${cont.i + 1}-${/^ac:/.test((cont.mo && cont.mo.mediaKey) || '') ? 'го урока' : /^tga:/.test((cont.mo && cont.mo.mediaKey) || '') ? 'й записи' : 'го видео'} из ${cont.n}` : `с ${cont.i + 1}-й ${cont.kind === 'deck' ? 'карточки' : 'части'} из ${cont.n}`}</small></span><span class="lc-open">▶ Слушать ›</span></button>` : ''}
           ${p ? `<button class="lc-now" data-lc="now"><span class="lc-eq" aria-hidden="true"><i></i><i></i><i></i></span><span><b>Сейчас играет</b><small>${U.esc(p.deck ? p.deck.name : 'Все колоды')} · ${U.esc(Listen.progressText())}</small></span><span class="lc-open">Открыть плеер ›</span></button>` : ''}
-          <h3 class="lc-h">🃏 Карточки и колоды</h3>
+          ${hd('cards', 'Карточки и колоды')}
           <div class="lc-decks">${decks.length > 1 ? tile(null, total) : ''}${decks.map(([d, n]) => tile(d, n)).join('')}</div>
-          <h3 class="lc-h">📖 Тексты — читаются вслух по-норвежски с переводом</h3>
+          ${hd('book', 'Тексты — читаются вслух по-норвежски с переводом')}
           <div class="lc-srcs">
-            ${src('books', '📚', 'Книги', 'бесплатные книги и PDF — страница за страницей')}
-            ${window.AudioCourse ? src('audiocourse', '🎧', 'Аудиокурсы', '50languages: 100 уроков с озвучкой — внутри приложения, без интернета') : ''}
-            ${src('textbook', '📘', 'Мой учебник', 'ваш PDF, EPUB, фото страниц')}
-            ${src('news', '📰', 'Новости', 'Klar Tale и NRK — простым языком')}
-            ${src('expr', '💬', 'Выражения', 'устойчивые выражения и фразы')}
+            ${src('books', 'book', 'Книги', 'бесплатные книги и PDF — страница за страницей')}
+            ${window.AudioCourse ? src('audiocourse', 'headphones', 'Аудиокурсы', '50languages: 100 уроков с озвучкой — внутри приложения, без интернета') : ''}
+            ${src('textbook', 'note', 'Мой учебник', 'ваш PDF, EPUB, фото страниц')}
+            ${src('news', 'news', 'Новости', 'Klar Tale и NRK — простым языком')}
+            ${src('expr', 'dialogue', 'Выражения', 'устойчивые выражения и фразы')}
           </div>
-          <h3 class="lc-h">📻 Радио и подкасты NRK — с субтитрами и переводом</h3>
+          ${hd('radio', 'Радио и подкасты NRK — с субтитрами и переводом')}
           <div class="lc-srcs">
-            ${src('radio', '📻', 'Радио NRK', 'прямой эфир: P1, P2, P3, Nyheter, Klassisk…')}
-            ${src('podcast', '🎙', 'Подкасты NRK', 'Abels tårn, Dagsnytt 18, Norgeshistorie…')}
+            ${src('radio', 'radio', 'Радио NRK', 'прямой эфир: P1, P2, P3, Nyheter, Klassisk…')}
+            ${src('podcast', 'mic', 'Подкасты NRK', mac ? 'Abels tårn, Dagsnytt 18, Norgeshistorie…' : 'Supernytt — новости простым языком, каждый день')}
           </div>
-          <h3 class="lc-h">✈️ Telegram-авторы — их видео и аудио подряд, как подкаст</h3>
+          ${hd('send', mac ? 'Telegram-авторы — их видео и аудио подряд, как подкаст' : 'Telegram — открытые каналы о норвежском, подряд, как подкаст')}
           <div class="lc-srcs">
-            ${src('tgvideo', '✈️', 'Telegram-авторы', 'видео из ваших каналов: слушать подряд или смотреть с субтитрами')}
-            ${window.TgAudio ? src('tgaudio', '🎵', 'Telegram-аудио', 'подкасты и голосовые из ваших каналов — с субтитрами и переводом') : ''}
+            ${src('tgvideo', 'tv', 'Telegram-авторы', mac ? 'видео из ваших каналов: слушать подряд или смотреть с субтитрами' : 'видео избранных открытых каналов: слушать подряд или смотреть с субтитрами')}
+            ${window.TgAudio ? src('tgaudio', 'headphones', 'Telegram-аудио', mac ? 'подкасты и голосовые из ваших каналов — с субтитрами и переводом' : 'подкасты и голосовые избранных открытых каналов — с субтитрами и переводом') : ''}
           </div>
-          ${window.TgAudio ? TgAudio.chooserHtml() : ''}
-          <h3 class="lc-h">⏳ Скоро</h3>
-          <div class="lc-soon"><span>📺 Видео NRK</span><small>— в режиме прослушивания, следующим обновлением</small></div>`,
+          ${window.TgAudio ? TgAudio.chooserHtml() : ''}`,
         foot: `<button class="btn ghost" data-lc="help">❔ Как слушать</button><button class="btn ghost" data-lx="where" title="В наушниках или через динамик">${X ? X.outLabel() : '🔈 Где слушать'}</button><button class="btn" data-lc="opts" title="Что звучит, паузы, порядок, какие карточки">⚙️ Настройки прослушивания</button>`,
       });
       m.el.addEventListener('click', e => {
@@ -455,7 +460,7 @@
           <p class="lp-p">На телефоне и на компьютере. Подключены наушники — звук пойдёт в них, нет — вслух через динамик.</p>
           <ul class="lp-list">
             <li><span>✅</span><span><b>Уже сейчас:</b> карточки и колоды, книги, PDF и мой учебник, новости, выражения.</span></li>
-            <li><span>📻</span><span><b>Радио и подкасты NRK</b> — с субтитрами и переводом. <b>Скоро:</b> видео NRK в режиме прослушивания.</span></li>
+            <li><span>📻</span><span><b>Радио и подкасты NRK</b> — с субтитрами и переводом.</span></li>
             <li><span>🧠</span><span><b>«Вспомни сам»:</b> звучит перевод — вы говорите по-норвежски — потом ответ. «Знаю / не знаю» — прямо во время прослушивания.</span></li>
             <li><span>🌑</span><span>Экран можно затемнить или заблокировать — на iPhone карточки звучат и с заблокированным экраном.</span></li>
             <li><span>🗣</span><span><b>«Переводчик»</b> — это другое: он слушает людей вокруг и переводит их слова вам в наушники.</span></li>

@@ -16,8 +16,8 @@
   <script src="js/preloader.js?v=3"></script>
   <!-- 🎨 themes + holiday dress-up: before the first paint -->
   <!-- ℹ️ the version: ONE source of truth (window.APP) — bump with tools/bump-version.mjs N -->
-  <script src="js/version.js?v=231"></script>
-  <script src="js/apptheme.js?v=231"></script>
+  <script src="js/version.js?v=232"></script>
+  <script src="js/apptheme.js?v=232"></script>
   <!-- installable app (iPhone / Android) -->
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -28,40 +28,40 @@
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="css/styles.css?v=231" />
-  <link rel="stylesheet" href="css/news.css?v=231" />
-  <link rel="stylesheet" href="css/subs.css?v=231" />
-  <link rel="stylesheet" href="css/drills.css?v=231" />
-  <link rel="stylesheet" href="css/speech.css?v=231" />
-  <link rel="stylesheet" href="css/trnotice.css?v=231" />
-  <link rel="stylesheet" href="css/listen.css?v=231" />
-  <link rel="stylesheet" href="css/help.css?v=231" />
-  <link rel="stylesheet" href="css/gramterms.css?v=231" />
-  <link rel="stylesheet" href="css/ordtrainer.css?v=231" />
-  <link rel="stylesheet" href="css/tgvideo.css?v=231" />
-  <link rel="stylesheet" href="css/tgaudio.css?v=231" />
-  <link rel="stylesheet" href="css/audiocourse.css?v=231" />
-  <link rel="stylesheet" href="css/levels.css?v=231" />
-  <link rel="stylesheet" href="css/klokka.css?v=231" />
-  <link rel="stylesheet" href="css/reader.css?v=231" />
-  <link rel="stylesheet" href="css/prove.css?v=231" />
-  <link rel="stylesheet" href="css/bookshelf.css?v=231" />
-  <link rel="stylesheet" href="css/dialogs.css?v=231" />
-  <link rel="stylesheet" href="css/gramref.css?v=231" />
-  <link rel="stylesheet" href="css/artcards.css?v=231" />
-  <link rel="stylesheet" href="css/artcards-no.css?v=231" />
-  <link rel="stylesheet" href="css/signin.css?v=231" />
-  <link rel="stylesheet" href="css/apptheme.css?v=231" />
-  <link rel="stylesheet" href="css/aihub.css?v=231" />
-  <link rel="stylesheet" href="css/aichooser.css?v=231" />
-  <link rel="stylesheet" href="css/showcase.css?v=231" />
+  <link rel="stylesheet" href="css/styles.css?v=232" />
+  <link rel="stylesheet" href="css/news.css?v=232" />
+  <link rel="stylesheet" href="css/subs.css?v=232" />
+  <link rel="stylesheet" href="css/drills.css?v=232" />
+  <link rel="stylesheet" href="css/speech.css?v=232" />
+  <link rel="stylesheet" href="css/trnotice.css?v=232" />
+  <link rel="stylesheet" href="css/listen.css?v=232" />
+  <link rel="stylesheet" href="css/help.css?v=232" />
+  <link rel="stylesheet" href="css/gramterms.css?v=232" />
+  <link rel="stylesheet" href="css/ordtrainer.css?v=232" />
+  <link rel="stylesheet" href="css/tgvideo.css?v=232" />
+  <link rel="stylesheet" href="css/tgaudio.css?v=232" />
+  <link rel="stylesheet" href="css/audiocourse.css?v=232" />
+  <link rel="stylesheet" href="css/levels.css?v=232" />
+  <link rel="stylesheet" href="css/klokka.css?v=232" />
+  <link rel="stylesheet" href="css/reader.css?v=232" />
+  <link rel="stylesheet" href="css/prove.css?v=232" />
+  <link rel="stylesheet" href="css/bookshelf.css?v=232" />
+  <link rel="stylesheet" href="css/dialogs.css?v=232" />
+  <link rel="stylesheet" href="css/gramref.css?v=232" />
+  <link rel="stylesheet" href="css/artcards.css?v=232" />
+  <link rel="stylesheet" href="css/artcards-no.css?v=232" />
+  <link rel="stylesheet" href="css/signin.css?v=232" />
+  <link rel="stylesheet" href="css/apptheme.css?v=232" />
+  <link rel="stylesheet" href="css/aihub.css?v=232" />
+  <link rel="stylesheet" href="css/aichooser.css?v=232" />
+  <link rel="stylesheet" href="css/showcase.css?v=232" />
   <!-- 📱 phone layout (js/mobile.js): last, every rule is under html.m-phone -->
-  <link rel="stylesheet" href="css/mobile.css?v=231" />
+  <link rel="stylesheet" href="css/mobile.css?v=232" />
   <!-- v211: «Продолжить», 🧭 навигатор, плашки главной, нейросети на странице колоды (desktop + html.m-phone rules) -->
-  <link rel="stylesheet" href="css/navigator.css?v=231" />
-  <link rel="stylesheet" href="css/about.css?v=231" />
+  <link rel="stylesheet" href="css/navigator.css?v=232" />
+  <link rel="stylesheet" href="css/about.css?v=232" />
   <!-- v214: 🎓 «Учить по материалам» — the home tile, the player's bar, the plan, #/learn (js/learnby.js) -->
-  <link rel="stylesheet" href="css/learnby.css?v=231" />
+  <link rel="stylesheet" href="css/learnby.css?v=232" />
 </head>
 <body>
   <!-- 🎴 loading screen (css/preloader.css + js/preloader.js): cards, features, subtitles → deck + cap → logo; removes itself once the app has rendered (tap / any key skips) -->
@@ -128,102 +128,110 @@
   <canvas id="confetti" aria-hidden="true"></canvas>
   <input type="file" id="file-input" multiple hidden />
 
-  <script src="js/util.js?v=231"></script>
-  <script src="js/resume.js?v=231"></script>
-  <script src="js/store.js?v=231"></script>
-  <script src="js/fsrs.js?v=231"></script>
-  <script src="js/fsrs-opt.js?v=231"></script>
-  <script src="js/tts.js?v=231"></script>
-  <script src="js/voices.js?v=231"></script>
-  <script src="js/speech.js?v=231"></script>
-  <script src="js/ai.js?v=231"></script>
-  <script src="js/images.js?v=231"></script>
-  <script src="js/anki.js?v=231"></script>
-  <script src="js/importers.js?v=231"></script>
-  <script src="js/exporters.js?v=231"></script>
-  <script src="js/printx.js?v=231"></script>
-  <script src="js/translators.js?v=231"></script>
-  <script src="js/glossary.js?v=231"></script>
-  <script src="js/align.js?v=231"></script>
-  <script src="js/glossguard.js?v=231"></script>
-  <script src="js/selection.js?v=231"></script>
-  <script src="js/ordbok.js?v=231"></script>
-  <script src="js/sources.js?v=231"></script>
-  <script src="js/library.js?v=231"></script>
-  <script src="js/grammar.js?v=231"></script>
-  <script src="js/youtube.js?v=231"></script>
-  <script src="js/pairguard.js?v=231"></script>
-  <script src="js/telegram.js?v=231"></script>
-  <script src="js/photos.js?v=231"></script>
-  <script src="js/books.js?v=231"></script>
-  <script src="js/lexicon.js?v=231"></script>
-  <script src="js/textbook.js?v=231"></script>
-  <script src="js/reader.js?v=231"></script>
-  <script src="js/exams.js?v=231"></script>
-  <script src="js/news.js?v=231"></script>
-  <script src="js/langid.js?v=231"></script>
-  <script src="js/subs.js?v=231"></script>
-  <script src="js/nrk.js?v=231"></script>
-  <script src="js/nrkradio.js?v=231"></script>
-  <script src="js/drills.js?v=231"></script>
-  <script src="js/genders.js?v=231"></script>
-  <script src="js/progress.js?v=231"></script>
-  <script src="js/create.js?v=231"></script>
-  <script src="js/social.js?v=231"></script>
-  <script src="js/listen.js?v=231"></script>
-  <script src="js/listenx.js?v=231"></script>
-  <script src="js/listenui.js?v=231"></script>
-  <script src="js/interpreter.js?v=231"></script>
-  <script src="js/share.js?v=231"></script>
-  <script src="js/avatar.js?v=231"></script>
-  <script src="js/shareapp.js?v=231"></script>
-  <script src="js/guides.js?v=231"></script>
-  <script src="js/tgchan.js?v=231"></script>
-  <script src="js/tgvideo.js?v=231"></script>
-  <script src="js/tgaudio.js?v=231"></script>
-  <script src="js/audiocourse.js?v=231"></script>
-  <script src="js/frameocr.js?v=231"></script>
-  <script src="js/help.js?v=231"></script>
-  <script src="js/gramterms.js?v=231"></script>
-  <script src="js/ordtrainer.js?v=231"></script>
-  <script src="js/provenance.js?v=231"></script>
-  <script src="js/cardmaker.js?v=231"></script>
-  <script src="js/trnotice.js?v=231"></script>
-  <script src="js/sample.js?v=231"></script>
-  <script src="js/ui.js?v=231"></script>
-  <script src="js/bookshelf.js?v=231"></script>
-  <script src="js/views.js?v=231"></script>
-  <script src="js/account.js?v=231"></script>
-  <script src="js/signin.js?v=231"></script>
-  <script src="js/cloudsync.js?v=231"></script>
-  <script src="js/study.js?v=231"></script>
-  <script src="js/artcards.js?v=231"></script>
-  <script src="js/artcards-no.js?v=231"></script>
-  <script src="js/levels.js?v=231"></script>
-  <script src="js/mycourse.js?v=231"></script>
-  <script src="js/klokka.js?v=231"></script>
-  <script src="js/prove.js?v=231"></script>
+  <script src="js/util.js?v=232"></script>
+  <!-- W2/W3 (early: translators, voices, AI and the views read them): ⚙️ public config (one place), 🌐 the Norsk Kort server transport, 🛡 AI consent, ⭐ Pro state, 💳 store purchases, the paywall (+ css/paywall.css, loaded by it) -->
+  <script src="js/config.js?v=232"></script>
+  <script src="js/net.js?v=232"></script>
+  <script src="js/aiconsent.js?v=232"></script>
+  <script src="js/pro.js?v=232"></script>
+  <script src="js/purchases.js?v=232"></script>
+  <script src="js/paywall.js?v=232"></script>
+  <script src="js/resume.js?v=232"></script>
+  <script src="js/store.js?v=232"></script>
+  <script src="js/fsrs.js?v=232"></script>
+  <script src="js/fsrs-opt.js?v=232"></script>
+  <script src="js/tts.js?v=232"></script>
+  <script src="js/voices.js?v=232"></script>
+  <script src="js/speech.js?v=232"></script>
+  <script src="js/ai.js?v=232"></script>
+  <script src="js/images.js?v=232"></script>
+  <script src="js/anki.js?v=232"></script>
+  <script src="js/importers.js?v=232"></script>
+  <script src="js/exporters.js?v=232"></script>
+  <script src="js/printx.js?v=232"></script>
+  <script src="js/translators.js?v=232"></script>
+  <script src="js/glossary.js?v=232"></script>
+  <script src="js/align.js?v=232"></script>
+  <script src="js/glossguard.js?v=232"></script>
+  <script src="js/selection.js?v=232"></script>
+  <script src="js/ordbok.js?v=232"></script>
+  <script src="js/sources.js?v=232"></script>
+  <script src="js/library.js?v=232"></script>
+  <script src="js/grammar.js?v=232"></script>
+  <script src="js/youtube.js?v=232"></script>
+  <script src="js/pairguard.js?v=232"></script>
+  <script src="js/telegram.js?v=232"></script>
+  <script src="js/photos.js?v=232"></script>
+  <script src="js/books.js?v=232"></script>
+  <script src="js/lexicon.js?v=232"></script>
+  <script src="js/textbook.js?v=232"></script>
+  <script src="js/rdsync.js?v=232"></script>
+  <script src="js/reader.js?v=232"></script>
+  <script src="js/exams.js?v=232"></script>
+  <script src="js/news.js?v=232"></script>
+  <script src="js/langid.js?v=232"></script>
+  <script src="js/subs.js?v=232"></script>
+  <script src="js/nrk.js?v=232"></script>
+  <script src="js/nrkradio.js?v=232"></script>
+  <script src="js/drills.js?v=232"></script>
+  <script src="js/genders.js?v=232"></script>
+  <script src="js/progress.js?v=232"></script>
+  <script src="js/create.js?v=232"></script>
+  <script src="js/social.js?v=232"></script>
+  <script src="js/listen.js?v=232"></script>
+  <script src="js/listenx.js?v=232"></script>
+  <script src="js/listenui.js?v=232"></script>
+  <script src="js/interpreter.js?v=232"></script>
+  <script src="js/share.js?v=232"></script>
+  <script src="js/avatar.js?v=232"></script>
+  <script src="js/shareapp.js?v=232"></script>
+  <script src="js/guides.js?v=232"></script>
+  <script src="js/tgchan.js?v=232"></script>
+  <script src="js/tgvideo.js?v=232"></script>
+  <script src="js/tgaudio.js?v=232"></script>
+  <script src="js/audiocourse.js?v=232"></script>
+  <script src="js/frameocr.js?v=232"></script>
+  <script src="js/help.js?v=232"></script>
+  <script src="js/gramterms.js?v=232"></script>
+  <script src="js/ordtrainer.js?v=232"></script>
+  <script src="js/provenance.js?v=232"></script>
+  <script src="js/cardmaker.js?v=232"></script>
+  <script src="js/trnotice.js?v=232"></script>
+  <script src="js/sample.js?v=232"></script>
+  <script src="js/ui.js?v=232"></script>
+  <script src="js/bookshelf.js?v=232"></script>
+  <script src="js/views.js?v=232"></script>
+  <script src="js/account.js?v=232"></script>
+  <script src="js/signin.js?v=232"></script>
+  <script src="js/cloudsync.js?v=232"></script>
+  <script src="js/study.js?v=232"></script>
+  <script src="js/artcards.js?v=232"></script>
+  <script src="js/artcards-no.js?v=232"></script>
+  <script src="js/levels.js?v=232"></script>
+  <script src="js/mycourse.js?v=232"></script>
+  <script src="js/klokka.js?v=232"></script>
+  <script src="js/prove.js?v=232"></script>
   <!-- v212: ⭐ очки, 🌅 фраза дня, 🎯 тест уровня, 🧪 тренировка Norskprøven (css/practice.css — lazy) -->
-  <script src="js/xp.js?v=231"></script>
-  <script src="js/phraseday.js?v=231"></script>
-  <script src="js/leveltest.js?v=231"></script>
-  <script src="js/examtrainer.js?v=231"></script>
-  <script src="js/dialogs.js?v=231"></script>
-  <script src="js/gramref.js?v=231"></script>
-  <script src="js/coachmarks.js?v=231"></script>
-  <script src="js/aihub.js?v=231"></script>
+  <script src="js/xp.js?v=232"></script>
+  <script src="js/phraseday.js?v=232"></script>
+  <script src="js/leveltest.js?v=232"></script>
+  <script src="js/examtrainer.js?v=232"></script>
+  <script src="js/dialogs.js?v=232"></script>
+  <script src="js/gramref.js?v=232"></script>
+  <script src="js/coachmarks.js?v=232"></script>
+  <script src="js/aihub.js?v=232"></script>
   <!-- 🔑 «Войти в Claude» одной кнопкой (мост открывает Терминал с tools/claude-token.sh) -->
-  <script src="js/claudelogin.js?v=231"></script>
-  <script src="js/showcase.js?v=231"></script>
-  <script src="js/learnby.js?v=231"></script>
-  <script src="js/continue.js?v=231"></script>
-  <script src="js/mypath.js?v=231"></script>
-  <script src="js/navigator.js?v=231"></script>
-  <script src="js/about.js?v=231"></script>
-  <script src="js/app.js?v=231"></script>
-  <script src="js/aichooser.js?v=231"></script>
-  <script src="js/mobile.js?v=231"></script>
+  <script src="js/claudelogin.js?v=232"></script>
+  <script src="js/showcase.js?v=232"></script>
+  <script src="js/learnby.js?v=232"></script>
+  <script src="js/continue.js?v=232"></script>
+  <script src="js/mypath.js?v=232"></script>
+  <script src="js/navigator.js?v=232"></script>
+  <script src="js/about.js?v=232"></script>
+  <script src="js/app.js?v=232"></script>
+  <script src="js/aichooser.js?v=232"></script>
+  <script src="js/mobile.js?v=232"></script>
   <!-- ⬅ one Back for the whole app: browser Back, Esc, the Android button (js/nav.js) -->
-  <script src="js/nav.js?v=231"></script>
+  <script src="js/nav.js?v=232"></script>
 </body>
 </html>

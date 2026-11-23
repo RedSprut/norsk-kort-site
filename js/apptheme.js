@@ -813,6 +813,14 @@
   }
 
   /* ---------------------------------------------------------------- UI: picker, settings block, banner */
+  /* drawn icons (js/app.js NavIcons) for the holidays and the picker's labels — no coloured emoji as icons; t.emoji stays
+   * the data (and the fallback before NavIcons exists) */
+  var HOL_ICO = { nyttar: 'fireworks', samefolket: 'sun', valentin: 'heart', fastelavn: 'feather', paske: 'egg', mai17: 'flag', sankthans: 'fire', halloween: 'pumpkin', lucia: 'candle', jul: 'tree' };
+  function ni(name, size, fb) { return (W.NavIcons && NavIcons.icon && NavIcons.icon(name, size || 18, 'at-ico')) || fb || ''; }
+  /** a theme's / holiday's mark: the drawn icon for a holiday, the theme's own emoji for the others (their preview) */
+  function hico(t, size) { var id = t && (t.theme || t.id); return HOL_ICO[id] ? ni(HOL_ICO[id], size, t.emoji) : (t ? t.emoji : ''); }
+  /** a label in front of text: the drawn icon + a space */
+  function lab(name, text, fb) { var i = ni(name, 18); return i ? '<span class="at-lab">' + i + '<span>' + text + '</span></span>' : (fb ? fb + ' ' : '') + text; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function tileHtml(t, cur, m) {
     var r = BY[resolve(t.id)] || t, p = r.dark ? r[m] : BASE[m];
@@ -824,7 +832,7 @@
     var holi = t.kind === 'holiday' ? (function () { var u = upcoming(12).filter(function (o) { return o.id === t.id; })[0]; return u ? range(u.startDate, u.endDate) : ''; })() : '';
     return '<button type="button" class="at-tile' + (on ? ' on' : '') + '" data-at-pick="' + t.id + '" aria-pressed="' + on + '" aria-haspopup="dialog" title="' + esc(t.desc) + ' — нажмите, чтобы посмотреть">'
       + '<span class="at-sw" style="--sw-bg:' + p.bg + ';--sw-solid:' + p.solid + ';--sw-text:' + p.text + ';--sw-muted:' + p.muted + ';--sw-acc:' + p.accent + ';--sw-end:' + p.end + ';--sw-acc2:' + p.accent2 + ';--sw-b1:' + (p.blobs[0] || 'transparent') + ';--sw-b2:' + (p.blobs[1] || 'transparent') + ';--at-fx1:' + p.fx[0] + ';--at-fx2:' + p.fx[1] + ';--at-fx3:' + p.fx[2] + ';--bg:' + p.bg + ';--accent:' + p.accent + '">'
-      + mini + '<span class="at-sw-card"><b>Hei!</b><i>Привет!</i></span><span class="at-sw-btn"></span>' + (mini.indexOf('at-sw-pic') > -1 ? '' : '<span class="at-sw-emo" aria-hidden="true">' + t.emoji + '</span>') + '</span>'
+      + mini + '<span class="at-sw-card"><b>Hei!</b><i>Привет!</i></span><span class="at-sw-btn"></span>' + (mini.indexOf('at-sw-pic') > -1 ? '' : '<span class="at-sw-emo" aria-hidden="true">' + hico(t, 22) + '</span>') + '</span>'
       + '<span class="at-tile-name">' + esc(t.name) + (t.no ? ' <small lang="nb">' + esc(t.no) + '</small>' : '') + '</span>'
       + (holi ? '<span class="at-tile-when">' + esc(holi) + '</span>' : '') + (t.seasonal ? '<span class="at-tile-when">сейчас: ' + esc(r.name.toLowerCase()) + '</span>' : '')
       + (on ? '<span class="at-tile-ok" aria-hidden="true">✓</span>' : '') + '</button>';
@@ -832,9 +840,9 @@
   function statusLine() {
     if (trial) return '👀 Сейчас вы примеряете <b>' + esc(BY[trial.id].name) + '</b> — она ещё не сохранена. Ваша тема: «' + esc(BY[current().id].name) + '».';
     var c = current(), t = BY[c.id], v = t.seasonal ? ' (сейчас ' + esc(BY[resolve(t.id)].name.toLowerCase()) + ')' : '';
-    if (c.source === 'always') return t.emoji + ' Сейчас всегда: <b>' + esc(t.name) + '</b> — останется, пока вы не выберете другое оформление.';
-    if (c.source === 'holiday') return t.emoji + ' Сейчас праздничный наряд: <b>' + esc(t.name) + '</b> — до ' + esc(ru(c.holiday.endDate)) + '. Потом вернётся ваша тема «' + esc(BY[S.theme].name) + '».';
-    return t.emoji + ' Сейчас: <b>' + esc(t.name) + '</b>' + v + (S.hol === 'auto' ? '. В праздники приложение само наденет праздничный наряд.' : '. Праздничное оформление выключено.');
+    if (c.source === 'always') return hico(t) + ' Сейчас всегда: <b>' + esc(t.name) + '</b> — останется, пока вы не выберете другое оформление.';
+    if (c.source === 'holiday') return hico(t) + ' Сейчас праздничный наряд: <b>' + esc(t.name) + '</b> — до ' + esc(ru(c.holiday.endDate)) + '. Потом вернётся ваша тема «' + esc(BY[S.theme].name) + '».';
+    return hico(t) + ' Сейчас: <b>' + esc(t.name) + '</b>' + v + (S.hol === 'auto' ? '. В праздники приложение само наденет праздничный наряд.' : '. Праздничное оформление выключено.');
   }
   function switchHtml(opt, on, label, desc) {
     return '<label class="at-switch"><input type="checkbox" data-at-opt="' + opt + '"' + (on ? ' checked' : '') + '><span class="at-track" aria-hidden="true"></span><span class="at-sw-txt"><span>' + label + '</span>' + (desc ? '<small>' + desc + '</small>' : '') + '</span></label>';
@@ -848,16 +856,16 @@
         + '<span class="at-hol-dot" aria-hidden="true"></span><span class="at-hol-emo" aria-hidden="true">' + emo + '</span><span class="at-hol-t"><span>' + label + '</span>' + (desc ? '<small>' + desc + '</small>' : '') + '</span></label>';
     };
     var hols = THEMES.filter(function (t) { return t.kind === 'holiday'; });
-    return '<fieldset class="at-hol" role="radiogroup" aria-labelledby="' + nm + '-h"><legend class="at-hol-h" id="' + nm + '-h">🎉 Праздничное оформление</legend>'
-      + '<div class="at-hol-main">' + radio('auto', '🗓', 'Автоматически по праздникам', 'Рождество, 17 мая, Пасха, Хэллоуин… — по календарю, потом обратно')
-      + radio('off', '🚫', 'Без праздничного оформления', 'Всегда ваша обычная тема') + '</div>'
+    return '<fieldset class="at-hol" role="radiogroup" aria-labelledby="' + nm + '-h"><legend class="at-hol-h" id="' + nm + '-h">' + lab('party', 'Праздничное оформление', '🎉') + '</legend>'
+      + '<div class="at-hol-main">' + radio('auto', ni('calendar', 20, '🗓'), 'Автоматически по праздникам', 'Рождество, 17 мая, Пасха, Хэллоуин… — по календарю, потом обратно')
+      + radio('off', ni('ban', 20, '🚫'), 'Без праздничного оформления', 'Всегда ваша обычная тема') + '</div>'
       + '<p class="at-hol-sub">Или один праздник — <b>всегда</b>, пока не смените:</p>'
-      + '<div class="at-hol-grid">' + hols.map(function (t) { return radio(t.id, t.emoji, 'Всегда: ' + esc(t.name), '', 'chip'); }).join('') + '</div></fieldset>';
+      + '<div class="at-hol-grid">' + hols.map(function (t) { return radio(t.id, hico(t, 20), 'Всегда: ' + esc(t.name), '', 'chip'); }).join('') + '</div></fieldset>';
   }
   var holSeq = 0;
   function optionsHtml() {
     return holHtml()
-      + switchHtml('deco', S.deco, '❄️ Украшения', 'Снег, флажки, сердечки — лёгкие и за текстом. Выключите — останутся только цвета')
+      + switchHtml('deco', S.deco, lab('snow', 'Украшения', '❄️'), 'Снег, флажки, сердечки — лёгкие и за текстом. Выключите — останутся только цвета')
       + (motionOK() ? '' : '<p class="at-note">🌿 На этом устройстве включено «Уменьшить движение» — украшения стоят на месте.</p>');
   }
   function pickerBody() {
@@ -866,7 +874,7 @@
       return '<h3 class="at-h">' + title + '</h3><div class="at-grid">' + THEMES.filter(function (t) { return t.kind === kind || (kind === 'style' && t.kind === 'base'); })
         .map(function (t) { return tileHtml(t, act.source === 'holiday' || act.source === 'always' ? act.id : cur, m); }).join('') + '</div>';
     };
-    var up = upcoming(5).map(function (o) { return '<li><span aria-hidden="true">' + o.emoji + '</span> <b>' + esc(o.name) + '</b> <span lang="nb">' + esc(o.say) + '</span> <span class="at-when">' + esc(range(o.startDate, o.endDate)) + '</span></li>'; }).join('');
+    var up = upcoming(5).map(function (o) { return '<li><span aria-hidden="true">' + hico(o) + '</span> <b>' + esc(o.name) + '</b> <span lang="nb">' + esc(o.say) + '</span> <span class="at-when">' + esc(range(o.startDate, o.endDate)) + '</span></li>'; }).join('');
     var first = !tipSeen(), hand = first && W.Help && Help.handIcon ? '<span class="at-tip-hand" aria-hidden="true">' + Help.handIcon(26) + '</span>' : '<span aria-hidden="true">👆</span>';
     var lm = lightDark();
     var mb = function (v, label, tip) { var on = lm === v; return '<button type="button" class="btn sm' + (on ? ' primary' : '') + '" data-at-mode="' + v + '" aria-pressed="' + on + '" title="' + tip + '">' + label + '</button>'; };
@@ -875,18 +883,18 @@
       + '<p class="at-status" data-at-status>' + statusLine() + '</p>'
       + '<p class="at-tip' + (first ? ' first' : '') + '">' + hand + '<span>Нажмите на тему — покажу, как она выглядит, ничего не меняя</span></p>'
       + '<div class="at-modes" role="group" aria-label="Светлая или тёмная">'
-      + mb('auto', '🖥 Как в системе', 'Днём светлая, вечером тёмная — как настроено на телефоне или компьютере')
-      + mb('dark', '🌙 Тёмная', 'Всегда тёмная') + mb('light', '☀️ Светлая', 'Всегда светлая')
+      + mb('auto', lab('laptop', 'Как в системе', '🖥'), 'Днём светлая, вечером тёмная — как настроено на телефоне или компьютере')
+      + mb('dark', lab('theme', 'Тёмная', '🌙'), 'Всегда тёмная') + mb('light', lab('sun', 'Светлая', '☀️'), 'Всегда светлая')
       + '<span class="at-note">' + (lm === 'auto' ? 'Сейчас ' + (m === 'dark' ? 'тёмная' : 'светлая') + ' — как в системе. ' : '') + 'Каждая тема — и светлая, и тёмная</span></div>'
-      + grp('style', '🎨 Темы') + grp('norway', '🇳🇴 Норвегия') + grp('holiday', '🎉 Праздничные')
+      + grp('style', lab('palette', 'Темы', '🎨')) + grp('norway', lab('flag', 'Норвегия', '🇳🇴')) + grp('holiday', lab('party', 'Праздничные', '🎉'))
       + '<div class="at-opts">' + optionsHtml() + '</div>'
-      + '<h3 class="at-h">🗓 Ближайшие праздники</h3><ul class="at-cal">' + up + '</ul>';
+      + '<h3 class="at-h">' + lab('calendar', 'Ближайшие праздники', '🗓') + '</h3><ul class="at-cal">' + up + '</ul>';
   }
   var picker = null;
   function openPicker() {
     if (!(W.UI && UI.modal)) return;
     if (picker) { try { picker.close(); } catch (e) { /* ignore */ } }
-    picker = UI.modal({ title: '🎨 Тема приложения', body: pickerBody(), cls: 'at-modal', onClose: function () { picker = null; } });
+    picker = UI.modal({ title: lab('palette', 'Тема приложения', '🎨'), body: pickerBody(), cls: 'at-modal', onClose: function () { picker = null; } });
   }
   function refreshUI() {
     if (picker && picker.el && picker.el.isConnected) {
@@ -899,7 +907,7 @@
   function settingsHtml() {
     var c = current(), t = BY[c.id];
     return '<div class="at-set" data-apptheme-settings>'
-      + '<div class="setting"><div><div>Тема приложения</div><div class="desc">' + statusLine() + '</div></div><div class="ctl"><button type="button" class="btn sm primary" data-at-open><span aria-hidden="true">' + t.emoji + '</span> ' + esc(t.name) + ' · выбрать</button></div></div>'
+      + '<div class="setting"><div><div>Тема приложения</div><div class="desc">' + statusLine() + '</div></div><div class="ctl"><button type="button" class="btn sm primary" data-at-open><span aria-hidden="true">' + hico(t) + '</span> ' + esc(t.name) + ' · выбрать</button></div></div>'
       + '<div class="at-opts">' + optionsHtml() + '</div></div>';
   }
   function afterRender(view, root) {
@@ -980,9 +988,9 @@
     if (D.getElementById('at-banner')) return;
     var b = D.createElement('div');
     b.id = 'at-banner'; b.className = 'at-banner'; b.setAttribute('role', 'dialog'); b.setAttribute('aria-labelledby', 'at-banner-t'); b.setAttribute('aria-describedby', 'at-banner-d');
-    b.innerHTML = '<span class="at-b-emo" aria-hidden="true">' + h.emoji + '</span><div class="at-b-txt"><b id="at-banner-t"><span lang="nb">' + esc(h.say) + '</span></b>'
+    b.innerHTML = '<span class="at-b-emo" aria-hidden="true">' + hico(h, 30) + '</span><div class="at-b-txt"><b id="at-banner-t"><span lang="nb">' + esc(h.say) + '</span></b>'
       + (h.say !== h.sayRu ? '<small class="at-b-tr">' + esc(h.sayRu) + '</small>' : '') + '<p id="at-banner-d">' + esc(bannerText(h)) + '</p>'
-      + '<div class="at-b-act"><button type="button" class="btn sm primary" data-at-b="keep">💛 Оставить</button><button type="button" class="btn sm" data-at-b="normal">Вернуть обычный вид</button><button type="button" class="btn sm ghost" data-at-b="never">Не менять автоматически</button></div></div>'
+      + '<div class="at-b-act"><button type="button" class="btn sm primary" data-at-b="keep">' + lab('heart', 'Оставить', '💛') + '</button><button type="button" class="btn sm" data-at-b="normal">Вернуть обычный вид</button><button type="button" class="btn sm ghost" data-at-b="never">Не менять автоматически</button></div></div>'
       + '<button type="button" class="at-b-x" data-at-b="keep" aria-label="Закрыть" title="Закрыть">✕</button>';
     D.body.appendChild(b);
     requestAnimationFrame(function () { b.classList.add('in'); });
@@ -1129,7 +1137,7 @@
     if (t.seasonal) note = '<p class="atp-when">🌗 Меняется по сезону: весной и летом — полуночное солнце, осенью и зимой — полярная ночь. Сейчас: ' + esc(r.name.toLowerCase()) + '.</p>';
     var state = mine ? '<p class="atp-state">✓ Эта тема у вас сейчас' + (c.source === 'holiday' ? ' (праздничный наряд)' : c.source === 'always' ? ' — всегда' : '') + '</p>' : trying ? '<p class="atp-state">👀 Сейчас вы её примеряете — она ещё не сохранена</p>' : '';
     host.innerHTML = '<div class="atp-nav"><button type="button" class="btn atp-go" data-atp-go="-1" aria-label="Предыдущая тема" title="Предыдущая тема (←)">‹</button>'
-      + '<div class="atp-name"><b><span aria-hidden="true">' + t.emoji + '</span> ' + esc(t.name) + '</b>' + (t.no ? '<small lang="nb">' + esc(t.no) + '</small>' : '') + '<span class="atp-count">' + (k + 1) + ' из ' + ids.length + '</span></div>'
+      + '<div class="atp-name"><b><span aria-hidden="true">' + hico(t) + '</span> ' + esc(t.name) + '</b>' + (t.no ? '<small lang="nb">' + esc(t.no) + '</small>' : '') + '<span class="atp-count">' + (k + 1) + ' из ' + ids.length + '</span></div>'
       + '<button type="button" class="btn atp-go" data-atp-go="1" aria-label="Следующая тема" title="Следующая тема (→)">›</button></div>'
       + '<div class="atp-stage">' + screenHtml(P.id, P.mode) + '</div>'
       + '<div class="atp-info"><p class="atp-desc">' + esc(t.desc) + '</p>' + note + state
@@ -1207,7 +1215,7 @@
     var t = BY[id]; if (!t) return;
     if (trial) { trial = null; hideTryBar(); }
     setTheme(id);
-    toast(t.kind === 'holiday' ? '✓ ' + t.emoji + ' «' + t.name + '» теперь всегда. Вернуть праздники по календарю: 🎨 Тема → «Праздничное оформление»' : '✓ Тема «' + t.name + '» выбрана');
+    toast(t.kind === 'holiday' ? '«' + t.name + '» теперь всегда. Вернуть праздники по календарю: Тема → «Праздничное оформление»' : '✓ Тема «' + t.name + '» выбрана');
   }
 
   /* the try-on: worn, not saved */
@@ -1225,7 +1233,7 @@
     var t = BY[trial.id], b = D.getElementById('at-try'), fresh = !b;
     if (fresh) { b = D.createElement('div'); b.id = 'at-try'; b.className = 'at-try'; b.setAttribute('role', 'region'); b.setAttribute('aria-label', 'Примерка темы'); D.body.appendChild(b); }
     b.classList.remove('out');
-    b.innerHTML = '<span class="at-try-emo" aria-hidden="true">' + t.emoji + '</span><div class="at-try-t"><b>Примерка: ' + esc(t.name) + '</b><small>Тема ещё не сохранена</small></div>'
+    b.innerHTML = '<span class="at-try-emo" aria-hidden="true">' + hico(t, 24) + '</span><div class="at-try-t"><b>Примерка: ' + esc(t.name) + '</b><small>Тема ещё не сохранена</small></div>'
       + '<div class="at-try-act"><button type="button" class="btn sm primary" data-at-try="keep">✓ Оставить</button><button type="button" class="btn sm" data-at-try="back">↩ Вернуть как было</button></div>'
       + '<button type="button" class="at-try-x" data-at-try="ask" aria-label="Закончить примерку" title="Закончить примерку">✕</button>';
     if (fresh) requestAnimationFrame(function () { b.classList.add('in'); }); else b.classList.add('in');
@@ -1276,7 +1284,7 @@
       if (t && t.hasAttribute && t.hasAttribute('data-at-hol') && t.checked) {
         var v = t.value; setHol(v);
         var hb = BY[v];
-        toast(v === 'auto' ? '🗓 Праздничное оформление — по календарю' : v === 'off' ? 'Праздничное оформление выключено — всегда ваша тема' : '✓ ' + hb.emoji + ' «' + hb.name + '» — теперь всегда, пока не смените');
+        toast(v === 'auto' ? 'Праздничное оформление — по календарю' : v === 'off' ? 'Праздничное оформление выключено — всегда ваша тема' : '«' + hb.name + '» — теперь всегда, пока не смените');
         // focus stays on the same choice after the block is redrawn
         setTimeout(function () { var f = D.querySelector('.at-modal input[data-at-hol][value="' + v + '"]') || D.querySelector('[data-apptheme-settings] input[data-at-hol][value="' + v + '"]'); if (f) try { f.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 0);
       }

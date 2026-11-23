@@ -34,7 +34,8 @@
       desc: 'Речевые шаблоны («gå på X», «X er på fornavn med Y») с примерами из живых текстов; у части есть уровень A1–C1 и объяснение.' },
     { id: 'book2', kind: 'auto', name: '50languages (book2) — 100 уроков бытовых фраз', org: 'Goethe Verlag', domain: 'goethe-verlag.com',
       url: `${BOOK2}/RU/RUNO/RUNO002.HTM`, count: '≈ 1 800', langs: '🇳🇴 🇷🇺 🇺🇦', lic: 'бесплатно для учёбы',
-      desc: 'Готовые разговорные фразы с ПЕРЕВОДОМ ОТ ЛЮДЕЙ на русский и украинский: знакомство, магазин, врач, работа… Сайт не пускает браузер напрямую — работает через мост на Mac; без моста — откройте урок и вставьте текст.', needsBridge: true },
+      desc: 'Готовые разговорные фразы с ПЕРЕВОДОМ ОТ ЛЮДЕЙ на русский и украинский: знакомство, магазин, врач, работа… Сайт не пускает браузер напрямую — работает через мост на Mac; без моста — откройте урок и вставьте текст.',
+      descWeb: 'Готовые разговорные фразы с ПЕРЕВОДОМ ОТ ЛЮДЕЙ на русский и украинский: знакомство, магазин, врач, работа… Откройте урок на сайте ↗, скопируйте фразы — и вставьте их сюда: карточки сделаются сами.', needsBridge: true },
     // ---------- open the page, copy, paste ----------
     { id: 'vk', kind: 'paste', name: 'VK «Норвежский язык для тебя» — 35 идиом', domain: 'vk.com',
       url: 'https://vk.ru/@norskfordeg-35-norvezhskih-idiom-o-znachenii-kotoryh-vam-budet-trudno-do', count: '35', langs: '🇳🇴 🇷🇺', lic: 'бесплатно',
@@ -105,12 +106,16 @@
     await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (k < items.length && !(stop && stop())) { const i = k++; await fn(items[i], i); } }));
   }
   const strip = h => U.stripHtml(String(h || '')).replace(/\s+/g, ' ').trim();
-  /** pages that block browsers: through the Mac bridge (GET) */
+  /** the app runs on this Mac (file / localhost) · … and its bridge (bridge/server.py) answers — js/net.js */
+  const onMacApp = () => (window.Net && Net.onMac ? Net.onMac() : !!(window.AI && AI.onMac && AI.onMac()));
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(onMacApp() && window.AI && AI.bridge && AI.bridge.up));
+  /** pages that block browsers (50languages): only through the Mac bridge — js/net.js Net.get. Off the Mac the lesson opens
+   *  on its site and its text is pasted (pasteForm); nothing here ever calls /api/* there. */
   async function viaBridge(url) {
-    const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
-    if (!r.ok) throw new Error('Мост: ' + r.status);
-    return r.text();
+    if (!macBridge()) throw new Error('Этот сайт открывается только у себя — откройте урок ↗ и вставьте текст');
+    return Net.get(url, { as: 'text' });
   }
+  const book2Lesson = n => `${BOOK2}/RU/RUNO/RUNO${String(Math.max(1, Math.min(100, n | 0 || 1)) + 2).padStart(3, '0')}.HTM`;
   const have = () => new Set(Store.cards().map(c => U.norm(c.no)));
 
   /* ---------------- loaders: -> [{ no, def?, en?, ru?, uk?, examples?, note?, level? }] ---------------- */
@@ -352,13 +357,15 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
   }
 
   /* ---------------- UI ---------------- */
+  /** off the Mac 50languages is a calm «open the lesson, paste its text» source */
+  const descOf = s => (!onMacApp() && s.descWeb) || s.desc;
   const tile = s => `<div class="lib-tile" data-src="${s.id}">
       <div class="lib-tile-head">${fav(s.domain, 26)}<div class="grow"><b>${U.esc(s.name)}</b>${s.org ? `<small>${U.esc(s.org)}</small>` : ''}</div></div>
-      <div class="lib-chips"><span class="chip">${U.esc(s.count)}</span><span class="chip">${s.langs}</span>${s.lic ? `<span class="chip learned">${U.esc(s.lic)}</span>` : ''}${s.needsBridge ? `<span class="chip ${AI.bridge.up ? 'learned' : 'due'}">${AI.bridge.up ? '✓ мост работает' : 'нужен мост на Mac'}</span>` : ''}</div>
-      <p class="small muted">${U.esc(s.desc)}</p>
+      <div class="lib-chips"><span class="chip">${U.esc(s.count)}</span><span class="chip">${s.langs}</span>${s.lic ? `<span class="chip learned">${U.esc(s.lic)}</span>` : ''}${s.needsBridge && onMacApp() ? `<span class="chip ${macBridge() ? 'learned' : 'due'}">${macBridge() ? '✓ мост работает' : 'нужен мост на Mac'}</span>` : ''}</div>
+      <p class="small muted">${U.esc(descOf(s))}</p>
       <div class="row" style="gap:6px">
-        ${s.kind === 'auto' ? `<button class="btn sm primary" data-lib="make" data-id="${s.id}">➕ Создать карточки</button>` : ''}
-        ${s.kind === 'paste' ? `<button class="btn sm primary" data-lib="paste" data-id="${s.id}">📋 Вставить текст</button>` : ''}
+        ${s.kind === 'auto' && !(s.id === 'book2' && !onMacApp()) ? `<button class="btn sm primary" data-lib="make" data-id="${s.id}">➕ Создать карточки</button>` : ''}
+        ${s.kind === 'paste' || (s.id === 'book2' && !onMacApp()) ? `<button class="btn sm primary" data-lib="paste" data-id="${s.id}">📋 Вставить текст</button>` : ''}
         ${s.kind === 'anki' ? '<button class="btn sm primary" data-lib="apkg">📥 Импортировать .apkg</button>' : ''}
         <a class="btn sm" href="${U.esc(s.url)}" target="_blank" rel="noopener">↗ ${s.kind === 'anki' ? 'Найти на AnkiWeb' : 'Открыть'}</a>
       </div></div>`;
@@ -422,6 +429,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
     },
 
     form(body, s, deckId, m, home) {
+      if (s.id === 'book2' && !onMacApp()) { this.pasteForm(body, s, deckId, m, home); return; }
       const extra = {
         freq: `<div class="field-row"><label class="field"><span>Сколько выражений</span><input class="input" type="number" data-o="count" value="30" min="1"></label>
                  <label class="field"><span>Начать с места в рейтинге частоты</span><input class="input" type="number" data-o="from" value="1" min="1" max="3472"></label></div>
@@ -432,7 +440,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
                <label class="field"><span>Сколько выражений</span><input class="input" type="number" data-o="count" value="25" min="1"></label>`,
         cxn: `<div class="field-row"><label class="field"><span>Уровень</span><select class="input" data-o="level">${[['all', 'Любой (сначала с уровнем и объяснением)'], ['A1', 'A1'], ['A2', 'A2'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
               <label class="field"><span>Сколько</span><input class="input" type="number" data-o="count" value="20" min="1"></label></div>`,
-        book2: `${AI.bridge.up ? '' : !(AI.onMac && AI.onMac()) ? '<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>' : `<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Запустите мост на Mac (Настройки → Нейросети → Claude, команда в Терминале) и перезапустите его, если он был запущен раньше. Без моста: откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>`}
+        book2: `${macBridge() ? '' : `<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Запустите мост на Mac (Настройки → Нейросети → Claude, команда в Терминале) и перезапустите его, если он был запущен раньше. Без моста: откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>`}
                <div class="field-row"><label class="field"><span>Уроки с</span><input class="input" type="number" data-o="from" value="1" min="1" max="100"></label>
                <label class="field"><span>по</span><input class="input" type="number" data-o="to" value="5" min="1" max="100"></label>
                <label class="field"><span>Максимум фраз</span><input class="input" type="number" data-o="count" value="90" min="1"></label></div>
@@ -468,21 +476,23 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
           cats: ['idioms', 'phrases', 'proverbs'].filter(c => on('cat-' + c)),
           en: on('lib-en'), uk: on('lib-uk'), examples: on('lib-ex'), skipKnown: on('lib-skip'),
         };
-        if (s.id === 'book2') { o.to = Math.min(100, Math.max(o.from, o.to)); if (!AI.bridge.up) { UI.toast(AI.onMac && AI.onMac() ? 'Нужен мост на Mac — или вставьте текст урока вручную' : 'В версии на сайте это пока недоступно — вставьте текст урока вручную', 'warn', 5000); return; } }
+        if (s.id === 'book2') { o.to = Math.min(100, Math.max(o.from, o.to)); if (!macBridge()) { UI.toast('Нужен мост на Mac — или вставьте текст урока вручную', 'warn', 5000); return; } }
         await this.run(body, s, o, () => Load[s.id](o, msg => this.status(body, msg)), m);
       };
     },
 
     pasteForm(body, s, deckId, m, home) {
       body.innerHTML = `<button class="btn sm ghost" data-lib="back">← Все источники</button>
-        <div class="lib-form-head">${fav(s.domain, 30)}<div><h3 style="margin:0">${U.esc(s.name)}</h3><div class="small muted">${U.esc(s.desc)}</div></div></div>
-        <ol class="small lib-steps"><li><a href="${U.esc(s.url)}" target="_blank" rel="noopener">Откройте страницу ↗</a></li><li>Выделите список выражений и скопируйте (⌘C)</li><li>Вставьте сюда (⌘V) — каждая строка станет карточкой. Понимаю форматы «norsk – русский», «norsk: русский», «norsk (русский)», пары строк, или просто норвежский текст.</li></ol>
+        <div class="lib-form-head">${fav(s.domain, 30)}<div><h3 style="margin:0">${U.esc(s.name)}</h3><div class="small muted">${U.esc(descOf(s))}</div></div></div>
+        <ol class="small lib-steps"><li>${s.id === 'book2' ? `<label class="lib-lesson">Урок <input class="input" type="number" data-o="lesson" value="1" min="1" max="100" inputmode="numeric" aria-label="Номер урока"></label> <a class="btn sm" data-lesson-link href="${U.esc(book2Lesson(1))}" target="_blank" rel="noopener">Открыть урок на сайте ↗</a>` : `<a href="${U.esc(s.url)}" target="_blank" rel="noopener">Откройте страницу ↗</a>`}</li><li>Выделите список выражений и скопируйте (⌘C)</li><li>Вставьте сюда (⌘V) — каждая строка станет карточкой. Понимаю форматы «norsk – русский», «norsk: русский», «norsk (русский)», пары строк, или просто норвежский текст.</li></ol>
         <textarea class="input" data-o="text" rows="8" placeholder="Вставьте текст со страницы…"></textarea>
         ${this.deckPicker(deckId, 'Устойчивые выражения')}
         ${this.commonOpts()}
         ${AI.available() ? UI.switchHtml('lib-aiparse', true, `${U.esc(AI.name())} сама найдёт в тексте выражения и их значения (для «грязного» текста со страницы)`) : ''}
         <div class="row" style="gap:8px;margin-top:6px"><button class="btn primary" data-go>➕ Создать карточки</button><span class="small muted" data-status></span></div>`;
       const on = k => { const el = body.querySelector(`[data-key="${k}"]`); return !!(el && el.checked); };
+      const les = body.querySelector('[data-o="lesson"]'), lesA = body.querySelector('[data-lesson-link]');
+      if (les && lesA) les.addEventListener('input', () => { lesA.href = book2Lesson(+les.value); });
       body.querySelector('[data-go]').onclick = async () => {
         const text = body.querySelector('[data-o="text"]').value;
         if (!text.trim()) { UI.toast('Вставьте текст', 'warn'); return; }

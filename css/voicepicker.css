@@ -1,6 +1,6 @@
-/* ============ 🔊 «Голоса» (js/voicepicker.js) + the summary in Settings → Озвучка (js/voices.js settingsHtml) ============
+/* ============ «Голоса» (js/voicepicker.js) + the summary in Settings → Озвучка and the language buttons (js/voices.js) ============
  * Only the app's tokens (--panel, --text, --accent …): light / dark and every app theme come for free.
- * Every button ≥ 44 px, hover on all of them, reduced motion respected. */
+ * Every button ≥ 44 px, hover on all of them, reduced motion respected. Icons are drawn (Voices.icon → .ui-ico), never emoji. */
 .vp-modal .modal-body { padding-top: 0; }
 .vp { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .vp h3 { margin: 0 0 8px; font-size: 16px; }
@@ -33,6 +33,27 @@
 .vp-dl { --b: color-mix(in srgb, var(--accent2) 14%, var(--panel-solid)); }
 .vp-connect { --b: color-mix(in srgb, var(--warn) 12%, var(--panel-solid)); }
 .vp-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* ---------- drawn icons inside buttons, headings, groups ---------- */
+.vp .ui-ico, .vs-sum .ui-ico, .vs-langs .ui-ico { flex: none; vertical-align: -0.2em; }
+.vp-btn > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.vp-btn .ui-ico { width: 18px; height: 18px; }
+.vp h3 { display: flex; align-items: center; gap: 8px; }
+.vp h3 .ui-ico { color: var(--accent); }
+.vp-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; opacity: .7; }
+.vp-flip { transform: rotate(180deg); }
+/* the language as a drawn badge (no flag emoji) */
+.vs-lc { display: inline-grid; place-items: center; flex: none; min-width: 2.1em; height: 1.55em; padding: 0 .35em; border-radius: .45em;
+  font-size: .72em; font-weight: 800; letter-spacing: .04em; line-height: 1; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.vs-lc-uk { color: color-mix(in srgb, var(--accent2) 85%, var(--text)); background: color-mix(in srgb, var(--accent2) 12%, transparent); border-color: color-mix(in srgb, var(--accent2) 35%, transparent); }
+.vs-lc-ru { color: color-mix(in srgb, var(--good) 75%, var(--text)); background: color-mix(in srgb, var(--good) 11%, transparent); border-color: color-mix(in srgb, var(--good) 32%, transparent); }
+.vs-flag .vs-lc { font-size: 15px; }
+/* the language buttons other screens show (Voices.langButtons): ≥ 44 px, hover */
+.vs-langs { display: flex; flex-wrap: wrap; gap: 6px; }
+.vs-langs .vs-lang { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; transition: background .18s, border-color .18s, transform .12s; }
+.vs-langs .vs-lang:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel-solid)); border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); transform: translateY(-1px); }
+.vs-langs .vs-lang small { color: var(--muted); font-weight: 500; margin-left: 2px; }
 
 /* ---------- language tabs (stay on top while scrolling) ---------- */
 .vp-head { position: sticky; top: 0; z-index: 3; margin: 0 -22px; padding: 4px 22px 10px; background: var(--panel-solid); border-bottom: 1px solid var(--panel-border);
@@ -89,6 +110,12 @@
 .vp-chip.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
 .vp-chip.mac, .vp-chip.size { color: color-mix(in srgb, var(--accent2) 75%, var(--text)); }
 .vp-chip.priv { color: color-mix(in srgb, var(--new) 80%, var(--text)); }
+.vp-chip.pro { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+.vp-pro { --b: color-mix(in srgb, var(--accent) 16%, var(--panel-solid)); border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); }
+.vp-pronote .vp-row { margin-top: 8px; }
+.vp-pronote .vp-btn { margin-top: 0; }
+.vp-macnote { display: flex; gap: 10px; align-items: flex-start; }
+.vp-macnote .ui-ico { margin-top: 1px; color: var(--accent); }
 
 /* ---------- voice cards ---------- */
 .vp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
@@ -161,10 +188,10 @@
 .vp-group > summary, .vp-key > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 14px; border-radius: 18px; transition: background .18s; }
 .vp-group > summary::-webkit-details-marker, .vp-key > summary::-webkit-details-marker { display: none; }
 .vp-group > summary:hover, .vp-key > summary:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.vp-gico { font-size: 20px; width: 30px; text-align: center; }
+.vp-gico { font-size: 20px; width: 30px; display: grid; place-items: center; color: var(--accent); }
 .vp-gt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .vp-gt small { color: var(--muted); font-size: 12.5px; }
-.vp-chev { color: var(--muted); transition: transform .2s; font-size: 18px; width: 24px; text-align: center; }
+.vp-chev { color: var(--muted); transition: transform .2s; font-size: 18px; width: 24px; display: grid; place-items: center; }
 details[open] > summary > .vp-chev { transform: rotate(180deg); }
 .vp-gbody { padding: 4px 12px 14px; display: flex; flex-direction: column; gap: 12px; }
 .vp-gnote { font-size: 13px; line-height: 1.5; color: var(--muted); padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--panel-solid) 50%, transparent); }
@@ -201,6 +228,8 @@ details[open] > summary > .vp-chev { transform: rotate(180deg); }
 .vp-fields .input { min-height: 44px; }
 .vp-usage { display: flex; flex-direction: column; gap: 4px; }
 .vp-foot { padding: 4px 2px 6px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.key-local { display: flex; gap: 8px; align-items: flex-start; }
+.key-local .ui-ico { margin-top: 2px; }
 
 /* ---------- 🎭 «Разные голоса в диалогах» ---------- */
 .vp-roles { margin: 14px 0; padding: 12px 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 6px; }
@@ -216,7 +245,7 @@ details[open] > summary > .vp-chev { transform: rotate(180deg); }
   padding: 10px 12px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); transition: border-color .18s, box-shadow .18s; }
 .vp-prow:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--panel-border)); box-shadow: 0 10px 24px -20px rgba(0,0,0,.6); }
 .vp-prow.own { border-color: color-mix(in srgb, var(--accent2) 45%, var(--panel-border)); }
-.vp-pico { grid-area: ico; font-size: 22px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px;
+.vp-pico { grid-area: ico; font-size: 22px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, var(--panel-solid)); }
 .vp-pt { grid-area: t; display: flex; flex-direction: column; min-width: 0; }
 .vp-pt b { font-size: 15px; overflow-wrap: anywhere; }
@@ -236,6 +265,7 @@ details[open] > summary > .vp-chev { transform: rotate(180deg); }
 .vp-pchip-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vp-pchip:not(.set) .vp-pchip-t { font-weight: 500; font-style: italic; }
 .vp-pflag { flex: none; font-size: 15px; }
+.vp-pplay .vs-lc { font-size: 11px; }
 .vp-pplay { grid-area: play; }
 @media (min-width: 900px) {
   .vp-prow { grid-template-columns: 36px minmax(150px, 1fr) minmax(0, 2.3fr) auto; grid-template-areas: "ico t chips play"; }
@@ -258,7 +288,7 @@ details[open] > summary > .vp-chev { transform: rotate(180deg); }
 .vs-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 14px; border-radius: 14px; cursor: pointer; text-align: left;
   border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; transition: background .18s, border-color .18s, transform .12s; }
 .vs-row:hover { background: color-mix(in srgb, var(--accent) 10%, var(--panel-solid)); border-color: color-mix(in srgb, var(--accent) 40%, var(--panel-border)); transform: translateY(-1px); }
-.vs-flag { font-size: 22px; flex: none; }
+.vs-flag { font-size: 22px; flex: none; display: grid; place-items: center; min-width: 34px; color: var(--accent); }
 .vs-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .vs-main b { overflow-wrap: anywhere; }
 .vs-main small { color: var(--muted); font-size: 12.5px; }
@@ -306,8 +336,8 @@ details[open] > summary > .vp-chev { transform: rotate(180deg); }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .vp-btn, .vp-tab, .vp-card, .vp-chev, .vp-bar i, .vp-pbar i, .vp-dlbar > i, .vp-kmark, .vs-row, .vp-pchip, .vp-prow,
-  .vp-more > summary::before, .vp-how > summary::before, .vp-steps-d > summary::before { transition: none !important; }
-  .vp-btn:hover, .vs-row:hover, .vp-pchip:hover { transform: none; }
+  .vp-btn, .vp-tab, .vp-card, .vp-chev, .vp-bar i, .vp-pbar i, .vp-dlbar > i, .vp-kmark, .vs-row, .vp-pchip, .vp-prow, .vs-langs .vs-lang,
+  .vp-group > summary, .vp-key > summary, .vp-more > summary::before, .vp-how > summary::before, .vp-steps-d > summary::before { transition: none !important; }
+  .vp-btn:hover, .vs-row:hover, .vp-pchip:hover, .vs-langs .vs-lang:hover, .vp-btn:active, .vp-pchip:active { transform: none; }
   .vp-busy > i { animation: none; left: 0; width: 100%; opacity: .5; }
 }

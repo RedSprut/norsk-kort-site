@@ -261,6 +261,14 @@ html.m-phone .home-pd .pd-acts .btn { min-height: 44px; }
 html.m-phone .home-decks-h .home-list-sw { flex: 1 1 100%; }
 html.m-phone .hl-tab { flex: 1 1 0; justify-content: center; padding: 0 8px; font-size: 15px; }
 @media (max-width: 420px) { .hl-tab { padding: 0 8px; font-size: 15px; gap: 5px; } }
+.hl-i { display: inline-grid; place-items: center; }
+.hl-i:empty { display: none; }
+/* the narrowest phones (320–360 px): both tabs fit — no icon, the label may shorten */
+@media (max-width: 360px) {
+  .hl-tab { min-width: 0; padding: 0 6px; font-size: 14px; gap: 4px; }
+  .hl-tab .hl-i { display: none; }
+  .hl-tab .hl-l { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}
 @media (prefers-reduced-motion: reduce) { .hl-tab, .hh-xp { transition: none; } }
 
 /* 🔑 Settings → Нейросети → «Claude (подписка)»: the login expired — one button */

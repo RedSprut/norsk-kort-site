@@ -144,3 +144,5 @@ button.lv-chip.active { color: var(--text); border-color: var(--accent); backgro
   .lv-step .lv-seg { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .lv-step, .lv-row, .lv-job-bar i, .lv-pl-bar i, .lv-house, .lv-ring-fg { transition: none; } .lv-house:hover { transform: none; } }
+.lv-ico { vertical-align: -.16em; margin-right: .32em; flex: none; }
+.lv-head h1 .lv-ico { width: .95em; height: .95em; }

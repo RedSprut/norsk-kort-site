@@ -748,7 +748,7 @@
     const sec = (ico, title, html) => html ? `<section class="ac-sec"><h4><span aria-hidden="true">${ico}</span> ${title}</h4>${html}</section>` : '';
     const ex = (c.examples || []).length || c.example;
     const srcs = Prov.sources(c);
-    const examples = (Study.examplesHtml(c) || '') + (c.example ? `<div class="example">${UI.rich(c.example)} <button class="icon-btn sm ex-say" data-act="say" data-say="${esc(c.example)}" data-lang="no" title="Произнести по-норвежски">🔊</button>${c.exampleRu ? `<span class="tr">${UI.rich(c.exampleRu)}</span>` : ''}</div>` : '');
+    const examples = (Study.examplesHtml(c) || '') + (c.example ? `<div class="example">${UI.rich(c.example)} <button class="icon-btn sm ex-say" data-act="say" data-say="${esc(c.example)}" data-lang="no" title="Произнести по-норвежски" aria-label="Произнести по-норвежски">${window.NavIcons ? NavIcons.icon('speaker', 18, 'say-ico') : ''}</button>${c.exampleRu ? `<span class="tr">${UI.rich(c.exampleRu)}</span>` : ''}</div>` : '');
     const hist = (c.history || []).slice(-4).reverse().map(h => `<li>${Prov.icon(h.by, 15)} <span>${esc(Prov.name(h.by))}</span> <small class="muted">· ${esc(U.fmtDate ? U.fmtDate(h.t) : new Date(h.t).toLocaleDateString('ru-RU'))}</small></li>`).join('');
     const empty = !c.description && !(c.forms || []).length && !ex && !(c.synonyms || []).length;
     // light templates (paper, pastel): dark letters on the head — white ones would not be readable there
@@ -856,7 +856,7 @@
     // the button shows what it switches TO (🖼 «Картинкой» / 🔤 «Текстом») — the label and the screen reader say the same
     const on = studyOn(S);
     const label = on ? 'Текстом' : 'Картинкой';
-    return `<button class="btn sm ac-study-toggle" data-art-act="study-toggle" data-art-on="${on}" aria-label="${on ? 'Показать карточки текстом (обычный вид)' : 'Показать карточки картинкой (художественный вид)'}" title="${on ? 'Обычный вид карточек: слово и перевод текстом' : 'Художественный вид: картинка во всю карточку, крупное слово'}"><span aria-hidden="true">${on ? '🔤' : '🖼'}</span><span class="ac-tl"> ${label}</span></button>`;
+    return `<button class="btn sm ac-study-toggle" data-art-act="study-toggle" data-art-on="${on}" aria-label="${on ? 'Показать карточки текстом (обычный вид)' : 'Показать карточки картинкой (художественный вид)'}" title="${on ? 'Обычный вид карточек: слово и перевод текстом' : 'Художественный вид: картинка во всю карточку, крупное слово'}"><span aria-hidden="true">${window.NavIcons ? NavIcons.icon(on ? 'cards' : 'image', 18) : ''}</span><span class="ac-tl"> ${label}</span></button>`;
   }
 
   /* =====================================================================
@@ -1941,15 +1941,16 @@
   function settingsHtml() {
     const s = Store.settings, lk = look(), th = theme(lk.theme);
     const sw = (k, on, label, desc) => `<div class="setting"><div><div>${label}</div>${desc ? `<div class="desc">${desc}</div>` : ''}</div><div class="ctl"><label class="switch"><input type="checkbox" data-art-set="${k}" ${on ? 'checked' : ''}><span class="track"></span></label></div></div>`;
+    const NI = (n, sz) => (window.NavIcons ? NavIcons.icon(n, sz || 18) : ''); // W7: drawn icons in Settings
     return `<div class="panel ac-settings" style="grid-column:1/-1">
-      <h3>🎨 Художественный вид карточек</h3>
-      <p class="small muted">Колода как красивая галерея в стиле Pinterest: картинка во всю карточку, крупное норвежское слово, цвет рода. Учить можно и в этом виде. В любой колоде одним нажатием: «🎨 Художественный вид» / «🔤 Обычный вид».</p>
+      <h3 class="ui-t">${NI('palette', 22)}<span>Художественный вид карточек</span></h3>
+      <p class="small muted">Колода как красивая галерея в стиле Pinterest: картинка во всю карточку, крупное норвежское слово, цвет рода. Учить можно и в этом виде. В любой колоде одним нажатием: «Художественный вид» / «Обычный вид».</p>
       ${sw('artMode', s.artMode, 'Открывать колоды в художественном виде', 'Для колод, где вы ещё не выбирали вид сами')}
-      <div class="setting"><div><div>Оформление: <b>${th.icon} ${esc(th.name)}</b> · ${esc((lk.font === 'theme' ? fontById(th.font) : fontById(lk.font)).name)}</div><div class="desc">Шаблоны, шрифты, цвета, обводка — с живым просмотром</div></div><div class="ctl"><button class="btn" data-art-act="studio">🎨 Настроить…</button></div></div>
+      <div class="setting"><div><div>Оформление: <b>${th.icon} ${esc(th.name)}</b> · ${esc((lk.font === 'theme' ? fontById(th.font) : fontById(lk.font)).name)}</div><div class="desc">Шаблоны, шрифты, цвета, обводка — с живым просмотром</div></div><div class="ctl"><button class="btn" data-art-act="studio">${NI('palette')}<span>Настроить…</span></button></div></div>
       <div class="setting"><div><div>Цвет рода существительных</div><div class="desc">Рамка и значок карточки окрашены по артиклю — так род запоминается сам</div></div><div class="ctl">${legendHtml()}</div></div>
-      ${sw('artMotion', s.artMotion === 'on', 'Анимация, даже если на устройстве она уменьшена', reduceSys() ? '🌿 Сейчас в настройках устройства анимация уменьшена — карточки переворачиваются затуханием' : 'Сейчас анимация на устройстве включена')}
+      ${sw('artMotion', s.artMotion === 'on', 'Анимация, даже если на устройстве она уменьшена', reduceSys() ? 'Сейчас в настройках устройства анимация уменьшена — карточки переворачиваются затуханием' : 'Сейчас анимация на устройстве включена')}
       ${sw('artSeasonHints', s.artSeasonHints, 'Предлагать праздничные шаблоны', 'Хэллоуин, Jul, 17. mai, Påske, Sankthans… — одна ненавязчивая подсказка, когда подходит дата')}
-      <div class="row" style="gap:8px;margin-top:8px"><button class="btn sm" data-art-act="ideas">📌 Норвежские идеи в Pinterest</button>${reduceSys() ? `<button class="btn sm ghost" data-art-act="motion-help">Как включить анимацию на устройстве</button>` : ''}</div>
+      <div class="row" style="gap:8px;margin-top:8px"><button class="btn sm" data-art-act="ideas">${NI('pin')}<span>Норвежские идеи в Pinterest</span></button>${reduceSys() ? `<button class="btn sm ghost" data-art-act="motion-help">Как включить анимацию на устройстве</button>` : ''}</div>
     </div>`;
   }
   function onClick(e) {

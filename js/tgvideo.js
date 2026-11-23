@@ -12,6 +12,11 @@
  *    the dark screen, the sleep timer, the place inside a video remembered). With ffmpeg on the Mac the next video is
  *    prepared as sound only (.m4a) while the current one plays.
  * Everything from Telegram is shown as text (U.esc).
+ * W6: the personal Telegram session exists only on the Mac (bridge/tg.py). Everywhere else (the site, the store apps) the
+ * tab is TgVideo.preview(): the curated public channels (data/tg-channels.json) through the server's tg-public, only their
+ * posts with a video (or, for js/tgaudio.js, a sound); a post plays in Telegram's own embeddable widget, «Открыть в
+ * Telegram» next to it. No server → the «Норвежские каналы» tab (Telegram's widgets work without it). A channel outside
+ * the list is never shown here (not_curated → Net.linkOut). No «connect Telegram», no bridge words off the Mac.
  */
 (function () {
   const enc = encodeURIComponent;
@@ -36,13 +41,16 @@
   }
   const linkOf = (info, v) => (info && info.public && info.username ? `https://t.me/${info.username}/${v.id}` : '');
 
+  const home = () => !!(window.Telegram && Telegram.home ? Telegram.home() : (window.Net && Net.onMac && Net.onMac()));
+  // the bridge's words only on the Mac itself (never «запустите мост» to a visitor of the site)
+  const OLD = () => (home() ? 'Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 bridge/server.py)' : 'Это видео сейчас недоступно здесь — откройте канал в Telegram');
   async function api(action, params = {}) {
     let r;
-    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error(window.Telegram && Telegram.home && !Telegram.home() ? 'Это видео сейчас недоступно здесь — откройте канал в Телеграме' : 'Мост на Mac не отвечает — запустите его и попробуйте снова'); }
+    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error(!home() ? 'Это видео сейчас недоступно здесь — откройте канал в Telegram' : 'Мост на Mac не отвечает — запустите его и попробуйте снова'); }
     const ct = r.headers.get('Content-Type') || '';
-    if (!/json/.test(ct)) throw new Error('Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 …/bridge/server.py)');
+    if (!/json/.test(ct)) throw new Error(OLD());
     const j = await r.json().catch(() => ({}));
-    if (r.status === 404 && /unknown action/.test(j.error || '')) throw new Error('Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 …/bridge/server.py)');
+    if (r.status === 404 && /unknown action/.test(j.error || '')) throw new Error(OLD());
     if (!r.ok) throw new Error(j.error || 'Telegram не ответил — попробуйте ещё раз');
     return j;
   }
@@ -66,23 +74,16 @@
     /** bridge + Telegram connected? Otherwise a clear explanation (no technical errors) */
     async gate(el) {
       const up = window.AI && AI.bridge && AI.bridge.up;
-      if (!up && !(window.Telegram && Telegram.home ? Telegram.home() : true)) {
-        // the site: no bridge, no account — the channels' videos play inside Telegram's own post widget
-        el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Видео из норвежских каналов</b>
-          <p>Откройте канал во вкладке «📢 Норвежские каналы» и нажмите «📖 Читать здесь» — видео играют прямо в постах, без входа в Телеграм.</p>
-          <button type="button" class="btn primary tgv-tochan" data-tgv-chan>📢 Норвежские каналы</button></div>`;
-        el.querySelector('[data-tgv-chan]').onclick = () => {
-          const tab = el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]');
-          if (tab) { tab.click(); return; }
-          const mm = el.closest('.modal-backdrop'); if (mm && mm._m) mm._m.close();
-          Telegram.open(null, 'channels');
-        };
+      if (!up && !home()) {
+        // the site / the store apps: no personal Telegram here — the curated public channels' videos (tg-public)
+        TgVideo.preview(el, 'video');
         return false;
       }
       if (!up) {
+        // the Mac itself, the bridge is off (only here: the bridge's words)
         el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Видео авторов открываются через приложение на Mac</b>
           <p>Telegram показывает видео каналов только вашему аккаунту. Его читает «мост» — маленькая программа на вашем Mac: запустите её и откройте приложение по адресу <b>http://localhost:8787</b>.</p>
-          <p class="small muted">В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code></p></div>`;
+          <p class="small muted">В Терминале, в папке приложения: <code style="user-select:all">python3 bridge/server.py</code></p></div>`;
         return false;
       }
       if (window.Telegram && (!Telegram.status || Telegram.status.authorized === undefined)) { try { await Telegram.accStatus(); } catch (e) { /* shown below */ } }
@@ -229,6 +230,117 @@
       if (!p) return;
       if (window.ListenUI) { ListenUI.markUsed(); ListenUI.nowPlaying(); }
     },
+  };
+
+  /* ---------- W6: the curated public channels' media (no personal Telegram off the Mac) ---------- */
+  const IC = (n, sz) => (window.MediaIcons ? MediaIcons.icon(n, sz || 18) : '');
+  let curated = null;
+  async function curatedList() {
+    if (curated) return curated;
+    try { const r = await fetch('data/tg-channels.json', { cache: 'force-cache' }); curated = r.ok ? (await r.json()).filter(c => c && /^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(c.username || '')) : []; }
+    catch (e) { curated = []; }
+    return curated;
+  }
+  const KIND_TXT = { video: ['видео', 'Видео из норвежских каналов', 'video'], audio: ['аудио', 'Аудио из норвежских каналов', 'audio'] };
+  /** Telegram's own embeddable post (sandboxed) in a small window, «Открыть в Telegram» under it */
+  function postWindow(u, id, title) {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const link = `https://t.me/${encodeURIComponent(u)}/${encodeURIComponent(id)}`;
+    const m = UI.modal({
+      title: `${TG(22)} ${esc(title || '@' + u)}`, cls: 'tgp-post-modal',
+      body: `<div class="tgp-frame-box"><iframe class="tgp-frame" src="${esc(link)}?embed=1${dark ? '&dark=1' : ''}" title="Пост из канала @${esc(u)}" loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <p class="tiny muted">Пост показывает сам Telegram — видео и звук играют в нём. Слова из поста можно выделить и скопировать в карточку.</p>`,
+      foot: `<a class="btn primary" href="${esc(link)}" target="_blank" rel="noopener">${IC('send')} Открыть в Telegram</a>`,
+    });
+    // the widget tells its height (only from https://t.me, only a number)
+    const f = m.$('iframe');
+    const onMsg = e => {
+      if (!f.isConnected) { window.removeEventListener('message', onMsg); return; }
+      if (e.origin !== 'https://t.me' || e.source !== f.contentWindow) return;
+      let d = null; try { d = typeof e.data === 'string' && e.data.length < 2000 ? JSON.parse(e.data) : null; } catch (x) { return; }
+      const h = d && d.event === 'resize' ? Math.round(+d.height) : 0;
+      if (h > 60 && h < 5000) f.style.height = h + 'px';
+    };
+    window.addEventListener('message', onMsg);
+    return m;
+  }
+  /** the preview: channel chips → that channel's latest posts with a video / a sound → Telegram's widget */
+  TgVideo.preview = async function (el, kind = 'video') {
+    const K = KIND_TXT[kind] || KIND_TXT.video;
+    const toChannels = () => {
+      const tab = el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]');
+      if (tab) { tab.click(); return; }
+      const mm = el.closest('.modal-backdrop'); if (mm && mm._m) mm._m.close();
+      if (window.Telegram) Telegram.open(null, 'channels');
+    };
+    const chanBtn = `<button type="button" class="btn tgv-tochan" data-tgp-chan>${IC('grid')} Норвежские каналы</button>`;
+    const list = await curatedList();
+    const server = !!(window.NKConfig && NKConfig.ready() && window.Net && Net.callFn);
+    if (!server || !list.length) {
+      // no server: the channels tab (Telegram's widgets work without it)
+      el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>${K[1]}</b>
+          <p>Откройте канал во вкладке «Норвежские каналы» и нажмите «Читать здесь» — ${K[0]} играют прямо в постах, без входа в Telegram.</p>${chanBtn.replace('class="btn ', 'class="btn primary ')}</div>`;
+      el.querySelector('[data-tgp-chan]').onclick = toChannels;
+      return;
+    }
+    const S = { u: list[0].username, posts: [], next: 0, busy: false };
+    el.innerHTML = `<div class="tgp">
+        <div class="tgv-top"><div><h3 class="tgv-h">${K[1]}</h3><p class="tgv-sub">Отобранные каналы для изучающих норвежский. Выберите канал — здесь появятся его посты с ${kind === 'audio' ? 'аудио' : 'видео'}.</p></div></div>
+        <div class="tgp-chips" role="group" aria-label="Каналы">${list.map(c => `<button type="button" class="chip tgp-chip" data-tgp-u="${esc(c.username)}">${esc(c.title || '@' + c.username)}</button>`).join('')}</div>
+        <div class="tgp-list" data-tgp-list></div>
+        <div class="tgv-more-row"><button type="button" class="btn tgv-more" data-tgp-more hidden>Показать ещё</button></div>
+        <p class="tiny muted tgv-note">Посты показывает сам Telegram. Свой аккаунт Telegram здесь не нужен.</p></div>`;
+    const $ = q => el.querySelector(q);
+    const card = p => {
+      const line = String(p.text || '').split('\n').map(x => x.trim()).find(x => /\p{L}/u.test(x)) || (kind === 'audio' ? 'Аудио' : 'Видео');
+      const th = p.media && /^https:\/\//.test(p.media.thumb || '') ? p.media.thumb : '';
+      return `<article class="tgp-card">
+          <button type="button" class="tgv-thumb tgp-thumb" data-tgp-post="${+p.id}" aria-label="Открыть пост: ${esc(line.slice(0, 80))}">
+            ${th ? `<img src="${esc(th)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}<span class="tgv-ph" aria-hidden="true">${IC(kind === 'audio' ? 'music' : 'video', 30)}</span><span class="tgv-pl" aria-hidden="true">${IC('play', 22)}</span></button>
+          <div class="tgv-meta"><b class="tgv-cap" lang="nb">${esc(line.length > 120 ? line.slice(0, 118) + '…' : line)}</b><span class="tgv-date">${esc(dateRu(p.date))}</span></div>
+          <div class="tgv-acts"><button type="button" class="btn sm tgv-watch" data-tgp-post="${+p.id}">${IC('play', 16)} ${kind === 'audio' ? 'Слушать' : 'Смотреть'}</button>
+            <a class="btn sm ghost" href="${esc(p.link || `https://t.me/${S.u}/${+p.id}`)}" target="_blank" rel="noopener">${IC('send', 16)} В Telegram</a></div>
+        </article>`;
+    };
+    const paint = () => {
+      const mine = S.posts.filter(p => p.media && p.media.kind === K[2]);
+      const ch = list.find(c => c.username === S.u) || {};
+      $('[data-tgp-list]').innerHTML = mine.length ? `<div class="tgv-grid">${mine.map(card).join('')}</div>`
+        : S.busy ? '' : `<div class="tgv-gate small"><b>В последних постах «${esc(ch.title || S.u)}» ${kind === 'audio' ? 'аудио' : 'видео'} нет</b>
+            <p>${S.next ? 'Нажмите «Показать ещё» — оно может быть в более ранних постах. ' : ''}Или откройте канал в Telegram.</p>
+            <a class="btn sm" href="https://t.me/${esc(S.u)}" target="_blank" rel="noopener">${IC('send', 16)} Открыть @${esc(S.u)}</a></div>`;
+      const more = $('[data-tgp-more]'); more.hidden = !S.next; more.textContent = 'Показать ещё';
+      el.querySelectorAll('[data-tgp-u]').forEach(b => { b.classList.toggle('active', b.dataset.tgpU === S.u); b.setAttribute('aria-pressed', b.dataset.tgpU === S.u ? 'true' : 'false'); });
+    };
+    const load = async (more) => {
+      if (more && S.busy) return;
+      const seq = S.seq = (S.seq || 0) + 1, u = S.u;
+      S.busy = true;
+      if (!more) $('[data-tgp-list]').innerHTML = '<div class="tgv-wait"><span class="spinner sm"></span> загружаю посты…</div>';
+      else $('[data-tgp-more]').innerHTML = '<span class="spinner sm"></span> загружаю…';
+      let err = null, r = null;
+      try { r = await Net.callFn('tg-public', null, { method: 'GET', auth: false, query: Object.assign({ u }, more && S.next ? { before: S.next } : {}), timeout: 20000 }); }
+      catch (e) { err = e; }
+      if (seq !== S.seq || !el.isConnected) return; // another channel was chosen meanwhile
+      S.busy = false;
+      if (err && err.code === 'not_curated') { Net.linkOut(err); S.posts = []; S.next = 0; }
+      else if (err) {
+        $('[data-tgp-more]').hidden = true;
+        $('[data-tgp-list]').innerHTML = `<div class="tgv-gate small"><b>${esc(err.nk ? err.message : 'Посты сейчас не загрузились')}</b><p>Попробуйте ещё раз или откройте канал в Telegram.</p>
+            <a class="btn sm" href="https://t.me/${esc(u)}" target="_blank" rel="noopener">${IC('send', 16)} Открыть @${esc(u)}</a></div>`;
+        return;
+      } else { S.posts = (more ? S.posts : []).concat((r && r.posts) || []); S.next = (r && r.next) || 0; }
+      paint();
+    };
+    el.onclick = e => {
+      const c = e.target.closest('[data-tgp-u]'); if (c) { if (c.dataset.tgpU !== S.u) { S.u = c.dataset.tgpU; S.posts = []; S.next = 0; paint(); load(false); } return; }
+      if (e.target.closest('[data-tgp-more]')) { load(true); return; }
+      const pb = e.target.closest('[data-tgp-post]');
+      if (pb) { const ch = list.find(x => x.username === S.u) || {}; postWindow(S.u, pb.dataset.tgpPost, ch.title); return; }
+      if (e.target.closest('[data-tgp-chan]')) toChannels();
+    };
+    await load(false);
   };
 
   /* ---------- 🎧 sound only for the NEXT video (the Mac has ffmpeg): the bridge makes an .m4a while this one plays ----------

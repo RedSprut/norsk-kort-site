@@ -25,8 +25,53 @@
  * (+ примерное чтение по-русски), должности — по словарику; всё собирается в блок «🎬 Титры» под списком строк.
  * 🎵 Песни без субтитров (Song): там, где субтитров нет, слова распознаются по звуку (NB-Whisper на устройстве);
  * не норвежский и не английский — «Звучит песня на шведском языке». 🇬🇧 Английские строки переводятся с английского («EN»).
+ * W6 (docs/release-architecture.md): мост на Mac — только Net.isMacBridge(); без него YouTube — официальный IFrame-плеер
+ * (ничего поверх него: ни стекла, ни строк, ни своего полного экрана) + свой файл субтитров; Cast App ID — NK_CONFIG.castAppId;
+ * Media Session (экран блокировки) для звука и видео этого плеера; MediaIcons — рисованные значки для окон медиа.
  */
 (function () {
+  /* ---------- 🎨 MediaIcons: drawn line icons for the media windows (NRK, radio, YouTube, Telegram media, TV) ----------
+   * The same family as NavIcons.icon (js/app.js): 24×24, a 1.9 line in the colour of the text, round ends, a part lightly
+   * filled (.f). MediaIcons.icon(name, size) → <svg>; a name it does not know goes to NavIcons.icon; unknown → ''. */
+  const MI = {
+    tv: '<rect class="f" x="3.4" y="5" width="17.2" height="11.6" rx="2.4"/><path d="M8.6 20h6.8M12 16.6V20"/>',
+    radio: '<rect class="f" x="3.6" y="8.4" width="16.8" height="11.4" rx="2.4"/><path d="M7.4 8.4 16.6 4.2"/><circle cx="15.6" cy="14.1" r="2.6"/><path d="M7.2 12.4h3.6M7.2 15.8h3.6"/>',
+    podcast: '<rect class="f" x="9" y="3.6" width="6" height="10.4" rx="3"/><path d="M5.8 11.2a6.2 6.2 0 0 0 12.4 0"/><path d="M12 17.4v3"/><path d="M9 20.4h6"/>',
+    headphones: '<path d="M4.4 15.6v-3.2a7.6 7.6 0 0 1 15.2 0v3.2"/><rect class="f" x="3.8" y="13.6" width="4.4" height="6.6" rx="1.8"/><rect class="f" x="15.8" y="13.6" width="4.4" height="6.6" rx="1.8"/>',
+    play: '<path class="f" d="M8 5.4v13.2c0 .8.86 1.28 1.54.86l10.3-6.6a1 1 0 0 0 0-1.72L9.54 4.54C8.86 4.12 8 4.6 8 5.4z"/>',
+    pause: '<rect class="f" x="6.4" y="5" width="3.8" height="14" rx="1.2"/><rect class="f" x="13.8" y="5" width="3.8" height="14" rx="1.2"/>',
+    stop: '<rect class="f" x="6" y="6" width="12" height="12" rx="2.4"/>',
+    search: '<circle class="f" cx="10.6" cy="10.6" r="6.2"/><path d="m15.2 15.2 4.6 4.6"/>',
+    external: '<path d="M13.6 4.4h6v6"/><path d="M19.6 4.4 11 13"/><path d="M17.6 13.8v3.6c0 1.2-1 2.2-2.2 2.2H6.6c-1.2 0-2.2-1-2.2-2.2V8.6c0-1.2 1-2.2 2.2-2.2h3.6"/>',
+    subtitles: '<rect class="f" x="3.4" y="5.4" width="17.2" height="13.2" rx="2.6"/><path d="M7 11.6h5M14.4 11.6H17M7 15h2.6M12 15h5"/>',
+    back: '<path d="M14.6 5.6 8.2 12l6.4 6.4"/>',
+    next: '<path d="M9.4 5.6 15.8 12l-6.4 6.4"/>',
+    live: '<circle class="dot" cx="12" cy="12" r="2.4"/><path d="M8.2 8.2a5.4 5.4 0 0 0 0 7.6M15.8 8.2a5.4 5.4 0 0 1 0 7.6"/><path d="M5.3 5.3a9.5 9.5 0 0 0 0 13.4M18.7 5.3a9.5 9.5 0 0 1 0 13.4"/>',
+    video: '<rect class="f" x="3.4" y="6" width="12.6" height="12" rx="2.4"/><path d="m16 10.4 4.6-2.6v8.4L16 13.6"/>',
+    file: '<path class="f" d="M7 3.6h6.6l4.4 4.4v10.2c0 1.2-1 2.2-2.2 2.2H7c-1.2 0-2.2-1-2.2-2.2V5.8c0-1.2 1-2.2 2.2-2.2z"/><path d="M13.4 3.8V8h4.4"/><path d="M8.4 12.6h6.2M8.4 16h4"/>',
+    send: '<path class="f" d="M20.2 4 3.8 10.6c-.7.28-.66 1.28.06 1.5l5.5 1.7 1.7 5.5c.22.72 1.22.76 1.5.06z"/><path d="m9.4 13.8 4.4-4.4"/>',
+    laptop: '<rect class="f" x="5" y="5" width="14" height="9.8" rx="1.8"/><path d="M3 18.6h18"/>',
+    phone: '<rect class="f" x="7" y="3" width="10" height="18" rx="2.4"/><path d="M10.6 17.8h2.8"/>',
+    cast: '<path d="M3.4 14.6V6.9c0-1.05.85-1.9 1.9-1.9h13.4c1.05 0 1.9.85 1.9 1.9v9.2c0 1.05-.85 1.9-1.9 1.9H13.6"/><path d="M3.4 14.9a6.1 6.1 0 0 1 6.1 6.1"/><path d="M3.4 18.1a2.9 2.9 0 0 1 2.9 2.9"/><circle class="dot" cx="4" cy="20.4" r="1"/>',
+    airplay: '<path d="M6.4 17H5.6c-1.2 0-2.2-1-2.2-2.2V6.6c0-1.2 1-2.2 2.2-2.2h12.8c1.2 0 2.2 1 2.2 2.2v8.2c0 1.2-1 2.2-2.2 2.2h-.8"/><path class="f" d="M12 14.2 7.6 19.6h8.8z"/>',
+    music: '<path d="M9.4 17.4V5.6l9.4-1.8v11.8"/><circle class="f" cx="7" cy="17.4" r="2.6"/><circle class="f" cx="16.4" cy="15.6" r="2.6"/>',
+    mic: '<rect class="f" x="9" y="3.6" width="6" height="10.4" rx="3"/><path d="M5.8 11.2a6.2 6.2 0 0 0 12.4 0M12 17.4v3"/>',
+    grid: '<rect class="f" x="4" y="4" width="7" height="7" rx="1.6"/><rect class="f" x="13" y="4" width="7" height="7" rx="1.6"/><rect class="f" x="4" y="13" width="7" height="7" rx="1.6"/><rect class="f" x="13" y="13" width="7" height="7" rx="1.6"/>',
+    star: '<path class="f" d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z"/>',
+  };
+  const miPaint = s => s.replace(/class="f"/g, 'class="f" fill="currentColor" fill-opacity=".22"').replace(/class="dot"/g, 'class="dot" fill="currentColor" stroke="none"');
+  const MediaIcons = {
+    NAMES: Object.keys(MI),
+    icon(name, size, cls) {
+      const p = MI[name], s = size || 18;
+      if (!p) return window.NavIcons && NavIcons.icon ? NavIcons.icon(name, s, cls) : '';
+      return `<svg class="ico ui-ico mi-ico mi-${name}${cls ? ' ' + cls : ''}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${miPaint(p)}</svg>`;
+    },
+  };
+  window.MediaIcons = MediaIcons;
+  /** the Mac bridge may be used: the app runs on that Mac AND the bridge answered (Net.isMacBridge — docs §3.4) */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge()
+    : (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname)) && !!(window.AI && AI.bridge && AI.bridge.up));
   const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const MEDIA_EXT = /\.(mp4|m4v|mov|webm|mkv|ogv|mp3|m4a|m4b|aac|wav|ogg|oga|opus|flac)$/i;
   const SUB_EXT = /\.(srt|vtt|webvtt|ass|ssa)$/i;
@@ -623,7 +668,9 @@
   function trBadge() {
     if (!st || !st.m || !window.TrBadge) return;
     const head = st.m.$('.modal-head'); if (!head) return;
-    if (st.stage === 'player' && !hasRuFile()) TrBadge.mount(head, { place: trPlace() }); else TrBadge.unmount(head);
+    // (nothing to translate — a YouTube video without subtitles here: no «кто переводит» either)
+    const nothing = !st.lines.length && st.stream && !st.stream.autoAsr && !st.stream.live;
+    if (st.stage === 'player' && !hasRuFile() && !nothing) TrBadge.mount(head, { place: trPlace() }); else TrBadge.unmount(head);
   }
   /** start (or wake) the translation of the lines; ms: a small delay to gather several calls into one */
   function trKick(ms = 120) {
@@ -807,8 +854,8 @@
         ${slot('no', '🇳🇴', 'Норвежские субтитры', st.noFile, st.noFile ? `${st.noLines} ${U.plural(st.noLines, ['строка', 'строки', 'строк'])}` : '')}
         ${slot('tr', '🇷🇺', 'Перевод (вторые субтитры)', st.trFile, st.trFile ? (st.trLang === 'ru' ? 'русский' : 'английский') : '')}
       </div>
-      <div class="subs-note">ℹ️ <span><b>Видео с YouTube и передачи NRK TV</b> открываются с субтитрами прямо в приложении — в разделах
-        <a href="#" data-goto="youtube">▶ YouTube</a> и <a href="#" data-goto="nrk">📺 NRK TV</a>.
+      <div class="subs-note">${MediaIcons.icon('info', 18)} <span>${macBridge() ? `<b>Видео с YouTube и передачи NRK TV</b> открываются с субтитрами прямо в приложении — в разделах
+        <a href="#" data-goto="youtube">YouTube</a> и <a href="#" data-goto="nrk">NRK TV</a>.` : '<b>Видео с YouTube</b> открываются прямо в приложении — в разделе <a href="#" data-goto="youtube">YouTube</a>; к ним можно добавить свой файл субтитров.'}
         Здесь — свои файлы: видео или аудио с компьютера / телефона и файл субтитров к нему (.srt, .vtt, .ass).
         Если русских субтитров нет — строки переведёт переводчик, как в режиме «По предложениям».</span></div>
       <div class="row subs-go"><span class="grow"></span>
@@ -820,7 +867,10 @@
   }
 
   /** the video in a 16:9 stage (always the whole width, never squeezed) + the subtitle layer and the bar for full screen */
+  /** ▶ YouTube: its own player only — nothing of ours over it (YouTube API terms): no glass, no lines, no full screen of ours */
+  const ytPlain = () => !!(st && st.stream && st.stream.kind === 'youtube');
   function stage(inner) {
+    if (ytPlain()) return `<div class="subs-stage subs-stage-yt" data-stage>${inner}</div>`;
     return `<div class="subs-stage" data-stage>${inner}
         ${ocrOk() ? '<button type="button" class="subs-ocr-chip" data-k="ocr" data-ocr-chip hidden title="Прочитать надписи этого кадра и сделать из них карточки">🔎 Найти слова в кадре</button>' : ''}
         <div class="subs-glass-box" data-glass-box><div class="subs-glass" data-glass hidden>
@@ -854,6 +904,16 @@
   /** under the video: layout (video left / right), full screen, TV */
   function viewBar() {
     const lay = layout();
+    if (ytPlain()) return `<div class="subs-view">
+        <span class="seg-mini sm subs-lay" role="group" aria-label="Где видео">
+          <button data-lay="left" class="${lay === 'left' ? 'active' : ''}" title="Видео слева, субтитры справа">◧ Видео слева</button>
+          <button data-lay="right" class="${lay === 'right' ? 'active' : ''}" title="Видео справа, субтитры слева">Видео справа ◨</button>
+        </span>
+        ${Kar.btn('kar-first')}${Kar.mini()}
+        ${rateSel()}
+        <button class="btn sm sv-btn" data-k="subview" title="Размер текста, размер перевода слов, цвета">Aa Вид субтитров</button>
+        <button class="btn sm tv-btn" data-k="tv" title="Смотреть на телевизоре">${UI.TV_SVG(18)}<span>На телевизор</span></button>
+      </div>`;
     return `<div class="subs-view">
         <span class="seg-mini sm subs-lay" role="group" aria-label="Где видео">
           <button data-lay="left" class="${lay === 'left' ? 'active' : ''}" title="Видео слева, субтитры справа">◧ Видео слева</button>
@@ -895,21 +955,27 @@
       ? `${secondBox(S)}${secondBar()}
         <div class="subs-src"><span class="grow">📺 <b>${U.esc(S.title)}</b> · <span class="muted">второй экран к телевизору</span></span>
           <a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть эфир в приложении или на сайте NRK TV">↗ Открыть в NRK</a></div>
-        ${S.note ? `<div class="mt-warn ok subs-stream-note"><span>ℹ️</span><span>${S.note}</span></div>` : ''}`
+        ${S.note ? `<div class="mt-warn ok subs-stream-note"><span>${MediaIcons.icon('info', 18)}</span><span>${S.note}</span></div>` : ''}`
       : S && S.audio
       ? `${radioBox(S)}${S.live ? liveBar() : ''}
         <div class="subs-src"><span class="grow small muted">${brandIco(S)} ${S.kind === 'tg' ? `${U.esc(S.channel || 'Telegram')}${S.author && S.author !== S.channel ? ' · ' + U.esc(S.author) : ''}${S.date ? ' · ' + U.esc(new Date(S.date).toLocaleDateString('ru-RU')) : ''}` : `${S.live ? 'прямой эфир' : 'выпуск'} ${brand(S)}`}</span>
-          ${learnBtn()}${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте ${brand(S)}">↗ ${brand(S)}</a>` : ''}</div>
-        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : 'ℹ️'}</span><span>${S.note}
+          ${learnBtn()}${tvSource(S) ? `<button class="btn sm ghost tv-btn" data-k="tv" title="Слушать на телевизоре или колонке">${UI.TV_SVG(18)}<span>На ТВ / колонку</span></button>` : ''}${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте ${brand(S)}">↗ ${brand(S)}</a>` : ''}</div>
+        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : MediaIcons.icon('info', 18)}</span><span>${S.note}
           ${S.autoAsr ? `<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>${BOT()} Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>` : ''}</span></div>` : ''}`
+      : S && S.kind === 'youtube' && !st.lines.length && S.note
+      ? `${stage(`<iframe data-yt-frame src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(S.id)}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&fs=1&origin=${encodeURIComponent(location.origin)}${S.start ? '&start=' + Math.floor(S.start) : ''}" title="${U.esc(S.title)}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`)}
+        <div class="mt-warn ok subs-stream-note subs-yt-note"><span>${MediaIcons.icon('subtitles', 18)}</span><span>${S.note}</span></div>
+        <div class="subs-src"><span class="grow">${brandIco(S)} <b>${U.esc(S.title)}</b>${S.channel ? ` · <span class="muted">${U.esc(S.channel)}</span>` : ''}</span>
+          ${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте YouTube">${MediaIcons.icon('external', 16)} YouTube</a>` : ''}
+          <button class="btn sm tv-btn" data-k="tv" title="Смотреть на телевизоре">${UI.TV_SVG(18)}<span>На телевизор</span></button></div>`
       : S
       ? `${stage(S.kind === 'youtube'
-          ? `<iframe data-yt-frame src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(S.id)}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&fs=0&origin=${encodeURIComponent(location.origin)}${S.start ? '&start=' + Math.floor(S.start) : ''}" title="${U.esc(S.title)}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`
+          ? `<iframe data-yt-frame src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(S.id)}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&fs=1&origin=${encodeURIComponent(location.origin)}${S.start ? '&start=' + Math.floor(S.start) : ''}" title="${U.esc(S.title)}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
           : `<video class="subs-media" data-media playsinline webkit-playsinline preload="auto" controls controlslist="nofullscreen" ${S.poster ? `poster="${U.esc(S.poster)}"` : ''}></video>`)}
         ${viewBar()}${S.live ? liveBar() : ''}
         <div class="subs-src"><span class="grow">${brandIco(S)} <b>${U.esc(S.title)}</b>${S.channel ? ` · <span class="muted">${U.esc(S.channel)}</span>` : ''}${S.kind === 'tg' && S.date ? ` · <span class="muted">${U.esc(new Date(S.date).toLocaleDateString('ru-RU'))}</span>` : ''}</span>
           ${learnBtn()}${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в ${S.kind === 'youtube' ? 'приложении или на сайте YouTube' : S.kind === 'tg' ? 'Telegram' : 'приложении или на сайте NRK TV'}">↗ ${S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : 'NRK TV'}</a>` : ''}</div>
-        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : 'ℹ️'}</span><span>${S.note}
+        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : MediaIcons.icon('info', 18)}</span><span>${S.note}
           ${S.autoAsr ? `<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>${BOT()} Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>
           <span class="subs-asr-row"><button class="btn sm glass-btn" data-k="glass" aria-pressed="false">▭ В видео видны свои надписи? Закрыть их стеклом</button></span>` : ''}</span></div>` : ''}`
       : st.media
@@ -936,7 +1002,7 @@
           <span class="small muted">Перевод:</span>
           <span class="seg-mini sm" data-trm role="group" aria-label="Перевод">${TR_MODES.map(([k, t, tip]) => `<button type="button" data-trmode="${k}" class="${st.trMode === k ? 'active' : ''}" aria-pressed="${st.trMode === k}" title="${tip}">${t}</button>`).join('')}</span>
           <span class="tiny muted subs-glprog" data-glprog role="status" aria-live="polite"></span>
-          <span class="tiny muted subs-glass-hint">работает с нашими субтитрами · надписи, впечатанные в видео, закройте <button type="button" class="linklike" data-k="glass">▭ стеклом</button></span>
+          ${S && S.kind === 'youtube' ? '' : '<span class="tiny muted subs-glass-hint">работает с нашими субтитрами · надписи, впечатанные в видео, закройте <button type="button" class="linklike" data-k="glass">▭ стеклом</button></span>'}
           <span class="small muted subs-off" title="Если субтитры спешат или опаздывают">Сдвиг: <button class="btn sm ghost" data-off="-0.5">−</button><b data-offv>${fmtOff()}</b><button class="btn sm ghost" data-off="0.5">+</button></span>
         </div>
         <div class="tiny muted subs-keys">Клавиши: пробел — пауза · ← → — строка · R — повтор. Нажмите на слово — перевод; выделите несколько слов — перевод выделенного.</div>
@@ -2473,6 +2539,7 @@
     on: false, leaving: 0, taking: false,
     enter() {
       if (!st || !st.m || this.on) return;
+      if (ytPlain()) { UI.toast('Во весь экран — кнопкой в самом плеере YouTube (справа внизу видео)', '', 4000); return; }
       this.mark(true);
       const de = document.documentElement, req = de.requestFullscreen || de.webkitRequestFullscreen;
       if (fsEl() && fsEl() !== de) { this.takeOver(true); return; } // the bare video is full screen (F pressed there): it steps out first
@@ -2672,6 +2739,7 @@
   }
   /** ▭ on / off. Turned on by hand in a video for the first time: the calm note (once per video) asks whether to keep it */
   function glassToggle() {
+    if (ytPlain()) return; // nothing over YouTube's player
     if (glassPrefs().on) { glassSet(false); burnHide(); return; }
     const ask = !burnSaid() && !!st.m.$('[data-stage]');
     glassSet(true, ask);
@@ -2694,6 +2762,7 @@
     } catch (e) { /* full */ }
   }
   function burnNote(why) {
+    if (ytPlain()) return;
     if (!st || !st.m || burnSaid() || st.m.$('[data-burn]')) return;
     const stg = st.m.$('[data-stage]'); if (!stg) return;
     if (why === 'ocr' && glassPrefs().on) return; // covered already
@@ -3401,7 +3470,7 @@
 
   /* 💬 the line with its translation ON the video in the normal window too (not only in full screen) — on by default */
   const OVW_KEY = 'nk-ovwin';
-  const ovOn = () => { if (!st || st.kind !== 'video' || (st.stream && st.stream.companion)) return false; try { return localStorage.getItem(OVW_KEY) !== '0'; } catch (e) { return true; } };
+  const ovOn = () => { if (!st || st.kind !== 'video' || (st.stream && (st.stream.companion || st.stream.kind === 'youtube'))) return false; try { return localStorage.getItem(OVW_KEY) !== '0'; } catch (e) { return true; } };
   function ovApply() {
     if (!st || !st.m) return;
     svApply(); // the chosen size / colours
@@ -4175,7 +4244,7 @@
           if ((st.nativeRetry || 0) < 2 && streamReload(v)) { st.nativeRetry = (st.nativeRetry || 0) + 1; return; }
         }
         const S = st.stream, why = (v.errMsg || st.streamErr || (S.audio ? 'звук не воспроизводится' : 'видео не воспроизводится'));
-        if (box) box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>${S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : 'NRK'}: ${U.esc(why)}.</b> ${S.kind === 'tg' ? 'Проверьте, что мост на Mac запущен, и попробуйте снова.' : 'Субтитры и карточки работают и так.'}
+        if (box) box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>${S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : 'NRK'}: ${U.esc(why)}.</b> ${S.kind === 'tg' ? (onMac() ? 'Проверьте, что мост на Mac запущен, и попробуйте снова.' : 'Откройте запись в Telegram.') : 'Субтитры и карточки работают и так.'}
           ${S.kind === 'nrk' || S.kind === 'tg' ? '<button class="btn sm" data-k="retry">🔄 Попробовать снова</button>' : ''}
           ${S.link ? `<a href="${U.esc(S.link)}" target="_blank" rel="noopener">↗ ${S.kind === 'youtube' ? 'Смотреть в YouTube' : S.kind === 'tg' ? 'Открыть в Telegram' : S.radio ? 'Слушать в NRK Radio' : 'Смотреть в NRK TV'}</a>` : ''}</span></div>`;
         return;
@@ -4183,7 +4252,47 @@
       if (box) box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>Браузер не может воспроизвести «${U.esc(st.media.name)}».</b> Скорее всего, видео или звук в нём в формате, который этот браузер не понимает (например, MKV с AC-3 / DTS, AVI, WMV). Сохраните его как MP4 (H.264 + AAC) или звук как MP3 / M4A. Субтитры и карточки работают и так — только без звука.</span></div>`;
     });
     if (st.clk) Second.run();
+    MSess.bind(v);
   }
+
+  /* ---------- 🔒 Media Session: the lock screen / headphones / car controls while this player plays sound ----------
+   * Title, where it comes from and the picture; ⏯, ±10 s (not on air), ⏮ ⏭ = the previous / next LINE (handy for
+   * learning with the screen off). Only our own <audio> / <video> (YouTube's player has its own). Cleared on close. */
+  const MSess = {
+    on: false,
+    ok() { return 'mediaSession' in navigator && typeof window.MediaMetadata === 'function'; },
+    bind(v) {
+      if (!this.ok() || !v || !(v.tagName === 'AUDIO' || v.tagName === 'VIDEO')) return;
+      const S = st.stream || {}, ms = navigator.mediaSession;
+      const art = /^https:\/\//.test(S.poster || '') ? [{ src: S.poster, sizes: '512x512' }] : [];
+      const set = () => {
+        if (!st || media() !== v) return;
+        try {
+          ms.metadata = new MediaMetadata({ title: S.title || (st.media && baseName(st.media.name)) || 'Norsk Kort',
+            artist: S.kind ? (S.channel || brand(S)) : 'Свой файл', album: 'Norsk Kort · субтитры и перевод', artwork: art });
+        } catch (e) { /* an old browser */ }
+        const h = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { /* not supported here */ } };
+        h('play', () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); });
+        h('pause', () => v.pause());
+        h('stop', () => v.pause());
+        h('previoustrack', st.lines.length ? () => step(-1) : null);
+        h('nexttrack', st.lines.length ? () => step(1) : null);
+        const seekable = !S.live && !S.companion;
+        h('seekbackward', seekable ? d => { v.currentTime = Math.max(0, v.currentTime - ((d && d.seekOffset) || 10)); } : null);
+        h('seekforward', seekable ? d => { v.currentTime = Math.min(v.duration || Infinity, v.currentTime + ((d && d.seekOffset) || 10)); } : null);
+        this.on = true;
+      };
+      v.addEventListener('play', () => { set(); try { ms.playbackState = 'playing'; } catch (e) { /* ignore */ } });
+      v.addEventListener('pause', () => { if (this.on) try { ms.playbackState = 'paused'; } catch (e) { /* ignore */ } });
+    },
+    clear() {
+      if (!this.on || !this.ok()) return;
+      this.on = false;
+      const ms = navigator.mediaSession;
+      try { ms.metadata = null; ms.playbackState = 'none'; } catch (e) { /* ignore */ }
+      ['play', 'pause', 'stop', 'previoustrack', 'nexttrack', 'seekbackward', 'seekforward'].forEach(a => { try { ms.setActionHandler(a, null); } catch (e) { /* ignore */ } });
+    },
+  };
 
   /* =================== cards =================== */
   function deckName() {
@@ -4631,6 +4740,8 @@
         if (s.slot === 'no') {
           if (s.lang === 'ru') UI.toast(`«${s.f.name}» — русские субтитры. Нужны норвежские; русские можно добавить как перевод`, 'warn', 6000);
           st.noFile = s.f; st.noCues = s.cues; st.noLines = s.cues.length;
+          // a stream got the person's own file: the note says so (no more «нет субтитров»)
+          if (st.stream) { st.stream.subName = 'ваш файл субтитров'; st.stream.ownSubs = s.f.name; st.stream.note = `Субтитры из вашего файла «${U.esc(s.f.name)}». Если строки спешат или опаздывают — «Сдвиг» ниже.`; }
           if (s.lang === 'en') UI.toast(`«${s.f.name}» похож на английские субтитры — если это так, выберите норвежские`, 'warn', 6000);
         } else {
           st.trFile = s.f; st.trCues = s.cues; st.trLang = s.lang === 'ru' ? 'ru' : 'en';
@@ -4643,6 +4754,13 @@
     render();
     // both files at hand → straight to the player
     if (st.noFile && st.media && (media || subs.some(s => s.slot === 'no'))) openPlayer();
+  }
+  /** 📄 «Свой файл субтитров» for a stream (YouTube without the Mac): the person's own .srt / .vtt / .ass becomes the lines */
+  function ownSubPick() {
+    if (!st || !st.m) return;
+    let inp = st.m.$('input[data-in="no"]');
+    if (!inp) { inp = document.createElement('input'); inp.type = 'file'; inp.hidden = true; inp.dataset.in = 'no'; inp.accept = '.srt,.vtt,.webvtt,.ass,.ssa,text/vtt'; st.m.el.appendChild(inp); }
+    inp.value = ''; inp.click();
   }
   function setMedia(f) {
     if (st.mediaUrl) URL.revokeObjectURL(st.mediaUrl);
@@ -4771,6 +4889,7 @@
       else if (a === 'ovbg') bgSet(!tvPrefs().bg, true);
       else if (a === 'kar') Kar.set(!Kar.prefs().on);
       else if (a === 'trpop') trPop(k);
+      else if (a === 'ownsub') ownSubPick();
       return;
     }
     const ly = t.closest('.subs-lay [data-lay]'); // not the .subs-wrap[data-lay] around everything (that swallowed every click below)
@@ -4936,7 +5055,7 @@
   const appAddr = () => location.origin + location.pathname.replace(/[^/]*$/, '');
   /** 🎤 Google's own player (Chrome's cast, no bridge) shows NRK's own subtitle file only — say so once, kindly */
   const tvKarNote = () => (Kar.prefs().on && !Cast.appId()
-    ? '<div class="tv-kar-note" data-tv-kar>🎤 Бегущая строка так на телевизор не пойдёт — там будут обычные строки. Со словами, которые загораются, — через мост на Mac (или нашу страницу для телевизора, когда её подключат); при повторе экрана или AirPlay экрана телевизор покажет её как здесь.</div>'
+    ? `<div class="tv-kar-note" data-tv-kar>Бегущая строка так на телевизор не пойдёт — там будут обычные строки. ${onMac() ? 'Со словами, которые загораются, — через мост на Mac; ' : ''}при повторе экрана или AirPlay экрана телевизор покажет её как здесь.</div>`
     : '');
   /** the window «Подключиться к телевизору» when there is no bridge: the best way for this device first */
   function tvNoBridge(m, box, S) {
@@ -5007,7 +5126,7 @@
   function tvHelp() {
     const S = st.stream || {};
     const canCast = S.kind === 'nrk' || S.kind === 'youtube';
-    const bridge = window.AI && AI.bridge && AI.bridge.up;
+    const bridge = macBridge(); // /api/cast/* only on the Mac with its bridge
     const m = UI.modal({
       title: `${UI.TV_SVG(24)} Подключиться к телевизору`, cls: 'tv-modal',
       body: `<div data-tv></div><button class="btn sm ghost tv-other" data-tv-other>Другие способы (повтор экрана, AirPlay)</button>`,
@@ -5173,6 +5292,7 @@
   }
   function svHint() {
     if (!st || !st.m || st.stage !== 'player' || st.kind !== 'video') return;
+    if (!st.lines.length && st.stream && !st.stream.autoAsr) return; // no lines to style yet
     const s = svHintState(); if (s.done) return;
     st.m.$$('[data-k="subview"]').forEach(b => b.classList.add('sv-new'));
     const day = 20 * 3600e3, now = Date.now();
@@ -5657,7 +5777,7 @@
    * page gets the word times with the lines and lights the words up by the TV's own clock. */
   // the Cast App ID of OUR TV page (receiver.html on the site's https domain, registered once in the Google Cast SDK
   // Developer Console — a one-time developer fee). Empty = Google's standard receiver.
-  const CAST_APP_ID = '';
+  const CAST_APP_ID = String((window.NK_CONFIG && NK_CONFIG.castAppId) || '').trim(); // js/config.js (one place)
   const CAST_NS = 'urn:x-cast:no.norskkort.subs';
   const Cast = {
     ready: null,
@@ -6103,6 +6223,7 @@
           if (s.raf) cancelAnimationFrame(s.raf);
           if (s.posTimer) { clearInterval(s.posTimer); s.posTimer = 0; }
           Clip.reset(); KEnv.reset(); Kar.boxes = null; Song.reset();
+          MSess.clear(); // 🔒 the lock screen forgets this player
           if (s.mediaUrl) setTimeout(() => URL.revokeObjectURL(s.mediaUrl), 500);
           hidePop();
           s.cleanup.forEach(f => f());
@@ -6150,7 +6271,8 @@
     },
     /** the Mac bridge's media helpers (/api/media/…): YouTube subtitles and channel videos, NRK TV catalogue */
     async api(action, params = {}) {
-      if (!(window.AI && AI.bridge && AI.bridge.up)) throw Object.assign(new Error(onMac() ? 'нужен мост на Mac (python3 bridge/server.py) — в облачной версии появится позже' : 'в версии на сайте это пока недоступно'), { noBridge: true });
+      // the bridge's paths only on the Mac itself, with the bridge running (never from the site or the store apps)
+      if (!macBridge()) throw Object.assign(new Error(onMac() ? 'нужен мост на Mac (python3 bridge/server.py)' : 'здесь это пока недоступно'), { noBridge: true, site: !onMac() });
       let r;
       try { r = await fetch(`/api/media/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error('мост на Mac не отвечает'); }
       const ct = r.headers.get('Content-Type') || '';
@@ -6193,7 +6315,8 @@
         if (src.liveVtt) LiveSubs.start(src.liveVtt).catch(() => {});
       }
       // 🌐 who translates: the free translator can be wrong — offer a neural network (once; a badge stays in the player)
-      if (window.TrNotice) setTimeout(() => { if (st && st.stream === src) TrNotice.maybe(src); }, 350);
+      // (only when there are lines to translate or the app will make them — not over a video that has none)
+      if (window.TrNotice && (st.noCues.length || src.autoAsr)) setTimeout(() => { if (st && st.stream === src) TrNotice.maybe(src); }, 350);
       return st.m;
     },
 
@@ -6256,7 +6379,10 @@
       if (!wordsOnly && window.Levels) Levels.subsBar(st.m.$('[data-lv-subs]'));
     },
 
+    /** the Mac bridge may be used here (the Mac itself + the bridge answered) — for js/youtube.js, js/nrk*.js, js/tg*.js */
+    macBridge,
     /* ---------- internals (tests) ---------- */
+    _ms: MSess, _ytPlain: () => ytPlain(),
     _ocrFrame: () => ocrFrame(), _whereAt: t => whereAt(t),
     _parse: parseSubs, _decode: decodeSub, _detect: detectLang, _pair: pairUp, _clip: Clip, _wav: wavBytes, _asr: Asr, _cast: Cast, _phrase: i => phrase(i),
     _tv: { tvVtt, tvPrefs, tvSave, glossText, castBar, tvSource, tvDevice, mirrorSteps, onMac },

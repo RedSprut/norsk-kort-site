@@ -148,3 +148,6 @@ details.prov.aic-flash { border-color: var(--accent2); animation: aicFlash 2.6s 
 .aicc-help ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
 .aicc-code { user-select: all; word-break: break-all; padding: 1px 5px; border-radius: 6px; background: color-mix(in srgb, var(--text) 8%, transparent); }
 .aicc-foot { display: flex; justify-content: flex-end; }
+/* W7: Norsk Kort Pro on top; the Mac-only AIs as one calm line (css/styles.css .aic-mac) */
+.aic-row.aic-pro .aic-ico { color: var(--accent); }
+.aic-foot.ui-t { display: flex; justify-content: center; }

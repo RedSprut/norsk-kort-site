@@ -12,7 +12,9 @@
   'use strict';
   const POLL_MS = 3000, POLL_MAX = 180000;
   const toast = (m, k, ms) => { if (window.UI && UI.toast) UI.toast(m, k || '', ms || 3200); };
-  const onMac = () => { try { return !!(window.AI && AI.onMac && AI.onMac()); } catch (e) { return false; } };
+  // the one «are we on the Mac» (js/net.js): never in the store apps, never on the site
+  const onMac = () => { try { return window.Net && Net.onMac ? Net.onMac() : !!(window.AI && AI.onMac && AI.onMac()); } catch (e) { return false; } };
+  const NI = (n, s) => (window.NavIcons ? NavIcons.icon(n, s || 18) : '');
   const wait = ms => new Promise(r => setTimeout(r, ms));
   let run = null; // the login in progress: { t0, timer, stop }
 
@@ -24,7 +26,7 @@
     document.querySelectorAll('[data-claude-login="go"]').forEach(b => {
       b.disabled = !!on;
       if (!b.dataset.label) b.dataset.label = b.innerHTML;
-      b.innerHTML = on ? '<span aria-hidden="true">⏳</span> Жду входа…' : b.dataset.label;
+      b.innerHTML = on ? `${NI('hourglass')}<span>Жду входа…</span>` : b.dataset.label;
     });
   }
   function done(ok) {
@@ -76,7 +78,7 @@
   }
   async function start(btn) {
     if (run) { say('Уже жду входа — подтвердите его в браузере, который открылся.'); return; }
-    if (!onMac()) { toast('Вход в Claude по подписке работает только в приложении на Mac', 'warn', 4500); return; }
+    if (!onMac()) { toast('Claude по подписке работает только в версии для Mac', '', 4500); return; }
     busy(true);
     say('Открываю окно Терминала…');
     let res = null;
@@ -105,10 +107,10 @@
     if (B.ok && B.auth !== 'bad') { done(true); return; }
     say(!B.up ? 'Мост на Mac не отвечает — запустите его и нажмите ещё раз.' : B.auth === 'bad' ? 'Claude пока не пускает — нажмите «Войти в Claude».' : B.checking ? 'Claude ещё отвечает — нажмите «Проверить» через пару секунд.' : 'Claude пока не ответил — нажмите «Проверить» ещё раз чуть позже.', 'bad');
   }
-  const buttonHtml = () => `<div class="cl-box"><div class="cl-acts">
-      <button type="button" class="btn primary cl-go" data-claude-login="go" title="Откроется окно Терминала и страница Claude в браузере — войдите, и вход сохранится примерно на год"><span aria-hidden="true">🔑</span> Войти в Claude</button>
+  const buttonHtml = () => (!onMac() ? `<p class="cl-msg st-maconly">${NI('laptop')}<span>Claude по подписке работает только в версии для Mac.</span></p>` : `<div class="cl-box"><div class="cl-acts">
+      <button type="button" class="btn primary cl-go" data-claude-login="go" title="Откроется окно Терминала и страница Claude в браузере — войдите, и вход сохранится примерно на год">${NI('key')}<span>Войти в Claude</span></button>
       <button type="button" class="btn cl-check" data-claude-login="check" title="Спросить Claude, пускает ли он уже">Проверить</button></div>
-      <p class="cl-msg" data-claude-login-msg role="status" aria-live="polite"></p></div>`;
+      <p class="cl-msg" data-claude-login-msg role="status" aria-live="polite"></p></div>`);
 
   document.addEventListener('click', e => {
     const b = e.target.closest && e.target.closest('[data-claude-login]'); if (!b) return;

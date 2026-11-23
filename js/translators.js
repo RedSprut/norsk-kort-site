@@ -29,6 +29,31 @@
   };
   const deeplSrc = c => String(c).split('-')[0];
 
+  /* 🌐 where we are (W4 · docs/release-architecture.md §1.2 T1/T2/T4): the unofficial Google endpoint (gtx), Mozhi (Google
+   * through other people's servers) and MyMemory are for the owner's Mac only. The public build (the site, the store apps,
+   * every phone) translates with Norsk Kort Pro (the server's `translate`, through AI.call — AI.proBatch), the user's own keys
+   * (Microsoft everywhere; DeepL in the store apps through native HTTP) and the connected AI; the dictionaries (Ordbøkene,
+   * Tatoeba, Wiktionary) stay free. Google Translate and DeepL are still one tap away as their own sites with the word filled in.
+   * js/config.js loads after this file, so NK_CONFIG is read lazily — with the same rule as a fallback. On the Mac nothing changes. */
+  const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/;
+  const isNative = () => { try { return !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()); } catch (e) { return false; } };
+  const pub = () => (window.NK_CONFIG ? !!NK_CONFIG.publicBuild : (isNative() || !(location.protocol === 'file:' || LOCAL_HOST.test(location.hostname))));
+  const MAC_ONLY = ['google', 'mozhi', 'mymemory'];
+  const macOnly = id => MAC_ONLY.includes(id) && pub();
+  /** the Mac bridge answered (the only case for /api/proxy) */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : (typeof AI !== 'undefined' && !!(AI.bridge && AI.bridge.up)));
+  /** DeepL refuses browsers: the bridge on the Mac (as before), native HTTP in the store apps; on the site — its page with the word */
+  const deeplHere = () => !pub() || isNative();
+  if (pub()) {
+    LIST.google = Object.assign({}, LIST.google, { web: true, free: false, note: 'Откроется сайт Google Переводчика со словом. Прямо в приложении переводят Norsk Kort Pro, ваш ключ нейросети или Microsoft' });
+    LIST.mozhi = Object.assign({}, LIST.mozhi, { hidden: true });
+    LIST.mymemory = Object.assign({}, LIST.mymemory, { hidden: true });
+    if (!isNative()) LIST.deepl = Object.assign({}, LIST.deepl, { web: true, note: 'Откроется сайт DeepL со словом. Со своим ключом DeepL переводит прямо в приложении для iPhone и Android' });
+    LIST.telegram = Object.assign({}, LIST.telegram, { note: 'Посты, картинки и файлы из каналов о норвежском — по слову карточки, прямо в приложении' });
+  }
+  /** a calm «only on the Mac» error for a translator that does not work here */
+  const notHere = id => Object.assign(new Error(`${(LIST[id] || {}).name || 'Этот переводчик'} переводит прямо в приложении только на Mac. Здесь — Norsk Kort Pro, ваш ключ нейросети или Microsoft`), { macOnly: true, friendly: true });
+
   /* 🎨 brand marks of the services on the card's rails — drawn inline (crisp, offline, never a grey favicon), like the share sheet (js/shareapp.js).
    * Glyphs from Simple Icons 16.38.0 (simpleicons.org, CC0): Google Translate, DeepL, Telegram (only the plane of its badge, as in js/shareapp.js).
    * The others have no Simple Icons glyph: simple marks drawn here in the service's colours (Microsoft's four squares, Yandex's «Я», …).
@@ -94,7 +119,7 @@
     LIST,
     enabled() {
       const order = Store.settings.translators || Object.keys(LIST);
-      return order.filter(id => LIST[id]);
+      return order.filter(id => LIST[id] && !LIST[id].hidden);
     },
     /** text to translate: first line, without Russian glosses in brackets when going NO→RU */
     prepare(text, from) {
@@ -105,7 +130,7 @@
     detect(text) { return U.cyrRatio(text) > 0.3 ? { from: 'ru', to: 'no' } : { from: 'no', to: 'ru' }; },
     inline(id) {
       const t = LIST[id];
-      if (!t || t.web) return false;
+      if (!t || t.web || t.hidden || macOnly(id)) return false;
       if (t.ai) return AI.available();
       if (t.key) return !!(Store.settings[t.key] || '').trim();
       return true;
@@ -172,7 +197,7 @@
     /** minutes left of Google's pause (0 = it translates) — for «Google попросил паузу на ~N минут» */
     gRestMin() { return this.gCooling() ? Math.max(1, Math.ceil((this._gCoolUntil - Date.now()) / 60000)) : 0; },
     /** the Mac bridge can ask Google for us (another client): up and not refused itself a moment ago */
-    gBridgeOk() { return typeof AI !== 'undefined' && !!(AI.bridge && AI.bridge.up) && !this.trResting('gbridge'); },
+    gBridgeOk() { return !pub() && macBridge() && !this.trResting('gbridge'); },
     /** Google cannot translate right now at all: this browser has to rest and the bridge cannot ask for it */
     gResting() { return this.gCooling() && !this.gBridgeOk(); },
     /** who really translated the last lines (a few minutes): { id, key, name, short, none (nobody answered), reason, gMin } or null */
@@ -226,7 +251,7 @@
     orderFor(opts = {}, keepResting) {
       let order = this.dictOrder().slice();
       // the free spares always stand in line too (switching between translators is always on)
-      ['mozhi', 'mymemory'].forEach(id => { if (!order.includes(id)) order.push(id); });
+      ['mozhi', 'mymemory'].forEach(id => { if (!order.includes(id) && !macOnly(id)) order.push(id); });
       const pref = this.prefFor(this.placeOf(opts));
       if (pref && order.includes(pref)) order = [pref, ...order.filter(id => id !== pref)];
       if (opts.only) order = order.filter(id => opts.only.includes(id));
@@ -249,7 +274,7 @@
       // nobody has translated here yet: the first one that may be asked is the one at work
       if (!cur) { const f = out.find(x => x.state === 'next'); if (f) f.state = 'work'; }
       const need = [];
-      if (!(S.deeplKey || '').trim()) need.push('deepl');
+      if (!(S.deeplKey || '').trim() && deeplHere()) need.push('deepl');
       if (!(S.msKey || '').trim()) need.push('microsoft');
       if (typeof AI !== 'undefined' && !AI.available()) need.push('ai');
       need.forEach(id => out.push({ id, key: id === 'ai' ? 'ai:gemini' : id, name: id === 'ai' ? 'Нейросеть' : this.whoName(id), state: 'key', until: 0 }));
@@ -304,8 +329,9 @@
       try { return await fetch(url, c ? Object.assign({}, init, { signal: c.signal }) : init); } finally { clearTimeout(t); }
     },
     async gget(url) {
+      if (pub()) throw notHere('google');
       const viaBridge = () => this.tfetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) }, 20000);
-      const bridge = typeof AI !== 'undefined' && AI.bridge && AI.bridge.up;
+      const bridge = macBridge();
       if (this.gCooling()) throw new Error('Google временно ограничил переводы — попробуйте через несколько минут');
       let r;
       try { r = await this.tfetch(url, {}, 20000); } catch (e) {
@@ -320,6 +346,7 @@
     },
     /** Mozhi (spare Google front-end) for one text */
     async mozhiOne(text, from, to) {
+      if (pub()) throw notHere('mozhi');
       for (const h of ['https://mozhi.ducks.party', 'https://mozhi.pussthecat.org']) {
         try {
           const r = await this.tfetch(`${h}/api/translate?engine=google&from=${CODES.google[from]}&to=${CODES.google[to]}&text=${encodeURIComponent(text)}`, {}, 20000);
@@ -333,6 +360,7 @@
     async translate(id, text, from, to, opts = {}) {
       text = String(text || '').trim();
       if (!text) throw new Error('Нет текста для перевода');
+      if (macOnly(id) || (id === 'deepl' && !deeplHere())) throw notHere(id);
       switch (id) {
         case 'google': {
           const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${CODES.google[from]}&tl=${CODES.google[to]}&dt=t&q=${encodeURIComponent(text)}`;
@@ -396,14 +424,21 @@
     DICT_TRANSLATORS: ['deepl', 'google', 'microsoft', 'mymemory', 'ai'],
     dictOrder() {
       const S = Store.settings;
-      const usable = id => id === 'deepl' ? !!(S.deeplKey || '').trim() : id === 'microsoft' ? !!(S.msKey || '').trim() : id === 'ai' ? (typeof AI !== 'undefined' && AI.available()) : true;
+      const usable = id => macOnly(id) ? false : id === 'deepl' ? !!(S.deeplKey || '').trim() && deeplHere() : id === 'microsoft' ? !!(S.msKey || '').trim() : id === 'ai' ? (typeof AI !== 'undefined' && AI.available()) : true;
       const pref = S.dictTranslator === 'lingva' ? 'mozhi' : S.dictTranslator || 'auto'; // Lingva was replaced by Mozhi
       const base = ['deepl', 'google', 'mozhi', 'microsoft', 'mymemory', 'ai'];
       const order = pref === 'auto' ? base : [pref, ...base.filter(x => x !== pref)];
       return order.filter(usable);
     },
     /** which translator will translate the next article (for the settings hint) */
-    dictMain() { return this.dictOrder()[0] || 'google'; },
+    dictMain() { return this.dictOrder()[0] || (pub() ? 'ai' : 'google'); },
+    /** the public build has nobody to translate with yet (no Pro, no AI key, no Microsoft / DeepL key): say how to get one */
+    needSetup() { return pub() && !this.dictOrder().length; },
+    /** one calm sentence: how translation starts working here (no technical words) */
+    publicHint() {
+      const pro = !!(window.Pro && Pro.offered && Pro.offered());
+      return `Чтобы переводить прямо в приложении, подключите ${pro ? 'Norsk Kort Pro или ' : ''}бесплатный ключ нейросети (Gemini или Groq) в Настройках → Нейросети. Словари Ordbøkene и Tatoeba работают и без этого`;
+    },
     /** 'google' -> 'tr:google', 'ai' -> 'ai:groq' — keys of the icons on the card */
     provKeys(ids) {
       return (ids || []).map(id => id === 'ai' ? 'ai:' + (this.lastAI || AI.current()) : 'tr:' + id);
@@ -498,6 +533,7 @@
         },
         // Google: a few requests of ~1200 characters, one text per line (dozens of parallel calls get blocked)
         google: async () => {
+          if (pub()) return; // T1: the Mac only
           const LIMIT = 'Google временно ограничил переводы с вашего адреса (слишком много запросов за короткое время) — подождите 5–15 минут';
           const viaBridge = url => this.tfetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) }, 15000);
           /** Google's answer → the text; its «sorry» page (HTML instead of JSON) counts as a refusal */
@@ -571,6 +607,7 @@
         // Mozhi: Google quality through public open-source servers — for when Google refuses your address
         // (Lingva, the older service of this kind, stopped working everywhere in 2026)
         mozhi: async () => {
+          if (pub()) return; // T4: the Mac only
           const hosts = ['https://mozhi.ducks.party', 'https://mozhi.pussthecat.org'];
           let alive = hosts.slice();
           const ask = async q => {
@@ -648,12 +685,16 @@
       }
       if (todo().length && this._gSlow) { const s = this._gSlow; this._gSlow = null; await s(); }
       const missing = todo().length;
-      return { out, by: [...by], missing, error: missing ? U.calm(this.lastError) || 'переводчики сейчас не отвечают' : '' };
+      // the public build without Pro / keys: one calm way forward instead of «nobody answered»
+      const setup = !!missing && this.needSetup();
+      if (setup) this.lastError = this.publicHint();
+      return { out, by: [...by], missing, needSetup: setup, error: missing ? U.calm(this.lastError) || 'переводчики сейчас не отвечают' : '' };
     },
 
     /** other meanings of ONE Norwegian word (Google: dictionary + alternative translations) — for finding the word
      *  in a sentence translation. One request; refused / resting Google → throws (the caller stops asking). */
     async alts(word, from = 'no', to = 'ru') {
+      if (pub()) throw notHere('google'); // the dictionary of the unofficial Google endpoint: the Mac only
       const j = await this.gget(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${CODES.google[from]}&tl=${CODES.google[to]}&dt=t&dt=bd&dt=at&q=${encodeURIComponent(word)}`);
       const out = [];
       const add = t => { t = String(t || '').trim(); if (t && t.length <= 40 && /[а-яё]/i.test(t) && !out.includes(t)) out.push(t); };
@@ -664,6 +705,7 @@
     },
     /** main translation + other meanings (Google dictionary, MyMemory matches) */
     async detail(id, text, from, to, opts = {}) {
+      if (macOnly(id) || (id === 'deepl' && !deeplHere())) throw notHere(id);
       if (id === 'google') {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${CODES.google[from]}&tl=${CODES.google[to]}&dt=t&dt=bd&q=${encodeURIComponent(text)}`;
         const j = await this.gget(url);

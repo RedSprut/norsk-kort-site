@@ -10,4 +10,4 @@
  *  and regenerates data/changelog.json («Что нового» in «О приложении»). Then `node --check` and commit.
  *  Read by js/about.js («О приложении») — window.APP.
  */
-window.APP = Object.freeze({ name: 'Norsk Kort', version: '1.0.0', build: 231, date: '2026-11-22', author: '' });
+window.APP = Object.freeze({ name: 'Norsk Kort', version: '1.0.0', build: 232, date: '2026-11-23', author: '' });

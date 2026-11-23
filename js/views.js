@@ -11,6 +11,8 @@
   /** the direction labels follow the translation language: 🇳🇴 → 🇺🇦 … */
   const dirsNow = () => [['nr', `🇳🇴 → ${trFlag()}`], ['rn', `${trFlag()} → 🇳🇴`], ['mix', '🔀 Вперемешку']];
 
+  /** W7: the drawn speaker (js/app.js NavIcons) on the «say» buttons — never the 🔊 emoji */
+  const SPK = () => (window.NavIcons ? NavIcons.icon('speaker', 18, 'say-ico') : '');
   const Views = { DIRS, TRLANGS, MODES, FILTERS, SIZES, sel: new Set(), deckFilter: 'all', deckSearch: '', deckLimit: 120 };
 
   /** forms/examples <-> editable lines "label | no | ru (| note)" */
@@ -96,6 +98,38 @@
   Views.BOT = BOT;
   /** AI.icon (js/ai.js) draws a 🤖 emoji for the subscriptions without a site logo — here it is the brand robot too */
   const aiIco = (id, size) => { const h = window.AI && AI.icon ? AI.icon(id, size) : ''; return !h || />🤖</.test(h) ? BOT(size) : h; };
+
+  /* ---------- ⚑ «Пожаловаться на ответ» (W7, Google Play AI-content rule; js/net.js Net.reportAiAnswer opens the sheet) ----------
+   * Views.aiNote({ answer, question, task, provider, compact }) → the quiet line «Ответ нейросети, может ошибаться» and a
+   * small flag button (a 44 px target). The texts stay in memory (not in the markup); one click handler for the whole app. */
+  const REPORTS = new Map();
+  let repN = 0;
+  const canReport = () => !!(window.Net && Net.reportAiAnswer && window.NKConfig && NKConfig.ready());
+  Views.canReport = canReport;
+  Views.reportBtn = function (o = {}) {
+    if (!o.answer || !canReport()) return '';
+    const id = 'r' + (++repN);
+    REPORTS.set(id, { answer: String(o.answer).slice(0, 4000), question: o.question ? String(o.question).slice(0, 1000) : '', task: o.task || '',
+      provider: o.provider || (window.AI && AI.name ? AI.name(AI.lastProvider) : '') });
+    if (REPORTS.size > 300) REPORTS.delete(REPORTS.keys().next().value);
+    const ico = window.NavIcons ? NavIcons.icon('flag', 16) : '';
+    return `<button type="button" class="ai-report${o.compact ? ' compact' : ''}" data-ai-report="${id}" title="Пожаловаться на ответ нейросети" aria-label="Пожаловаться на ответ нейросети">${ico}${o.compact ? '' : '<span>Пожаловаться</span>'}</button>`;
+  };
+  Views.aiNote = function (o = {}) {
+    return `<div class="ai-note${o.cls ? ' ' + o.cls : ''}"><span class="ai-note-t">Ответ нейросети, может ошибаться</span>${Views.reportBtn(o)}</div>`;
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-ai-report]'); if (!b) return;
+    e.preventDefault(); e.stopPropagation(); // not a tap on the card / row under it
+    const o = REPORTS.get(b.dataset.aiReport);
+    if (!o || b.disabled) return;
+    Net.reportAiAnswer(o).then(sent => {
+      if (!sent || !b.isConnected) return;
+      b.disabled = true; b.classList.add('sent');
+      const t = b.querySelector('span'); if (t) t.textContent = 'Жалоба отправлена';
+      b.title = 'Жалоба отправлена — спасибо';
+    }).catch(() => { /* the sheet says it itself */ });
+  }, true);
   const CHEV = '<svg class="ico sx-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
   /** every place a row / tile / chip can open (a missing module is skipped quietly) */
   const GO = {
@@ -247,8 +281,8 @@
   Views.plaquesHtml = function () {
     const p = (attrs, cls, ico, t, sub) => `<button type="button" class="hp-card ${cls}" ${attrs}><span class="hp-i" aria-hidden="true">${ico}</span><span class="hp-t"><b>${t}</b><small>${sub}</small></span><span class="hp-go" aria-hidden="true">›</span></button>`;
     return [
-      window.AppNav ? p('data-appnav aria-haspopup="dialog" title="Экскурсия по экрану, помощь по разделам и быстрые пути"', 'hp-nav', '🧭', 'Навигатор по приложению', 'экскурсия по экрану, помощь и быстрые пути') : '',
-      window.AppThemes || window.ArtCards ? p('data-foot="looks" aria-haspopup="dialog" title="Темы приложения и вид карточек"', 'hp-looks', '🎨', 'Оформление', 'викинги, тролли, праздники…') : '',
+      window.AppNav ? p('data-appnav aria-haspopup="dialog" title="Экскурсия по экрану, помощь по разделам и быстрые пути"', 'hp-nav', window.NavIcons ? NavIcons.icon('compass', 22) : '', 'Навигатор по приложению', 'экскурсия по экрану, помощь и быстрые пути') : '',
+      window.AppThemes || window.ArtCards ? p('data-foot="looks" aria-haspopup="dialog" title="Темы приложения и вид карточек"', 'hp-looks', window.NavIcons ? NavIcons.icon('palette', 22) : '', 'Оформление', 'викинги, тролли, праздники…') : '',
       window.ShareApp ? p('data-foot="share" aria-haspopup="dialog" title="Ссылка на приложение — другу, в группу, в соцсети"', 'hp-share', ShareApp.SHARE_SVG(22), 'Поделиться приложением', 'с друзьями учить веселее') : '',
     ].join('');
   };
@@ -257,7 +291,7 @@
   Views.footHtml = function () {
     const cards = Views.plaquesHtml();
     return cards ? `<footer class="app-foot hp" data-app-foot aria-label="Навигатор, оформление и «Поделиться»">
-        <p class="hp-lead">Нравится Norsk Kort? Расскажите друзьям <span aria-hidden="true">💙</span></p>
+        <p class="hp-lead">Нравится Norsk Kort? Расскажите друзьям</p>
         <div class="hp-grid" style="--hp-n:${(cards.match(/class="hp-card/g) || []).length}">${cards}</div>
         ${window.About && window.APP ? `<div class="ab-foot-row"><button type="button" class="ab-foot-link" data-about aria-haspopup="dialog" title="Версия, что нового, проверка обновлений, лицензии">${window.NavIcons ? NavIcons.icon('info', 18) : ''}<span>О приложении · <b>${U.esc(APP.name)} ${U.esc(APP.version)}</b> · сборка ${U.esc(APP.build)}</span></button></div>` : ''}
       </footer>` : '';
@@ -351,14 +385,17 @@
   const HINT_KEY = 'nk-declutter-hint';
   const hintSeen = w => { try { return !!(JSON.parse(localStorage.getItem(HINT_KEY) || '{}') || {})[w]; } catch (e) { return true; } };
   const hintDone = w => { try { const o = JSON.parse(localStorage.getItem(HINT_KEY) || '{}') || {}; o[w] = Date.now(); localStorage.setItem(HINT_KEY, JSON.stringify(o)); } catch (e) { /* private mode */ } };
+  /** W7: the first start of a new user — the hint is not for them (js/app.js) */
+  Views.declutterHintSkip = () => { hintDone('home'); hintDone('deck'); };
   function hintHtml(where) {
-    if (hintSeen(where) || (window.Help && Help.touring)) return '';
+    // one guide at a time: never while the first start's guides (showcase, name, welcome, coach marks) are on their way
+    if (hintSeen(where) || (window.Help && (Help.touring || (Help.firstPending && Help.firstPending())))) return '';
     const txt = where === 'deck'
       ? 'Импорт, экспорт, «Поделиться», картинки, «Выбрать» и «Удалить колоду» — в <b>«⋯ Ещё»</b>. Режим, направление и сколько карт — в <b>«✎ Изменить»</b>.'
       : 'Видео, радио, книги, Telegram и упражнения — в больших плитках ниже. Новая колода, импорт и фото — в <b>«➕ Создать карточки»</b>, экспорт и корзина — в <b>«⋯»</b> у «Мои колоды».';
     // v211: the title on its own line, the text under it, the buttons in one row — and real spaces between them
     // (it read «…по разделамИмпорт…» where the styles did not apply)
-    return `<div class="dc-hint" role="note" data-dc-hint="${where}"><span class="dc-hint-i" aria-hidden="true">🧭</span>
+    return `<div class="dc-hint" role="note" data-dc-hint="${where}"><span class="dc-hint-i" aria-hidden="true">${window.NavIcons ? NavIcons.icon('compass', 22) : ''}</span>
       <div class="dc-hint-t"><p class="dc-hint-h"><b>Всё на месте — просто разложено по разделам</b></p> <p class="dc-hint-p">${txt}</p></div>
       <div class="dc-hint-btns"><button type="button" class="btn dc-hint-ok" data-dc-hint-ok="${where}">Понятно</button>
       <button type="button" class="icon-btn dc-hint-x" data-dc-hint-ok="${where}" aria-label="Скрыть подсказку" title="Скрыть подсказку">✕</button></div></div>`;
@@ -493,7 +530,7 @@
     // v212: «📚 Мои колоды | ⏳ В процессе» — the list under the switch (remembered in Store.settings.homeList)
     const inProc = window.MyPath && MyPath.mountInline ? MyPath.openCount() : -1;
     const listMode = inProc >= 0 && gs.homeList === 'progress' ? 'progress' : 'decks';
-    const tabBtn = (k, ico, label, n, tip) => `<button type="button" class="hl-tab" data-act="home-list" data-list="${k}" aria-pressed="${listMode === k}" title="${tip}"><span aria-hidden="true">${ico}</span><span class="hl-l">${label}</span><span class="chip">${n}</span></button>`;
+    const tabBtn = (k, ico, label, n, tip) => `<button type="button" class="hl-tab" data-act="home-list" data-list="${k}" aria-pressed="${listMode === k}" title="${tip}"><span class="hl-i" aria-hidden="true">${(window.NavIcons && NavIcons.icon(ico, 20)) || ''}</span><span class="hl-l">${label}</span><span class="chip">${n}</span></button>`;
     root.innerHTML = `
       <div class="home-cont" data-home-cont${contHtml ? '' : ' hidden'}>${contHtml}</div>
       <div class="home-top${window.PhraseDay ? ' has-pd' : ''}">
@@ -513,7 +550,7 @@
       ${sectionTilesHtml()}
       <div class="home-xp" data-xp-home-mount><button type="button" class="home-xp-plaque" data-act="examprep" title="Конструктор ответа, темы, аудирование, письмо-жалоба, пробный устный экзамен, учебные маршруты"><span class="home-xp-i" aria-hidden="true">🎓</span><span class="home-xp-t"><b>Подготовка к экзамену</b><small>Norskprøven A1–B2: каркасы ответов, темы, пробный устный экзамен и маршруты на 6–8 недель</small></span><span class="home-xp-go" aria-hidden="true">›</span></button></div>
       <div class="section-title home-decks-h" id="my-decks">${inProc >= 0
-        ? `<div class="home-list-sw" role="group" aria-label="Что показать: колоды или начатое">${tabBtn('decks', '📚', 'Мои колоды', decks.length, 'Все ваши колоды')}${tabBtn('progress', '⏳', 'В процессе', inProc, 'Всё начатое и незаконченное: видео, книги, курсы, колоды')}</div>`
+        ? `<div class="home-list-sw" role="group" aria-label="Что показать: колоды или начатое">${tabBtn('decks', 'cards', 'Мои колоды', decks.length, 'Все ваши колоды')}${tabBtn('progress', 'hourglass', 'В процессе', inProc, 'Всё начатое и незаконченное: видео, книги, курсы, колоды')}</div>`
         : `<h2>Мои колоды</h2><span class="chip">${decks.length}</span>`}<span class="grow"></span>
         <div class="home-search"><input class="input" type="search" data-home-search placeholder="🔍 Найти карточку…" aria-label="Поиск по всем карточкам — норвежский, русский, описание" autocomplete="off"></div>
         <button type="button" class="icon-btn hs-toggle" data-act="search-toggle" aria-label="Найти карточку" title="Найти карточку во всех колодах">🔍</button>
@@ -1099,7 +1136,7 @@
         <button class="btn primary" data-cv="study">${opts.inSession ? '▶ Перейти к этой карте' : '▶ Учить с этой карты'}</button>`,
       onClose: () => document.removeEventListener('keydown', onKey, true),
     });
-    const say = (t, lang) => t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Произнести по-русски' : 'Произнести по-норвежски'}">🔊${lang === 'ru' ? '<small>RU</small>' : ''}</button>` : '';
+    const say = (t, lang) => t ? `<button class="icon-btn sm ex-say" data-act="say" data-say="${U.esc(t)}" data-lang="${lang}" title="${lang === 'ru' ? 'Произнести по-русски' : 'Произнести по-норвежски'}">${SPK()}${lang === 'ru' ? '<small>RU</small>' : ''}</button>` : '';
     /** the translation in the chosen language (🔊 only for Russian: there is no Ukrainian voice) */
     const trBox = c => {
       const l = Study.trLang(), uk = Study.ukOf(c), ru = String(c.ru || '');
@@ -1129,7 +1166,7 @@
           ${c.example ? `<div class="example">${UI.rich(c.example)} ${say(c.example, 'no')}${c.exampleRu ? `<span class="tr">${UI.rich(c.exampleRu)}</span>` : ''}</div>` : ''}
         </div>
         <div class="row cv-tools">
-          <button class="btn sm" data-cv="read" title="Прочитать всю карточку вслух">🔊 Читать всё</button>
+          <button class="btn sm" data-cv="read" title="Прочитать всю карточку вслух">${SPK()}<span>Читать всё</span></button>
           ${ids.length > 1 ? `<button class="btn sm listen-cta" data-cv="listen" title="Слушать карточки подряд, начиная с этой — в наушниках или через динамик">${Listen.HEADPHONES(16, true)} Слушать подряд</button>` : ''}
           <button class="btn sm ${hide ? 'primary' : ''}" data-cv="hide" title="Прятать перевод, пока не нажмёте — чтобы проверять себя (пробел)">🙈 ${hide ? 'Перевод скрыт' : 'Скрывать перевод'}</button>
           <button class="btn sm" data-cv="grammar">📐 Грамматика</button>
@@ -1204,9 +1241,9 @@
         <div class="meta">${UI.statusChip(s)}${Prov.badges(c, 14)}${Store.isLeech(c) ? '<span class="chip debt">🐛</span>' : ''}</div>
       </div>
       <div class="tools">
-        <button class="icon-btn sm" data-act="speak" data-id="${c.id}" title="Прослушать">🔊</button>
-        <button class="icon-btn sm" data-act="edit" data-id="${c.id}" title="Редактировать">✏️</button>
-        <button class="icon-btn sm" data-act="del" data-id="${c.id}" title="Удалить">🗑</button>
+        <button class="icon-btn sm" data-act="speak" data-id="${c.id}" title="Прослушать" aria-label="Прослушать">${SPK()}</button>
+        <button class="icon-btn sm" data-act="edit" data-id="${c.id}" title="Редактировать" aria-label="Редактировать">${(window.NavIcons && NavIcons.icon('edit', 18)) || '✏️'}</button>
+        <button class="icon-btn sm" data-act="del" data-id="${c.id}" title="Удалить" aria-label="Удалить">${(window.NavIcons && NavIcons.icon('trash', 18)) || '🗑'}</button>
       </div>
     </div>`;
   }
@@ -1433,7 +1470,7 @@
         <div class="small muted tr-hint">🌐 Переводчики (между полями) и ${BOT()} нейросети: заполнена одна сторона — переведут во вторую; заполнены обе — сверят перевод. ⚖️ — сравнить все сразу.</div>
         <div data-tr-out></div>
         <div class="row" style="gap:8px">
-          <button class="btn sm" data-act="speak-no">🔊 NO</button><button class="btn sm" data-act="speak-ru">🔊 RU</button>
+          <button class="btn sm" data-act="speak-no">${SPK()}<span>NO</span></button><button class="btn sm" data-act="speak-ru">${SPK()}<span>RU</span></button>
           <button class="btn sm" data-act="swap">⇄ Поменять стороны</button>
           <span class="grow"></span>
           <button class="btn sm ai" data-act="ai-fill">${aiIco(AI.current(), 14)} ${U.esc(AI.name())}: заполнить</button>
@@ -1751,10 +1788,18 @@
         case 'translate': {
           a.disabled = true;
           try {
-            if (c.no && !c.ru) write({ ru: await Images.translate(c.no, 'no|ru') });
-            else if (c.ru && !c.no) write({ no: await Images.translate(c.ru, 'ru|no') });
+            // W7: the translators of THIS place (Pro, own AI key, Microsoft…; Google / MyMemory only on the Mac) — not MyMemory directly
+            const one = async (text, from, to) => {
+              const r = await Translators.translateMany([text], from, to);
+              const t = r && r.out && String(r.out[0] || '').trim();
+              if (t) return t;
+              if (r && r.needSetup) { UI.toastAction('Чтобы переводить прямо здесь, подключите Norsk Kort Pro или свою нейросеть', 'Подключить', () => AI.need('Перевести карточку'), 9000, window.NavIcons ? NavIcons.icon('translate', 18) : ''); return ''; }
+              throw new Error((r && r.error) || 'Переводчик сейчас не ответил — попробуйте ещё раз');
+            };
+            if (c.no && !c.ru) { const t = await one(c.no, 'no', 'ru'); if (t) write({ ru: t }); }
+            else if (c.ru && !c.no) { const t = await one(c.ru, 'ru', 'no'); if (t) write({ no: t }); }
             else UI.toast('Заполните одну сторону — вторая переведётся', 'warn');
-          } catch (err) { UI.toast(err.message, 'bad'); }
+          } catch (err) { UI.toast(U.calm ? U.calm(err.message) : err.message, 'warn'); }
           a.disabled = false; break;
         }
         case 'ai-fill': case 'ai-check': {
@@ -1900,14 +1945,17 @@
     const m = UI.modal({
       title: `${aiIco(results[0] && results[0].by, 22)} ${U.esc(AI.name(results[0] && results[0].by))}: предложения по улучшению`, cls: 'wide',
       body: `
-        <div class="row small"><span class="chip learned">✓ без замечаний: ${okCount}</span><span class="chip due">✎ с предложениями: ${items.length}</span>
+        <div class="row small"><span class="chip learned">без замечаний: ${okCount}</span><span class="chip due">с предложениями: ${items.length}</span>
           <span class="grow"></span><button class="btn sm" data-act="all">Отметить всё</button><button class="btn sm" data-act="none">Снять всё</button>
           <button class="btn sm" data-act="main">Только NO/RU</button></div>
         <p class="small muted" style="margin:0">Отметьте изменения, которые хотите принять. Зачёркнуто — как было, зелёным — как предлагает ${U.esc(AI.name(results[0] && results[0].by))}. После принятия на карточке появится значок проверившей нейросети.</p>
+        ${Views.aiNote({ cls: 'ai-note-top' })}
         ${items.map(r => {
           const c = getCard(r.id) || {};
+          const ans = [(r.issues || []).join('; '), ...Object.entries(r.changes || {}).map(([f, x]) => `${AI.FIELD_NAMES[f] || f}: ${x.old || '—'} → ${x.new}`)].filter(Boolean).join('\n');
           return `<div class="review-item ${r.ok ? 'ok' : 'changed'}" data-id="${r.id}">
-            <div class="title">${r.ok ? '✅' : '⚠️'} <span>${U.esc(String(c.no || '').split('\n')[0].slice(0, 80))}</span><span class="muted">—</span><span>${UI.rich(String(c.ru || '').split('\n')[0].slice(0, 80))}</span></div>
+            <div class="title">${window.NavIcons ? NavIcons.icon(r.ok ? 'check' : 'alert', 18) : ''} <span>${U.esc(String(c.no || '').split('\n')[0].slice(0, 80))}</span><span class="muted">—</span><span>${UI.rich(String(c.ru || '').split('\n')[0].slice(0, 80))}</span>
+              <span class="grow"></span>${Views.reportBtn({ answer: ans, question: `${String(c.no || '').slice(0, 200)} — ${String(c.ru || '').slice(0, 200)}`, task: 'check', provider: AI.name(r.by), compact: true })}</div>
             ${r.issues.length ? `<ul class="issues">${r.issues.map(i => `<li>${U.esc(i)}</li>`).join('')}</ul>` : ''}
             ${fieldOrder.filter(f => r.changes[f]).map(f => `<label class="change">
               <input type="checkbox" data-field="${f}" ${f === 'imagePrompt' || f === 'en' ? '' : 'checked'}>
@@ -2279,7 +2327,9 @@
         all.slice(0, count).forEach(c => Store.addCard(deck.id, Object.assign({}, c, AI.stamp(null, by, { action: 'generate', note: `тема: ${topic} · ${level}` }))));
         Store.touchDeck(deck.id); Store.autoNameDeck(deck.id, topic); // 🏷 a deck without a name: the topic
         m.close();
-        UI.toast(`Создано ${U.cards(Math.min(all.length, count))}`, 'good');
+        const made = all.slice(0, count);
+        if (Views.canReport()) UI.toastAction(`Создано ${U.cards(made.length)} · это ответ нейросети, он может ошибаться`, 'Пожаловаться', () => Net.reportAiAnswer({ answer: made.map(c => `${c.no} — ${c.ru}`).join('\n').slice(0, 3000), question: `тема: ${topic} · ${level}`, task: 'topic-deck', provider: AI.name(by) }), 9000, window.NavIcons ? NavIcons.icon('flag', 18) : '');
+        else UI.toast(`Создано ${U.cards(made.length)}`, 'good');
         App.go('deck', { id: deck.id });
         if (imgs) Views.batchImages(Store.cards(deck.id));
       } catch (e) {
@@ -2598,8 +2648,67 @@
     else UI.toast('Настройки как по умолчанию', 'good');
   };
 
+  /* ---------- W7: Settings off the Mac (public site, store apps) ----------
+   * Bridge subscriptions, the CLI programs, Ollama and the «browser-blocked» keys cannot work there: they are not listed,
+   * one calm line names them instead. The bridge command shows only on the Mac, built from where the app really is. */
+  const NI = (n, sz) => (window.NavIcons ? NavIcons.icon(n, sz || 18) : '');
+  const LM = l => (window.Voices && Voices.langMark ? Voices.langMark(l) : String(l).toUpperCase());
+  const onMacNow = () => (window.Net && Net.onMac ? Net.onMac() : !!(window.AI && AI.onMac && AI.onMac()));
+  /** «python3 "…/bridge/server.py"» for THIS Mac: the bridge's own answer, the opened file's folder, else the home folder */
+  Views.bridgeCmd = function () {
+    const b = (window.AI && AI.bridge) || {};
+    const fromTok = (/^bash "(.*)\/tools\/claude-token\.sh"$/.exec(b.tokenCmd || '') || [])[1];
+    let root = fromTok || '';
+    if (!root && location.protocol === 'file:') { try { root = decodeURIComponent(location.pathname).replace(/\/[^/]*$/, ''); } catch (e) { root = ''; } }
+    return `python3 "${root || '$HOME/Norsk - Russisk'}/bridge/server.py"`;
+  };
+  /** the AIs that cannot work here (off the Mac) → one calm line, '' on the Mac */
+  function macOnlyLine(ids) {
+    if (!ids.length) return '';
+    const names = [...new Set(ids.map(id => (AI.PROVIDERS[id] || {}).short || id))];
+    return `<p class="st-maconly">${NI('laptop', 18)}<span>${U.esc(names.join(', '))} — работает только в версии для Mac.</span></p>`;
+  }
+  /** Pro, the AI consent, the account (with deletion) and the legal links — one block at the top of Settings */
+  function accountPanelHtml() {
+    const C = window.NK_CONFIG || {}, u = window.Account && Account.user;
+    const pro = window.Pro && Pro.panelHtml ? Pro.panelHtml() : '';
+    // Pro.panelHtml has its own «panel» frame: inside ours it is a plain section
+    const proIn = pro.replace(/^<div class="panel acc-pro" style="margin-top:14px">/, '<div class="st-pro acc-pro">');
+    const cloud = window.Account && Account.cloudReady && Account.cloudReady();
+    const acc = u
+      ? `<div class="st-acc-row"><span class="st-acc-who">${NI('user', 20)}<span><b>${U.esc(u.email || 'Вы вошли')}</b><small class="muted">Аккаунт · колоды и прогресс синхронизируются</small></span></span>
+          <span class="st-acc-btns"><button type="button" class="btn sm" data-act="to-account">${NI('user')}<span>Мой кабинет</span></button>
+          <button type="button" class="btn sm ghost st-acc-del" data-act="st-acc-delete">${NI('trash')}<span>Удалить аккаунт</span></button></span></div>`
+      : cloud ? `<div class="st-acc-row"><span class="st-acc-who">${NI('user', 20)}<span><b>Вы не вошли</b><small class="muted">Без входа всё работает на этом устройстве</small></span></span>
+          <span class="st-acc-btns"><button type="button" class="btn sm primary" data-act="st-signin">${NI('cloud')}<span>Войти</span></button></span></div>` : '';
+    const legal = C.termsUrl || C.privacyUrl ? `<p class="st-legal">${C.termsUrl ? `<a href="${U.esc(C.termsUrl)}" target="_blank" rel="noopener">${NI('licence', 16)}<span>Условия использования</span></a>` : ''}${C.privacyUrl ? `<a href="${U.esc(C.privacyUrl)}" target="_blank" rel="noopener">${NI('shield', 16)}<span>Конфиденциальность</span></a>` : ''}</p>` : '';
+    if (!proIn && !acc && !legal) return '';
+    return `<div class="panel st-account" style="grid-column:1/-1">
+      <h3 class="ui-t">${NI('user', 22)}<span>Аккаунт и Norsk Kort Pro</span></h3>${acc}${proIn}${legal}</div>`;
+  }
+  /** «Удалить аккаунт»: first what is deleted and what stays (+ the store subscription), then js/account.js asks once more */
+  Views.deleteAccountFlow = async function () {
+    if (!(window.Account && Account.user && Account.deleteAccount)) return false;
+    const st = window.Pro && Pro.state, store = !!(st && st.active && st.source === 'store'), web = !!(st && st.active && st.source === 'web');
+    const plat = window.Net && Net.where ? Net.where() : 'web';
+    const storeUrl = plat === 'android' ? 'https://play.google.com/store/account/subscriptions?package=no.norskkort.app' : 'https://apps.apple.com/account/subscriptions';
+    const r = await UI.askClose({ title: 'Удалить аккаунт?',
+      text: `<span class="st-del-l"><b>Удалятся:</b> аккаунт, облачная копия колод, карточек и прогресса, картинки и звуки в облаке, история и статус Pro этого аккаунта.</span>
+        <span class="st-del-l"><b>Останутся:</b> колоды и прогресс на этом устройстве — приложение работает и без аккаунта.</span>
+        ${store ? `<span class="st-del-warn">${NI('alert', 18)}<span>Удаление аккаунта не отменяет подписку. Сначала отмените её в ${plat === 'android' ? 'Google Play' : 'App Store'}: <a href="${storeUrl}" target="_blank" rel="noopener">открыть подписки</a>.</span></span>` : ''}
+        ${web ? `<span class="st-del-warn">${NI('alert', 18)}<span>Сначала отмените подписку: Настройки → Norsk Kort Pro → «Управлять подпиской».</span></span>` : ''}`,
+      line: 'Сначала можно скачать копию всех колод — она останется у вас файлом.',
+      actions: [{ label: `${NI('download')}<span>Скачать копию</span>`, value: 'backup' }, { label: `${NI('trash')}<span>Дальше</span>`, value: 'go', cls: 'bad' }], cancel: 'Отмена' });
+    if (r === 'backup') { try { Exporter.backup(); } catch (e) { /* the download failed: nothing is deleted */ } return false; }
+    if (r !== 'go') return false;
+    return Account.deleteAccount();
+  };
+
   Views.settings = function (root) {
     const s = Store.settings;
+    const mac = onMacNow();
+    const hereOk = id => mac || !window.AI || !AI.usableHere || AI.usableHere(id);
+    if (window.Voices && Voices.ensureCss) { try { Voices.ensureCss(); } catch (e) { /* the language badges fall back to plain letters */ } }
     const voiceOpts = lang => {
       const list = TTS.voicesFor(lang);
       const cur = lang === 'no' ? s.voiceNo : lang === 'uk' ? s.voiceUk : s.voiceRu;
@@ -2612,7 +2721,7 @@
     const curId = AI.current();
     const provRow = id => {
       const p = AI.PROVIDERS[id]; const c = AI.cfg(id); const ok = AI.configured(id);
-      const chips = `${p.free ? '<span class="chip learned">бесплатно</span>' : p.cheap ? '<span class="chip learning">дёшево</span>' : ''}${ok ? '<span class="chip learned">✓ подключено</span>' : ''}${curId === id ? '<span class="chip due">★ активна</span>' : ''}`;
+      const chips = `${p.free ? '<span class="chip learned">бесплатно</span>' : p.cheap ? '<span class="chip learning">дёшево</span>' : ''}${ok ? `<span class="chip learned ui-t">${NI('check', 14)}<span>подключено</span></span>` : ''}${curId === id ? `<span class="chip due ui-t">${NI('star', 14)}<span>активна</span></span>` : ''}`;
       let body;
       if (p.type === 'bridge') {
         body = AI.bridge.ok
@@ -2620,7 +2729,7 @@
              <label class="field"><span>Модель</span><select class="input" data-ai="claude.model">${[['', 'По умолчанию'], ['sonnet', 'Sonnet (быстро)'], ['opus', 'Opus (умнее)'], ['haiku', 'Haiku (очень быстро)']].map(([v, l]) => `<option value="${v}" ${(c.model || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>`
           : AI.bridge.up && AI.bridge.auth === 'bad'
             // v212: the login expired — one button (js/claudelogin.js → bridge POST /api/claude/login opens the Terminal)
-            ? `<div class="cl-card"><div class="cl-card-h"><span aria-hidden="true">🔑</span><div><b>Вход в Claude закончился — войдите ещё раз</b>
+            ? `<div class="cl-card"><div class="cl-card-h"><span aria-hidden="true">${NI('key', 22)}</span><div><b>Вход в Claude закончился — войдите ещё раз</b>
                  <small>Один раз примерно на год: откроется окно Терминала и страница Claude в браузере — войдите своим аккаунтом и нажмите «Authorize».</small></div></div>
                ${window.ClaudeLogin ? ClaudeLogin.buttonHtml() : `<div class="small muted">В Терминале: <code style="user-select:all">${U.esc(AI.bridge.tokenCmd || 'bash "tools/claude-token.sh"')}</code></div>`}</div>`
           : AI.bridge.up && !AI.bridge.path && /не найден/i.test(AI.bridge.error || '')
@@ -2631,8 +2740,8 @@
             ? `<div class="small muted">Мост работает, Claude Code найден${AI.bridge.version ? ` (${U.esc(AI.bridge.version)})` : ''}. ${AI.bridge.checking ? 'Проверяю вход — это несколько секунд…' : 'Claude пока не ответил — нажмите «🔌 Проверить».'}</div>`
             : AI.onMac()
               ? `<div style="color:var(--warn)">Мост не запущен.</div>
-               <div class="small muted">В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> — откроется http://localhost:8787</div>`
-              : `<div class="small muted">ℹ️ Claude по подписке работает только в приложении на Mac — в версии на сайте это пока недоступно. Подключите любую другую нейросеть ниже: <b>Gemini</b> и <b>Groq</b> — бесплатно, нужен только ключ.</div>`;
+               <div class="small muted">В Терминале: <code style="user-select:all">${U.esc(Views.bridgeCmd())}</code> — откроется http://localhost:8787</div>`
+              : `<div class="small muted">${U.esc(AI.envBlock ? AI.envBlock(id) || 'работает только в версии для Mac' : 'работает только в версии для Mac')}</div>`;
       } else {
         body = `${p.editableBase || id === 'ollama' ? `<label class="field"><span>Адрес API (OpenAI-совместимый)</span><input class="input" data-ai="${id}.base" value="${U.esc(c.base || p.base)}" placeholder="https://…/v1"></label>` : ''}
           ${p.noKey ? '<div class="small muted">Ключ не нужен.</div>' : `<label class="field"><span>API-ключ ${p.keyUrl ? `· <a href="${p.keyUrl}" target="_blank">получить ключ →</a>` : ''}</span>
@@ -2642,44 +2751,52 @@
       }
       return `<details class="prov" ${curId === id || (p.type === 'bridge' && id === 'claude' && AI.bridge.up && AI.bridge.auth === 'bad') ? 'open' : ''}><summary>${aiIco(id, 20)} <b>${U.esc(p.name)}</b> ${chips}</summary>
         <div class="col" style="padding:10px 2px 4px">${p.note ? `<div class="small muted">${U.esc(p.note)}</div>` : ''}${body}
-          <div class="row"><button class="btn sm ai" data-act="test-prov" data-id="${id}">🔌 Проверить</button>
-          <button class="btn sm" data-act="use-prov" data-id="${id}">★ Сделать активной</button><span class="small" data-prov-status="${id}"></span></div></div></details>`;
+          <div class="row"><button class="btn sm ai" data-act="test-prov" data-id="${id}">${NI('plug')}<span>Проверить</span></button>
+          <button class="btn sm" data-act="use-prov" data-id="${id}">${NI('star')}<span>Сделать активной</span></button><span class="small" data-prov-status="${id}"></span></div></div></details>`;
     };
+    const provIds = Object.keys(AI.PROVIDERS), shownIds = provIds.filter(hereOk), macOnlyIds = provIds.filter(id => !hereOk(id));
+    const proOn = !!(window.Pro && Pro.offered && Pro.offered());
+    const autoLabel = mac ? 'Авто (Claude по подписке, иначе первая подключённая)' : proOn ? 'Авто (Norsk Kort Pro, иначе первая подключённая)' : 'Авто (первая подключённая)';
     root.innerHTML = `
-      <h1>⚙️ Настройки</h1>
+      <h1 class="ui-t st-h1">${NI('gear', 30)}<span>Настройки</span></h1>
       ${UI.keysNoteHtml()}
       <div class="settings-grid" style="margin-top:16px">
+        ${accountPanelHtml()}
         <div class="panel" style="grid-column:1/-1">
           <h3 class="set-ai-h">${BOT(22)} Нейросети — проверка и улучшение карточек</h3>
           <div class="field-row" style="margin-top:10px">
-            <label class="field"><span>👤 Ваше имя</span><input class="input" data-text="userName" value="${U.esc(s.userName)}" placeholder="Alex"></label>
-            <label class="field"><span>Тариф Claude</span><input class="input" data-text="plan" value="${U.esc(s.plan)}" list="plans"><datalist id="plans"><option value="Max"><option value="Pro"><option value="Team"></datalist></label>
+            <label class="field"><span>Ваше имя</span><input class="input" data-text="userName" value="${U.esc(s.userName)}" placeholder="Alex"></label>
+            ${mac ? `<label class="field"><span>Тариф Claude</span><input class="input" data-text="plan" value="${U.esc(s.plan)}" list="plans"><datalist id="plans"><option value="Max"><option value="Pro"><option value="Team"></datalist></label>` : ''}
           </div>
           <label class="field" style="margin-top:10px"><span>Какая нейросеть проверяет карточки сейчас</span>
             <select class="input" data-sel="aiProvider">
-              <option value="auto" ${(s.aiProvider || 'auto') === 'auto' ? 'selected' : ''}>Авто (Claude по подписке, иначе первая подключённая)</option>
-              ${Object.entries(AI.PROVIDERS).map(([id, p]) => `<option value="${id}" ${s.aiProvider === id ? 'selected' : ''}>${AI.configured(id) ? '✓ ' : ''}${U.esc(p.name)}${p.free ? ' — бесплатно' : ''}</option>`).join('')}
+              <option value="auto" ${(s.aiProvider || 'auto') === 'auto' ? 'selected' : ''}>${autoLabel}</option>
+              ${proOn ? `<option value="pro" ${s.aiProvider === 'pro' || s.aiProvider === 'plus' ? 'selected' : ''}>${AI.configured('pro') ? '✓ ' : ''}Norsk Kort Pro — без своих ключей</option>` : ''}
+              ${provIds.filter(id => hereOk(id) || s.aiProvider === id).map(id => { const p = AI.PROVIDERS[id]; return `<option value="${id}" ${s.aiProvider === id ? 'selected' : ''}>${AI.configured(id) ? '✓ ' : ''}${U.esc(p.name)}${p.free ? ' — бесплатно' : ''}</option>`; }).join('')}
             </select></label>
-          <p class="small muted">На каждой проверенной карточке остаётся значок нейросети, которая её проверила (можно проверять несколькими — будут видны все значки). Ключи хранятся только в этом браузере и не попадают в экспорт.</p>
-          <div class="prov-list">${Object.keys(AI.PROVIDERS).map(provRow).join('')}</div>
-          ${set('🔁 Автопереключение нейросетей и переводчиков — всегда включено', 'Закончился лимит или ошибка — сразу отвечает следующая подключённая нейросеть (бесплатные в приоритете), а та, у которой кончился лимит, отдыхает и не тормозит перевод. Так же переключаются переводчики. На карточке — значок той, что реально ответила. Подключите несколько бесплатных — и перевод не остановится.', '<span class="chip learned">✓ всегда</span>')}
+          <p class="small muted">На каждой проверенной карточке остаётся значок нейросети, которая её проверила (можно проверять несколькими — будут видны все значки). Ключи хранятся только на этом устройстве и не попадают в экспорт.</p>
+          <div class="prov-list">${shownIds.map(provRow).join('')}</div>
+          ${mac ? '' : macOnlyLine(macOnlyIds)}
+          ${set('Автопереключение нейросетей и переводчиков — всегда включено', 'Закончился лимит или ошибка — сразу отвечает следующая подключённая нейросеть (бесплатные в приоритете), а та, у которой кончился лимит, отдыхает и не тормозит перевод. Так же переключаются переводчики. На карточке — значок той, что реально ответила. Подключите несколько бесплатных — и перевод не остановится.', `<span class="chip learned ui-t">${NI('check', 14)}<span>всегда</span></span>`)}
           ${set('Существительные с артиклем', 'Нейросеть добавляет en/ei/et и «å» у глаголов', sw('aiArticles'))}
           ${set('Проверять при импорте', 'Включать проверку нейросетью в окне импорта по умолчанию', sw('aiAutoImport'))}
           ${set('Проверять новые карточки', 'После сохранения новой карточки', sw('aiAutoSave'))}
         </div>
         <div class="panel" style="grid-column:1/-1">
-          <h3>🌐 Переводчики — значки на карточке и в редакторе</h3>
+          <h3 class="ui-t">${NI('translate', 22)}<span>Переводчики — значки на карточке и в редакторе</span></h3>
           <p class="small muted">Заполнена одна сторона — значок переведёт во вторую; заполнены обе — сверит перевод (✓ совпадает / ≠ отличается). ⚖️ сравнивает все сразу. Кто переводил — видно по значкам на карточке и в истории.</p>
           <div class="dict-tr">
             ${set('Переводчик для статей словарей', `Чем переводить статьи Ordbøkene и текст, вставленный из словарей. Сейчас переводит: <b>${Translators.icon(Translators.dictMain(), 14)} ${U.esc(Translators.provNames([Translators.dictMain()]))}</b>${s.dictTranslator && s.dictTranslator !== 'auto' && Translators.dictMain() !== s.dictTranslator ? ' — выбранный переводчик недоступен (нет ключа / нейросети), поэтому используется следующий' : ''}. Если он не ответит — подхватит следующий.`,
-              sel('dictTranslator', [['auto', 'Авто: DeepL, если есть ключ, иначе Google'], ['ai', 'Нейросеть — самый точный (нужна подключённая нейросеть)'], ['deepl', 'DeepL — точнее Google (нужен ключ и мост на Mac)'], ['google', 'Google — бесплатно, но неточно в выражениях'], ['mozhi', 'Mozhi — бесплатно, без ключа (когда Google ограничил переводы)'], ['microsoft', 'Microsoft (нужен ключ Azure)'], ['mymemory', 'MyMemory — бесплатно']]))}
-            ${Translators.dictMain() !== 'ai' ? `<div class="mt-warn" style="margin-top:6px">⚠️ <span>Машинные переводчики (Google, MyMemory, Microsoft и даже DeepL) — <b>неточные</b>: устойчивые выражения часто переводят дословно и неправильно. Перепроверяйте перевод нейросетью или по словарям (NAOB, LEXIN, Glosbe).</span></div>` : ''}
+              sel('dictTranslator', mac
+                ? [['auto', 'Авто: DeepL, если есть ключ, иначе Google'], ['ai', 'Нейросеть — самый точный (нужна подключённая нейросеть)'], ['deepl', 'DeepL — точнее Google (нужен ключ и мост на Mac)'], ['google', 'Google — бесплатно, но неточно в выражениях'], ['mozhi', 'Mozhi — бесплатно, без ключа (когда Google ограничил переводы)'], ['microsoft', 'Microsoft (нужен ключ Azure)'], ['mymemory', 'MyMemory — бесплатно']]
+                : [['auto', 'Авто: Norsk Kort Pro или ваша нейросеть, иначе Microsoft'], ['ai', 'Нейросеть — самый точный (Pro или свой ключ)'], ['microsoft', 'Microsoft (нужен ключ Azure)']]))}
+            ${Translators.dictMain() !== 'ai' ? `<div class="mt-warn" style="margin-top:6px">${NI('alert', 18)} <span>Машинные переводчики (Google, MyMemory, Microsoft и даже DeepL) — <b>неточные</b>: устойчивые выражения часто переводят дословно и неправильно. Перепроверяйте перевод нейросетью или по словарям (NAOB, LEXIN, Glosbe).</span></div>` : ''}
           </div>
-          <div class="prov-list">${Object.entries(Translators.LIST).map(([id, t]) => `
+          <div class="prov-list">${Object.entries(Translators.LIST).filter(([, t]) => !t.hidden).map(([id, t]) => `
             <div class="prov">
               <label class="switch" style="width:100%"><input type="checkbox" data-trtoggle="${id}" ${(s.translators || []).includes(id) ? 'checked' : ''}><span class="track"></span>
                 <span>${Translators.icon(id, 18)} <b>${U.esc(t.ai ? 'ИИ-перевод (' + AI.name() + ')' : t.name)}</b>${t.free ? ' <span class="chip learned">бесплатно</span>' : ''}${t.web ? ' <span class="chip">сайт</span>' : ''}<br><span class="small muted">${U.esc(t.note)}</span></span></label>
-              ${id === 'deepl' ? `<label class="field" style="margin-top:8px"><span>Ключ DeepL API Free · <a href="${t.keyUrl}" target="_blank">получить →</a> · ${AI.onMac() ? 'работает через мост на Mac; без ключа/моста откроется deepl.com' : 'перевод в карточке — только в приложении на Mac; здесь откроется deepl.com с вашим словом'}</span>
+              ${id === 'deepl' ? `<label class="field" style="margin-top:8px"><span>Ключ DeepL API Free · <a href="${t.keyUrl}" target="_blank">получить →</a> · ${mac ? 'работает через мост на Mac; без ключа/моста откроется deepl.com' : 'перевод в карточке — только в версии для Mac; здесь откроется deepl.com с вашим словом'}</span>
                 <input class="input" type="password" data-text="deeplKey" value="${U.esc(s.deeplKey || '')}" placeholder="xxxxxxxx-…:fx" autocomplete="off"></label>` : ''}
               ${id === 'microsoft' ? `<div class="field-row" style="margin-top:8px"><label class="field"><span>Ключ Azure Translator · <a href="${t.keyUrl}" target="_blank">как получить →</a></span>
                 <input class="input" type="password" data-text="msKey" value="${U.esc(s.msKey || '')}" autocomplete="off"></label>
@@ -2687,19 +2804,19 @@
             </div>`).join('')}</div>
         </div>
         <div class="panel" style="grid-column:1/-1">
-          <h3>🖐 Жесты и свайпы — телефоны, планшеты, мышь, трекпад MacBook</h3>
+          <h3 class="ui-t">${NI('hand', 22)}<span>Жесты и свайпы — телефоны, планшеты, мышь, трекпад MacBook</span></h3>
           <div class="swipe-settings">
             <div>
               ${set('Схема свайпов', 'Что делает каждое направление', sel('swipeMode', [['lr', '→ знаю · ← не знаю (по умолчанию)'], ['lr-rev', '← знаю · → не знаю (для левшей)'], ['ud', '↑ знаю · ↓ не знаю'], ['four', '4 направления: → хорошо · ← снова · ↑ легко · ↓ трудно'], ['flip-first', 'Сначала свайп переворачивает, потом оценка'], ['off', 'Без свайпов — только кнопки']]))}
-              ${set('Анимация улёта карточки', '', sel('swipeStyle', [['tinder', '🃏 Tinder — наклон и улёт'], ['slide', '➡️ Плавный сдвиг'], ['flick3d', '🔄 3D-поворот'], ['fade', '✨ Растворение'], ['stack', '📚 Под колоду'], ['bounce', '🎈 Пружина']]))}
+              ${set('Анимация улёта карточки', '', sel('swipeStyle', [['tinder', 'Tinder — наклон и улёт'], ['slide', 'Плавный сдвиг'], ['flick3d', '3D-поворот'], ['fade', 'Растворение'], ['stack', 'Под колоду'], ['bounce', 'Пружина']]))}
               ${set('Чувствительность', 'Насколько далеко тянуть; быстрый взмах тоже засчитывается', sel('swipeSensitivity', [['low', 'Низкая — тянуть далеко'], ['medium', 'Средняя'], ['high', 'Высокая — короткий свайп']]))}
-              ${set('Долгое нажатие на карточку', '', sel('longPressAction', [['speak', '🔊 Озвучить'], ['flip', '↻ Перевернуть'], ['edit', '✏️ Редактировать'], ['explain', '🤖 Объяснить'], ['none', 'Ничего']]))}
-              ${set('Двойной тап', 'Если включён — одиночный тап переворачивает с крошечной задержкой', sel('doubleTapAction', [['none', 'Ничего'], ['know', '✓ Знаю'], ['speak', '🔊 Озвучить'], ['edit', '✏️ Редактировать']]))}
+              ${set('Долгое нажатие на карточку', '', sel('longPressAction', [['speak', 'Озвучить'], ['flip', 'Перевернуть'], ['edit', 'Редактировать'], ['explain', 'Объяснить (нейросеть)'], ['none', 'Ничего']]))}
+              ${set('Двойной тап', 'Если включён — одиночный тап переворачивает с крошечной задержкой', sel('doubleTapAction', [['none', 'Ничего'], ['know', 'Знаю'], ['speak', 'Озвучить'], ['edit', 'Редактировать']]))}
               ${set('Свайп двумя пальцами по трекпаду (MacBook)', 'Влево/вправо — как свайп на телефоне', sw('trackpadSwipe'))}
             </div>
             <div class="swipe-demo-wrap">
               <div class="swipe-demo-stage"><div class="swipe-demo" data-demo>
-                <div class="sd-flag">🇳🇴</div><b>et eple</b><span class="ru-text">яблоко</span></div></div>
+                <div class="sd-flag">${window.Voices && Voices.langMark ? Voices.langMark('no') : 'NO'}</div><b>et eple</b><span class="ru-text">яблоко</span></div></div>
               <div class="row" style="justify-content:center;gap:6px">
                 <button class="btn sm" data-demo-dir="left">← Пример</button>
                 <button class="btn sm" data-demo-dir="up">↑</button><button class="btn sm" data-demo-dir="down">↓</button>
@@ -2710,63 +2827,66 @@
           </div>
         </div>
         <div class="panel">
-          <h3>🎯 Дневная цель</h3>
+          <h3 class="ui-t">${NI('target', 22)}<span>Дневная цель</span></h3>
           ${Progress.goalSettingsHtml()}
         </div>
         <div class="panel">
-          <h3>📅 Расписание</h3>
+          <h3 class="ui-t">${NI('calendar', 22)}<span>Расписание</span></h3>
           ${Progress.scheduleHtml()}
         </div>
         <div class="panel">
-          <h3>🧠 Изучение</h3>
-          ${set('🌐 Язык перевода: 🇷🇺 Русский · 🇺🇦 Українська · 🇷🇺+🇺🇦 Оба', 'Какой перевод показывать на карточках и спрашивать при изучении. Если у карточки ещё нет украинского перевода — показан русский с пометкой 🇷🇺. В режиме «Ввод» ответ принимается и по-русски, и по-украински.', UI.seg('transLang', TRLANGS, Study.trLang()))}
+          <h3 class="ui-t">${NI('cards', 22)}<span>Изучение</span></h3>
+          ${set('Язык перевода: русский, украинский или оба', 'Какой перевод показывать на карточках и спрашивать при изучении. Если у карточки ещё нет украинского перевода — показан русский с пометкой RU. В режиме «Ввод» ответ принимается и по-русски, и по-украински.', UI.seg('transLang', [['ru', `${LM('ru')} Русский`], ['uk', `${LM('uk')} Українська`], ['both', `${LM('ru')}${LM('uk')} Оба`]], Study.trLang()))}
           ${set('Повторять «не знаю» в той же сессии', 'Карта вернётся через несколько карт', sw('requeue'))}
           ${set('Выучено после N верных подряд', '', num('learnedStreak', 1, 20))}
           ${set('Новых карт в день', 'Для «умного повторения»', num('newPerDay', 0, 1000))}
-          ${set('🛟 Защита от завала повторений', `Когда просроченных повторений больше ${Study.backlogLimit()}, новые слова ставятся на паузу, пока вы не догоните`, UI.switchHtml('backlogGuard', s.backlogGuard !== false, ''))}
+          ${set('Защита от завала повторений', `Когда просроченных повторений больше ${Study.backlogLimit()}, новые слова ставятся на паузу, пока вы не догоните`, UI.switchHtml('backlogGuard', s.backlogGuard !== false, ''))}
           ${set('Целевое удержание FSRS', `Выше — чаще повторения<div class="fsrs-box" data-fsrs-box>${FSRSOpt.settingsHtml()}</div>`, num('retention', 0.7, 0.99, 0.01))}
-          ${set('Трудная карта после N забываний', 'Помечается 🐛', num('leechLapses', 2, 50))}
+          ${set('Трудная карта после N забываний', 'Помечается как трудная', num('leechLapses', 2, 50))}
           ${set('4 кнопки (Снова / Трудно / Хорошо / Легко)', 'Вместо «Знаю / Не знаю»', sw('fourButtons'))}
           ${set('Разброс интервалов (fuzz)', 'Чтобы карты не копились в один день: интервал чуть сдвигается на день, где повторений меньше', sw('fuzz'))}
           ${set('Режим ввода: допускать опечатки', 'и ae/o/aa вместо æ/ø/å', sw('typeTolerance'))}
           ${set('Картинка на карточке', '', sel('imageSide', [['back', 'На обороте'], ['front', 'На лицевой'], ['both', 'На обеих'], ['none', 'Не показывать']]))}
         </div>
         <div class="panel">
-          <h3>🔊 Озвучка</h3>
+          <h3 class="ui-t">${NI('speaker', 22)}<span>Озвучка</span></h3>
           ${Voices.settingsHtml()}
           ${set('Скорость', '', `<input type="range" min="0.5" max="1.4" step="0.05" data-num="ttsRate" value="${s.ttsRate}">`)}
           ${set('Автоматически произносить норвежский', 'При показе норвежской стороны', sw('autoSpeak'))}
-          <div class="row"><button class="btn" data-act="test-no">🇳🇴 Тест: «God morgen»</button><button class="btn" data-act="test-uk">🇺🇦 Тест: «Доброго ранку»</button><button class="btn" data-act="test-ru">🇷🇺 Тест: «Доброе утро»</button></div>
-          <div class="row"><button class="btn listen-cta" data-listen-choose>${Listen.HEADPHONES(18, true)} Слушать в наушниках</button><button class="btn ghost" data-listen-intro>❔ Как слушать</button></div>
+          <div class="row"><button class="btn" data-act="test-no">${LM('no')} Тест: «God morgen»</button><button class="btn" data-act="test-uk">${LM('uk')} Тест: «Доброго ранку»</button><button class="btn" data-act="test-ru">${LM('ru')} Тест: «Доброе утро»</button></div>
+          <div class="row"><button class="btn listen-cta" data-listen-choose>${Listen.HEADPHONES(18, true)} Слушать в наушниках</button><button class="btn ghost" data-listen-intro>${NI('help')}<span>Как слушать</span></button></div>
         </div>
         <div class="panel">
-          <h3>🎙 Распознавание речи</h3>
+          <h3 class="ui-t">${NI('mic', 22)}<span>Распознавание речи</span></h3>
           <p class="small muted">Модель NB-Whisper слушает норвежскую речь прямо на устройстве: проверка произношения, диктант и субтитры к передачам без субтитров.</p>
           ${set('Качество распознавания', 'Лёгкое — быстрее, для телефонов · Точное — меньше ошибок, для компьютера с видеокартой', '')}
           <div data-asr-quality></div>
         </div>
         <div class="panel">
-          <h3>🖼 Картинки</h3>
-          ${set('Источник', 'Картинка есть всегда: если ИИ недоступен — фото, иначе эмодзи-картинка', sel('imageProvider', [['pollinations', '🎨 ИИ-рисунок → фото → эмодзи'], ['wikimedia', '📷 Реальное фото → эмодзи'], ['emoji', '😀 Эмодзи-картинки (мгновенно, офлайн)'], ['off', 'Выключено']]))}
-          <label class="field"><span>🔑 Ключ Pollinations — бесплатно, снимает лимит «1 ИИ-картинка в 45 сек» · <a href="https://enter.pollinations.ai" target="_blank">получить →</a></span>
+          <h3 class="ui-t">${NI('image', 22)}<span>Картинки</span></h3>
+          ${set('Источник', 'Картинка есть всегда: если ИИ недоступен — фото, иначе эмодзи-картинка', sel('imageProvider', [['pollinations', 'ИИ-рисунок → фото → эмодзи'], ['wikimedia', 'Реальное фото → эмодзи'], ['emoji', 'Эмодзи-картинки (мгновенно, офлайн)'], ['off', 'Выключено']]))}
+          <label class="field"><span>Ключ Pollinations — бесплатно, снимает лимит «1 ИИ-картинка в 45 сек» · <a href="https://enter.pollinations.ai" target="_blank">получить →</a></span>
             <input class="input" type="password" data-text="pollinationsToken" value="${U.esc(s.pollinationsToken || '')}" placeholder="необязательно" autocomplete="off"></label>
-          <div class="row" style="gap:6px;align-items:center"><button class="btn sm" data-act="gallery-keys">📌 Галерея картинок: свои ключи Unsplash / Pexels</button><span class="small muted">необязательно — без ключей галерея ищет в Openverse и Wikimedia</span></div>
+          <div class="row" style="gap:6px;align-items:center"><button class="btn sm" data-act="gallery-keys">${NI('image')}<span>Галерея картинок: свои ключи Unsplash / Pexels</span></button><span class="small muted">необязательно — без ключей галерея ищет в Openverse и Wikimedia</span></div>
           ${set('Стиль', '', sel('imageStyle', Object.entries(Images.STYLE_NAMES)))}
           ${set('Автоматически создавать картинки', 'Для новых карт и при изучении', sw('autoImages'))}
           <label class="field"><span>Шаблон URL генератора ({prompt}, {seed})</span><input class="input" data-text="imageTemplate" value="${U.esc(s.imageTemplate)}"></label>
         </div>
         <div class="panel">
-          <h3>☁️ Облако — вход и синхронизация</h3>
-          <p class="small muted">Личный кабинет со входом по почте, через Google, Apple, Facebook, X и синхронизация колод между телефоном и компьютером. Нужен бесплатный проект Supabase: supabase.com → New project (регион Stockholm) → Settings → API → скопируйте <b>Project URL</b> и <b>anon public</b> ключ. Ключ <b>service_role</b> сюда не вставляйте никогда. Для синхронизации один раз выполните в Supabase → SQL Editor скрипт <b>supabase/norsk-kort-sync.sql</b> (пошагово — docs/cloud-sync-setup.md). Ключи API в облако не попадают никогда.</p>
+          <h3 class="ui-t">${NI('cloud', 22)}<span>Облако — вход и синхронизация</span></h3>
+          <p class="small muted">Вход по почте, через Google или Apple и синхронизация колод между телефоном и компьютером${window.NKConfig && NKConfig.builtin && NKConfig.builtin() ? ' — уже подключено, ничего настраивать не нужно' : ''}.</p>
+          <details class="st-adv" ${(s.cloudUrl || '').trim() ? 'open' : ''}><summary>Свой сервер Supabase — для опытных</summary>
+          <p class="small muted">Нужен бесплатный проект Supabase: supabase.com → New project (регион Stockholm) → Settings → API → скопируйте <b>Project URL</b> и <b>anon public</b> ключ. Ключ <b>service_role</b> сюда не вставляйте никогда. Для синхронизации один раз выполните в Supabase → SQL Editor скрипт <b>supabase/norsk-kort-sync.sql</b> (пошагово — docs/cloud-sync-setup.md). Ключи API в облако не попадают никогда.</p>
           <label class="field"><span>Project URL</span><input class="input" data-text="cloudUrl" value="${U.esc(s.cloudUrl || '')}" placeholder="https://xxxx.supabase.co"></label>
           <label class="field"><span>anon public key (не секретный — так задумано Supabase)</span><input class="input" data-text="cloudAnon" value="${U.esc(s.cloudAnon || '')}" placeholder="eyJ…" autocomplete="off"></label>
           <label class="field"><span>Адрес приложения для «Поделиться» (например, https://имя.github.io/norsk-kort/)</span><input class="input" data-text="appUrl" value="${U.esc(s.appUrl || '')}" placeholder="определяется автоматически на GitHub"></label>
-          <div class="row" style="gap:6px"><button class="btn sm" data-act="to-account">👤 Мой кабинет</button><button class="btn sm" data-act="share-app">${ShareApp.SHARE_SVG(16)} Поделиться приложением</button></div>
+          </details>
+          <div class="row" style="gap:6px"><button class="btn sm" data-act="to-account">${NI('user')}<span>Мой кабинет</span></button><button class="btn sm" data-act="share-app">${ShareApp.SHARE_SVG(16)} Поделиться приложением</button></div>
         </div>
         <div class="panel">
-          <h3>🗣 Переводчик в наушниках</h3>
+          <h3 class="ui-t">${NI('headphones', 22)}<span>Переводчик в наушниках</span></h3>
           ${Interp.settingsHtml()}
-          <button class="btn sm primary" data-act="interp-try">${Interp.on ? '■ Выключить' : '🎙 Включить переводчик'}</button>
+          <button class="btn sm primary" data-act="interp-try">${Interp.on ? `${NI('stop')}<span>Выключить</span>` : `${NI('mic')}<span>Включить переводчик</span>`}</button>
         </div>
         <div class="panel">
           <h3>${YouTube.YT_SVG(20)} YouTube</h3>
@@ -2776,25 +2896,25 @@
           <p class="tiny muted">Бесплатно: около 100 поисков в день — этого хватает надолго: каждое слово ищется один раз и запоминается на 30 дней, а если лимит всё же закончится, приложение само переключится на ссылки до завтра. Как получить: Google Cloud → создать проект → «Enable» YouTube Data API v3 → Credentials → Create API key. Лучше ограничить ключ: Application restrictions → Websites → адрес приложения. Ключ хранится только в этом браузере и не попадает в резервные копии.</p>
         </div>
         <div class="panel">
-          <h3>🎨 Внешний вид</h3>
-          <button type="button" class="st-looks" data-act="looks-open" aria-haspopup="dialog"><span class="st-looks-i" aria-hidden="true">🎨</span><span class="st-looks-t"><b>Оформление</b><small>темы приложения — викинги, тролли, праздники — и вид карточек</small></span><span class="st-looks-go" aria-hidden="true">›</span></button>
-          ${set('Тема', '', sel('theme', [['dark', '🌙 Тёмная'], ['light', '☀️ Светлая'], ['auto', 'Как в системе']]))}
-          ${set('🗂 Порядок колод', 'В боковом меню и в «Моих колодах». «Недавние сверху» — колода, которую вы учите или открывали, поднимается первой. 📌 Закреплённые (в «⋯» колоды) — всегда наверху', sel('deckSort', [['recent', 'Недавние сверху'], ['created', 'Как создавал'], ['abc', 'По алфавиту']]))}
+          <h3 class="ui-t">${NI('palette', 22)}<span>Внешний вид</span></h3>
+          <button type="button" class="st-looks" data-act="looks-open" aria-haspopup="dialog"><span class="st-looks-i" aria-hidden="true">${NI('palette', 24)}</span><span class="st-looks-t"><b>Оформление</b><small>темы приложения — викинги, тролли, праздники — и вид карточек</small></span><span class="st-looks-go" aria-hidden="true">›</span></button>
+          ${set('Тема', '', sel('theme', [['dark', 'Тёмная'], ['light', 'Светлая'], ['auto', 'Как в системе']]))}
+          ${set('Порядок колод', 'В боковом меню и в «Моих колодах». «Недавние сверху» — колода, которую вы учите или открывали, поднимается первой. Закреплённые (в «⋯» колоды) — всегда наверху', sel('deckSort', [['recent', 'Недавние сверху'], ['created', 'Как создавал'], ['abc', 'По алфавиту']]))}
           ${set('Русский текст — голубым', 'Норвежский белым, русский светло-голубым (и в скобках тоже)', sw('highlightRu'))}
         </div>
         ${window.ArtCards ? ArtCards.settingsHtml() : ''}
         <div class="panel" style="grid-column:1/-1">
-          <h3>🧭 Что работает и на сколько</h3>
+          <h3 class="ui-t">${NI('compass', 22)}<span>Что работает и на сколько</span></h3>
           <p class="small muted">Состояние всех сервисов с вашими текущими настройками и что сделать, чтобы каждый работал на 100%.</p>
           ${Guides.statusHtml()}
-          <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><button class="btn sm primary" data-help="" title="Все темы: как учить, слушать, смотреть с субтитрами, Telegram… — и показ на экране">❓ Как пользоваться</button><button class="btn sm" data-act="guides-reset" title="Снова показывать подсказки, приветственные окна и напоминания">💡 Показать подсказки снова</button></div>
+          <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><button class="btn sm primary" data-help="" title="Все темы: как учить, слушать, смотреть с субтитрами, Telegram… — и показ на экране">${NI('help')}<span>Как пользоваться</span></button><button class="btn sm" data-act="guides-reset" title="Снова показывать подсказки, приветственные окна и напоминания">${NI('bulb')}<span>Показать подсказки снова</span></button></div>
         </div>
         <div class="panel" style="grid-column:1/-1">
-          <h3>📚 Полезные ресурсы для норвежского</h3>
+          <h3 class="ui-t">${NI('book', 22)}<span>Полезные ресурсы для норвежского</span></h3>
           <p class="small muted">Проверенные бесплатные источники. Словари со значком ✓ уже встроены в карточки.</p>
           <div class="res-grid">${[
-            ['ordbokene.no', 'https://ordbokene.no', 'Ordbøkene ✓', 'Официальный словарь bokmål/nynorsk — встроен (📖)'],
-            ['tatoeba.org', 'https://tatoeba.org/ru/sentences/search?from=nob&to=rus', 'Tatoeba ✓', 'Живые предложения NO→RU — встроено (💬)'],
+            ['ordbokene.no', 'https://ordbokene.no', 'Ordbøkene ✓', 'Официальный словарь bokmål/nynorsk — встроен в карточки'],
+            ['tatoeba.org', 'https://tatoeba.org/ru/sentences/search?from=nob&to=rus', 'Tatoeba ✓', 'Живые предложения NO→RU — встроено в карточки'],
             ['lexin.oslomet.no', 'https://lexin.oslomet.no/', 'LEXIN', 'Норвежско-русский словарь OsloMet для иммигрантов'],
             ['naob.no', 'https://naob.no', 'NAOB', 'Большой академический словарь норвежского'],
             ['ntnu.edu', 'https://www.ntnu.edu/now', 'NTNU «Now You\'re Talking»', 'Бесплатный университетский курс норвежского (A1–A2)'],
@@ -2803,23 +2923,23 @@
             ['tv.nrk.no', 'https://tv.nrk.no', 'NRK TV', 'Норвежское ТВ с субтитрами — практика на слух'],
             ['podcasts.apple.com', 'https://podcasts.apple.com/search?term=L%C3%A6r%20norsk%20n%C3%A5', '«Lær Norsk Nå» подкаст', 'Подкаст для изучающих норвежский'],
             ['forvo.com', 'https://forvo.com/languages/no/', 'Forvo', 'Произношение слов носителями'],
-            ['commons.wikimedia.org', 'https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation-nor', 'Lingua Libre ✓', 'Записи носителей — встроено (🎙 Живой голос)'],
+            ['commons.wikimedia.org', 'https://commons.wikimedia.org/wiki/Category:Lingua_Libre_pronunciation-nor', 'Lingua Libre ✓', 'Записи носителей — встроено («Живой голос»)'],
             ['sprakradet.no', 'https://www.sprakradet.no', 'Språkrådet', 'Языковой совет Норвегии: правила и нормы'],
           ].map(([d, u, n, t]) => `<a class="res-item" href="${u}" target="_blank" rel="noopener">
-              <img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" width="22" height="22" alt="" onerror="this.replaceWith(document.createTextNode('🌐'))">
+              <img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" width="22" height="22" alt="" onerror="this.style.visibility='hidden'">
               <span><b>${U.esc(n)}</b><small>${U.esc(t)}</small></span></a>`).join('')}</div>
         </div>
         <div class="panel st-reset">
-          <h3>↺ Настройки по умолчанию</h3>
+          <h3 class="ui-t">${NI('refresh', 22)}<span>Настройки по умолчанию</span></h3>
           <p class="small muted">Вернёт обычные значения настроек: как учить, направление, какие карты и сколько, подсказки, голоса, жесты, картинки и оформление. Колоды, карточки, прогресс, ключи и аккаунты останутся как есть.</p>
-          <button type="button" class="btn" data-act="settings-reset">↺ Вернуть настройки по умолчанию</button>
+          <button type="button" class="btn" data-act="settings-reset">${NI('refresh')}<span>Вернуть настройки по умолчанию</span></button>
         </div>
         <div class="panel">
-          <h3>💾 Данные</h3>
+          <h3 class="ui-t">${NI('disk', 22)}<span>Данные</span></h3>
           <p class="small muted">Всё хранится локально в браузере (IndexedDB). Делайте резервные копии.</p>
-          <div class="row"><button class="btn" data-act="backup">💾 Скачать бэкап</button><button class="btn" data-act="restore">♻️ Восстановить из файла</button>
-          <button class="btn" data-act="sample">🎁 Добавить пример колоды</button><button class="btn" data-act="trash">🗑 Корзина (${Store.trashCount()})</button><button class="btn bad" data-act="wipe">Удалить всё</button></div>
-          ${window.Resume ? `<div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" data-act="resume-forget" title="Видео, передачи, подкасты, книги и прослушивание колод снова начнутся сначала">📍 Забыть все места продолжения</button><span class="small muted">${(n => n ? `запомнено мест: ${n}` : 'пока ничего не запомнено')(Resume.count())}</span></div>` : ''}
+          <div class="row"><button class="btn" data-act="backup">${NI('download')}<span>Скачать бэкап</span></button><button class="btn" data-act="restore">${NI('upload')}<span>Восстановить из файла</span></button>
+          <button class="btn" data-act="sample">${NI('cards')}<span>Добавить пример колоды</span></button><button class="btn" data-act="trash">${NI('trash')}<span>Корзина (${Store.trashCount()})</span></button><button class="btn bad" data-act="wipe">Удалить всё</button></div>
+          ${window.Resume ? `<div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" data-act="resume-forget" title="Видео, передачи, подкасты, книги и прослушивание колод снова начнутся сначала">${NI('pin')}<span>Забыть все места продолжения</span></button><span class="small muted">${(n => n ? `запомнено мест: ${n}` : 'пока ничего не запомнено')(Resume.count())}</span></div>` : ''}
         </div>
         ${window.About && window.APP ? `<div class="panel st-about" style="grid-column:1/-1"><img src="icons/icon.svg" width="48" height="48" alt="">
           <div class="st-about-t"><h3 class="ui-t">${window.NavIcons ? NavIcons.icon('info', 20) : ''}<span>О приложении</span></h3><span class="small muted">${U.esc(APP.name)} · версия ${U.esc(APP.version)} · сборка ${U.esc(APP.build)} — что нового, обновления, лицензии</span></div>
@@ -2861,7 +2981,7 @@
     // 🔒 under every key field: where the key lives
     root.querySelectorAll('input[type="password"]').forEach(inp => {
       const host = inp.closest('label') || inp;
-      if (!host.nextElementSibling || !host.nextElementSibling.classList.contains('key-local')) host.insertAdjacentHTML('afterend', '<div class="key-local">🔒 Хранится только на этом устройстве — разработчики приложения его не видят</div>');
+      if (!host.nextElementSibling || !host.nextElementSibling.classList.contains('key-local')) host.insertAdjacentHTML('afterend', `<div class="key-local">${NI('lock', 14)}<span>Хранится только на этом устройстве — разработчики приложения его не видят</span></div>`);
     });
     // live demo of the chosen swipe animation (buttons + drag with mouse/finger)
     const demo = root.querySelector('[data-demo]');
@@ -2901,6 +3021,10 @@
       switch (a.dataset.act) {
         case 'interp-try': await Interp.toggle(); App.render(); break;
         case 'to-account': App.go('account'); break;
+        case 'st-signin': if (window.SignIn) SignIn.open(); break;
+        case 'st-acc-delete': Views.deleteAccountFlow(); break;
+        case 'pro-open': case 'pro-refresh': case 'pro-restore': case 'pro-manage': if (window.Pro && Pro.onPanelAct) await Pro.onPanelAct(a.dataset.act, a); if (a.dataset.act === 'pro-refresh' && App.view.name === 'settings') App.render(); break;
+        case 'aic-withdraw': case 'aic-allow': if (window.AIConsent) { await AIConsent.onAct(a.dataset.act); if (App.view.name === 'settings') App.render(); } break;
         case 'gallery-keys': Views.loadGallery().then(G => G.keys()).catch(() => UI.toast('Не получилось открыть — проверьте интернет и попробуйте ещё раз', 'warn')); break;
         case 'share-app': ShareApp.open(); break;
         case 'keys-note-ok': Store.setSetting('keysNoteSeen', true); a.closest('details').open = false; break;
@@ -2916,7 +3040,7 @@
         }
         case 'use-prov':
           Store.setSetting('aiProvider', a.dataset.id);
-          if (!AI.configured(a.dataset.id)) UI.toast('Сначала добавьте ключ (или запустите мост) — иначе проверка не сработает', 'warn', 5000);
+          if (!AI.configured(a.dataset.id)) UI.toast(mac ? 'Сначала добавьте ключ (или запустите мост) — иначе проверка не сработает' : 'Сначала добавьте ключ — иначе проверка не сработает', 'warn', 5000);
           App.updateBadge(); App.render(); break;
         case 'voice-use': Store.setSetting('ttsEngine', a.dataset.id === 'system' ? 'browser' : a.dataset.id); Voices.resetWarnings(); App.render(); break;
         case 'voice-test': {
@@ -2945,23 +3069,23 @@
         case 'test-no': TTS.speak('God morgen! Hvordan har du det?', 'no'); break;
         case 'test-ru': TTS.speak('Доброе утро! Как дела?', 'ru'); break;
         case 'test-uk': TTS.speak('Доброго ранку! Як справи?', 'uk'); break;
-        case 'uk-voice-help': UI.modal({ title: '🇺🇦 Украинский голос', body: TTS.ukHelpHtml() + '<div class="small muted" style="margin-top:8px">После установки перезапустите браузер и выберите голос: Настройки → 🔊 Озвучка → «💻 Системный украинский голос».</div>' }); break;
+        case 'uk-voice-help': UI.modal({ title: 'Украинский голос', body: TTS.ukHelpHtml() + '<div class="small muted" style="margin-top:8px">После установки перезапустите браузер и выберите голос: Настройки → Озвучка → «Системный украинский голос».</div>' }); break;
         case 'backup': Exporter.backup(); break;
         case 'restore': App.pickFiles(); break;
         case 'looks-open': Views.looksSheet(null); break;
         case 'settings-reset': Views.resetSettings(); break;
         case 'resume-forget':
-          if (window.Resume && await UI.confirm('Забыть, где вы остановились, во всех видео, передачах, подкастах, книгах и при прослушивании колод?<br><span class="small muted">Всё снова начнётся сначала. Карточки и прогресс изучения не изменятся. Книги в Читалке хранят свои страницы — их сбрасывают в меню книги.</span>', { ok: 'Забыть', title: '📍 Места продолжения' })) {
+          if (window.Resume && await UI.confirm('Забыть, где вы остановились, во всех видео, передачах, подкастах, книгах и при прослушивании колод?<br><span class="small muted">Всё снова начнётся сначала. Карточки и прогресс изучения не изменятся. Книги в Читалке хранят свои страницы — их сбрасывают в меню книги.</span>', { ok: 'Забыть', title: 'Места продолжения' })) {
             Resume.clearAll(); UI.toast('Места продолжения забыты', 'good'); App.render();
           }
           break;
         case 'sample': App.addSampleDeck(); UI.toast('Пример колоды добавлен', 'good'); break;
         case 'wipe':
           // the biggest loss in the app: two steps (a question, then the word typed by hand) and a safety copy first
-          if (await UI.confirm('Точно удалить ВСЕ колоды и карточки?<br><span class="small muted">Колоды попадут в 🗑 Корзину — их можно вернуть в течение 30 дней. А вот статистика ответов будет очищена навсегда. Перед удалением приложение само скачает резервную копию всех ваших данных.</span>', { danger: true, ok: 'Дальше', title: '⚠️ Удалить всё' })) {
+          if (await UI.confirm('Точно удалить ВСЕ колоды и карточки?<br><span class="small muted">Колоды попадут в 🗑 Корзину — их можно вернуть в течение 30 дней. А вот статистика ответов будет очищена навсегда. Перед удалением приложение само скачает резервную копию всех ваших данных.</span>', { danger: true, ok: 'Дальше', title: 'Удалить всё' })) {
             const w = await UI.prompt('Чтобы подтвердить, напишите слово УДАЛИТЬ', '', 'удалить');
             if (w == null) break;
-            if (String(w).trim().toLowerCase() !== 'удалить') { UI.toast('Слово не совпало — ничего не удалено 💚', 'good'); break; }
+            if (String(w).trim().toLowerCase() !== 'удалить') { UI.toast('Слово не совпало — ничего не удалено', 'good'); break; }
             try { Exporter.backup(); } catch (e) { /* the download failed — the user confirmed twice */ }
             await Store.clearAll(); UI.toast('Все колоды перемещены в корзину. Резервная копия скачана в «Загрузки»', 'warn', 6000); App.go('home');
           }

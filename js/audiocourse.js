@@ -6,6 +6,10 @@
  *    as the decks' offline voice and the saved Telegram audio — js/listenx.js, js/tgaudio.js; sw.js never touches it)
  *    under /__nk_audio/course/<course>/<file>. So a stopped or broken download simply continues where it was.
  *    Browsers without DecompressionStream('deflate-raw') — the whole archive with progress, unpacked by JSZip.
+ *    That direct read is for the owner's Mac only (docs/release-architecture.md §1.4 P6): 50languages sends no CORS, and the
+ *    course is «free for personal use» — so it is never relayed by a server. Everywhere else (the site, phones, the store apps)
+ *    the person downloads the archive from the course site themselves («Скачать архив с сайта курса» — the publisher's own
+ *    link) and adds it with «У меня уже скачано»; the lessons then play offline exactly the same way.
  *  - 📂 «У меня уже скачано»: a folder (RUNO-all…), MP3 files or the .zip itself — chosen or dropped here.
  *  - Lesson titles: the official list of 50languages (goethe-verlag.com/book2/RU/RUNO/RUNO002.HTM, UK/UKNO/UKNO002.HTM,
  *    NO/NORU/NORU002.HTM — read 2026-11); the archive's _readme.htm has no lesson names.
@@ -29,13 +33,15 @@
   const friendly = (msg, extra) => Object.assign(new Error(msg), { friendly: true }, extra || {});
   const HP = (s, on) => (window.Listen && Listen.HEADPHONES ? Listen.HEADPHONES(s, on) : '🎧');
   const TV = s => (window.UI && UI.TV_SVG ? UI.TV_SVG(s) : '📺');
-  const bridgeUp = () => !!(window.AI && AI.bridge && AI.bridge.up);
+  /** the Mac bridge answered (js/net.js Net.isMacBridge — the only case for /api/proxy and /api/cast) */
+  const bridgeUp = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
   const AUDIO_RE = /\.(mp3|m4a|aac|ogg|oga|opus|wav|flac)$/i;
   const MIME = n => (/\.m4a$|\.aac$/i.test(n) ? 'audio/mp4' : /\.og[ga]$|\.opus$/i.test(n) ? 'audio/ogg' : /\.wav$/i.test(n) ? 'audio/wav' : /\.flac$/i.test(n) ? 'audio/flac' : 'audio/mpeg');
   // the app runs on this Mac itself: only here do hints with the Terminal command make sense (not for site visitors)
-  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname));
+  const IC = (n, s) => (window.NavIcons && NavIcons.icon ? NavIcons.icon(n, s) : '');
   const NEED_BRIDGE_MAC = 'Сайт 50languages не даёт браузеру загрузить курс напрямую. Запустите мост на Mac (в Терминале: python3 …/bridge/server.py) и нажмите ещё раз. Или скачайте архив с сайта и добавьте его кнопкой «📂 У меня уже скачано».';
-  const NEED_BRIDGE_SITE = 'Сайт 50languages не даёт браузеру загрузить курс напрямую. Скачайте архив с сайта курса (кнопка «⬇ Скачать файл» в «📚 Книгах») и добавьте его сюда кнопкой «📂 У меня уже скачано» — уроки будут играть без интернета.';
+  const NEED_BRIDGE_SITE = 'Скачайте архив с сайта курса (кнопка «Скачать архив с сайта курса») и добавьте его сюда кнопкой «У меня уже скачано» — уроки будут играть без интернета.';
   const needBridge = () => (onMac() ? NEED_BRIDGE_MAC : NEED_BRIDGE_SITE);
   const RESTART = 'Мост на Mac нужно перезапустить — в нём новая функция: в окне Терминала, где он запущен, нажмите Ctrl+C и снова запустите python3 …/bridge/server.py. Потом нажмите «Загрузить» ещё раз.';
   const LICENCE = 'Источник: 50languages / Goethe Verlag — бесплатно для личного использования';
@@ -213,6 +219,7 @@
   const noCors = new Set();
   /** GET a remote file (optionally a byte range): directly when the site allows it, otherwise through the Mac bridge */
   async function remote(url, range, signal) {
+    if (!onMac()) throw friendly(NEED_BRIDGE_SITE, { needBridge: true }); // P6: the manual path off the Mac (no CORS there)
     const host = new URL(url).host;
     if (!noCors.has(host)) {
       try { const r = await fetch(url, { headers: range ? { Range: range } : {}, signal, mode: 'cors', credentials: 'omit' }); if (r.ok) return r; } catch (e) { if (e && e.name === 'AbortError') throw e; }
@@ -690,7 +697,8 @@
     }
     if (s === 'done') return `<div class="ac-st"><span class="ac-chip ok">в приложении ✓</span><small>${n} ${U.plural(n, ['урок', 'урока', 'уроков'])} · ${mb(bytesOf(cid))} · играют без интернета</small></div>`;
     if (s === 'partial') return `<div class="ac-st"><span class="ac-chip part">частично: ${n} из ${c.lessons}</span><small>${mb(bytesOf(cid))} · можно слушать уже сейчас</small></div>${lastErr[cid] ? `<div class="ac-err small">${esc(lastErr[cid])}</div>` : ''}`;
-    return `<div class="ac-st"><span class="ac-chip none">не загружен</span>${c.zip ? `<small>архив ${mb(c.zipBytes)} · в приложении займёт ≈ ${mb(c.appBytes)}</small>` : ''}</div>${lastErr[cid] ? `<div class="ac-err small">${esc(lastErr[cid])}</div>` : ''}`;
+    return `<div class="ac-st"><span class="ac-chip none">не загружен</span>${c.zip ? `<small>архив ${mb(c.zipBytes)} · в приложении займёт ≈ ${mb(c.appBytes)}</small>` : ''}</div>${lastErr[cid] ? `<div class="ac-err small">${esc(lastErr[cid])}</div>` : ''}
+      ${c.zip && !onMac() ? `<p class="small muted ac-how"><span aria-hidden="true">${IC('info', 16)}</span> Два шага: скачайте архив с сайта курса, затем нажмите «У меня уже скачано» и выберите его — уроки останутся в приложении и будут играть без интернета.</p>` : ''}`;
   }
   function actionsHtml(cid, big) {
     const c = course(cid), s = statusOf(cid), n = stored(cid).length;
@@ -701,8 +709,11 @@
     const b = [];
     if (s === 'loading') b.push(`<button type="button" class="btn sm ghost ac-stop" data-ac-stop="${esc(cid)}" title="Остановить загрузку (уже загруженное останется)">✕ Остановить</button>`);
     if (n) b.push(`<button type="button" class="btn ${big ? '' : 'sm'} primary listen-cta" data-ac-play="${esc(cid)}" title="Слушать уроки один за другим — в наушниках, через динамик, на колонке">${HP(big ? 18 : 16, true)} ${esc(contLbl.replace(/^▶ /, ''))}</button>`);
-    if (c.zip && s === 'none') b.push(`<button type="button" class="btn ${big ? '' : 'sm'} primary" data-ac-dl="${esc(cid)}" title="Загрузить все уроки внутрь приложения (через мост на Mac)">⬇ Загрузить в приложение</button>`);
-    if (c.zip && s === 'partial') b.push(`<button type="button" class="btn sm" data-ac-dl="${esc(cid)}" title="Загрузить недостающие уроки">⬇ Догрузить (ещё ${c.lessons - n})</button>`);
+    const mac = onMac();
+    if (c.zip && s === 'none' && mac) b.push(`<button type="button" class="btn ${big ? '' : 'sm'} primary" data-ac-dl="${esc(cid)}" title="Загрузить все уроки внутрь приложения (через мост на Mac)">⬇ Загрузить в приложение</button>`);
+    if (c.zip && s === 'partial' && mac) b.push(`<button type="button" class="btn sm" data-ac-dl="${esc(cid)}" title="Загрузить недостающие уроки">⬇ Догрузить (ещё ${c.lessons - n})</button>`);
+    // 🌐 off the Mac: the archive comes from the publisher's own site to this device (then «У меня уже скачано»)
+    if (c.zip && !mac && (s === 'none' || s === 'partial')) b.push(`<a class="btn ${big ? '' : 'sm'} ${s === 'none' ? 'primary' : ''} ac-get" href="${esc(c.zip)}" target="_blank" rel="noopener noreferrer" download data-ac-get="${esc(cid)}" title="Архив ${mb(c.zipBytes)} скачается с сайта 50languages на это устройство">${IC('download', 16)} Скачать архив с сайта курса</a>`);
     if (s === 'none' || s === 'partial') b.push(`<button type="button" class="btn sm ghost" data-ac-import="${esc(cid)}" title="Добавить уже скачанную папку, MP3 или архив .zip">📂 У меня уже скачано</button>`);
     if (!big && s !== 'loading') b.push(`<button type="button" class="btn sm ghost" data-ac-view="${esc(cid)}" title="Все уроки курса">Уроки ›</button>`);
     if (big && n && s !== 'loading') b.push(`<button type="button" class="btn sm ghost ac-del" data-ac-del="${esc(cid)}" title="Удалить уроки этого курса из приложения">🗑 Удалить курс</button>`);
@@ -1025,7 +1036,7 @@
   /* ---------------- help topic (runtime registration, like js/ordtrainer.js) ---------------- */
   const HELP_STEPS = [
     ['📚', 'В «📚 Книги» у курса 50languages нажмите <b>«🎧 В приложение»</b> — или на главной <b>«🎧 Аудиокурсы»</b>.'],
-    ['⬇', '<b>«⬇ Загрузить в приложение»</b>: уроки по одному загружаются внутрь приложения (нужен мост на Mac). Остановили или пропал интернет — <b>«Догрузить»</b> продолжит с того же места.'],
+    ['⬇', '<b>«Скачать архив с сайта курса»</b> — архив (~73 МБ) скачается с сайта 50languages на ваше устройство. На Mac с мостом — <b>«⬇ Загрузить в приложение»</b>: уроки по одному загружаются прямо внутрь приложения, <b>«Догрузить»</b> продолжит с того же места.'],
     ['📂', 'Уже скачали архив? <b>«📂 У меня уже скачано»</b>: выберите папку «RUNO-all» из «Загрузок», MP3-файлы или сам .zip — или просто перетащите их в окно.'],
     ['▶', '<b>«Слушать подряд»</b> или любой урок из списка. Кнопки: ⏮ ⏭ — уроки, ↺10 и 10↻ — на 10 секунд, скорость, 🔂 повторять урок, 🔁 A–B — повторять кусок, 🌙 таймер сна. Место запоминается.'],
     ['🔈', '<b>Где слушать</b>: наушники, динамик — как в системе; на Mac можно выбрать устройство. <b>Колонка Bluetooth или магнитофон</b>: подключите их к телефону или Mac по Bluetooth (или кабелем AUX) — звук пойдёт туда сам. <b>AirPlay</b> — в Safari и на iPhone. <b>📺 Телевизор</b> или колонка Google — кнопкой «На телевизор» (через мост на Mac).'],

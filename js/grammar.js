@@ -3,12 +3,17 @@
  * picks the ones that fit the card (words, word class, patterns), reads the PDF through the bridge
  * (the site does not allow browser requests), shows the text with a Russian translation and can add
  * the relevant lines to the card — with the source (© Kjell H. Ullestad, link) and who translated it.
- * Without the bridge the PDF opens right inside the window (reading only).
+ * Without the bridge: «↗ PDF на сайте» (the author's own page) and «Выбрать скачанный PDF» — the file the user downloaded is
+ * read here, on the device. The app never fetches grammatikk.com off the Mac (no server relay, no native HTTP) until the author
+ * gives written permission (docs/release-architecture.md §1.4 P5). On the Mac nothing changes.
  * Only short parts are stored in the card; the whole topic stays on the author's site.
  */
 (function () {
   /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — on the site its hints are not shown */
-  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname));
+  /** the Mac bridge answered (js/net.js) — the only way the app itself reads a grammatikk.com PDF */
+  const bridgeUp = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  const IC = (n, s) => (window.NavIcons && NavIcons.icon ? NavIcons.icon(n, s) : '');
   const BASE = 'https://grammatikk.com/';
   const AUTHOR = 'Kjell H. Ullestad';
   const GROUPS = {
@@ -204,7 +209,7 @@
     /* ---------- reading a topic (PDF → lines → paragraphs) ---------- */
     async load(t) {
       try { const c = localStorage.getItem(cacheKey(t.file)); if (c) return JSON.parse(c); } catch (e) { /* no cache */ }
-      if (!(window.AI && AI.bridge && AI.bridge.up)) throw Object.assign(new Error('nobridge'), { nobridge: true });
+      if (!bridgeUp()) throw Object.assign(new Error('nobridge'), { nobridge: true });
       const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: url(t), method: 'GET' }) });
       if (!r.ok) {
         let msg = `сайт ответил ${r.status}`;
@@ -283,13 +288,14 @@
       if (card && !opts.write) card = Store.card(card.id) || card;
       const found = card ? this.match(card) : [];
       const word = card ? String(card.no).split('\n')[0].slice(0, 60) : '';
-      const bridge = !!(window.AI && AI.bridge && AI.bridge.up);
+      const bridge = bridgeUp();
       const groups = Object.entries(GROUPS).map(([g, name]) => `<details class="gk-group"><summary>${name} <span class="muted small">${T.filter(t => t.group === g).length}</span></summary>
         <div class="gk-list">${T.filter(t => t.group === g).map(t => this.topicBtn(t)).join('')}</div></details>`).join('');
       const m = UI.modal({
         title: '📐 Грамматика · grammatikk.com', cls: 'wide gk-modal',
         body: `<div class="lib-intro">📐 <span>Бесплатные материалы по грамматике норвежского от <b>${AUTHOR}</b> (grammatikk.com). ${word ? `Подобрано к «<b>${U.esc(word)}</b>»: нажмите тему — увидите объяснение с переводом на русский и сможете добавить нужное в карточку.` : 'Выберите тему.'}</span></div>
-          ${!bridge ? '<div class="mt-warn"><span>ℹ️</span><span>Сайт не даёт приложению прочитать PDF напрямую — тема откроется для чтения здесь же. ' + (onMac() ? '<b>Перевод на русский и «В карточку»</b> работают, когда запущен мост на Mac (в облачной версии будет работать само).' : 'Чтобы <b>перевести тему и перенести её в карточку</b>, откройте тему, нажмите «↗ PDF на сайте», скачайте файл и выберите его здесь.') + '</span></div>' : ''}
+          ${!bridge ? (onMac() ? '<div class="mt-warn"><span>ℹ️</span><span>Сайт не даёт приложению прочитать PDF напрямую — тема откроется для чтения здесь же. <b>Перевод на русский и «В карточку»</b> работают, когда запущен мост на Mac.</span></div>'
+            : `<div class="mt-warn gk-note"><span aria-hidden="true">${IC('info', 18)}</span><span>Темы живут на сайте автора. Чтобы <b>перевести тему и перенести её в карточку</b>: откройте тему, нажмите «PDF на сайте», скачайте файл и выберите его здесь — всё останется на вашем устройстве.</span></div>`) : ''}
           ${card ? `<div class="gk-sec">${found.length ? `К этой карточке подходят:` : 'Для этого слова нет отдельной темы — посмотрите список ниже'}${bridge ? ` <button class="btn sm ghost" data-gk-search title="Скачать все темы и найти, где встречается это слово (первый раз ~1 минута, потом мгновенно)">🔍 Найти «${U.esc(word.slice(0, 24))}» во всех темах</button>` : ''}</div>
           <div class="gk-list" data-found>${found.map(f => this.topicBtn(f.t, f.why)).join('')}</div>` : ''}
           <div class="gk-reader" data-reader hidden></div>
@@ -332,11 +338,12 @@
       try { paras = await this.load(t); } catch (e) {
         if (this._cur.t !== t) return;
         // the app can't read the PDF by itself: show it, and offer to pick the downloaded file → translate → card
-        box.innerHTML = head + `<div class="mt-warn"><span>${e.nobridge ? 'ℹ️' : '⚠️'}</span><span>${e.nobridge ? 'Сайт не даёт приложению прочитать тему напрямую.' : U.esc(U.niceErr(e)) + '.'}
-            Чтобы <b>перевести тему и перенести её в карточку</b>: ${!onMac() ? '' : e.nobridge ? 'запустите мост на Mac — или' : 'перезапустите мост (в Терминале: <code>python3 bridge/server.py</code>) — или'}
-            нажмите «↗ PDF на сайте», скачайте файл и выберите его здесь:</span></div>
+        const mac = onMac();
+        box.innerHTML = head + `<div class="mt-warn"><span aria-hidden="true">${mac ? (e.nobridge ? 'ℹ️' : '⚠️') : IC('info', 18)}</span><span>${!mac ? 'Эта тема открывается на сайте автора.' : e.nobridge ? 'Сайт не даёт приложению прочитать тему напрямую.' : U.esc(U.niceErr(e)) + '.'}
+            Чтобы <b>перевести тему и перенести её в карточку</b>: ${!mac ? '' : e.nobridge ? 'запустите мост на Mac — или' : 'перезапустите мост (в Терминале: <code>python3 bridge/server.py</code>) — или'}
+            нажмите «PDF на сайте», скачайте файл и выберите его здесь:</span></div>
           <label class="btn primary gk-file">📄 Выбрать скачанный PDF — перевести и перенести<input type="file" accept="application/pdf,.pdf" hidden data-gk-file></label>
-          <iframe class="gk-pdf" src="${url(t)}" title="${U.esc(t.no)}"></iframe>`;
+          ${mac ? `<iframe class="gk-pdf" src="${url(t)}" title="${U.esc(t.no)}"></iframe>` : ''}`;
         box.querySelector('[data-gk-file]').addEventListener('change', async ev => {
           const f = ev.target.files[0]; if (!f) return;
           try {
@@ -393,7 +400,8 @@
         if (this._cur !== c) return;
         need.forEach((i, k) => { if (res.out[k]) c.tr[i] = res.out[k]; });
         c.by = [...new Set([...c.by, ...res.by])];
-        if (res.missing) UI.toast(`Не удалось перевести ${res.missing} — переводчики сейчас не отвечают`, 'warn');
+        if (res.missing && res.needSetup) UI.toastAction(res.error, 'Подключить', () => { if (window.AI && AI.need) AI.need('Перевод грамматики'); }, 9000, IC('info', 18));
+        else if (res.missing) UI.toast(`Не удалось перевести ${res.missing} — переводчики сейчас не отвечают`, 'warn');
         // the source and the translator light up on the card (who worked on it)
         // once per topic and translator for this card — switching views must not fill the history with repeats
         this._logged = this._logged || new Set();
@@ -494,6 +502,16 @@
       if (!hits.length) UI.toast('В темах grammatikk.com это слово не встречается', 'warn');
     },
   };
+
+  /* touch targets ≥ 44 px on phones (phone audit 2026-11-23); the window's styles live in css/styles.css (shared) — scoped here */
+  (function style() {
+    if (typeof document === 'undefined' || document.getElementById('nk-gk-touch')) return;
+    const st = document.createElement('style');
+    st.id = 'nk-gk-touch';
+    st.textContent = '@media (pointer: coarse) { .gk-modal .btn.sm, .gk-modal .btn, .gk-modal .gk-group > summary { min-height: 44px; } .gk-modal .gk-group > summary { display: flex; align-items: center; gap: 6px; } }'
+      + '.gk-modal .gk-note .ui-ico, .gk-modal .mt-warn .ui-ico { flex: none; }';
+    (document.head || document.documentElement).appendChild(st);
+  })();
 
   window.Grammar = Grammar;
 })();

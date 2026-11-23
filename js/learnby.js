@@ -11,7 +11,8 @@
  * (Subs.learnCtx().pcm — own file / Telegram / NRK; YouTube has none: «▶ посмотреть момент» plays the embed instead)
  * and a still frame where the browser allows reading the picture.
  *
- *   LearnBy.offer(material)  a gentle «Сделать колоду?» after ≥ 3 pages read (books, js/reader.js …): material = { kind: 'book',
+ *   LearnBy.offer(material)  a gentle «Сделать колоду?» after ≥ 3 pages read (books, js/reader.js …); material.hold: only
+ *                            collect pages — LearnBy.pause(key) offers at a natural pause (a chapter's end, the book closed). material = { kind: 'book',
  *                            key, title, sub?, page?, text(): string | Promise<string> — the text of the page now, open?(),
  *                            src?: 'reader' | 'textbook' | 'books' | 'news', id? — to open it again after a reload }
  *                            (js/reader.js, js/textbook.js, js/books.js, js/news.js call it)
@@ -925,25 +926,45 @@
       if (t && !arr.some(x => x.page === page)) { arr.push({ page, text: String(t).slice(0, 20000) }); if (arr.length > 8) arr.shift(); }
       const pg = s.pages[key] = s.pages[key] || {}; pg[page] = 1; save();
       bookMats.set(key, mat);
-      if (Object.keys(pg).length < OFFER_PAGES || arr.length < OFFER_PAGES || s.no[key] || +s.later[key] > Date.now() || offerShown.has(key) || !window.UI) return;
-      const p = planOf(key);
-      if (p && p.parts.some(x => !x.deckId)) return;
-      offerShown.add(key);
-      const words = arr.map(x => x.text).join(' ').split(/\s+/).length;
-      showBookOffer(key, mat, words);
+      if (mat.hold) return; // 📖 the reader: pages are collected while reading; it asks only at a natural pause (LearnBy.pause)
+      offerIfDue(key);
     } catch (e) { /* a convenience — never an error */ }
   }
-  const bookMats = new Map();
+  /** the offer, when enough was read and the person has not said «позже» / «не предлагать» → true when shown */
+  function offerIfDue(key) {
+    const s = load(), pg = s.pages[key] || {}, arr = bookText.get(key) || [], mat = bookMats.get(key);
+    if (!mat || Object.keys(pg).length < OFFER_PAGES || arr.length < OFFER_PAGES || s.no[key] || +s.later[key] > Date.now() || offerShown.has(key) || !window.UI) return false;
+    const p = planOf(key);
+    if (p && p.parts.some(x => !x.deckId)) return false;
+    offerShown.add(key);
+    const words = arr.map(x => x.text).join(' ').split(/\s+/).length;
+    showBookOffer(key, mat, words);
+    return true;
+  }
+  /** a natural pause in reading (the end of a chapter, the book closed — js/reader.js): offer the deck now, if it is due */
+  function pause(matKey) {
+    try {
+      const key = 'book:' + String(matKey || '').slice(0, 200), el = offerEls.get(key);
+      // shown at a chapter's end inside the book and left unanswered, then the book was closed (the offer went with its window):
+      // ask once more where the person is now
+      if (el && !el.dataset.answered && (!el.isConnected || el.closest('.closing'))) { offerEls.delete(key); offerShown.delete(key); }
+      return offerIfDue(key);
+    } catch (e) { return false; }
+  }
+  const bookMats = new Map(), offerEls = new Map();
   function showBookOffer(key, mat, words) {
     document.querySelectorAll('.lb-boffer').forEach(x => x.remove());
     const el = document.createElement('div'); el.className = 'lb-boffer'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Колода из прочитанного');
     const n = Math.min(35, Math.round(words / 25));
     el.innerHTML = `<span class="lb-pb-i" aria-hidden="true">🎓</span><span class="lb-pb-t"><b>Сделать колоду из прочитанного?</b><small>${planOf(key) ? 'Следующие страницы' : `«${esc(String(mat.title || 'Книга').slice(0, 60))}»`}${n > 5 ? ` · ≈ ${n} ${pl(n, ['нужное слово и фраза', 'нужных слова и фразы', 'нужных слов и фраз'])}` : ''}</small></span>
       <span class="lb-offer-acts"><button type="button" class="btn sm primary" data-bo="yes">Сделать</button><button type="button" class="btn sm ghost" data-bo="later">Позже</button><button type="button" class="btn sm ghost" data-bo="no">Не предлагать для этого</button></span>`;
-    (document.querySelector('#modal-root .modal-backdrop:last-child .modal') || document.body).appendChild(el);
+    // on the top window that stays (not one that is closing — the book's own window right after «закрыть»), else on the page
+    const top = [...document.querySelectorAll('#modal-root > .modal-backdrop')].filter(b => !b.classList.contains('closing')).pop();
+    ((top && top.querySelector('.modal')) || document.body).appendChild(el);
+    offerEls.set(key, el);
     el.addEventListener('click', e => {
       const b = e.target.closest('[data-bo]'); if (!b) return;
-      e.stopPropagation(); el.remove();
+      e.stopPropagation(); el.dataset.answered = '1'; el.remove();
       const s = load();
       if (b.dataset.bo === 'later') { s.later[key] = Date.now() + 3 * 864e5; save(); return; }
       if (b.dataset.bo === 'no') { s.no[key] = Date.now(); save(); toast('Для этой книги больше не предложу', '', 3000); return; }
@@ -1123,7 +1144,7 @@
   document.addEventListener('learnby-changed', () => { if (window.App && App.view && App.view.name === 'learn' && !document.querySelector('#modal-root .modal-backdrop')) redrawPage(); });
 
   window.LearnBy = {
-    attach, btnHtml, offer, open, go, continueItems, progressList, entry,
+    attach, btnHtml, offer, pause, open, go, continueItems, progressList, entry,
     plans: () => plans().map(p => JSON.parse(JSON.stringify(p))),
     /** ☁️ js/cloudsync.js: write the pending change now (before the cloud reads localStorage) · re-read after the cloud wrote it */
     _sync: { flush() { if (saveT) save(true); }, reload() { clearTimeout(saveT); saveT = 0; S = null; emit(); } },

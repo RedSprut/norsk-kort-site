@@ -1,8 +1,13 @@
-/* ============ 🔊 «Голоса»: choose a voice per language (🇳🇴 🇺🇦 🇷🇺), listen first, download offline voices, connect services ============
+/* ============ «Голоса»: choose a voice per language (no / uk / ru), listen first, download offline voices, connect services ============
  * Loaded on first use by Voices.openChooser(lang) (js/voices.js) together with css/voicepicker.css.
- * Everything a voice needs is shown as a calm next step on its card («⬇ Скачать», «🔑 Подключить», «нужна установка на Mac»);
+ * Everything a voice needs is shown as a calm next step on its card («Скачать», «Подключить», «Подключить Pro»);
  * technical errors are never shown. Keys are saved through Store (sealed on the device, never in backups / exports).
- * 📍 «Где какой голос»: a row per place (cards, reader, video…) with a chip per language — tapping a chip opens this same
+ * Groups: Norsk Kort Pro (server voices — Pro only; a free person never makes a paid call, ▶ needs Pro too) · the device ·
+ * offline Piper · and only on the owner's Mac: Google Translate and Microsoft Edge (the bridge). The public build hides
+ * the Mac-only groups behind one calm line; the owner's folder is never written in this file — on the Mac the bridge
+ * commands are built from what the bridge itself says (AI.bridge.tokenCmd), else a relative command.
+ * Icons: drawn line icons (Voices.icon) — never emoji.
+ * «Где какой голос»: a row per place (cards, reader, video…) with a chip per language — tapping a chip opens this same
  * list for that place and language (st.place), «Как везде» on top; a pick there is the voice of that place only.
  */
 (function () {
@@ -15,13 +20,17 @@
   const SAFARI = /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|FxiOS|Edg|OPR|Android/.test(navigator.userAgent);
   const ANDROID = /Android/.test(navigator.userAgent);
   const TAB_ORDER = ['no', 'uk', 'ru'];
+  const I = (n, sz, cls) => V.icon(n, sz || 18, cls);
+  // order: Pro first (spec §3.2 «offered first in Голоса»), then what is free on every device
   const GROUPS = [
-    ['offline', '📴', 'Без интернета', 'бесплатно · скачивается один раз'],
-    ['online', '🌐', 'Онлайн', 'бесплатно · нужен интернет'],
-    ['mac', '💻', 'Через мост на Mac', 'бесплатно · нейроголоса Microsoft'],
-    ['key', '🔑', 'С вашим ключом', 'бесплатный месячный лимит'],
-    ['device', '📱', 'Голоса этого устройства', 'бесплатно · без интернета'],
+    ['pro', 'crown', 'Norsk Kort Pro', 'живые голоса сервера · без ключей'],
+    ['device', 'phone', 'Голоса этого устройства', 'бесплатно · без интернета'],
+    ['offline', 'cloud-off', 'Без интернета', 'бесплатно · скачивается один раз'],
+    ['online', 'globe', 'Онлайн', 'бесплатно · нужен интернет'],
+    ['mac', 'laptop', 'Через мост на Mac', 'бесплатно · нейроголоса Microsoft'],
+    ['key', 'key', 'С вашим ключом', 'бесплатный месячный лимит'],
   ];
+  const PRO_FEATURE = 'Голоса Norsk Kort Pro';
   const AZ_REGIONS = ['westeurope', 'northeurope', 'swedencentral', 'norwayeast', 'germanywestcentral', 'francecentral', 'uksouth', 'eastus', 'westus2'];
   const KEY_INFO = {
     azure: {
@@ -33,30 +42,30 @@
         'Заполните: Resource group — <b>Create new</b> (любое имя), Region — например <b>West Europe</b>, Name — любое, <b>Pricing tier — Free F0</b>. Нажмите <b>Review + create</b> → <b>Create</b>.',
         'Когда ресурс готов, нажмите <b>«Go to resource»</b> → слева <b>«Keys and Endpoint»</b>.',
         'Скопируйте <b>KEY 1</b> и <b>Location/Region</b> (например <code>westeurope</code>) и вставьте их ниже.',
-        'Нажмите <b>«✓ Проверить»</b> — вы услышите голос. Готово!',
+        'Нажмите <b>«Проверить»</b> — вы услышите голос. Готово!',
       ],
     },
     gcloud: {
       title: 'Google Cloud Text-to-Speech', tag: '30 голосов Google · нужна карта', field: 'gcloudKey',
       free: '<b>Бесплатно 1 млн знаков в месяц</b> на голоса Chirp 3 HD — те самые Umbriel, Despina, Sulafat, Algenib… Для норвежского и украинского их 30, для русского — 8. Ещё 4 млн знаков — на голоса попроще (WaveNet и Standard). Одна карточка — примерно 20 знаков, то есть около <b>45 000 озвучек в месяц</b>.',
-      warn: '⚠️ Google требует <b>привязать банковскую карту</b>, а <b>сверх лимита списывает деньги</b>. Поэтому приложение <b>само останавливается на 950 000 знаков</b> (можно поставить меньше — ниже) и до 1-го числа читает запасным голосом. Пока вы в бесплатном лимите, деньги не спишутся. Для надёжности оставьте ключу только «Cloud Text-to-Speech API» и поставьте бюджет 1 $ с оповещением (Billing → Budgets &amp; alerts).',
+      warn: 'Google требует <b>привязать банковскую карту</b>, а <b>сверх лимита списывает деньги</b>. Поэтому приложение <b>само останавливается на 950 000 знаков</b> (можно поставить меньше — ниже) и до 1-го числа читает запасным голосом. Пока вы в бесплатном лимите, деньги не спишутся. Для надёжности оставьте ключу только «Cloud Text-to-Speech API» и поставьте бюджет 1 $ с оповещением (Billing → Budgets &amp; alerts).',
       steps: [
         'Откройте <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> и войдите своим аккаунтом Google. Создайте проект: вверху «Select a project» → <b>New project</b>.',
         'Подключите оплату: <b>Billing</b> → <b>Link a billing account</b> → добавьте карту. Пока вы в бесплатном лимите, деньги не спишутся.',
         'Включите голоса: <a href="https://console.cloud.google.com/apis/library/texttospeech.googleapis.com" target="_blank" rel="noopener">APIs &amp; Services → Library → «Cloud Text-to-Speech API»</a> → <b>Enable</b>.',
         '<b>APIs &amp; Services → Credentials → Create credentials → API key</b>. Нажмите «Edit API key» и в «API restrictions» оставьте только Cloud Text-to-Speech API.',
-        'Скопируйте ключ (он начинается с <code>AIza</code>), вставьте ниже и нажмите «✓ Проверить» — прозвучит голос.',
+        'Скопируйте ключ (он начинается с <code>AIza</code>), вставьте ниже и нажмите «Проверить» — прозвучит голос.',
       ],
     },
     gemini: {
       title: 'Google Gemini — ключ AI Studio', tag: 'Только для себя · без карты', field: 'geminiKey',
       free: () => `<b>Без банковской карты.</b> Те же 30 голосов Google — Umbriel, Despina, Sulafat… — и для русского тоже все 30. Но бесплатный лимит маленький: <b>около 10 фраз в день на каждую модель</b>; приложение по очереди берёт несколько моделей, и выходит <b>несколько десятков новых фраз в день</b>. Озвученная фраза остаётся на устройстве и второй раз лимит не тратит. Лимит обновляется каждый день (у нас — около ${resetHM()}). Норвежский и русский — да, <b>украинского у Gemini нет</b>.`,
-      warn: '👤 <b>Только для личного пользования.</b> Каждый подключает свой аккаунт Google и сам за него отвечает. На бесплатном тарифе Google может использовать отправленный текст, чтобы улучшать свои модели, — не озвучивайте ничего личного. Встраивать бесплатный Gemini в приложение для других людей в Европе (и в Норвегии) условия Google не разрешают, поэтому здесь каждый вставляет только свой ключ. <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Условия Gemini API</a>',
+      warn: '<b>Только для личного пользования.</b> Каждый подключает свой аккаунт Google и сам за него отвечает. На бесплатном тарифе Google может использовать отправленный текст, чтобы улучшать свои модели, — не озвучивайте ничего личного. Встраивать бесплатный Gemini в приложение для других людей в Европе (и в Норвегии) условия Google не разрешают, поэтому здесь каждый вставляет только свой ключ. <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Условия Gemini API</a>',
       steps: [
         'Откройте <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> и войдите своим аккаунтом Google.',
         'Нажмите <b>«Create API key»</b>. Если попросят выбрать проект — создайте новый, это бесплатно. Карта не нужна.',
         'Скопируйте ключ (он начинается с <code>AIza</code>) и вставьте ниже.',
-        'Нажмите «✓ Проверить» — прозвучит голос. Готово: голоса Gemini появятся в списке «С вашим ключом».',
+        'Нажмите «Проверить» — прозвучит голос. Готово: голоса Gemini появятся в списке «С вашим ключом».',
       ],
     },
     eleven: {
@@ -65,7 +74,7 @@
       steps: [
         'Зарегистрируйтесь на <a href="https://elevenlabs.io" target="_blank" rel="noopener">elevenlabs.io</a> (бесплатно).',
         'Профиль → <b>API Keys</b> → <b>Create API key</b> (достаточно права «Text to Speech»).',
-        'Вставьте ключ ниже и нажмите «✓ Проверить». Кнопка «Мои голоса» покажет голоса из вашей библиотеки.',
+        'Вставьте ключ ниже и нажмите «Проверить». Кнопка «Мои голоса» покажет голоса из вашей библиотеки.',
       ],
     },
   };
@@ -73,25 +82,33 @@
   const KEY_ORDER = ['azure', 'gcloud', 'gemini', 'eleven'];
   const LIST_SHORT = 8; // a long list (30 Google voices) shows this many first — «Показать все» opens the rest in place
   const WHY = {
-    site: ['💻 Только в приложении на Mac', 'Эти голоса работают через мост на Mac. Здесь те же голоса доступны через Azure — бесплатный ключ подключается за 10 минут.'],
-    bridge: ['💻 Мост на Mac не запущен', 'Запустите мост — и голоса Edge заработают бесплатно.'],
-    install: ['💻 Нужна установка на Mac', 'Голоса Edge ставятся на Mac один раз — кнопкой «⬇ Установить» в этом разделе.'],
-    old: ['💻 Мост нужно перезапустить', 'Мост на Mac старой версии — его нужно один раз перезапустить.'],
-    key: ['🔑 Нужен ключ', 'Подключите сервис — бесплатный ключ, все шаги ниже.'],
-    badkey: ['🔑 Ключ не подходит', 'Сервис не принял ключ. Проверьте его в разделе «Подключения».'],
-    quota: ['⏳ Лимит на месяц исчерпан', 'Бесплатный лимит закончился — голос вернётся 1-го числа. Пока читает запасной.'],
-    stale: ['💻 Голоса Edge нужно обновить', 'Microsoft поменяла защиту — обновите голоса Edge одной кнопкой в этом разделе.'],
-    billing: ['💳 Подключите оплату в Google Cloud', 'Без платёжного аккаунта Google не озвучивает. Деньги не спишутся, пока вы в бесплатном лимите.'],
-    blocked: ['🚫 Бесплатный тариф приостановлен', 'ElevenLabs приостановил бесплатный тариф — так бывает, если включён VPN. Ключ при этом верный.'],
-    region: ['🌍 Недоступно в этой стране', 'Бесплатный Gemini не работает из этой страны.'],
-    nolang: ['🇺🇦 Нет украинского', 'Gemini не говорит по-украински.'],
-    down: ['⏸ Временно не отвечает', 'Голос недавно не ответил — пока читает запасной. Можно попробовать «▶ Послушать».'],
-    offline: ['🌐 Нужен интернет', 'Сейчас нет интернета — этот голос заработает, когда связь вернётся.'],
-    download: ['⬇ Не скачан', ''],
-    nosupport: ['⚠ Не работает в этом браузере', 'Офлайн-голосам нужны WebAssembly и хранилище браузера.'],
+    site: ['Только в приложении на Mac', 'Эти голоса работают через мост на Mac. Здесь те же голоса доступны через Azure — бесплатный ключ подключается за 10 минут.'],
+    public: ['Только в версии для Mac', 'Этот голос работает только в настольной версии на Mac.'],
+    bridge: ['Мост на Mac не запущен', 'Запустите мост — и голоса Edge заработают бесплатно.'],
+    install: ['Нужна установка на Mac', 'Голоса Edge ставятся на Mac один раз — кнопкой «Установить» в этом разделе.'],
+    old: ['Мост нужно перезапустить', 'Мост на Mac старой версии — его нужно один раз перезапустить.'],
+    key: ['Нужен ключ', 'Подключите сервис — бесплатный ключ, все шаги ниже.'],
+    badkey: ['Ключ не подходит', 'Сервис не принял ключ. Проверьте его в разделе «Подключения».'],
+    quota: ['Лимит на месяц исчерпан', 'Лимит закончился — голос вернётся 1-го числа. Пока читает запасной.'],
+    hdquota: ['Голоса HD на месяц закончились', 'До 1-го числа читают обычные голоса Pro.'],
+    stale: ['Голоса Edge нужно обновить', 'Microsoft поменяла защиту — обновите голоса Edge одной кнопкой в этом разделе.'],
+    billing: ['Подключите оплату в Google Cloud', 'Без платёжного аккаунта Google не озвучивает. Деньги не спишутся, пока вы в бесплатном лимите.'],
+    blocked: ['Бесплатный тариф приостановлен', 'ElevenLabs приостановил бесплатный тариф — так бывает, если включён VPN. Ключ при этом верный.'],
+    region: ['Недоступно в этой стране', 'Бесплатный Gemini не работает из этой страны.'],
+    nolang: ['Нет украинского', 'Gemini не говорит по-украински.'],
+    down: ['Временно не отвечает', 'Голос недавно не ответил — пока читает запасной. Можно попробовать «Послушать».'],
+    offline: ['Нужен интернет', 'Сейчас нет интернета — этот голос заработает, когда связь вернётся.'],
+    download: ['Не скачан', ''],
+    nosupport: ['Не работает в этом браузере', 'Офлайн-голосам нужны WebAssembly и хранилище браузера.'],
     nosys: ['Нет на устройстве', ''],
+    pro: ['Входит в Norsk Kort Pro', 'Живые голоса сервера — на любом устройстве, без ключей и настроек.'],
+    consent: ['Нужно ваше разрешение', 'Голоса сервера включатся, когда вы разрешите отправлять им текст для озвучки.'],
+    signin: ['Нужно войти', 'Войдите в аккаунт — и голоса Pro заработают.'],
+    licence: ['Только для личного использования', ''],
+    noserver: ['Сейчас недоступно', ''],
+    nopremium: ['Сейчас недоступно', ''],
   };
-  const st = { allv: {}, lang: 'no', place: '', open: { places: true, offline: true, online: true, mac: true, key: false, device: false }, keyOpen: {}, dl: {}, playing: '', kar: null, prog: null, check: {}, editChain: false, own: '', more: {}, draft: {},
+  const st = { allv: {}, lang: 'no', place: '', open: { places: true, pro: true, offline: true, online: true, mac: true, key: false, device: !V.macBridge() }, keyOpen: {}, dl: {}, playing: '', kar: null, prog: null, check: {}, editChain: false, own: '', more: {}, draft: {},
     recs: {}, edge: {}, anchor: '' };
   // recs: the «⭐ Рекомендуем» cards keep their order while the window is open · edge: the one-click Edge install
   // ({ phase: '' | installing | fail | restart | restarting | done, error }) · anchor: the card the person works with
@@ -111,43 +128,49 @@
     const out = [];
     const ch = (t, c) => out.push(`<span class="vp-chip ${c || ''}">${t}</span>`);
     if (e.engine === 'piper') {
-      ch('🆓 бесплатно', 'free');
-      ch('📴 без интернета', 'off');
-      if (a.ok) ch('✓ скачан', 'ok'); else if (e.size) ch('⬇ ' + fmtMB(e.size), 'size');
+      ch('бесплатно', 'free');
+      ch('без интернета', 'off');
+      if (a.ok) ch('скачан', 'ok'); else if (e.size) ch(fmtMB(e.size), 'size');
       // one honest warning at most (the rest is under «Подробнее»)
-      if (/неизвестн/.test(e.licence || '')) ch('🔒 личное', 'priv'); else if (e.stress) ch('⚠ ударения', 'warn');
-    } else if (e.engine === 'gtr') { ch('🆓 бесплатно', 'free'); ch('🌐 нужен интернет', 'net'); }
-    else if (e.engine === 'edge') { ch('🆓 бесплатно', 'free'); ch('🌐 нужен интернет', 'net'); ch('💻 через Mac', 'mac'); }
-    else if (e.engine === 'sys') { ch('🆓 бесплатно', 'free'); ch(e.local ? '📴 без интернета' : '🌐 нужен интернет', e.local ? 'off' : 'net'); }
+      if (/неизвестн/.test(e.licence || '')) ch('личное', 'priv'); else if (e.stress) ch('ударения', 'warn');
+    } else if (e.engine === 'nk') { ch('Pro', 'pro'); if (e.hd) ch('HD', 'pro'); ch('нужен интернет', 'net'); }
+    else if (e.engine === 'gtr') { ch('бесплатно', 'free'); ch('нужен интернет', 'net'); }
+    else if (e.engine === 'edge') { ch('бесплатно', 'free'); ch('нужен интернет', 'net'); ch('через Mac', 'mac'); }
+    else if (e.engine === 'sys') { ch('бесплатно', 'free'); ch(e.local ? 'без интернета' : 'нужен интернет', e.local ? 'off' : 'net'); }
     else {
-      ch('🔑 нужен ключ', 'key'); ch('🌐 нужен интернет', 'net');
-      if (e.engine === 'eleven') ch('🔒 личное', 'priv');
-      if (e.engine === 'gemini') ch('👤 только для себя', 'priv');
+      ch('нужен ключ', 'key'); ch('нужен интернет', 'net');
+      if (e.engine === 'eleven') ch('личное', 'priv');
+      if (e.engine === 'gemini') ch('только для себя', 'priv');
     }
     return out.join('');
   }
   function why(a, e) {
     if (a.why === 'quota' && e) {
       const mt = V.Limits.meter(e.engine, e.key);
-      return mt === 'gemini' ? ['⏳ Лимит на сегодня исчерпан', `Вернётся ${V.Limits.resetText(mt)}. Пока читает запасной.`] : [`⏳ Лимит до ${V.Limits.resetText(mt)}`, 'Бесплатный лимит этого месяца закончился. Пока читает запасной.'];
+      if (e.engine === 'nk') return ['Лимит Pro на месяц исчерпан', 'До 1-го числа читает запасной голос.'];
+      return mt === 'gemini' ? ['Лимит на сегодня исчерпан', `Вернётся ${V.Limits.resetText(mt)}. Пока читает запасной.`] : [`Лимит до ${V.Limits.resetText(mt)}`, 'Бесплатный лимит этого месяца закончился. Пока читает запасной.'];
     }
     return WHY[a.why] || ['', ''];
   }
 
   /** the main action of a card: pick it, or what it needs first */
   function actions(e, a, picked, mini) {
-    const playable = a.ok || a.why === 'down' || a.why === 'quota';
-    const play = playable ? `<button type="button" class="vp-btn vp-play${st.playing === e.id ? ' on' : ''}" data-vp-play="${esc(e.id)}" aria-label="${st.playing === e.id ? 'Остановить' : 'Послушать голос ' + esc(e.name)}">${st.playing === e.id ? '■ Стоп' : '▶ Послушать'}</button>` : '';
-    const pick = `<button type="button" role="radio" aria-checked="${picked}" class="vp-btn vp-pick${picked ? ' on' : ''}" data-vp-pick="${esc(e.id)}" aria-label="${picked ? 'Выбран' : 'Выбрать'}: ${esc(e.name)}">${picked ? '✓ Выбран' : '◉ Выбрать'}</button>`;
-    if (a.ok || a.why === 'down' || a.why === 'quota') return play + pick;
+    // a Pro voice that rests (month used up / a short break) is not played: ▶ would be a paid call that fails
+    const playable = a.ok || ((a.why === 'down' || a.why === 'quota') && e.engine !== 'nk');
+    const on = st.playing === e.id;
+    const play = playable ? `<button type="button" class="vp-btn vp-play${on ? ' on' : ''}" data-vp-play="${esc(e.id)}" aria-label="${on ? 'Остановить' : 'Послушать голос ' + esc(e.name)}">${I(on ? 'stop' : 'play')}<span>${on ? 'Стоп' : 'Послушать'}</span></button>` : '';
+    const pick = `<button type="button" role="radio" aria-checked="${picked}" class="vp-btn vp-pick${picked ? ' on' : ''}" data-vp-pick="${esc(e.id)}" aria-label="${picked ? 'Выбран' : 'Выбрать'}: ${esc(e.name)}">${picked ? I('check') : '<i class="vp-dot" aria-hidden="true"></i>'}<span>${picked ? 'Выбран' : 'Выбрать'}</span></button>`;
+    if (a.ok || a.why === 'down' || a.why === 'quota' || a.why === 'hdquota') return play + pick;
+    if (e.engine === 'nk' && (a.why === 'pro' || a.why === 'signin')) return `<button type="button" class="vp-btn vp-pro" data-vp-pro>${I('crown')}<span>Подключить Pro</span></button>`;
+    if (e.engine === 'nk' && a.why === 'consent') return `<button type="button" class="vp-btn vp-connect" data-vp-consent>${I('check')}<span>Разрешить</span></button>`;
     if (a.why === 'download') {
       if (st.dl[e.key]) return dlSlot(e);
-      return `<button type="button" class="vp-btn vp-dl" data-vp-dl="${esc(e.key)}">⬇ Скачать · ${fmtMB(e.size)}</button>`;
+      return `<button type="button" class="vp-btn vp-dl" data-vp-dl="${esc(e.key)}">${I('download')}<span>Скачать · ${fmtMB(e.size)}</span></button>`;
     }
-    if (a.why === 'key' || a.why === 'badkey' || a.why === 'billing') return `<button type="button" class="vp-btn vp-connect" data-vp-connect="${e.engine}">🔑 Подключить</button>`;
+    if (a.why === 'key' || a.why === 'badkey' || a.why === 'billing') return `<button type="button" class="vp-btn vp-connect" data-vp-connect="${e.engine}">${I('key')}<span>Подключить</span></button>`;
     // Edge before the one-click install: the same two buttons, resting — they wake up in place when the voices are there
     if (e.engine === 'edge' && (a.why === 'install' || a.why === 'old' || a.why === 'bridge' || a.why === 'stale')) {
-      return `<button type="button" class="vp-btn vp-play" disabled aria-label="Послушать: сначала установите голоса Edge">▶ Послушать</button><button type="button" class="vp-btn vp-pick" disabled aria-label="Выбрать: сначала установите голоса Edge">◉ Выбрать</button>`;
+      return `<button type="button" class="vp-btn vp-play" disabled aria-label="Послушать: сначала установите голоса Edge">${I('play')}<span>Послушать</span></button><button type="button" class="vp-btn vp-pick" disabled aria-label="Выбрать: сначала установите голоса Edge"><i class="vp-dot" aria-hidden="true"></i><span>Выбрать</span></button>`;
     }
     return '';
   }
@@ -164,11 +187,11 @@
   /** the download in progress: a bar in place of the «⬇ Скачать» button — the card keeps its height */
   function dlSlot(e) {
     const d = st.dl[e.key];
-    if (d.err) return `<div class="vp-dlp err" data-dlp="${esc(e.key)}"><span class="vp-dlbar"><span data-dlp-txt>⚠ Не скачалось</span></span><button type="button" class="vp-btn" data-vp-dl="${esc(e.key)}">🔁 Ещё раз</button></div>`;
+    if (d.err) return `<div class="vp-dlp err" data-dlp="${esc(e.key)}"><span class="vp-dlbar"><span data-dlp-txt>Не скачалось</span></span><button type="button" class="vp-btn" data-vp-dl="${esc(e.key)}">${I('refresh')}<span>Ещё раз</span></button></div>`;
     const pctv = d.total ? Math.min(100, Math.round(d.done / d.total * 100)) : 0;
     return `<div class="vp-dlp" data-dlp="${esc(e.key)}">
       <span class="vp-dlbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctv}" aria-label="Скачивание голоса ${esc(e.name)}"><i style="width:${pctv}%"></i><span data-dlp-txt>${d.total ? leftTxt(d) : 'Начинаю скачивание…'}</span></span>
-      <button type="button" class="vp-btn ghost sq" data-vp-cancel="${esc(e.key)}" aria-label="Отменить скачивание" title="Отменить">✕</button></div>`;
+      <button type="button" class="vp-btn ghost sq" data-vp-cancel="${esc(e.key)}" aria-label="Отменить скачивание" title="Отменить">${I('close')}</button></div>`;
   }
   function card(e, o = {}) {
     const lang = st.lang;
@@ -177,11 +200,11 @@
     const pp = V.parse(pick);
     const picked = !!pick && (pick === e.id || (e.engine === 'piper' && pp.engine === 'piper' && pp.key === e.key));
     const [wt, wd] = a.ok ? ['', ''] : why(a, e);
-    const ok = a.ok || a.why === 'down' || a.why === 'quota';
+    const ok = a.ok || a.why === 'down' || a.why === 'quota' || a.why === 'hdquota';
     const more = !o.mini && (e.about || e.licence || (e.engine === 'piper' && a.ok));
     // Edge: one short line while the voices wait for the install — and a «✓» line in its place right after it,
     // so the cards keep their height when the voices wake up
-    const edgeNote = e.engine === 'edge' ? (a.ok && st.edge.phase === 'done' ? '<div class="vp-note good">✓ Установлено на Mac</div>'
+    const edgeNote = e.engine === 'edge' ? (a.ok && st.edge.phase === 'done' ? '<div class="vp-note good">Установлено на Mac</div>'
       : a.why === 'install' || a.why === 'old' || a.why === 'stale' ? `<div class="vp-note">${esc(wt)}</div>` : null) : null;
     return `<article class="vp-card${picked ? ' is-picked' : ''}${ok ? '' : ' is-off'}${st.playing === e.id ? ' is-playing' : ''}${o.mini ? ' mini' : ''}" data-card="${esc(e.id)}" data-anchor="${esc((o.where || 'g') + ':' + e.id)}">
       <div class="vp-ava" style="--h:${hue(e)}" aria-hidden="true">${esc(initial(e))}</div>
@@ -190,21 +213,21 @@
         <div class="vp-eng">${esc((V.ENGINES[e.engine] || {}).short || '')}${e.ch ? ` · <span class="vp-ch">${esc(e.ch)}</span>` : ''}</div>
         ${qBadge(e.q)}
         <div class="vp-chips">${chips(e, a)}</div>
-        ${edgeNote != null ? edgeNote : a.why === 'quota' || a.why === 'badkey' || a.why === 'down' || a.why === 'billing' || a.why === 'blocked' ? `<div class="vp-note">${esc(wt)}</div>` : !ok && wt && a.why !== 'download' && a.why !== 'key' ? `<div class="vp-note">${esc(wt)}${wd && !o.mini ? `<small>${esc(wd)}</small>` : ''}</div>` : ''}
+        ${edgeNote != null ? edgeNote : a.why === 'quota' || a.why === 'hdquota' || a.why === 'badkey' || a.why === 'down' || a.why === 'billing' || a.why === 'blocked' ? `<div class="vp-note">${esc(wt)}</div>` : !ok && wt && a.why !== 'download' && a.why !== 'key' && a.why !== 'pro' ? `<div class="vp-note">${esc(wt)}${wd && !o.mini ? `<small>${esc(wd)}</small>` : ''}</div>` : ''}
         ${!o.mini ? speakerSel(e, picked) : ''}
       </div>
       <div class="vp-acts">${actions(e, a, picked, o.mini)}</div>
       ${st.playing === e.id ? '<div class="vp-pbar" aria-hidden="true"><i data-pbar></i></div>' : ''}
-      ${more ? `<details class="vp-more"${st.more[e.id] ? ' open' : ''} data-more="${esc(e.id)}"><summary>Подробнее</summary><div class="small">${e.about ? esc(e.about) : ''}
+      ${more ? `<details class="vp-more"${st.more[e.id] ? ' open' : ''} data-more="${esc(e.id)}"><summary>Подробнее</summary><div class="small">${e.about ? esc(e.about) : ''}${e.engine === 'nk' ? '<br>Текст для озвучки отправляется на сервер Norsk Kort и в Google Cloud Text-to-Speech — только с вашего разрешения. Готовые фразы общие для всех и не связаны с вашим аккаунтом.' : ''}
         ${e.engine === 'piper' ? `<br>Лицензия записи: ${esc(e.licence || '—')} · программа Piper: MIT · фонемы espeak-ng (GPL-3.0) скачиваются с CDN.${e.stress ? '<br>Ударения ставятся по правилам — в редких словах бывают ошибки.' : ''}` : ''}
         <br>Оценка «${esc(V.QUALITY[e.q] || '')}» — по независимым замерам и на слух: ★★★★★ как живой человек, ★★ заметно «роботский».
-        ${e.engine === 'piper' && a.ok ? `<div class="vp-row"><button type="button" class="vp-btn ghost" data-vp-del="${esc(e.key)}">🗑 Удалить с устройства</button></div>` : ''}</div></details>` : ''}
+        ${e.engine === 'piper' && a.ok ? `<div class="vp-row"><button type="button" class="vp-btn ghost" data-vp-del="${esc(e.key)}">${I('trash')}<span>Удалить с устройства</span></button></div>` : ''}</div></details>` : ''}
     </article>`;
   }
 
   /* ---------- the window ---------- */
   const baseId = id => { const p = V.parse(id); return p.engine === 'piper' ? 'piper:' + p.key : id; };
-  const REC_TAG = { piper: 'Офлайн', edge: 'Бесплатно на Mac', azure: 'Живой голос', gtr: 'Без настройки', sys: 'На устройстве' };
+  const REC_TAG = { piper: 'Офлайн', edge: 'Бесплатно на Mac', azure: 'Живой голос', gtr: 'Без настройки', sys: 'На устройстве', nk: 'Norsk Kort Pro' };
   /** «⭐ Рекомендуем»: chosen when the window opens (per language and place) and kept in that order while it is open —
    *  a voice that has just been downloaded or installed does not jump to another place; only «Сейчас лучший» moves */
   function recs(lang) {
@@ -215,9 +238,11 @@
       const ids = [];
       const add = id => { if (by(id) && !ids.includes(id)) ids.push(id); };
       add(best);
+      if (V.nkOffered()) add('nk:' + V.voice('nk', lang));
       add({ no: 'piper:no_NO-talesyntese-medium', uk: 'piper:uk_UA-tetiana-high', ru: 'piper:ru_RU-irina-medium' }[lang]);
-      add((V.onMac() ? 'edge:' : 'azure:') + V.MS_DEFAULT[lang]);
-      add('gtr:' + lang);
+      add('piper:ru_RU-denis-medium'); // (the public build: Ирина has no licence for a paid app)
+      if (!V.publicBuild()) { add((V.onMac() ? 'edge:' : 'azure:') + V.MS_DEFAULT[lang]); add('gtr:' + lang); }
+      add('azure:' + V.MS_DEFAULT[lang]);
       st.recs[k] = ids.slice(0, 3);
     }
     return st.recs[k].map(id => by(id)).filter(Boolean).map(e => ({ e, tag: e.id === best ? 'Сейчас лучший' : REC_TAG[e.engine] || 'С ключом' }));
@@ -225,19 +250,32 @@
   function deviceNote(lang) {
     const n = V.entries(lang).filter(e => e.engine === 'sys').length;
     const lines = [];
-    if (IOS) lines.push('📱 <b>Safari на iPhone и iPad даёт сайтам только базовые («компактные») голоса Apple</b> — даже если в Настройках скачаны улучшенные. Это ограничение Apple, не приложения. Живой голос бесплатно: офлайн-голос Piper или Google.');
-    else if (SAFARI) lines.push('💻 Safari иногда не показывает сайтам улучшенные голоса Apple. В Chrome на Mac они обычно видны.');
-    if (!n) lines.push(lang === 'uk' ? '🇺🇦 Украинского голоса на этом устройстве нет. Украинский текст <b>никогда не читается русским голосом</b> — выберите голос выше.' : 'На этом устройстве нет голоса для этого языка.');
+    const alt = V.publicBuild() ? `офлайн-голос Piper${V.nkOffered() ? ' — или голоса Norsk Kort Pro' : ''}` : 'офлайн-голос Piper или Google';
+    if (IOS) lines.push(`<b>Safari на iPhone и iPad даёт сайтам только базовые («компактные») голоса Apple</b> — даже если в Настройках скачаны улучшенные. Это ограничение Apple, не приложения. Живой голос бесплатно: ${alt}.`);
+    else if (SAFARI) lines.push('Safari иногда не показывает сайтам улучшенные голоса Apple. В Chrome на Mac они обычно видны.');
+    if (!n) lines.push(lang === 'uk' ? 'Украинского голоса на этом устройстве нет. Украинский текст <b>никогда не читается русским голосом</b> — выберите голос выше.' : 'На этом устройстве нет голоса для этого языка.');
     const how = lang === 'no' ? 'Норвежский: Nora (улучшенный), Henrik' : lang === 'ru' ? 'Русский: Milena (улучшенный), Katya, Yuri' : 'Украинский: Lesya (улучшенный)';
     if (!IOS) lines.push(`<details class="vp-how"><summary>Как получить голос устройства получше</summary><div class="small">
       ${ANDROID ? '<b>Android:</b> Настройки → Озвучивание текста → Синтезатор речи Google → Установить голосовые данные → выберите язык и голос «высокого качества».' : `<b>Mac:</b> Системные настройки → Универсальный доступ → Устный контент → Системный голос → Управлять голосами… → ${how}. Потом перезапустите браузер.<br><b>Windows:</b> Параметры → Время и язык → Речь → Добавить голоса — или откройте приложение в Microsoft Edge: там есть бесплатные онлайн-нейроголоса.`}</div></details>`);
     return lines.length ? `<div class="vp-gnote">${lines.join('<br>')}</div>` : '';
   }
+  /** the Pro group: what it is, the person's month (the server's percentage), or the one door to Pro */
+  function proHead(lang) {
+    if (!V.nkPro()) {
+      return `<div class="vp-gnote vp-pronote"><b>Живые голоса Google на сервере Norsk Kort</b> — для норвежского, украинского и русского. Работают на любом устройстве: без ключей, без скачивания, без настроек. Входят в подписку Norsk Kort Pro.
+        <span class="vp-row"><button type="button" class="vp-btn primary" data-vp-pro>${I('crown')}<span>Подключить Pro</span></button></span></div>`;
+    }
+    const u = (window.Pro && Pro.state && Pro.state.usage) || null, pc = u && Number.isFinite(+u.tts_pct) ? Math.max(0, Math.min(100, Math.round(+u.tts_pct))) : null;
+    const consent = window.AIConsent && AIConsent.granted && !AIConsent.granted();
+    return (consent ? `<div class="vp-gnote">Голоса сервера включатся, когда вы разрешите отправлять им текст для озвучки (Norsk Kort и Google Cloud Text-to-Speech). <span class="vp-row"><button type="button" class="vp-btn" data-vp-consent>${I('check')}<span>Разрешить</span></button></span></div>` : '')
+      + (pc != null ? `<div class="vp-use${pc >= 100 ? ' over' : pc >= 80 ? ' high' : ''}"><div class="vp-use-h"><small>Голоса Pro в этом месяце: использовано ${pc} %</small></div><div class="vp-bar thin" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pc}" aria-label="Голоса Pro: использовано ${pc} %"><i style="width:${Math.max(pc ? 1.5 : 0, pc)}%"></i></div>${pc >= 80 ? `<div class="vp-limitline">${pc >= 100 ? 'Лимит этого месяца исчерпан — до 1-го числа читает запасной голос. Уже озвученные фразы звучат как прежде.' : 'Осталось меньше пятой части месячного лимита. Уже озвученные фразы лимит не тратят.'}</div>` : ''}</div>` : '');
+  }
   function groupHtml(g, list, lang) {
     const [id, ico, title, sub] = g;
     let body = '';
-    if (id === 'mac' && !V.onMac()) {
-      body = `<div class="vp-gnote">💻 Нейроголоса Microsoft Edge бесплатны, но работают только <b>в приложении на Mac</b> (через мост). Здесь — те же голоса через <b>Azure</b>: бесплатный ключ, 500 000 знаков в месяц. <button type="button" class="vp-btn" data-vp-connect="azure">🔑 Подключить Azure</button></div>`;
+    if (id === 'pro') body = proHead(lang) + (list.length ? `<div class="vp-grid">${list.map(e => card(e, { where: id })).join('')}</div>` : '');
+    else if (id === 'mac' && !V.onMac()) {
+      body = `<div class="vp-gnote">Нейроголоса Microsoft Edge бесплатны, но работают только <b>в приложении на Mac</b> (через мост). Здесь — те же голоса через <b>Azure</b>: бесплатный ключ, 500 000 знаков в месяц. <button type="button" class="vp-btn" data-vp-connect="azure">${I('key')}<span>Подключить Azure</span></button></div>`;
     } else {
       if (id === 'mac') {
         const a = V.avail('edge:' + V.MS_DEFAULT[lang], lang);
@@ -246,7 +284,7 @@
       if (id === 'key') {
         body += KEY_ORDER.map(en => {
           const ls = list.filter(e => e.engine === en);
-          if (!ls.length) return en === 'gemini' && lang === 'uk' ? '<div class="vp-gnote">✦ Gemini не говорит по-украински. Те же 30 голосов Google для украинского есть в Google Cloud — выше.</div>' : '';
+          if (!ls.length) return en === 'gemini' && lang === 'uk' ? '<div class="vp-gnote">Gemini не говорит по-украински. Те же 30 голосов Google для украинского есть в Google Cloud — выше.</div>' : '';
           const ready = V.ready(en);
           // not connected yet: a few voices to taste (▶ works after «Подключить»), the rest one tap away
           const short = ready ? LIST_SHORT : 4;
@@ -254,21 +292,33 @@
           const pick = curPick();
           const shown = all ? ls : ls.filter((e, i) => i < short || e.id === pick);
           const rest = ls.length - shown.length;
-          return `<div class="vp-sub" data-anchor="sub:${en}"><div class="vp-subh"><b>${esc(V.ENGINES[en].short)}</b>${ready ? '<span class="vp-chip ok">✓ подключено</span>' : `<button type="button" class="vp-btn sm" data-vp-connect="${en}">🔑 Подключить</button>`}</div>
+          return `<div class="vp-sub" data-anchor="sub:${en}"><div class="vp-subh"><b>${esc(V.ENGINES[en].short)}</b>${ready ? '<span class="vp-chip ok">подключено</span>' : `<button type="button" class="vp-btn sm" data-vp-connect="${en}">${I('key')}<span>Подключить</span></button>`}</div>
             ${ready ? useHtml(en) : ''}
             <div class="vp-grid">${shown.map(e => card(e, { where: 'key' })).join('')}</div>
-            ${ls.length > short + 2 ? `<div class="vp-row" data-anchor="allv:${k}"><button type="button" class="vp-btn ghost vp-allv" data-vp-allv="${k}" aria-expanded="${all}">${all ? '▴ Свернуть' : `▾ Показать ещё ${rest} ${U.plural ? U.plural(rest, ['голос', 'голоса', 'голосов']) : 'голосов'}`}</button></div>` : ''}</div>`;
+            ${ls.length > short + 2 ? `<div class="vp-row" data-anchor="allv:${k}"><button type="button" class="vp-btn ghost vp-allv" data-vp-allv="${k}" aria-expanded="${all}">${I('chevron', 18, all ? 'vp-flip' : '')}<span>${all ? 'Свернуть' : `Показать ещё ${rest} ${U.plural ? U.plural(rest, ['голос', 'голоса', 'голосов']) : 'голосов'}`}</span></button></div>` : ''}</div>`;
         }).join('');
       } else body += list.length ? `<div class="vp-grid">${list.map(e => card(e, { where: id })).join('')}</div>` : '';
       if (id === 'device') body += deviceNote(lang);
       if (id === 'offline' && !list.length) body += '<div class="vp-gnote">Офлайн-голосов для этого языка пока нет.</div>';
     }
     const n = id === 'mac' && !V.onMac() ? 0 : list.length;
-    return `<details class="vp-group" data-group="${id}" data-anchor="grp:${id}"${st.open[id] ? ' open' : ''}><summary><span class="vp-gico" aria-hidden="true">${ico}</span><span class="vp-gt"><b>${title}</b><small>${sub}${n ? ` · ${n}` : ''}</small></span><span class="vp-chev" aria-hidden="true">▾</span></summary>
+    return `<details class="vp-group" data-group="${id}" data-anchor="grp:${id}"${st.open[id] ? ' open' : ''}><summary><span class="vp-gico" aria-hidden="true">${I(ico, 22)}</span><span class="vp-gt"><b>${title}</b><small>${sub}${n ? ` · ${n}` : ''}</small></span><span class="vp-chev" aria-hidden="true">${I('chevron', 20)}</span></summary>
       <div class="vp-gbody">${body}</div></details>`;
   }
-  const BRIDGE_CMD = 'python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"';
-  const RESTART_CMD = '/bin/bash "/Users/sprut/Norsk - Russisk/tools/restart-bridge.command"';
+  /* The bridge commands (Mac only). No folder is written in this file: the bridge says where it lives (its token command
+     is `bash "<folder>/tools/claude-token.sh"`, js/ai.js AI.bridge.tokenCmd) — remembered on this Mac only — else the
+     command is relative to the app's folder. */
+  function macRoot() {
+    if (V.publicBuild() || !V.onMac()) return '';
+    const m = /"([^"]+)\/tools\/[^"\/]+"/.exec(String((window.AI && AI.bridge && AI.bridge.tokenCmd) || ''));
+    try {
+      if (m) { localStorage.setItem('nk-bridge-root', m[1]); return m[1]; }
+      return localStorage.getItem('nk-bridge-root') || '';
+    } catch (e) { return m ? m[1] : ''; }
+  }
+  const bridgeCmd = () => { const r = macRoot(); return r ? `python3 "${r}/bridge/server.py"` : 'python3 bridge/server.py'; };
+  const restartCmd = () => { const r = macRoot(); return r ? `/bin/bash "${r}/tools/restart-bridge.command"` : '/bin/bash tools/restart-bridge.command'; };
+  const inFolder = () => (macRoot() ? '' : '<br>Терминал нужно открыть в папке приложения: в Finder правый щелчок по папке → «Новый терминал по адресу папки».');
   /** 💻 Edge: one calm box with ONE main button — install, the progress, the result (the cards below wake up in place) */
   function edgeBox(a, lang) {
     const ph = st.edge.phase || '';
@@ -276,29 +326,30 @@
     const hT = st.edge.textH ? ` style="min-height:${st.edge.textH}px"` : '', hR = st.edge.rowH ? ` style="min-height:${st.edge.rowH}px"` : '';
     const box = (title, text, row, extra) => `<div class="vp-how-box vp-edgebox" data-anchor="edgebox" aria-live="polite"><b>${title}</b><p class="vp-eb-t"${hT}>${text}</p><div class="vp-row vp-eb-row"${hR}>${row}</div>${extra || ''}</div>`;
     const manual = `<details class="vp-how"><summary>Если не получилось</summary><div class="small">Можно поставить вручную: откройте «Терминал» (новое окно — ⌘N), вставьте команду и нажмите Enter, потом нажмите «Проверить».
-      <code class="vp-cmd" tabindex="0">python3 -m pip install --user -U edge-tts</code><span class="vp-row"><button type="button" class="vp-btn sm" data-vp-copy="python3 -m pip install --user -U edge-tts">📋 Скопировать</button><button type="button" class="vp-btn sm" data-vp-recheck>🔁 Проверить</button></span></div></details>`;
-    const restartHow = `<details class="vp-how"><summary>Как перезапустить мост</summary><div class="small">В Finder откройте папку <b>«Norsk - Russisk»</b> → <b>«tools»</b> и дважды щёлкните файл <b>restart-bridge.command</b> — откроется окно Терминала, мост перезапустится в нём (это окно не закрывайте).<br>Или в <b>новом</b> окне Терминала (⌘N) вставьте одну строку и нажмите Enter:
-      <code class="vp-cmd" tabindex="0">${esc(RESTART_CMD)}</code><button type="button" class="vp-btn sm" data-vp-copy="${esc(RESTART_CMD)}">📋 Скопировать</button></div></details>`;
-    if (a.why === 'bridge') return box('💻 Мост на Mac не запущен', 'Запустите мост — и голоса Edge заработают бесплатно. Проще всего: в папке «Norsk - Russisk» → «tools» дважды щёлкните <b>restart-bridge.command</b>.',
-      `<button type="button" class="vp-btn primary" data-vp-recheck>🔁 Я запустил — проверить</button>`,
-      `<details class="vp-how"><summary>Через Терминал</summary><div class="small"><code class="vp-cmd" tabindex="0">${esc(BRIDGE_CMD)}</code><button type="button" class="vp-btn sm" data-vp-copy="${esc(BRIDGE_CMD)}">📋 Скопировать</button></div></details>`);
-    if (a.why === 'old') return box('💻 Мост нужно перезапустить — один раз', 'На Mac работает мост старой версии. Перезапустите его один раз — дальше голоса Edge ставятся одной кнопкой прямо здесь.',
-      `<button type="button" class="vp-btn primary" data-vp-recheck>🔁 Я перезапустил — проверить</button>`, restartHow);
-    if (ph === 'installing' || ph === 'restarting') return box('💻 Голоса Microsoft Edge', ph === 'restarting' ? 'Перезапускаю мост… это несколько секунд.' : 'Устанавливаю… обычно меньше минуты. Можно пока слушать другие голоса.',
-      `<span class="vp-busy" role="status"><i></i><span>${ph === 'restarting' ? '↻ Перезапускаю мост…' : '⏳ Устанавливаю голоса Edge…'}</span></span>`);
-    if (ph === 'restart') return box('💻 Почти готово', 'Голоса установлены — осталось один раз перезапустить мост. Это несколько секунд.',
-      `<button type="button" class="vp-btn primary" data-vp-restart>↻ Перезапустить мост</button>`, restartHow);
-    if (ph === 'fail') return box('💻 Не получилось установить', `${esc(st.edge.error || 'Не получилось установить голоса.')} Ничего не сломалось — пока читают другие голоса.`,
-      `<button type="button" class="vp-btn primary" data-vp-install>🔁 Попробовать ещё раз</button>`, manual);
+      <code class="vp-cmd" tabindex="0">python3 -m pip install --user -U edge-tts</code><span class="vp-row"><button type="button" class="vp-btn sm" data-vp-copy="python3 -m pip install --user -U edge-tts">${I('copy')}<span>Скопировать</span></button><button type="button" class="vp-btn sm" data-vp-recheck>${I('refresh')}<span>Проверить</span></button></span></div></details>`;
+    const rc = restartCmd(), bc = bridgeCmd();
+    const restartHow = `<details class="vp-how"><summary>Как перезапустить мост</summary><div class="small">В Finder откройте папку приложения → <b>«tools»</b> и дважды щёлкните файл <b>restart-bridge.command</b> — откроется окно Терминала, мост перезапустится в нём (это окно не закрывайте).<br>Или в <b>новом</b> окне Терминала (⌘N) вставьте одну строку и нажмите Enter:${inFolder()}
+      <code class="vp-cmd" tabindex="0">${esc(rc)}</code><button type="button" class="vp-btn sm" data-vp-copy="${esc(rc)}">${I('copy')}<span>Скопировать</span></button></div></details>`;
+    if (a.why === 'bridge') return box('Мост на Mac не запущен', 'Запустите мост — и голоса Edge заработают бесплатно. Проще всего: в папке приложения → «tools» дважды щёлкните <b>restart-bridge.command</b>.',
+      `<button type="button" class="vp-btn primary" data-vp-recheck>${I('refresh')}<span>Я запустил — проверить</span></button>`,
+      `<details class="vp-how"><summary>Через Терминал</summary><div class="small">${inFolder()}<code class="vp-cmd" tabindex="0">${esc(bc)}</code><button type="button" class="vp-btn sm" data-vp-copy="${esc(bc)}">${I('copy')}<span>Скопировать</span></button></div></details>`);
+    if (a.why === 'old') return box('Мост нужно перезапустить — один раз', 'На Mac работает мост старой версии. Перезапустите его один раз — дальше голоса Edge ставятся одной кнопкой прямо здесь.',
+      `<button type="button" class="vp-btn primary" data-vp-recheck>${I('refresh')}<span>Я перезапустил — проверить</span></button>`, restartHow);
+    if (ph === 'installing' || ph === 'restarting') return box('Голоса Microsoft Edge', ph === 'restarting' ? 'Перезапускаю мост… это несколько секунд.' : 'Устанавливаю… обычно меньше минуты. Можно пока слушать другие голоса.',
+      `<span class="vp-busy" role="status"><i></i><span>${ph === 'restarting' ? 'Перезапускаю мост…' : 'Устанавливаю голоса Edge…'}</span></span>`);
+    if (ph === 'restart') return box('Почти готово', 'Голоса установлены — осталось один раз перезапустить мост. Это несколько секунд.',
+      `<button type="button" class="vp-btn primary" data-vp-restart>${I('refresh')}<span>Перезапустить мост</span></button>`, restartHow);
+    if (ph === 'fail') return box('Не получилось установить', `${esc(st.edge.error || 'Не получилось установить голоса.')} Ничего не сломалось — пока читают другие голоса.`,
+      `<button type="button" class="vp-btn primary" data-vp-install>${I('refresh')}<span>Попробовать ещё раз</span></button>`, manual);
     if (ph === 'done') {
       const id = 'edge:' + V.MS_DEFAULT[lang], e = V.entry(id, lang);
-      return box('✓ Голоса Edge установлены', `Живые голоса Microsoft готовы — выберите любой ниже.${!V.pickOf(lang) && a.ok ? ' «Авто» уже читает ими.' : ''}`,
-        `<button type="button" class="vp-btn primary${st.playing === id ? ' on' : ''}" data-vp-play="${esc(id)}"${a.ok || a.why === 'down' ? '' : ' disabled'}>${st.playing === id ? '■ Стоп' : `▶ Послушать ${esc(e ? e.name : '')}`}</button>`);
+      return box('Голоса Edge установлены', `Живые голоса Microsoft готовы — выберите любой ниже.${!V.pickOf(lang) && a.ok ? ' «Авто» уже читает ими.' : ''}`,
+        `<button type="button" class="vp-btn primary${st.playing === id ? ' on' : ''}" data-vp-play="${esc(id)}"${a.ok || a.why === 'down' ? '' : ' disabled'}>${I(st.playing === id ? 'stop' : 'play')}<span>${st.playing === id ? 'Стоп' : `Послушать ${esc(e ? e.name : '')}`}</span></button>`);
     }
-    if (a.why === 'stale') return box('💻 Голоса Edge нужно обновить', 'Голоса Edge перестали отвечать — похоже, Microsoft поменяла защиту. Обычно помогает обновление — одна кнопка, меньше минуты. Пока читают другие голоса.',
-      `<button type="button" class="vp-btn primary" data-vp-install>⬇ Обновить голоса Edge</button>`, manual);
-    return box('💻 Голоса Microsoft Edge — бесплатно', 'Pernille, Iselin, Finn и другие — самые живые бесплатные голоса. Их нужно один раз установить на этот Mac — всё сделает кнопка.',
-      `<button type="button" class="vp-btn primary" data-vp-install>⬇ Установить голоса Edge — бесплатно, ~1 минута</button>`);
+    if (a.why === 'stale') return box('Голоса Edge нужно обновить', 'Голоса Edge перестали отвечать — похоже, Microsoft поменяла защиту. Обычно помогает обновление — одна кнопка, меньше минуты. Пока читают другие голоса.',
+      `<button type="button" class="vp-btn primary" data-vp-install>${I('download')}<span>Обновить голоса Edge</span></button>`, manual);
+    return box('Голоса Microsoft Edge — бесплатно', 'Pernille, Iselin, Finn и другие — самые живые бесплатные голоса. Их нужно один раз установить на этот Mac — всё сделает кнопка.',
+      `<button type="button" class="vp-btn primary" data-vp-install>${I('download')}<span>Установить голоса Edge — бесплатно, ~1 минута</span></button>`);
   }
   function chainHtml(lang) {
     const conf = V.chainConf(lang);
@@ -309,15 +360,15 @@
     const live = id => V.avail(id, lang).ok;
     if (!st.editChain) {
       const okList = order.filter(live);
-      return `<section class="vp-chain"><h3>↪ Если голос не сработает</h3>
+      return `<section class="vp-chain"><h3>${I('fallback', 20)}<span>Если голос не сработает</span></h3>
         <p class="small muted">Не ответил за ~4 секунды или ошибся — приложение тихо возьмёт следующий${Array.isArray(conf) ? ' (ваш порядок)' : ''}:</p>
         <div class="vp-flow"><span class="vp-step first">${name(cur)}</span>${okList.map(id => `<span class="vp-arr" aria-hidden="true">→</span><span class="vp-step">${name(id)}</span>`).join('')}${okList.length ? '' : '<span class="vp-arr" aria-hidden="true">→</span><span class="vp-step">голос устройства</span>'}</div>
-        <div class="vp-row"><button type="button" class="vp-btn" data-vp-chain-edit>↕ Изменить порядок</button>${Array.isArray(conf) ? '<button type="button" class="vp-btn ghost" data-vp-chain-auto>↺ Авто</button>' : ''}</div></section>`;
+        <div class="vp-row"><button type="button" class="vp-btn" data-vp-chain-edit>${I('sort')}<span>Изменить порядок</span></button>${Array.isArray(conf) ? `<button type="button" class="vp-btn ghost" data-vp-chain-auto>${I('sparkle')}<span>Авто</span></button>` : ''}</div></section>`;
     }
-    return `<section class="vp-chain"><h3>↪ Порядок запасных голосов</h3>
+    return `<section class="vp-chain"><h3>${I('fallback', 20)}<span>Порядок запасных голосов</span></h3>
       <ol class="vp-olist">${order.map((id, i) => `<li><span class="vp-oname">${name(id)}${live(id) ? '' : ' <small class="muted">· сейчас недоступен</small>'}</span>
-        <button type="button" class="vp-btn sq" data-vp-up="${i}" ${i ? '' : 'disabled'} aria-label="Выше: ${name(id)}">↑</button><button type="button" class="vp-btn sq" data-vp-down="${i}" ${i < order.length - 1 ? '' : 'disabled'} aria-label="Ниже: ${name(id)}">↓</button></li>`).join('')}</ol>
-      <div class="vp-row"><button type="button" class="vp-btn primary" data-vp-chain-done>Готово</button><button type="button" class="vp-btn ghost" data-vp-chain-auto>↺ Авто</button></div></section>`;
+        <button type="button" class="vp-btn sq" data-vp-up="${i}" ${i ? '' : 'disabled'} aria-label="Выше: ${name(id)}">${I('up')}</button><button type="button" class="vp-btn sq" data-vp-down="${i}" ${i < order.length - 1 ? '' : 'disabled'} aria-label="Ниже: ${name(id)}">${I('down')}</button></li>`).join('')}</ol>
+      <div class="vp-row"><button type="button" class="vp-btn primary" data-vp-chain-done>Готово</button><button type="button" class="vp-btn ghost" data-vp-chain-auto>${I('sparkle')}<span>Авто</span></button></div></section>`;
   }
   /** 📏 how much of the free limit is used: a thin bar «использовано 12 %»; from 75 % a quiet yellow line, at 100 % — when it comes back */
   function meterLine(mt, label, bare) {
@@ -326,7 +377,7 @@
     const used = L.used(mt), p = used / cap, pc = Math.min(100, Math.floor(p * 100)), day = mt === 'gemini';
     const cls = p >= 1 ? ' over' : p >= 0.75 ? ' high' : '';
     const left = Math.max(0, cap - used);
-    const note = p >= 1 ? `⏳ Лимит ${L.period(mt)} исчерпан — вернётся ${L.resetText(mt)}. Пока читает запасной голос.`
+    const note = p >= 1 ? `Лимит ${L.period(mt)} исчерпан — вернётся ${L.resetText(mt)}. Пока читает запасной голос.`
       : p >= 0.75 ? (day ? `Осталось около ${left} ${U.plural ? U.plural(left, ['новой фразы', 'новых фраз', 'новых фраз']) : 'новых фраз'} (лимит обновится ${L.resetText(mt)}).`
         : `Осталось ≈${fmtN(left)} знаков — лимит обновится ${L.resetText(mt)}. Дальше читать будет запасной голос.`) : '';
     return `<div class="vp-use${cls}">${bare ? '' : '<div class="vp-use-h"><small>'}${label ? esc(label) + ': ' : ''}${bare ? '' : `${day ? 'сегодня ' : ''}использовано ${pc} %</small></div>`}
@@ -346,9 +397,9 @@
     const dr = st.draft[eng] || {}; // what was typed but not saved yet survives a redraw
     const over = eng === 'gcloud' ? V.Limits.over('gcloud') && V.Limits.over('gcloud-wn') : V.Limits.over(eng);
     const status = !ready ? '<span class="vp-chip">не подключено</span>' : h === 'badkey' ? '<span class="vp-chip bad">ключ не подходит</span>' : h === 'billing' ? '<span class="vp-chip warn">нужна оплата</span>'
-      : h === 'blocked' ? '<span class="vp-chip warn">тариф приостановлен</span>' : h === 'quota' || over ? `<span class="vp-chip warn">лимит до ${esc(V.Limits.resetText(eng === 'gemini' ? 'gemini' : 'gcloud'))}</span>` : '<span class="vp-chip ok">✓ подключено</span>';
+      : h === 'blocked' ? '<span class="vp-chip warn">тариф приостановлен</span>' : h === 'quota' || over ? `<span class="vp-chip warn">лимит до ${esc(V.Limits.resetText(eng === 'gemini' ? 'gemini' : 'gcloud'))}</span>` : '<span class="vp-chip ok">подключено</span>';
     return `<details class="vp-key" data-key-eng="${eng}"${st.keyOpen[eng] ? ' open' : ''}>
-      <summary><span class="vp-ava sm" style="--h:${V.ENGINES[eng].hue}" aria-hidden="true">${eng === 'eleven' ? 'E' : eng === 'gcloud' ? 'G' : eng === 'gemini' ? '✦' : 'A'}</span><span class="vp-gt"><b>${k.title}</b><small>${k.tag}</small></span>${status}<span class="vp-chev" aria-hidden="true">▾</span></summary>
+      <summary><span class="vp-ava sm" style="--h:${V.ENGINES[eng].hue}" aria-hidden="true">${eng === 'eleven' ? 'E' : eng === 'gcloud' ? 'G' : eng === 'gemini' ? 'Gm' : 'A'}</span><span class="vp-gt"><b>${k.title}</b><small>${k.tag}</small></span>${status}<span class="vp-chev" aria-hidden="true">${I('chevron', 20)}</span></summary>
       <div class="vp-kbody">
         <p class="vp-free">${typeof k.free === 'function' ? k.free() : k.free}</p>
         ${k.warn ? `<p class="vp-warnbox">${k.warn}</p>` : ''}
@@ -357,8 +408,8 @@
           <label class="field"><span>${eng === 'azure' ? 'Ключ (KEY 1)' : 'API-ключ'}</span><input class="input" type="password" autocomplete="off" spellcheck="false" data-vp-key="${eng}" value="${esc(dr.key != null ? dr.key : s[k.field] || '')}" placeholder="${eng === 'gcloud' || eng === 'gemini' ? 'AIza…' : eng === 'eleven' ? 'sk_…' : 'вставьте ключ'}"></label>
           ${eng === 'azure' ? `<label class="field"><span>Регион (Location)</span><input class="input" list="vp-regions" autocomplete="off" spellcheck="false" data-vp-region value="${esc(dr.region != null ? dr.region : s.azureRegion || '')}" placeholder="westeurope"><datalist id="vp-regions">${AZ_REGIONS.map(r => `<option value="${r}">`).join('')}</datalist></label>` : ''}
         </div>
-        <div class="key-local">🔒 Ключ хранится <b>только на этом устройстве</b>, в зашифрованном виде. Он <b>не попадает</b> в резервные копии, экспорт и синхронизацию.</div>
-        <div class="vp-row"><button type="button" class="vp-btn primary" data-vp-check="${eng}">✓ Проверить</button>${ready ? `<button type="button" class="vp-btn ghost" data-vp-off="${eng}">Отключить</button>` : ''}${eng === 'eleven' && ready ? '<button type="button" class="vp-btn ghost" data-vp-eleven>⬇ Мои голоса</button>' : ''}</div>
+        <div class="key-local">${I('lock', 16)} Ключ хранится <b>только на этом устройстве</b>, в зашифрованном виде. Он <b>не попадает</b> в резервные копии, экспорт и синхронизацию.</div>
+        <div class="vp-row"><button type="button" class="vp-btn primary" data-vp-check="${eng}">${I('check')}<span>Проверить</span></button>${ready ? `<button type="button" class="vp-btn ghost" data-vp-off="${eng}">Отключить</button>` : ''}${eng === 'eleven' && ready ? `<button type="button" class="vp-btn ghost" data-vp-eleven>${I('download')}<span>Мои голоса</span></button>` : ''}</div>
         ${c ? `<div class="vp-msg ${c.cls}" role="status" aria-live="polite">${esc(c.t)}</div>` : ''}
         ${ready ? usageBox(eng, mon) : ''}
         ${eng === 'gcloud' ? capHtml() : ''}
@@ -389,13 +440,13 @@
     const autoOn = pl ? !V.placePick(pl, lang) : !V.pickOf(lang);
     const playing = st.playing === '__hero';
     return `<section class="vp-now" aria-label="Сейчас читает">
-      <div class="vp-now-h"><span class="vp-kicker">${autoOn ? (pl ? '↺ Как везде · ' : '✨ Авто · ') : ''}Сейчас читает${pl ? ' здесь' : ''}</span>${e ? qBadge(e.q) : ''}</div>
+      <div class="vp-now-h"><span class="vp-kicker">${autoOn ? (pl ? 'Как везде · ' : 'Авто · ') : ''}Сейчас читает${pl ? ' здесь' : ''}</span>${e ? qBadge(e.q) : ''}</div>
       <div class="vp-now-main"><div class="vp-ava lg" style="--h:${e ? hue(e) : 220}" aria-hidden="true">${e ? esc(initial(e)) : '♪'}</div>
-        <div class="vp-now-t"><b>${esc(V.label(lang, cur))}</b>${fb ? `<small class="vp-fb">Сейчас недоступен — читает запасной: ${esc(V.label(lang, act))}</small>` : e ? `<small>${chips(e, V.avail(cur, lang)).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}</small>` : ''}</div></div>
+        <div class="vp-now-t"><b>${esc(V.label(lang, cur))}</b>${fb ? `<small class="vp-fb">Сейчас недоступен — читает запасной: ${esc(V.label(lang, act))}</small>` : e ? `<small>${chips(e, V.avail(cur, lang)).replace(/<\/span>\s*<span[^>]*>/g, ' · ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}</small>` : ''}</div></div>
       <div class="vp-sample-wrap"><p class="vp-sample" data-sample lang="${{ no: 'nb', uk: 'uk', ru: 'ru' }[lang]}">${esc(st.own || V.SAMPLE[lang])}</p></div>
-      <div class="vp-row"><button type="button" class="vp-btn primary${playing ? ' on' : ''}" data-vp-hero aria-label="${playing ? 'Остановить' : 'Послушать текущий голос'}">${playing ? '■ Стоп' : '▶ Послушать'}</button>
-        <button type="button" class="vp-btn ghost" data-vp-own aria-expanded="${st.ownOpen ? 'true' : 'false'}">✎ Свой текст</button>
-        ${!autoOn ? `<button type="button" class="vp-btn ghost" data-vp-auto>${pl ? '↺ Вернуть «Как везде»' : '✨ Вернуть «Авто»'}</button>` : ''}</div>
+      <div class="vp-row"><button type="button" class="vp-btn primary${playing ? ' on' : ''}" data-vp-hero aria-label="${playing ? 'Остановить' : 'Послушать текущий голос'}">${I(playing ? 'stop' : 'play')}<span>${playing ? 'Стоп' : 'Послушать'}</span></button>
+        <button type="button" class="vp-btn ghost" data-vp-own aria-expanded="${st.ownOpen ? 'true' : 'false'}">${I('edit')}<span>Свой текст</span></button>
+        ${!autoOn ? `<button type="button" class="vp-btn ghost" data-vp-auto>${I('sparkle')}<span>${pl ? 'Вернуть «Как везде»' : 'Вернуть «Авто»'}</span></button>` : ''}</div>
       ${st.ownOpen ? `<label class="field vp-ownf"><span>Послушать на своём предложении</span><input class="input" data-vp-owntext maxlength="300" value="${esc(st.own)}" placeholder="${esc(V.SAMPLE[lang])}"></label>` : ''}
     </section>`;
   }
@@ -418,8 +469,8 @@
     }
     const playing = st.playing === '__roles';
     return `<section class="vp-roles" data-anchor="roles" aria-label="Разные голоса в диалогах">
-      <div class="vp-roles-top">${UI.switchHtml('vp-roles', on, '<b>🎭 Разные голоса в диалогах</b>').replace('data-key="vp-roles"', 'data-key="vp-roles" data-vp-roles')}
-        ${on ? `<button type="button" class="vp-btn sm ghost${playing ? ' on' : ''}" data-vp-roles-play aria-label="${playing ? 'Остановить' : 'Послушать короткий диалог'}">${playing ? '■ Стоп' : '▶ Послушать диалог'}</button>` : ''}</div>
+      <div class="vp-roles-top">${UI.switchHtml('vp-roles', on, '<b>Разные голоса в диалогах</b>').replace('data-key="vp-roles"', 'data-key="vp-roles" data-vp-roles')}
+        ${on ? `<button type="button" class="vp-btn sm ghost${playing ? ' on' : ''}" data-vp-roles-play aria-label="${playing ? 'Остановить' : 'Послушать короткий диалог'}">${I(playing ? 'stop' : 'play')}<span>${playing ? 'Стоп' : 'Послушать диалог'}</span></button>` : ''}</div>
       <p class="small muted">${on ? 'Когда текст читается по ролям, у каждого собеседника свой голос: у первого — тот, что выбран выше, у второго — другой, по возможности другого пола. Так звучат «Диалоги», учебник, читалка, «Слушать» и карточки с диалогами. Пояснения между репликами читает основной голос.'
         : 'Выключено: все реплики читает один голос.'}</p>
       ${who ? `<p class="small vp-roles-who">${who}</p>` : ''}
@@ -445,24 +496,24 @@
         const nm = id ? (e ? e.name : V.label(l, id)) : 'как везде';
         const full = id ? V.label(l, id) : 'Как везде: ' + V.label(l);
         return `<button type="button" class="vp-pchip${id ? ' set' : ''}" data-vp-place="${pl.id}" data-vp-plang="${l}" title="${esc(full)}" aria-label="${esc(pl.name)}, ${V.LANG_NAME[l].toLowerCase()}: ${esc(full)}. Выбрать голос">
-          <span class="vp-pflag" aria-hidden="true">${V.FLAG[l]}</span><span class="vp-pchip-t">${esc(nm)}</span></button>`;
+          ${V.langMark(l, 'vp-pflag')}<span class="vp-pchip-t">${esc(nm)}</span></button>`;
       }).join('');
       const playing = st.playing === '__place:' + pl.id;
-      return `<li class="vp-prow${own ? ' own' : ''}"><span class="vp-pico" aria-hidden="true">${pl.ico}</span>
+      return `<li class="vp-prow${own ? ' own' : ''}"><span class="vp-pico" aria-hidden="true">${I(pl.ico, 22)}</span>
         <span class="vp-pt"><b>${esc(pl.name)}</b><small>${esc(pl.sub)}</small></span>
         <span class="vp-pchips" role="group" aria-label="Голоса: ${esc(pl.name)}">${chipsH}</span>
-        <button type="button" class="vp-btn sm vp-pplay${playing ? ' on' : ''}" data-vp-pplay="${pl.id}" aria-label="${playing ? 'Остановить' : `Послушать: ${esc(pl.name)}, ${V.LANG_NAME[st.lang].toLowerCase()}`}">${playing ? '■ Стоп' : `▶ Послушать <span class="vp-pflag" aria-hidden="true">${V.FLAG[st.lang]}</span>`}</button></li>`;
+        <button type="button" class="vp-btn sm vp-pplay${playing ? ' on' : ''}" data-vp-pplay="${pl.id}" aria-label="${playing ? 'Остановить' : `Послушать: ${esc(pl.name)}, ${V.LANG_NAME[st.lang].toLowerCase()}`}">${I(playing ? 'stop' : 'play')}<span>${playing ? 'Стоп' : 'Послушать'}</span>${playing ? '' : V.langMark(st.lang, 'vp-pflag')}</button></li>`;
     }).join('');
-    return `<details class="vp-group vp-places" id="vp-places" data-group="places"${st.open.places ? ' open' : ''}><summary><span class="vp-gico" aria-hidden="true">📍</span><span class="vp-gt"><b>Где какой голос</b><small>${n ? `свой голос в ${n} ${U.plural ? U.plural(n, ['месте', 'местах', 'местах']) : 'местах'}` : 'везде одинаково'}</small></span><span class="vp-chev" aria-hidden="true">▾</span></summary>
+    return `<details class="vp-group vp-places" id="vp-places" data-group="places"${st.open.places ? ' open' : ''}><summary><span class="vp-gico" aria-hidden="true">${I('pin', 22)}</span><span class="vp-gt"><b>Где какой голос</b><small>${n ? `свой голос в ${n} ${U.plural ? U.plural(n, ['месте', 'местах', 'местах']) : 'местах'}` : 'везде одинаково'}</small></span><span class="vp-chev" aria-hidden="true">${I('chevron', 20)}</span></summary>
       <div class="vp-gbody"><p class="small muted">В каждом месте может звучать свой голос — например, в видео один, в карточках другой, в читалке третий. Нажмите на язык, чтобы выбрать. «Как везде» — голос, выбранный выше.</p>
         <ul class="vp-plist">${rows}</ul>
-        <div class="vp-row"><button type="button" class="vp-btn ghost" data-vp-preset${n ? '' : ' disabled'}>↺ Сбросить — везде одинаково</button></div></div></details>`;
+        <div class="vp-row"><button type="button" class="vp-btn ghost" data-vp-preset${n ? '' : ' disabled'}>${I('refresh')}<span>Сбросить — везде одинаково</span></button></div></div></details>`;
   }
   function placeBarHtml(lang) {
     const pl = V.placeInfo(st.place);
     return `<section class="vp-placebar" aria-label="Голос ${esc(pl.for)}">
-      <button type="button" class="vp-btn ghost sm vp-pback" data-vp-pback>← Все места</button>
-      <div class="vp-pb-t"><span class="vp-pico" aria-hidden="true">${pl.ico}</span><span><b>Голос ${esc(pl.for)} · ${V.FLAG[lang]} ${V.LANG_NAME[lang].toLowerCase()}</b>
+      <button type="button" class="vp-btn ghost sm vp-pback" data-vp-pback>${I('back')}<span>Все места</span></button>
+      <div class="vp-pb-t"><span class="vp-pico" aria-hidden="true">${I(pl.ico, 22)}</span><span><b>Голос ${esc(pl.for)} · ${V.LANG_NAME[lang].toLowerCase()}</b>
         <small>Выбранный здесь голос читает только в этом месте (${esc(pl.sub)}). «Как везде» — голос всего приложения.</small></span></div></section>`;
   }
   function asAllHtml(lang) {
@@ -470,22 +521,22 @@
     const gid = V.current(lang, ''), e = V.entry(gid, lang);
     const playing = st.playing === '__asall';
     return `<article class="vp-card vp-asall${on ? ' is-picked' : ''}${playing ? ' is-playing' : ''}" data-card="__asall">
-      <div class="vp-ava" style="--h:${e ? hue(e) : 220}" aria-hidden="true">↺</div>
+      <div class="vp-ava" style="--h:${e ? hue(e) : 220}" aria-hidden="true">${I('sparkle', 22)}</div>
       <div class="vp-info">
         <div class="vp-name"><b>Как везде</b><span class="vp-tag">по умолчанию</span></div>
         <div class="vp-eng">${esc(V.label(lang, gid))}</div>
         ${e ? qBadge(e.q) : ''}
         <div class="small muted">Тот же голос, что во всём приложении. Поменяете его — поменяется и здесь.</div>
       </div>
-      <div class="vp-acts"><button type="button" class="vp-btn vp-play${playing ? ' on' : ''}" data-vp-asall-play aria-label="${playing ? 'Остановить' : 'Послушать голос «как везде»'}">${playing ? '■ Стоп' : '▶ Послушать'}</button>
-        <button type="button" role="radio" aria-checked="${on}" class="vp-btn vp-pick${on ? ' on' : ''}" data-vp-asall aria-label="${on ? 'Выбрано' : 'Выбрать'}: как везде">${on ? '✓ Выбран' : '◉ Выбрать'}</button></div>
+      <div class="vp-acts"><button type="button" class="vp-btn vp-play${playing ? ' on' : ''}" data-vp-asall-play aria-label="${playing ? 'Остановить' : 'Послушать голос «как везде»'}">${I(playing ? 'stop' : 'play')}<span>${playing ? 'Стоп' : 'Послушать'}</span></button>
+        <button type="button" role="radio" aria-checked="${on}" class="vp-btn vp-pick${on ? ' on' : ''}" data-vp-asall aria-label="${on ? 'Выбрано' : 'Выбрать'}: как везде">${on ? I('check') : '<i class="vp-dot" aria-hidden="true"></i>'}<span>${on ? 'Выбран' : 'Выбрать'}</span></button></div>
       ${playing ? '<div class="vp-pbar" aria-hidden="true"><i data-pbar></i></div>' : ''}
     </article>`;
   }
   function html() {
     const lang = st.lang;
     const all = V.entries(lang);
-    const tabs = TAB_ORDER.map(l => `<button type="button" role="tab" id="vp-tab-${l}" aria-controls="vp-panel" aria-selected="${l === lang}" tabindex="${l === lang ? 0 : -1}" class="vp-tab${l === lang ? ' on' : ''}" data-vp-tab="${l}"><span aria-hidden="true">${V.FLAG[l]}</span> <span class="vp-tabt">${V.LANG_NAME[l]} <span class="vp-tabg">голос</span></span></button>`).join('');
+    const tabs = TAB_ORDER.map(l => `<button type="button" role="tab" id="vp-tab-${l}" aria-controls="vp-panel" aria-selected="${l === lang}" tabindex="${l === lang ? 0 : -1}" class="vp-tab${l === lang ? ' on' : ''}" data-vp-tab="${l}">${V.langMark(l)} <span class="vp-tabt">${V.LANG_NAME[l]} <span class="vp-tabg">голос</span></span></button>`).join('');
     const rec = recs(lang);
     const stats = V.Clips.stats();
     return `<div class="vp-head"><div class="vp-tabs" role="tablist" aria-label="Голос какого языка">${tabs}</div></div>
@@ -493,16 +544,17 @@
       ${st.place ? placeBarHtml(lang) : ''}
       ${heroHtml(lang)}
       ${st.place ? `<section class="vp-asall-s" role="radiogroup" aria-label="Голос ${esc(V.placeInfo(st.place).for)}">${asAllHtml(lang)}</section>` : ''}
-      <section class="vp-rec"><h3>⭐ Рекомендуем</h3><div class="vp-strip" role="radiogroup" aria-label="Рекомендуемые голоса">${rec.map(r => card(r.e, { mini: true, tag: r.tag, where: 'rec' })).join('')}</div></section>
+      <section class="vp-rec"><h3>${I('star', 20)}<span>Рекомендуем</span></h3><div class="vp-strip" role="radiogroup" aria-label="Рекомендуемые голоса">${rec.map(r => card(r.e, { mini: true, tag: r.tag, where: 'rec' })).join('')}</div></section>
       ${!st.place || st.place === 'dialogs' ? rolesHtml(lang) : ''}
       ${st.place ? '' : placesHtml()}
       <div class="vp-groups" role="radiogroup" aria-label="Голос: ${V.LANG_NAME[lang]}">
-        ${GROUPS.map(g => groupHtml(g, all.filter(e => e.group === g[0]), lang)).join('')}
+        ${GROUPS.filter(g => (g[0] !== 'pro' || V.nkOffered()) && !(V.publicBuild() && (g[0] === 'online' || g[0] === 'mac'))).map(g => groupHtml(g, all.filter(e => e.group === g[0]), lang)).join('')}
+        ${V.publicBuild() ? `<div class="vp-gnote vp-macnote">${I('info', 18)}<span>Голоса Microsoft Edge и Google Переводчика работают только в настольной версии на Mac. Здесь читают голоса этого устройства и офлайн-голоса${V.nkOffered() ? ', а с Norsk Kort Pro — живые голоса сервера' : ''}.</span></div>` : ''}
       </div>
-      ${st.place ? `<section class="vp-chain"><h3>↪ Если голос не сработает</h3><p class="small muted">Здесь его тихо заменит голос «как везде» (${esc(V.label(lang, V.current(lang, '')))}), а дальше — запасные голоса языка. Их порядок меняется в общем списке — «← Все места».</p></section>` : chainHtml(lang)}
-      <section class="vp-keys" id="vp-keys"><h3>🔑 Подключения</h3><p class="small muted">Сервисы с бесплатным лимитом. Один ключ — голоса сразу для всех языков, которые знает сервис.</p>
+      ${st.place ? `<section class="vp-chain"><h3>${I('fallback', 20)}<span>Если голос не сработает</span></h3><p class="small muted">Здесь его тихо заменит голос «как везде» (${esc(V.label(lang, V.current(lang, '')))}), а дальше — запасные голоса языка. Их порядок меняется в общем списке — «Все места».</p></section>` : chainHtml(lang)}
+      <section class="vp-keys" id="vp-keys"><h3>${I('key', 20)}<span>Подключения</span></h3><p class="small muted">Сервисы с бесплатным лимитом. Один ключ — голоса сразу для всех языков, которые знает сервис.</p>
         ${KEY_ORDER.map(keyHtml).join('')}</section>
-      <div class="vp-foot small muted">💾 Сохранённая на устройстве озвучка: ${fmtN(stats.count)} ${U.plural ? U.plural(stats.count, ['фраза', 'фразы', 'фраз']) : 'фраз'} · ${fmtMB(stats.bytes)} — повторно не тратит бесплатный лимит.${stats.count ? ' <button type="button" class="vp-btn sm ghost" data-vp-clear>Очистить</button>' : ''}</div>
+      <div class="vp-foot small muted">${I('disk', 16)}<span>Сохранённая на устройстве озвучка: ${fmtN(stats.count)} ${U.plural ? U.plural(stats.count, ['фраза', 'фразы', 'фраз']) : 'фраз'} · ${fmtMB(stats.bytes)} — повторно не тратит лимит.</span>${stats.count ? ' <button type="button" class="vp-btn sm ghost" data-vp-clear>Очистить</button>' : ''}</div>
       </div>`;
   }
   /** the element whose place on the screen must not change: the card the person works with, else the first one in sight */
@@ -524,7 +576,7 @@
     const anc = anchorNow(box, body);
     box.innerHTML = html();
     const h2 = m.$('.modal-head h2'), pl = st.place && V.placeInfo(st.place);
-    if (h2) h2.textContent = pl ? `🔊 Голос ${pl.for}` : '🔊 Голоса';
+    if (h2) h2.textContent = pl ? `Голос ${pl.for}` : 'Голоса';
     if (body) {
       body.scrollTop = y;
       const el = anc && box.querySelector(`[data-anchor="${CSS.escape(anc.key)}"]`);
@@ -588,7 +640,9 @@
         msg(id, k === 'badkey' ? 'Ключ не подошёл — проверьте его в разделе «Подключения».' : k === 'quota' ? `Бесплатный лимит ${V.Limits.period(mt)} закончился — вернётся ${V.Limits.resetText(mt)}.`
           : k === 'billing' ? 'Google Cloud просит подключить оплату (деньги не спишутся, пока вы в бесплатном лимите).' : k === 'blocked' ? 'ElevenLabs приостановил бесплатный тариф — так бывает, если включён VPN.'
           : k === 'stale' ? 'Голоса Edge нужно обновить — кнопка в разделе «Через мост на Mac».' : k === 'rate' ? 'Слишком много запросов подряд — попробуйте через минуту.'
-          : k === 'install' || k === 'old' ? 'Голосам Edge нужна установка на Mac — кнопка в разделе «Через мост на Mac».' : k === 'download' ? 'Этот голос нужно скачать заново — нажмите «⬇ Скачать».' : e && e.name === 'NotAllowedError' ? 'Браузер не дал включить звук — нажмите ещё раз.'
+          : k === 'install' || k === 'old' ? 'Голосам Edge нужна установка на Mac — кнопка в разделе «Через мост на Mac».' : k === 'download' ? 'Этот голос нужно скачать заново — нажмите «Скачать».' : e && e.name === 'NotAllowedError' ? 'Браузер не дал включить звук — нажмите ещё раз.'
+          : k === 'pro' ? 'Голоса сервера входят в Norsk Kort Pro.' : k === 'signin' ? 'Войдите в аккаунт — и голоса Pro заработают.' : k === 'consent' ? 'Без вашего разрешения текст на сервер не отправляется — голоса Pro пока не звучат.'
+          : k === 'hdquota' ? 'Голоса HD на этот месяц закончились — пока читают обычные голоса Pro.' : k === 'offline' ? 'Нет интернета — этот голос заработает, когда связь вернётся.'
           : 'Голос сейчас не ответил. Попробуйте ещё раз чуть позже или выберите другой.', 'warn');
       }
     }
@@ -605,9 +659,9 @@
     try { if (navigator.storage && navigator.storage.estimate) { const est = await navigator.storage.estimate(); if (est.quota) free = Math.max(0, est.quota - (est.usage || 0)); } } catch (err) { /* unknown */ }
     const total = n.total || e.size || 0, low = free != null && free < 2 * total;
     const text = `Голос <b>«${esc(ent.name || key)}»</b> скачивается <b>один раз</b> и дальше работает <b>без интернета и бесплатно</b>. Займёт <b>${fmtMB(n.voice || e.size)}</b>${n.runtime ? ` (+${fmtMB(n.runtime)} общий модуль — один раз для всех офлайн-голосов)` : ''}. Лучше по Wi‑Fi.`
-      + (free != null ? `<br><span class="small ${low ? 'vp-warn' : 'muted'}">${low ? '⚠️ Места на устройстве мало: ' : 'Свободно для приложения: '}${fmtMB(free)}</span>` : '')
+      + (free != null ? `<br><span class="small ${low ? 'vp-warn' : 'muted'}">${low ? 'Места на устройстве мало: ' : 'Свободно для приложения: '}${fmtMB(free)}</span>` : '')
       + (IOS ? '<br><span class="small muted">На iPhone большие голоса иногда не помещаются в память Safari. Если голос не заработает — выберите Google или голос поменьше.</span>' : '');
-    if (await UI.confirm(text, { ok: `⬇ Скачать ${fmtMB(total)}`, title: '⬇ Офлайн-голос' })) download(key);
+    if (await UI.confirm(text, { ok: `Скачать ${fmtMB(total)}`, title: 'Офлайн-голос' })) download(key);
   }
   async function download(key) {
     const ctrl = new AbortController();
@@ -641,7 +695,7 @@
       // («Авто» that already reads with a better voice — e.g. Edge — stays as it is; the toast says how to choose this one)
       const auto = !curE || curE.q <= ((V.PIPER[key] || {}).q || 3);
       if (auto) { if (here) V.setPlacePick(here, lang, id); else V.setPick(lang, id); }
-      msg('piper:' + key, `✓ «${(V.PIPER[key] || {}).name || key}» скачан${auto ? ' и выбран' : ' — нажмите «◉ Выбрать», чтобы он читал'}. Работает без интернета.`, 'good');
+      msg('piper:' + key, `«${(V.PIPER[key] || {}).name || key}» скачан${auto ? ' и выбран' : ' — нажмите «Выбрать», чтобы он читал'}. Работает без интернета.`, 'good');
       render();
       if (lang === st.lang) preview(id);
     } catch (e) {
@@ -675,7 +729,7 @@
     st.edge = Object.assign({ phase: 'done' }, edgeSizes());
     V.resetWarnings();
     render();
-    UI.toast('✓ Голоса Edge установлены — живые голоса Microsoft готовы', 'good', 3500);
+    UI.toast('Голоса Edge установлены — живые голоса Microsoft готовы', 'good', 3500);
     const id = 'edge:' + V.MS_DEFAULT[st.lang];
     if (V.avail(id, st.lang).ok) preview(id);
   }
@@ -730,14 +784,14 @@
     if (eng === 'azure') Store.setSetting('azureRegion', region);
     delete st.draft[eng];
     V.Health.forget(eng);
-    st.check[eng] = { t: '⏳ Проверяю — сейчас прозвучит голос…', cls: '' };
+    st.check[eng] = { t: 'Проверяю — сейчас прозвучит голос…', cls: '' };
     render();
     // Gemini has no Ukrainian: the check speaks Norwegian then
     const lang = eng === 'gemini' && !V.GEM.LANGS.includes(st.lang) ? 'no' : st.lang, id = eng + ':' + V.voiceOfEngine(eng, lang);
     try {
       stopPreview(true);
       await TTS.speak(V.SAMPLE[lang], lang, { voiceId: id, strict: true });
-      st.check[eng] = { t: `✓ Работает! ${!V.pickOf(lang) ? '«Авто» теперь может читать и этими голосами.' : 'Выберите голос в списке выше.'}`, cls: 'good' };
+      st.check[eng] = { t: `Работает! ${!V.pickOf(lang) ? '«Авто» теперь может читать и этими голосами.' : 'Выберите голос в списке выше.'}`, cls: 'good' };
       V.resetWarnings();
       if (eng === 'gcloud') V.loadGoogleVoices(true).catch(() => {});
     } catch (e) {
@@ -751,6 +805,23 @@
         : navigator.onLine === false ? 'Нет интернета — проверьте связь и попробуйте ещё раз.' : 'Сервис сейчас не ответил. Попробуйте ещё раз через минуту.' };
     }
     render();
+  }
+
+  /* ---------- Norsk Kort Pro ---------- */
+  /** the one door: sign-in → AI consent → paywall (js/pro.js); true = Pro is active now */
+  async function openPro() {
+    if (!window.Pro || !Pro.require) return false;
+    const ok = await Pro.require(PRO_FEATURE, { reason: 'voice' });
+    if (ok) { V.NK.declined = false; V.Health.forget('nk'); V.NK.health(true); st.recs = {}; }
+    render();
+    return ok;
+  }
+  /** the one-time permission to send text to the voice server (js/aiconsent.js); true = granted */
+  async function askConsent() {
+    if (!window.AIConsent || !AIConsent.ensure) return true;
+    const ok = await AIConsent.ensure({ feature: PRO_FEATURE });
+    if (ok) V.NK.declined = false;
+    return !!ok;
   }
 
   /* ---------- events ---------- */
@@ -790,10 +861,18 @@
         if (!await UI.confirm('Вернуть один голос для всего приложения? Свои голоса мест (читалка, видео, карточки…) будут сброшены — везде зазвучит голос, выбранный для языка.', { ok: 'Сбросить', title: 'Везде одинаково' })) return;
         V.resetPlaces(); render(); UI.toast('Готово — везде одинаковый голос', 'good', 2500); return;
       }
-      if (d.vpPlay) { preview(d.vpPlay); return; }
+      if (d.vpPlay) {
+        // ▶ on a Pro voice is a server call: Pro and the consent first (a free person never reaches the server)
+        if (V.parse(d.vpPlay).engine === 'nk' && st.playing !== d.vpPlay) { if (!V.nkPro()) { openPro(); return; } if (!(await askConsent())) return; }
+        preview(d.vpPlay); return;
+      }
+      if (t.hasAttribute('data-vp-pro')) { openPro(); return; }
+      if (t.hasAttribute('data-vp-consent')) { if (await askConsent()) render(); return; }
       if (d.vpPick) {
         let id = d.vpPick;
         const p = V.parse(id);
+        // a Pro voice: the person agrees to send the text first (Apple 5.1.2(i)) — declined → nothing changes
+        if (p.engine === 'nk' && !(await askConsent())) return;
         if (p.engine === 'piper' && !p.spk && V._spkOf(p.key)) {
           const sel = m.$(`[data-vp-spk="${CSS.escape(p.key)}"]`);
           id += '#' + (sel ? sel.value : V._spkOf(p.key));
@@ -839,7 +918,7 @@
         if (V.Edge.installing) { followInstall(); return; }
         UI.toast(a.why === 'old' ? 'Мост ещё старой версии — перезапустите его по шагам в разделе «Через мост на Mac».'
           : a.why === 'bridge' ? 'Мост пока не отвечает — запустите его и нажмите ещё раз.'
-          : a.why === 'install' ? 'Мост новый — осталось нажать «⬇ Установить голоса Edge».' : 'Проверил.', a.why === 'install' ? 'good' : '', 4000);
+          : a.why === 'install' ? 'Мост новый — осталось нажать «Установить голоса Edge».' : 'Проверил.', a.why === 'install' ? 'good' : '', 4000);
         return;
       }
       if (d.vpCheck) { checkKey(d.vpCheck); return; }
@@ -854,7 +933,7 @@
         return;
       }
       if (t.hasAttribute('data-vp-eleven')) {
-        try { const n = await V.loadElevenVoices(); st.check.eleven = { t: `✓ Загружено голосов: ${n}. Они — в списке «С вашим ключом».`, cls: 'good' }; }
+        try { const n = await V.loadElevenVoices(); st.check.eleven = { t: `Загружено голосов: ${n}. Они — в списке «С вашим ключом».`, cls: 'good' }; }
         catch (err) { st.check.eleven = { t: 'Не получилось загрузить голоса — проверьте ключ и интернет.', cls: 'warn' }; }
         render(); return;
       }
@@ -896,7 +975,7 @@
         if (st.playing === '__roles') stopPreview(true);
         st.anchor = 'roles';
         V.setRolesOn(t.checked); // → voices-pick → the window redraws
-        UI.toast(t.checked ? '🎭 В диалогах у каждого собеседника свой голос' : 'Все реплики диалогов читает один голос', 'good', 2600);
+        UI.toast(t.checked ? 'В диалогах у каждого собеседника свой голос' : 'Все реплики диалогов читает один голос', 'good', 2600);
         return;
       }
       if (t.dataset.vpSpk) {
@@ -940,6 +1019,7 @@
   document.addEventListener('voices-pick', onExternal);
   document.addEventListener('voices-spoke', onExternal);
   window.addEventListener('online', onExternal);
+  window.addEventListener('nk-pro', onExternal);
   window.addEventListener('offline', onExternal);
 
   function open(lang, o = {}) {
@@ -951,7 +1031,7 @@
     if (m && m.el.isConnected) { stopPreview(true); render(); const b = m.$('.modal-body'); if (b) b.scrollTop = 0; return m; }
     st.recs = {}; st.edge = {};
     m = UI.modal({
-      title: '🔊 Голоса', cls: 'vp-modal wide', body: '<div class="vp" data-vp></div>',
+      title: 'Голоса', cls: 'vp-modal wide', body: '<div class="vp" data-vp></div>',
       onClose() { stopPreview(true); Object.values(st.dl).forEach(d => d.ctrl && d.ctrl.abort()); m = null; if (window.App && App.view && App.view.name === 'settings' && App.render) App.render(); },
     });
     bind();
@@ -960,12 +1040,14 @@
     // the person has already started something in the window
     const edgeSeen = () => { if (!Object.keys(st.dl).length && !st.anchor && !st.edge.phase) st.recs = {}; render(); if (V.Edge.installing && m) followInstall(); };
     V.checkEdge(true).then(edgeSeen);
-    if (window.AI && AI.detectBridge && V.onMac() && !AI.bridge.up) AI.detectBridge().then(() => V.checkEdge(true)).then(edgeSeen).catch(() => {});
+    if (window.AI && AI.detectBridge && V.onMac() && !V.publicBuild() && !AI.bridge.up) AI.detectBridge().then(() => V.checkEdge(true)).then(edgeSeen).catch(() => {});
     // a voice marked «downloaded» whose files the browser has removed: its card offers «⬇ Скачать» again
     if (window.Speech && Speech.piper && Speech.piper.available()) {
       Promise.all(Object.keys(V.PIPER).filter(k => Speech.piper.isReady(k)).map(k => Speech.piper.status(k).then(x => x.ready, () => true)))
         .then(r => { if (r.some(x => !x)) render(); }).catch(() => {});
     }
+    // Norsk Kort Pro: which server voices are on (Chirp 3 HD only when the server allows it)
+    if (V.nkOffered()) V.NK.health().then(() => { if (m) render(); }).catch(() => {});
     // Google Cloud: the voices your key sees (once a week) — new Google voices appear by themselves
     if (V.ready('gcloud')) {
       const before = V.entries(st.lang).length;

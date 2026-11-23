@@ -34,23 +34,27 @@
   const safeUrl = u => /^https:\/\/[^\s"'<>]+$/i.test(String(u || '').trim()) ? String(u).trim() : '';
   const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + '…' : s; };
 
-  /* ---------------- fetching (direct — the feeds send CORS *; otherwise through the Mac bridge) ---------------- */
-  async function fetchText(url, alt, direct = true) {
+  /* ---------------- fetching: Net.get (js/net.js) — direct where the feed sends CORS (NRK news, Klar Tale), else the store
+   * apps' native HTTP, the Mac bridge (only when it runs on this Mac), then the Norsk Kort server's fetch-public kind 'rss'
+   * (an exact allow-list of these feed URLs — never an open proxy). Nothing works → a calm line + «Читать на сайте». ---------------- */
+  // feeds known to send no CORS header (NRK podcasts): off the Mac they go straight to the server — no doomed browser request
+  const NO_CORS = /^https:\/\/podkast\.nrk\.no\//;
+  async function fetchText(url, alt) {
     let err = null;
-    for (const u of (direct ? [url, alt] : []).filter(Boolean)) {
+    for (const u of [url, alt].filter(Boolean)) {
+      if (NO_CORS.test(u) && window.Net && !Net.onMac() && !Net.isNative()) {
+        if (!(window.NKConfig && NKConfig.ready())) { err = new Error('источник сейчас не ответил'); continue; } // → the list saved in the app
+        try { const t = await (await Net.callFn('fetch-public', { kind: 'rss', url: u }, { raw: true, auth: 'optional' })).text(); if (/<rss|<feed|<channel/i.test(t)) return t; } catch (e) { err = e; }
+        continue;
+      }
       try {
-        const r = await fetch(u, { cache: 'no-store' });
-        if (r.ok) return await r.text();
-        err = new Error('сервер ответил ' + r.status);
+        const t = window.Net && Net.get ? await Net.get(u, { kind: 'rss', as: 'text', cache: 'no-store' }) : await (await fetch(u, { cache: 'no-store' })).text();
+        if (/<rss|<feed|<channel/i.test(t)) return t;
+        err = new Error('лента пришла в непонятном виде');
       } catch (e) { err = e; }
     }
-    // no CORS (NRK podcasts): the bridge on the Mac fetches it, if it is running
-    try {
-      const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
-      if (r.ok) { const t = await r.text(); if (/<rss|<feed|<channel/i.test(t)) return t; }
-    } catch (e) { /* no bridge */ }
     const off = typeof navigator !== 'undefined' && navigator.onLine === false;
-    throw new Error(off ? 'нет интернета' : 'источник не ответил' + (err && err.message && !/Failed to fetch|Load failed|NetworkError/i.test(err.message) ? ` (${err.message})` : ''));
+    throw new Error(off ? 'нет интернета' : err && err.nk ? err.message.replace(/^./, c => c.toLowerCase()) : 'источник сейчас не ответил');
   }
   const tag = (el, name) => { const x = el.getElementsByTagName(name)[0]; return x ? x.textContent.trim() : ''; };
   function parseRss(xml, src) {
@@ -84,7 +88,7 @@
     const hit = mem[url] || all[url];
     if (!force && hit && Date.now() - hit.t < TTL) return { items: hit.items, t: hit.t };
     try {
-      const items = parseRss(await fetchText(url, alt, direct), src);
+      const items = parseRss(await fetchText(url, alt), src);
       const rec = { t: Date.now(), items };
       mem[url] = rec;
       // only the RSS fields (title, summary, picture, link) are kept — never article text
@@ -507,7 +511,7 @@
           : st === 'k' ? '<span class="chip learned">✓ знаю</span>' : st === 'l' ? '<span class="chip nw-chip-l">учу — есть в карточках</span>' : '<span class="chip nw-chip-n">новое слово</span>';
         const ctx = cur.ctx && cur.ctx !== cur.tr ? `<div class="small muted">в этом предложении: <b>${U.esc(cur.ctx)}</b></div>` : '';
         pop.innerHTML = `<div class="nw-pop-head"><b lang="nb">${U.esc(span.textContent)}</b>${lem ? ` <span class="muted">→ словарная форма</span> <b lang="nb">${U.esc(lem)}</b>` : ''} ${chip}</div>
-          <div class="sp-tr">${cur.tr === undefined ? '<span class="spinner sm"></span> перевожу…' : cur.tr ? `<b>${U.esc(cur.tr)}</b><small> · ${cur.by && cur.by.length ? U.esc(Translators.provNames(cur.by)) : 'словарик'}</small>` : `<span class="muted">Перевод не пришёл${cur.err ? ': ' + U.esc(cur.err) : ''}</span>`}</div>
+          <div class="sp-tr">${cur.tr === undefined ? '<span class="spinner sm"></span> перевожу…' : cur.tr ? `<b>${U.esc(cur.tr)}</b><small> · ${cur.by && cur.by.length ? U.esc(Translators.provNames(cur.by)) : 'словарик'}</small>` : cur.setup ? `<span class="muted">${U.esc(cur.err)}</span> <button class="btn sm" data-np="setup">Подключить перевод</button>` : `<span class="muted">Перевод не пришёл${cur.err ? ': ' + U.esc(cur.err) : ''}</span>`}</div>
           ${ctx}
           <div class="sp-row">
             <button class="media-btn sm" data-np="say" title="Произнести">🔊</button>
@@ -528,6 +532,7 @@
         if (a === 'known') this.toggleKnown(form, cur, draw);
         if (a === 'card') this.makeCard(cur, b);
         if (a === 'more') this.moreCard(cur);
+        if (a === 'setup') { this.hidePop(); if (window.AI && AI.need) AI.need('Перевод слов в новостях'); }
       });
       draw();
       // dictionary form + translation (small words from the built-in list first, then the translators)
@@ -540,7 +545,7 @@
         let tr = NoGloss.get(form) || NoGloss.get(head);
         let by = [];
         if (!tr) {
-          try { const r = await Translators.translateMany([head], 'no', 'ru'); tr = Study.cleanGloss(head, r.out[0]) || String(r.out[0] || '').trim(); by = r.by || []; cur.err = r.error; }
+          try { const r = await Translators.translateMany([head], 'no', 'ru'); tr = Study.cleanGloss(head, r.out[0]) || String(r.out[0] || '').trim(); by = r.by || []; cur.err = r.error; cur.setup = !!r.needSetup; }
           catch (e) { tr = ''; cur.err = U.niceErr(e, '', true); }
         }
         cur.tr = tr || cur.ctx || ''; cur.by = tr ? by : []; cur.head = head;
@@ -638,7 +643,7 @@
         try {
           const j = await (await fetch(SN.snapshot, { cache: 'no-cache' })).json();
           items = (j.items || []).map(x => ({ id: x.link || x.audio, src: 'NRK Supernytt', title: x.title, summary: x.summary || '', link: safeUrl(x.link), image: safeUrl(x.image), audio: safeUrl(x.audio), duration: x.duration || 0, date: Date.parse(x.date) || 0, cat: '' }));
-          note = 'NRK не разрешает браузеру читать список выпусков напрямую — показан список, сохранённый в приложении (с запущенным мостом на Mac он обновляется сам). Звук играет с серверов NRK.';
+          note = 'Свежий список выпусков сейчас не загрузился — показан список, сохранённый в приложении. Звук играет с серверов NRK.';
         } catch (e2) { items = null; }
       }
       if (this._m !== m || this.ui.tab !== 'sn') return;

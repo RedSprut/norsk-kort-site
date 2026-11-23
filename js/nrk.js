@@ -13,6 +13,9 @@
  * 📱 A locked channel (or live event) whose stream carries NRK's live subtitles also gets «Субтитры с переводом — второй
  * экран»: the viewer watches it on the TV in NRK's app, this device shows those subtitles in sync, with the translation
  * (Subs.openStream({ companion: true }) — only the playlists' text and the subtitle pieces are read, never the picture).
+ * W6: NRK's catalogue stays Mac-only (docs/release-architecture.md M3, decision O-6). Everywhere else (the site, the store
+ * apps) the window is a calm card: NRK TV in NRK's own app / tv.nrk.no, popular programmes as links there, and what plays
+ * here with subtitles (own video, YouTube, NRK radio and podcasts). Never a list that cannot open.
  */
 (function () {
   const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
@@ -57,12 +60,20 @@
     return out;
   }
   /** a friendly line for the viewer (the bridge / NRK error text stays technical only when it is the bridge's own advice) */
-  const friendly = err => (err && (err.noBridge || err.oldBridge) ? err.message : 'NRK сейчас не отвечает — проверьте интернет и попробуйте ещё раз');
+  const friendly = err => (err && err.site ? 'Это откроется в приложении или на сайте NRK'
+    : err && (err.noBridge || err.oldBridge) ? err.message : 'NRK сейчас не отвечает — проверьте интернет и попробуйте ещё раз');
+  const IC = (n, sz) => (window.MediaIcons ? MediaIcons.icon(n, sz || 18) : '');
+  const onMacHere = () => (window.Net && Net.onMac ? Net.onMac() : /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:');
+  // popular programmes for learners — links to NRK TV (they open the NRK TV app on a phone)
+  const PICKS = [['Supernytt', 'serie/supernytt', 'новости для детей — простым языком'], ['Dagsrevyen', 'serie/dagsrevyen', 'главные новости дня'],
+    ['Newton', 'serie/newton', 'наука для школьников'], ['Nytt på nytt', 'serie/nytt-paa-nytt', 'юмор о новостях недели'],
+    ['Skam', 'serie/skam', 'сериал о школьниках'], ['Norge rundt', 'serie/norge-rundt', 'истории со всей Норвегии']];
 
   const NrkTV = {
     link, pickImg, findEpisodes, nowNext, msOf, hm, friendly, api,
 
     open() {
+      if (!onMacHere()) return this.openPublic();
       const m = this._m = UI.modal({
         title: '📺 NRK TV — смотреть с субтитрами и переводом', cls: 'wide nrk-modal',
         body: `<div class="nrk-top">
@@ -80,6 +91,32 @@
       let pt = 0;
       new MutationObserver(() => { clearTimeout(pt); pt = setTimeout(() => this.probe(this.body()), 150); }).observe(m.$('[data-nbody]'), { childList: true, subtree: true });
       this.front();
+      return m;
+    },
+    /** W6: the site / the store apps — a calm card (NRK's catalogue is read only by the Mac app) */
+    openPublic() {
+      const has = o => !!window[o];
+      const m = this._m = UI.modal({
+        title: `${IC('tv', 24)} NRK TV`, cls: 'wide nrk-modal nrkp-modal nrk-public',
+        body: `<div class="nkm-card nkm-lg"><span class="nkm-ico">${IC('tv', 40)}</span><div class="nkm-txt">
+            <b>Передачи NRK смотрите в NRK TV</b>
+            <p>Все программы, сериалы и прямой эфир NRK — в приложении NRK TV или на сайте tv.nrk.no. У многих передач там есть норвежские субтитры — это отличная тренировка на слух.</p>
+            <div class="nkm-acts"><a class="btn primary" href="${TV}" target="_blank" rel="noopener">${IC('external')} Открыть NRK TV</a></div></div></div>
+          <h3 class="nrkp-h">Популярное для изучения</h3>
+          <div class="nrkp-picks">${PICKS.map(([t, path, sub]) => `<a class="nrkp-pick" href="${TV}/${path}" target="_blank" rel="noopener"><span class="nrkp-ct"><b>${esc(t)}</b><small>${esc(sub)}</small></span><span class="nrkp-po" aria-hidden="true">${IC('external', 18)}</span></a>`).join('')}</div>
+          <h3 class="nrkp-h">Здесь — с субтитрами и переводом</h3>
+          <div class="nrkp-here">
+            ${has('Subs') ? `<button type="button" class="nrkp-go" data-pgo="subs"><span class="nrkp-gi">${IC('file', 24)}</span><span class="nrkp-ct"><b>Своё видео</b><small>файл с телефона или компьютера + субтитры</small></span></button>` : ''}
+            ${has('YouTube') ? `<button type="button" class="nrkp-go" data-pgo="youtube"><span class="nrkp-gi">${IC('video', 24)}</span><span class="nrkp-ct"><b>YouTube</b><small>каналы учителей норвежского</small></span></button>` : ''}
+            ${has('NrkRadio') ? `<button type="button" class="nrkp-go" data-pgo="radio"><span class="nrkp-gi">${IC('radio', 24)}</span><span class="nrkp-ct"><b>Радио и подкасты NRK</b><small>прямой эфир и подкасты с субтитрами</small></span></button>` : ''}
+          </div>`,
+      });
+      m.el.addEventListener('click', e => {
+        const g = e.target.closest('[data-pgo]'); if (!g) return;
+        m.close();
+        const k = g.dataset.pgo;
+        setTimeout(() => { if (k === 'subs') Subs.open(); else if (k === 'youtube') YouTube.open(null); else if (k === 'radio') NrkRadio.open(); }, 60);
+      });
       return m;
     },
     body() { return this._m && this._m.$('[data-nbody]'); },

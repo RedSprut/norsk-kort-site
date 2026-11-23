@@ -387,11 +387,11 @@ body.subs-fullscreen { overflow: hidden; }
   .subs-stream .subs-list { height: 70dvh; }
 }
 @media (pointer: coarse) {
-  .subs-src .btn, .yt-chan-head .btn { min-height: 36px; }
-  /* finger-sized controls of the subtitle player (shift ±, line time, «☑ Все / Снять») */
-  .subs-off .btn { min-width: 38px; min-height: 38px; }
-  .subs-tools .btn.sm { min-height: 36px; }
-  .subs-line .sl-time { min-height: 32px; min-width: 40px; display: inline-flex; align-items: center; }
+  .subs-src .btn, .yt-chan-head .btn { min-height: 44px; }
+  /* finger-sized controls of the subtitle player (shift ±, line time, «☑ Все / Снять») — ≥ 44 px (audit 2026-11-23) */
+  .subs-off .btn { min-width: 44px; min-height: 44px; }
+  .subs-tools .btn.sm { min-height: 44px; }
+  .subs-line .sl-time { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; }
 }
 
 /* ---------- 📺 NRK TV catalogue (and ▶ YouTube channel videos — same tiles) ---------- */
@@ -916,3 +916,101 @@ a.nrk-tile-main:hover .nrk-open { filter: brightness(1.15); transform: translate
 .asr-offer-box .btn { min-height: 44px; }
 .subs-livebar .lb-dl.on { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); }
 .lb-delay { color: var(--accent); }
+
+/* ============ W6 media without the Mac bridge (js/nrk.js, js/nrkradio.js, js/youtube.js) + phone targets ============ */
+/* the drawn icons (MediaIcons, js/subs.js) sit on the text line */
+.mi-ico { flex: none; vertical-align: -0.2em; }
+.btn .mi-ico, .chip .mi-ico { margin-right: 2px; }
+/* a calm card: what to do here instead (never a dead tile) */
+.nkm-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px; margin: 6px 0 14px; border-radius: 16px; border: 1px solid var(--panel-border);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--panel)), var(--panel)); }
+.nkm-card.nkm-lg { padding: 20px; }
+.nkm-ico { flex: none; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 14px; color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.nkm-txt { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.nkm-txt > b { font-size: 16.5px; line-height: 1.3; }
+.nkm-txt p { margin: 0; line-height: 1.45; }
+.nkm-txt > .btn, .nkm-acts { margin-top: 4px; }
+.nkm-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.nkm-card .btn { min-height: 46px; }
+.nkm-txt > .btn { align-self: flex-start; }
+@media (max-width: 520px) { .nkm-card { flex-direction: column; } .nkm-acts .btn, .nkm-txt > .btn { flex: 1 1 auto; justify-content: center; align-self: stretch; } }
+.nrkp-h { display: flex; align-items: center; gap: 8px; font-size: 16.5px; margin: 16px 0 8px; }
+.nrkp-lead { margin: -2px 0 10px; }
+/* live channels: big rows, the whole row plays */
+.nrkp-live { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.nrkp-ch { position: relative; display: flex; min-width: 0; }
+.nrkp-chb { flex: 1; min-width: 0; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 52px 8px 10px; text-align: left; font: inherit; color: var(--text);
+  border-radius: 14px; border: 1px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: border-color .15s, background .15s, transform .12s; }
+.nrkp-chb:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.nrkp-chb:active { transform: scale(.985); }
+.nrkp-chb.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+.nrkp-ci { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--accent); }
+.nrkp-ct { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.nrkp-ct b { font-size: 14.5px; line-height: 1.25; }
+.nrkp-ct small { font-size: 12px; color: var(--muted); line-height: 1.3; }
+.nrkp-out { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; color: var(--muted); text-decoration: none; }
+.nrkp-out:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+/* the «now on air» bar */
+.nrkp-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; margin: 0 0 10px; border-radius: 14px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent2, #3b82f6) 14%, transparent)); }
+.nrkp-bar[hidden] { display: none; }
+.nrkp-now { flex: 1 1 140px; display: flex; flex-direction: column; min-width: 0; }
+.nrkp-now small { color: var(--muted); font-size: 12.5px; }
+.nrkp-bar .btn { min-height: 44px; }
+.nrkp-stop { min-width: 44px; justify-content: center; }
+.nrkp-eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; width: 20px; }
+.nrkp-eq i { width: 4px; height: 6px; border-radius: 2px; background: var(--accent); }
+.nrkp-eq.on i { animation: nrkpEq 1s ease-in-out infinite; }
+.nrkp-eq.on i:nth-child(2) { animation-delay: .2s; } .nrkp-eq.on i:nth-child(3) { animation-delay: .4s; }
+@keyframes nrkpEq { 0%, 100% { height: 5px; } 50% { height: 18px; } }
+@media (prefers-reduced-motion: reduce) { .nrkp-eq.on i { animation: none; height: 12px; } }
+.nrkp-more { margin-top: 8px; }
+/* the play mark on a tile's picture */
+.nrk-tile-pl { position: absolute; left: 8px; bottom: 8px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: rgba(0,0,0,.6); }
+.nrk-tile-main:hover .nrk-tile-pl { background: var(--accent); }
+/* NRK TV off the Mac: picks (links to NRK TV) and what plays here */
+.nrkp-picks, .nrkp-here { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.nrkp-pick, .nrkp-go { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border-radius: 14px; text-align: left; font: inherit;
+  color: var(--text); text-decoration: none; border: 1px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: border-color .15s, background .15s, transform .12s; }
+.nrkp-pick:hover, .nrkp-go:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); text-decoration: none; }
+.nrkp-pick:active, .nrkp-go:active { transform: scale(.985); }
+.nrkp-pick .nrkp-ct { flex: 1; }
+.nrkp-po { color: var(--muted); }
+.nrkp-gi { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+/* ▶ YouTube: the terms line, the pills instead of emoji badges, the language mark */
+.yt-terms { margin: 12px 0 2px; }
+.yt-terms a { color: inherit; text-decoration: underline; }
+.yt-pills { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: 1px; }
+.yt-pill { font-size: 10.5px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.yt-pill.top { background: color-mix(in srgb, #f59e0b 18%, transparent); color: #b45309; }
+:root[data-theme="dark"] .yt-pill.top { color: #fbbf24; }
+.yt-lang { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--panel-border); color: var(--muted); }
+.yt-go { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; flex: none; }
+.yt-go:hover { opacity: 1; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.yt-qrow { gap: 8px; }
+.yt-h3 { margin: 14px 0 4px; }
+.yt-sub { margin-bottom: 6px; }
+.yt-note { margin: 4px 0 8px; }
+.yt-keytip { margin: 6px 0; }
+/* YouTube's own player: nothing of ours over it */
+.subs-stage-yt { position: relative; }
+.subs-stage-yt iframe { pointer-events: auto; }
+/* every target on a phone ≥ 44 px (audit 2026-11-23: radio / NRK chips were 34 px) */
+.nrk-ext { width: 44px; height: 44px; }
+.nrk-play { width: 44px; height: 44px; }
+@media (pointer: coarse), (max-width: 760px) {
+  .nrk-modal .btn, .nrk-modal .chip, .nrk-modal a.btn, .yt-modal .btn, .yt-modal .chip, .yt-modal input.input,
+  .nrk-quick .chip, .nrk-cats .chip, .nrk-search .input, .nrk-search .btn, .nrk-out,
+  .subs-modal .btn, .subs-modal .btn.sm, .subs-tools .btn.sm, .subs-src .btn, .subs-modal .media-btn, .subs-modal .seg-mini button, .subs-modal .subs-speed select, .subs-modal input.input,
+  .tv-modal .btn, .tgp-post-modal .btn { min-height: 44px; }
+  .subs-modal .media-btn, .subs-modal .btn.sm.ghost[data-off] { min-width: 44px; }
+  .nrk-quick .chip, .nrk-cats .chip { padding: 6px 14px; }
+  .yt-ch { min-height: 56px; }
+  .subs-modal .linklike { min-height: 44px; display: inline-flex; align-items: center; }
+}
+/* hover on every button of these windows (a mouse sees what is pressable) */
+.nrk-modal button:not(:disabled):hover, .yt-modal button:not(:disabled):hover { cursor: pointer; }
+.nrk-modal .chip:not(:disabled):hover, .yt-modal a.chip:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--panel-border)); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.nrk-head-play:hover .nrk-head-btn { filter: brightness(1.1); }
+.subs-modal .linklike:hover { color: var(--accent); }

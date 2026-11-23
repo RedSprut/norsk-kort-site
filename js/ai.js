@@ -3,8 +3,11 @@
   const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const API = 'https://api.anthropic.com/v1/messages';
   /** the Mac bridge (bridge/server.py, 127.0.0.1 only) can exist only when the app is opened on the Mac itself:
-   *  a file or localhost. On the site (GitHub Pages) there is no bridge — hints about it are not shown there. */
-  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+   *  a file or localhost. On the site (GitHub Pages) there is no bridge — hints about it are not shown there.
+   *  ONE definition: js/net.js Net.onMac() (also false in the store apps, whose «localhost» is not the Mac). */
+  const onMac = () => (window.Net && Net.onMac ? Net.onMac() : location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname));
+  /** the learner's language for explanations / glosses (the setting comes from the UI-language workstream): ru | uk */
+  const trLang = () => { try { const s = Store.settings; return (s.transLang || s.trLang) === 'uk' ? 'uk' : 'ru'; } catch (e) { return 'ru'; } };
   const SITE_NO_BRIDGE = 'в версии на сайте это пока недоступно';
   const FIELDS = ['no', 'ru', 'en', 'description', 'example', 'exampleRu', 'wordClass', 'imagePrompt'];
   const FIELD_NAMES = {
@@ -67,7 +70,8 @@
   function appContext() {
     const name = (Store.settings.userName || '').trim();
     return `CONTEXT: You are the AI assistant built into "Norsk Kort" — a flashcard app for learning Norwegian (Bokmål) for a Russian-speaking learner${name ? ' named ' + name : ''}. Each card has a Norwegian side, a Russian side and an explanation (grammar forms, notes, examples). Your job: check that the translation is correct, fix mistakes, and add clear explanations — always helping the learner learn Norwegian as fast as possible.
-HOUSE STYLE (very important): whenever you write Norwegian words, phrases, expressions or example sentences, put the Russian translation right after them in parentheses, e.g. "Jeg skal hente barna fra skolen. (Я заберу детей из школы.)" or "å hente seg inn (восстановиться)". Explanations themselves are in Russian.`;
+HOUSE STYLE (very important): whenever you write Norwegian words, phrases, expressions or example sentences, put the Russian translation right after them in parentheses, e.g. "Jeg skal hente barna fra skolen. (Я заберу детей из школы.)" or "å hente seg inn (восстановиться)". Explanations themselves are in Russian.${trLang() === 'uk' ? `
+LANGUAGE: this learner reads UKRAINIAN — write every translation, gloss and explanation in Ukrainian instead of Russian (the field named "ru" holds the learner's-language translation).` : ''}`;
   }
 
   function systemPrompt() {
@@ -121,10 +125,6 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
     custom: { name: 'Своя нейросеть (OpenAI-совместимая)', short: 'ИИ', domain: '', type: 'openai', base: '', model: '', editableBase: true, models: [] },
   };
 
-  /* ---------- ✦ «Norsk Kort Plus» (a placeholder for the subscription; no server yet) ----------
-   * type 'proxy': the same chat request (model = Gemini Flash) goes to the owner's server (Store.settings.plusProxy) with the
-   * person's token (Store.settings.plusToken); the server holds the real keys and the fair-use limits.
-   * Completely hidden — not in PROVIDERS, the 🤖 lists, Settings or the chain — unless Store.settings.plusEnabled === true. */
   /* ---------- 🔢 tokens and money: approximate list prices, USD per 1 M tokens [input, output] (Nov 2026) ----------
    * Only to give a feel for paid keys — always shown as «примерно». Free tiers, subscriptions and Ollama cost nothing extra. */
   const PRICES = {
@@ -136,18 +136,29 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
   /** ≈ tokens of a text when the service does not say (about 4 characters per token) */
   const estTok = s => Math.ceil(String(s || '').length / 4);
   const STRATEGIES = ['one', 'free', 'all', 'mine'];
-  const PLUS = { name: 'Norsk Kort Plus', short: 'Plus', domain: '', type: 'proxy', model: PROVIDERS.gemini.model, models: [], noSettings: true,
-    note: 'Подписка Norsk Kort Plus: нейросеть и голоса без своих ключей' };
-  const plusOn = () => { try { return !!(window.Store && Store.state && Store.settings && Store.settings.plusEnabled === true); } catch (e) { return false; } };
-  /** keeps PROVIDERS.plus in step with the setting: every list in the app walks Object.keys(PROVIDERS), so when it is off
-   *  the entry is not enumerable (invisible to every list and to the chain) but a direct look-up never finds «undefined» */
-  function syncPlus() {
-    const on = plusOn();
-    const d = Object.getOwnPropertyDescriptor(PROVIDERS, 'plus');
-    if (!d || d.enumerable !== on) Object.defineProperty(PROVIDERS, 'plus', { value: PLUS, enumerable: on, configurable: true, writable: true });
-    return on;
+  /* ---------- ⭐ «Norsk Kort Pro» — the app's own server (js/net.js → Edge Functions `ai` / `translate`) ----------
+   * For signed-in Pro users (js/pro.js): no keys, the server holds them and the limits. NOT enumerable: the key/model lists
+   * (Settings, 🤖 menus) walk Object.keys(PROVIDERS) and must not draw key fields for it; a direct look-up works everywhere
+   * (AI.current() === 'pro' → PROVIDERS.pro.short). chain() / selected() add it themselves when Pro.ready().
+   * The old hidden «Plus» placeholder (plusEnabled / plusToken / plusProxy) is gone: 'plus' is read as 'pro'. */
+  const PRO = { name: 'Norsk Kort Pro', short: 'Pro', domain: '', type: 'server', model: 'claude-haiku-5-5', models: [], noSettings: true,
+    note: 'Подписка Norsk Kort Pro: нейросеть без своих ключей' };
+  Object.defineProperty(PROVIDERS, 'pro', { value: PRO, enumerable: false, configurable: true, writable: true });
+  Object.defineProperty(PROVIDERS, 'plus', { value: PRO, enumerable: false, configurable: true, writable: true }); // old cards / settings
+  const proReady = () => { try { return !!(window.Pro && Pro.ready()); } catch (e) { return false; } };
+  /** a provider that cannot work in THIS environment, and why (one calm line) — '' when it can.
+   *  Bridge subscriptions and «browser-blocked» keys need the Mac bridge; Ollama lives on this computer only. */
+  function envBlock(id) {
+    const p = PROVIDERS[id];
+    if (!p) return 'недоступно';
+    if (p.type === 'bridge' && !onMac()) return 'работает только в приложении на Mac';
+    // «browser-blocked» keys: through the bridge on the Mac, through native HTTP in the store apps (Net.native), not on the site
+    if (p.proxyOnly && !onMac() && !(window.Net && Net.isNative && Net.isNative())) return 'работает только в приложении на Mac и в приложении для телефона';
+    if ((p.local || p.noKey) && !onMac()) return 'работает только на компьютере, где установлена программа';
+    return '';
   }
-  syncPlus();
+  /* the Mac keeps the old dictionary: 'plus' chosen earlier → auto */
+  const selSetting = () => { const v = (window.Store && Store.settings && Store.settings.aiProvider) || ''; return v === 'plus' ? 'pro' : v; };
 
   const AI = {
     FIELDS, FIELD_NAMES, PROVIDERS, FORM_TAGS, GENDER_TAGS, FORM_TAG_HINT,
@@ -275,24 +286,29 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
       if (id === 'claude' && c.model == null && st.bridgeModel) c.model = st.bridgeModel;
       return c;
     },
+    /** connected AND usable here: off the Mac, Ollama (no key, localhost) and the bridge-only keys never count as connected
+     *  (phone audit 2026-11-23: Ollama showed «подключена» on a phone). On the Mac everything is exactly as before. */
     configured(id) {
-      syncPlus();
       const p = PROVIDERS[id]; if (!p) return false;
-      if (p.type === 'proxy') return this.plusReady();
+      if (p.type === 'server') return proReady();
       if (p.type === 'bridge') return p.cli ? this.cliReady(p.cli) : this.bridge.ok;
+      if (envBlock(id)) return false;
       const c = this.cfg(id);
       // Pollinations now rejects anonymous requests — its free key is required
       if (id === 'pollinations') return !!((c.key || '').trim() || (Store.settings.pollinationsToken || '').trim());
       if (p.editableBase && !(c.base || '').trim()) return false;
       return !!(p.noKey || (c.key || '').trim());
     },
+    /** '' = this AI can work here; else one calm line why not (for the lists: hide it or show the line — W7 hook) */
+    envBlock,
+    /** usable in this environment at all (with a key / sign-in), regardless of whether it is set up yet */
+    usableHere(id) { return !!PROVIDERS[id] && !envBlock(id); },
     /** the AI the person chose (Settings → 🤖 Нейросети; «auto»: the subscription on the Mac, Plus, else the first connected) */
     selected() {
-      const on = syncPlus();
-      const sel = (Store.settings.aiProvider === 'plus' && !on ? '' : Store.settings.aiProvider) || 'auto';
-      if (sel !== 'auto') return PROVIDERS[sel] ? sel : null;
+      const sel = selSetting() || 'auto';
+      if (sel !== 'auto' && !(sel === 'pro' && !proReady())) return PROVIDERS[sel] ? sel : null;
       if (this.bridge.ok) return 'claude';
-      if (this.plusReady()) return 'plus';
+      if (proReady()) return 'pro';
       const ids = Object.keys(PROVIDERS).filter(id => !PROVIDERS[id].noKey && this.configured(id));
       return ids.find(id => !this.resting(id)) || ids[0] || null;
     },
@@ -319,7 +335,7 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
       const p = PROVIDERS[id];
       if (!p) return 'paid';
       if (p.local) return 'local';
-      if (p.type === 'bridge' || p.type === 'proxy') return p.free ? 'free' : 'sub';
+      if (p.type === 'bridge' || p.type === 'server') return p.free ? 'free' : 'sub';
       if (id === 'openrouter') return /:free$/.test(this.model(id)) ? 'free' : 'paid';
       return p.free ? 'free' : 'paid';
     },
@@ -501,14 +517,22 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
       throw new Error(j.error || `${label}: ${res.statusText || 'ошибка'}`);
     },
 
-    /** HTTP POST: direct from the browser; if blocked (CORS) and the bridge is running — through the bridge */
+    /** HTTP POST: direct from the browser; if blocked (CORS): native HTTP in the store apps (Net.native), the bridge on the
+     *  Mac when it is running (Net.isMacBridge), else a calm line */
     async post(url, headers, body) {
       let res;
       try {
         res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
       } catch (e) {
         if (navigator.onLine === false) throw new Error(window.U && U.NICE && U.NICE.off ? U.NICE.off : 'Нет интернета — попробуйте, когда связь появится');
-        if (!this.bridge.up) throw new Error(onMac() ? 'Этот сервис не принимает запросы прямо из браузера — запустите мост Norsk Kort на Mac, он передаст запрос.'
+        if (window.Net && Net.isNative && Net.isNative()) {
+          res = await Net.native(url, { method: 'POST', headers, body: JSON.stringify(body) }).catch(() => null);
+          if (!res) throw new Error('Нет связи с сервисом — проверьте интернет и попробуйте ещё раз');
+          const d = await res.json().catch(() => ({}));
+          return { ok: res.ok, status: res.status, data: d };
+        }
+        // the bridge's /api/proxy only on the Mac with the bridge running (Net.isMacBridge)
+        if (!(onMac() && this.bridge.up)) throw new Error(onMac() ? 'Этот сервис не принимает запросы прямо из браузера — запустите мост Norsk Kort на Mac, он передаст запрос.'
           : 'Нет связи с сервисом. Проверьте интернет. Если интернет есть — этот сервис не принимает запросы прямо из браузера: выберите другую нейросеть в Настройках → 🤖 Нейросети (например, Gemini или Groq — бесплатно).');
         res = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, headers, body }) })
           .catch(err => { throw new Error(window.U && U.niceErr ? U.niceErr(err) : 'Сервис сейчас не отвечает — попробуйте позже'); });
@@ -530,13 +554,14 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
     /** order of AIs to try: the chosen one first, then every other connected one (free first);
      *  a network whose limit ran out a moment ago goes to the end (it is asked only if all others fail too) */
     chain() {
-      syncPlus();
       const sel = this.selected(), strat = this.strategy();
       const ok = id => !!PROVIDERS[id] && this.configured(id);
-      const order = (Array.isArray(Store.settings.aiOrder) ? Store.settings.aiOrder : []).filter(id => PROVIDERS[id]);
+      const order = (Array.isArray(Store.settings.aiOrder) ? Store.settings.aiOrder : []).map(id => (id === 'plus' ? 'pro' : id)).filter(id => PROVIDERS[id]);
       // key-less local services (Ollama) only when chosen (or put in «Мой порядок») — otherwise every failure would end with a localhost error
       const conn = Object.keys(PROVIDERS).filter(id => ok(id) && (!PROVIDERS[id].noKey || id === sel || (strat === 'mine' && order.includes(id))));
-      const tier = id => ({ free: 0, local: 0, sub: 1, paid: 2 })[this.costKind(id)];
+      if (proReady()) conn.unshift('pro'); // ⭐ Pro (not enumerable): right after the Mac subscriptions (selected() puts it first in auto)
+      // ⭐ Pro right after the chosen one (§3.2: Mac subscriptions → Pro → own keys); then free, subscriptions, paid keys
+      const tier = id => (id === 'pro' ? -1 : ({ free: 0, local: 0, sub: 1, paid: 2 })[this.costKind(id)]);
       const rest = conn.filter(id => id !== sel).sort((a, b) => tier(a) - tier(b));
       let all;
       if (strat === 'one') all = sel && ok(sel) ? [sel] : [];
@@ -556,42 +581,90 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
     },
     restUntil(id) { const r = this.restMap()[id]; return r && Date.now() < r.until ? r.until : 0; },
     /** translations (subtitles, books, comparison — js/translators.js asks with a «Translate …» system prompt):
-     *  Norsk Kort Plus (when on), then Gemini Flash (when its key is set) go first; the usual chain after them */
+     *  Norsk Kort Pro (signed in + Pro → the server's `translate`), then Gemini Flash (when its key is set) go first */
     translateChain() {
       const all = this.chain();
-      const lead = ['plus', 'gemini'].filter(id => all.includes(id) && !this.resting(id));
+      const lead = ['pro', 'gemini'].filter(id => all.includes(id) && !this.resting(id));
       return [...lead, ...all.filter(id => !lead.includes(id))];
     },
     isTranslateAsk(args) { return !!(args && (args.translate || /^Translate\b/.test(String(args.system || '')))); },
-    /* ---------- ✦ Norsk Kort Plus (placeholder) ---------- */
-    plusOn,
-    /** on, and a server address + a token are set (the address: https, or http on this computer for tests) */
-    plusReady() {
-      if (!syncPlus()) return false;
-      const st = Store.settings, url = String(st.plusProxy || '').trim();
-      return !!(String(st.plusToken || '').trim() && (/^https:\/\/[^\s]+$/i.test(url) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(url)));
+    /* ---------- ⭐ Norsk Kort Pro: the server (js/net.js) ---------- */
+    proReady,
+    trLang,
+    /** the task name the server expects (docs/api-contract.md `ai`): args.task, else read from the prompt */
+    proTask(args) {
+      if (args.task) return args.task;
+      const sy = String(args.system || ''), us = String(args.user || '').slice(0, 400);
+      if (/^Check these Norwegian|^Check and improve these flashcards/.test(us)) return 'card.check';
+      if (/^Create a complete flashcard/.test(us)) return 'card.fill';
+      if (/^Напиши объяснение для карточки/.test(us)) return 'card.explain';
+      if (/^Give ALL main grammatical forms/.test(us)) return 'card.forms';
+      if (/example sentences/.test(us) && /"examples"/.test(String(args.user || ''))) return 'card.examples';
+      if (/SYNONYMS/.test(us)) return 'card.synonyms';
+      if (/^Generate \d+ useful, distinct Norwegian/.test(us)) return 'deck.generate';
+      if (/^Translate to English\. Reply with 1-3 words/.test(sy)) return 'card.english';
+      if (/gloss/i.test(sy + us)) return 'gloss';
+      return 'generic';
     },
-    /** the same chat request as an OpenAI-compatible service; the server answers { text } or { choices:[{ message:{ content } }] } */
-    async callPlus({ system, user, maxTokens, temperature, sink }) {
-      const st = Store.settings, url = String(st.plusProxy || '').trim(), token = String(st.plusToken || '').trim();
-      const calm = m => Object.assign(new Error('Norsk Kort Plus: ' + m), { provider: 'plus' });
-      let res;
+    /** «Translate each <lang> line of the JSON array into <lang>» + a JSON array of strings → the server's `translate` */
+    proBatch(args) {
+      const m = /^Translate each (.+?) line of the JSON array into (.+?)\./.exec(String(args.system || ''));
+      if (!m) return null;
+      const code = n => (/norw|bokm/i.test(n) ? 'no' : /russ/i.test(n) ? 'ru' : /ukrain/i.test(n) ? 'uk' : /engl/i.test(n) ? 'en' : '');
+      const src = code(m[1]), dst = code(m[2]);
+      if (!src || !['ru', 'uk', 'no'].includes(dst) || src === dst) return null;
+      let arr; try { arr = JSON.parse(String(args.user || '')); } catch (e) { return null; }
+      if (!Array.isArray(arr) || !arr.length || arr.length > 200 || arr.some(x => typeof x !== 'string' || x.length > 1000) || arr.join('').length > 20000) return null;
+      return { src, dst, lines: arr.map((text, i) => ({ id: String(i), text })) };
+    },
+    /** one request to the Norsk Kort server; errors become calm lines the chain understands (limit → rests, others → next AI) */
+    async callPro(args) {
+      const calm = (e, extra) => Object.assign(new Error('Norsk Kort Pro: ' + (e && e.nk ? e.message.charAt(0).toLowerCase() + e.message.slice(1) : 'сервер сейчас недоступен')), { provider: 'pro', nk: e && e.nk ? e.code : '' }, extra || {});
       try {
-        res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token, 'x-norsk-kort-client': 'web' },
-          body: JSON.stringify({ model: PLUS.model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }], temperature, max_tokens: maxTokens }) });
-      } catch (e) { throw calm(navigator.onLine === false ? 'нет интернета — попробуйте, когда связь появится' : 'сервер сейчас недоступен, работает другая нейросеть'); }
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        if (res.status === 401 || res.status === 403) throw calm('подписка не активна или вход устарел — проверьте её в настройках');
-        if (res.status === 429) throw Object.assign(calm('на сегодня лимит исчерпан — завтра можно снова'), { retryAfter: Math.max(60, +(j && j.retryAfter) || 3600) });
-        if (res.status === 402) throw calm('подписка закончилась — её можно продлить в настройках');
-        throw calm('сервер ответил ошибкой, попробуйте чуть позже');
+        const batch = this.proBatch(args);
+        if (batch) {
+          const r = await Net.callFn('translate', Object.assign(batch, { ctx: 'subs' }));
+          const out = batch.lines.map(l => { const x = (r.lines || []).find(y => y && String(y.id) === l.id); return x ? String(x.translation || '') : ''; });
+          if (!out.some(Boolean)) throw Object.assign(new Error('empty'), { nk: false });
+          args._raw = null;
+          return JSON.stringify(out);
+        }
+        const task = this.proTask(args);
+        const input = { system: String(args.system || ''), user: String(args.user || '') };
+        if (task === 'deck.generate') { const n = /^Generate (\d+)/.exec(input.user); if (n) input.count = Math.max(1, Math.min(50, +n[1])); }
+        const r = await Net.callFn('ai', { task, lang: { explain: trLang() }, input, max_out: Math.max(16, Math.min(16000, +args.maxTokens || 1200)) });
+        args._raw = { usage: { input_tokens: (r.usage && r.usage.in) || 0, output_tokens: (r.usage && r.usage.out) || 0 } };
+        args.cut = !!r.cut;
+        if (!r.text) throw Object.assign(new Error('Norsk Kort Pro: пустой ответ'), { provider: 'pro' });
+        return String(r.text);
+      } catch (e) {
+        if (!e || !e.nk) throw e && /^Norsk Kort Pro/.test(e.message || '') ? e : calm(null, { restMin: 2, down: true });
+        switch (e.code) {
+          case 'no_entitlement': if (window.Pro) Pro.markInactive(); throw calm(e);
+          case 'cap_reached': { const t = Date.parse(e.resetsAt || ''); throw calm(e, { retryAfter: Number.isFinite(t) ? Math.max(60, Math.ceil((t - Date.now()) / 1000)) : (e.retryAfter || 6 * 3600), limit: true }); }
+          case 'rate_limited': throw calm(e, { retryAfter: Math.max(30, e.retryAfter || 60), limit: true });
+          case 'provider_unavailable': case 'internal': case 'timeout': case 'network': throw calm(e, { restMin: 2, down: true });
+          case 'unauthenticated': case 'signed_out': throw calm(e, { auth: false });
+          default: throw calm(e);
+        }
       }
-      const ch = j && j.choices && j.choices[0];
-      const txt = (j && typeof j.text === 'string' && j.text) || (ch && ch.message && ch.message.content) || '';
-      if (!txt) throw calm('пустой ответ');
-      if (sink) sink._raw = j;
-      return String(Array.isArray(txt) ? txt.map(x => x.text || '').join('') : txt).trim();
+    },
+    /** 🔑 the one entry for a button that needs an AI (W7 hook — instead of Guides.needAI directly):
+     *  an AI is available → run(); else, when the Norsk Kort server is set up → Pro.require(feature) (sign-in → paywall →
+     *  purchase) and run() right after; else the «Нужна нейросеть» guide. → run()'s result, or null */
+    async need(feature, run) {
+      // ⭐ Pro answers: the one-time «may we send this text?» first (js/aiconsent.js; asked again when pressed again)
+      if (this.available() && this.current() === 'pro' && window.AIConsent && !AIConsent.granted() && !(await AIConsent.ensure({ feature, force: true }))) {
+        if (!this.chain().some(id => id !== 'pro')) return null;
+      }
+      if (this.available()) return run ? run() : true;
+      if (window.Pro && Pro.offered()) {
+        const ok = await Pro.require(feature, { reason: 'ai' });
+        if (ok && this.available()) return run ? run() : true;
+        return null;
+      }
+      if (window.Guides && Guides.needAI) Guides.needAI(feature); else if (window.App) App.go('settings');
+      return null;
     },
     /* ---------- 🔁 limits: a network that said «limit reached» rests, the next one answers meanwhile ---------- */
     _rest: null,
@@ -658,7 +731,7 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
       return (this._probe[id] = res);
     },
     /** «limit» answers (not a wrong key or a broken request — those are not cured by waiting) */
-    isLimit(err) { return /лимит|limit|429|quota|402|нет средств|rate|перегруж|overload|503|временно/i.test(String(err && err.message || '')); },
+    isLimit(err) { return !!(err && err.limit) || /лимит|limit|429|quota|402|нет средств|rate|перегруж|overload|503|временно/i.test(String(err && err.message || '')); },
     /**
      * Ask the AI. If it fails (limit reached, quota, error, offline) and auto-switching is on,
      * the next connected AI answers instead. this.lastProvider = the AI that really answered
@@ -711,11 +784,12 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
     /** one AI, one request. args._raw ← the service's answer object (AI.call reads its token count from it) */
     async callOnce(id, args) {
       const { system, user, maxTokens = 2048, temperature = 0.2 } = args;
-      if (!PROVIDERS[id] || (id === 'plus' && !this.plusReady())) throw new Error('Эта нейросеть сейчас недоступна — работает другая');
+      if (id === 'plus') id = 'pro';
+      if (!PROVIDERS[id] || (id === 'pro' && !proReady())) throw new Error('Эта нейросеть сейчас недоступна — работает другая');
       if (id === 'claude' && this.bridge.up && this.bridge.auth === 'bad') throw Object.assign(new Error('Claude: нужно снова войти в Claude Code на этом Mac'), { auth: true, provider: 'claude' });
-      if (!this.configured(id)) throw new Error(`${PROVIDERS[id].name}: не настроено — добавьте ключ в Настройках`);
+      if (!this.configured(id)) throw new Error(envBlock(id) ? `${PROVIDERS[id].short}: ${envBlock(id)}` : `${PROVIDERS[id].name}: не настроено — добавьте ключ в Настройках`);
       const p = PROVIDERS[id];
-      if (p.type === 'proxy') return this.callPlus({ system, user, maxTokens, temperature, sink: args });
+      if (p.type === 'server') return this.callPro(args);
       const c = this.cfg(id);
       if (p.type === 'bridge') return p.cli ? this.callCli(id, { system, user, sink: args }) : this.callBridge({ system, user, sink: args });
       if (p.type === 'anthropic') {
@@ -802,7 +876,11 @@ Rules: keep the user's content when it is correct (do not rephrase for style onl
      * the forms of a word that has them is not taken as is: one small follow-up request (AI.forms / AI.examples) fills them. */
     checkFull() { return !(window.Store && Store.settings && Store.settings.aiCheckFull === false); },
     /** cards per request of the teacher's check: forms + examples for every card make the answer long — smaller portions */
-    reviewBatch(depth, full) { return depth === 'card' && (full == null ? this.checkFull() : full) ? 4 : 6; },
+    reviewBatch(depth, full) {
+      // ⭐ the Pro server caps an answer (card.check ≤ 1 500 tokens): small portions there
+      if (this.current() === 'pro') return depth === 'card' && (full == null ? this.checkFull() : full) ? 1 : 2;
+      return depth === 'card' && (full == null ? this.checkFull() : full) ? 4 : 6;
+    },
     /** which forms a word must have: { kind, req: [tags] } — null for words without forms (prepositions, phrases, «ikke»…) */
     formsNeed(card, wc) {
       const h = String(card && card.no || '').split('\n')[0].replace(/[!?.,;:«»"()]/g, ' ').trim().toLowerCase().replace(/\s+/g, ' ');

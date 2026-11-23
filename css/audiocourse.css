@@ -146,3 +146,12 @@
   .ac-l-b { grid-template-columns: 1.8em minmax(0, 1fr) auto; } .ac-l-go { display: none; }
   .ac-speed .lbl { display: none; }
 }
+
+/* touch targets ≥ 44 px on phones (phone audit 2026-11-23); «Скачать архив с сайта курса» off the Mac (W4, P6) */
+@media (pointer: coarse) {
+  .ac-modal .btn.sm, .ac-cast-modal .btn.sm, .ac-modal .ac-acts .btn { min-height: 44px; }
+}
+.ac-get { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.ac-get .ui-ico { flex: none; }
+.ac-how { display: flex; gap: 6px; align-items: flex-start; margin: 6px 0 0; }
+.ac-how .ui-ico { flex: none; margin-top: 1px; }

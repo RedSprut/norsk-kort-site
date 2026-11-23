@@ -629,6 +629,8 @@
   /** 🤖 in our own titles → the app's brand robot (the tours and coach marks are written as text) */
   const SIC = () => (window.NavIcons ? NavIcons.statsIco() : '📊'); // 📊 → the drawn «Статистика» bars (js/app.js NavIcons)
   const botify = h => String(h == null ? '' : h).replace(/🤖/g, () => BOT()).replace(/📊/g, SIC);
+  /** W7: a coach / tour bubble's title — the emoji in front of it is dropped (drawn icons only, never emoji as icons) */
+  const plainTitle = h => String(h == null ? '' : h).replace(/^[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D\u20E3⬇↺↻▾▶■✓✎＋]+\s*/u, '');
   const sicon = i => (i === 'tap' || i === '👆' || i === '👉' ? HAND_I(24) : i === '🤖' ? BOT(24) : i === '📊' ? SIC() : esc(i));
   /** a gentle CSS animation for the topic's icon in the grid (sound waves, subtitle flicker, a robot that blinks…) */
   const ANIM = { listen: 'waves', audiocourse: 'waves', radio: 'radio', video: 'tv', subview: 'tv', karaoke: 'talk', second: 'tv', ai: 'robot', study: 'flip', interp: 'talk', telegram: 'fly', klokka: 'tick', levels: 'climb', create: 'spark', backup: 'save', fix: 'tilt', library: 'book', reader: 'book', dialogs: 'talk', prove: 'tilt', gramref: 'book', gram: 'book', ordtr: 'tilt' };
@@ -922,6 +924,19 @@
   const Help = {
     TOURS, TOPICS,
     touring: false,
+    /** W7 — ONE guide at a time on the first start: true while the first start's own guides are still on their way
+     *  (the showcase / «Как вас зовут?», the welcome, the «всегда здесь» bubble, the home coach marks). Other guides
+     *  (coach marks of other places, intros, hint bubbles) wait for it. Bounded: the waiting timers give up by themselves. */
+    firstPending() {
+      try {
+        if (window.Showcase && Showcase.active) return true;
+        const st = window.Store && Store.state;
+        if (st && Store.settings && !Store.settings.userName && !st.askedName) return true; // «Как вас зовут?» is still to come
+        if (wTimer || hcT || Help._here || T) return true;
+        if (Help._welcome && Help._welcome.el && Help._welcome.el.isConnected) return true;
+        return !!document.querySelector('#modal-root > .nk-sc-wait');
+      } catch (e) { return false; }
+    },
     open(id) {
       id = id ? alias(id) : null;
       patch({ opened: state().opened || Date.now() });
@@ -1158,7 +1173,7 @@
     T.root.classList.remove('searching');
     const steps = T.steps, i = T.i;
     const last = !steps.slice(i + 1).length;
-    T.bubble.querySelector('[data-hltitle]').innerHTML = botify(s.title); // titles are ours (no user text)
+    T.bubble.querySelector('[data-hltitle]').innerHTML = botify(plainTitle(s.title)); // titles are ours (no user text); W7: no emoji in front
     T.bubble.querySelector('[data-hltext]').innerHTML = typeof s.text === 'function' ? s.text(el) : s.text;
     T.bubble.querySelector('[data-hldots]').innerHTML = steps.map((x, k) => `<i class="${k === i ? 'on' : k < i ? 'done' : ''}"></i>`).join('') + `<span class="hl-n">${i + 1} из ${steps.length}</span>`;
     if (T.onShown && !T.shownOnce) { T.shownOnce = true; try { T.onShown(); } catch (e) { /* ignore */ } }

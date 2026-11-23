@@ -915,7 +915,7 @@ ${inc.chart !== false ? `<h2>Ответы за 30 дней · всего ${g.mon
   let cssLoaded = false;
   function loadCss() {
     if (cssLoaded || document.querySelector('link[data-printx-css]')) { cssLoaded = true; return; }
-    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/printx.css?v=231'; l.dataset.printxCss = '1';
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/printx.css?v=232'; l.dataset.printxCss = '1';
     document.head.appendChild(l); cssLoaded = true;
   }
   const SIZE_OPTS = [{ v: 's', t: 'Мельче' }, { v: 'm', t: 'Обычный' }, { v: 'l', t: 'Крупнее' }, { v: 'xl', t: 'Крупный' }];

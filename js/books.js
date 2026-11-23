@@ -3,7 +3,8 @@
  * every book opens from its official address. Reading inside the app:
  *  - most PDFs can be shown in a frame directly;
  *  - Wikimedia PDFs are fetched (CORS) and shown from memory;
- *  - the rest open in a new tab, or come through the Mac bridge.
+ *  - the rest come through js/net.js Net.get (the Mac bridge on the Mac, the server's fetch-public «pd-book» elsewhere)
+ *    or open in a new tab.
  * "🃏 Слова в карточки" sends the PDF to the card importer (pairs "norsk – русский" become cards).
  * A PDF the app can read (CORS or the Mac bridge) is drawn by the app itself (js/bookview.js, loaded on first use):
  * the word being read aloud lights up on the page, «Aa» and «🔊 Голос» sit right in the player row; otherwise the
@@ -53,16 +54,20 @@
     ]],
   ];
 
+  /** a free book's file: a direct fetch (CORS) → the store apps' native HTTP → the Mac bridge (only on the Mac) → the Norsk Kort
+   *  server (fetch-public «pd-book», allow-list supabase/functions/_shared/allowlists.ts PD_BOOKS) — js/net.js Net.get.
+   *  50languages archives (.zip) are never fetched here: they open on their site / in «Аудиокурсы». */
   async function fetchBlob(url) {
-    try { const r = await fetch(url); if (r.ok) return await r.blob(); } catch (e) { /* no CORS — try the bridge */ }
-    if (window.AI && AI.bridge.up) {
-      const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
-      if (r.ok) return r.blob();
+    if (/\.zip(\?|$)/i.test(url)) throw new Error('это архив — скачайте его на сайте ↗');
+    if (window.Net && Net.get) {
+      try { return await Net.get(url, { kind: 'pd-book', as: 'blob' }); } catch (e) {
+        if (e && e.code === 'offline') throw new Error('нет интернета — книга загрузится, когда связь вернётся');
+        if (e && e.nk && e.message && !['bad_input', 'not_configured', 'network', 'internal'].includes(e.code)) throw new Error(e.message);
+        throw new Error('этот сайт не даёт приложению загрузить книгу. Читать глазами можно и так: откройте её на сайте ↗');
+      }
     }
-    throw new Error(window.AI && AI.bridge.up ? 'сайт не отдал книгу — откройте её на сайте ↗'
-      : (window.AI && AI.onMac && AI.onMac()
-        ? 'этот сайт не даёт приложению загрузить книгу напрямую. Чтобы слушать её вслух или сделать карточки — запустите мост на Mac (в облачной версии это будет работать само). Читать глазами можно и так.'
-        : 'этот сайт не даёт приложению загрузить книгу напрямую — в версии на сайте это пока недоступно. Читать глазами можно и так: откройте книгу на сайте ↗.'));
+    const r = await fetch(url); if (r.ok) return r.blob();
+    throw new Error('этот сайт не даёт приложению загрузить книгу. Читать глазами можно и так: откройте её на сайте ↗');
   }
 
   /** one PDF document per book for this visit: the page view and «Читать вслух» share it (the last 2 books are kept) */
@@ -101,7 +106,7 @@
       const m = UI.modal({
         title: '📚 Книги — бесплатно и легально', cls: 'wide books-modal',
         body: `<div class="lib-intro">📖 <span>Книги, учебники, разговорники и словарики, которые авторы, университеты и норвежское государство раздают бесплатно. Читайте прямо здесь или скачивайте. Кнопка <b>🃏 Слова в карточки</b> превращает пары «норвежский – перевод» из книги в карточки.</span></div>
-          <div class="row" style="gap:8px;flex-wrap:wrap;margin:-4px 0 10px"><button type="button" class="btn sm primary" data-reader-open>📖 Читалка — мои книги</button><span class="tiny muted" style="align-self:center">свои PDF, EPUB, TXT, Word — вслух двумя голосами</span></div>
+          <div class="row" style="gap:8px;flex-wrap:wrap;margin:-4px 0 10px"><button type="button" class="btn sm primary" data-reader-open>📖 Читалка — мои книги</button><span class="tiny muted" style="align-self:center">свои EPUB, FB2, MOBI, AZW3, DjVu, PDF, TXT, Word — вслух двумя голосами</span></div>
           <div class="row" style="gap:6px;flex-wrap:wrap" data-filter>${['все', '🇷🇺', '🇺🇦', '🇬🇧', '🇳🇴', 'A1', 'A2', 'B1', 'B2', 'C1'].map((f, i) => `<button class="chip ${i ? '' : 'active'}" data-f="${f}">${f === 'все' ? 'Все' : f}</button>`).join('')}</div>
           ${SHELF.map(([title, list], gi) => `<div class="lib-group"><div class="lib-group-head"><h3>${title}</h3></div><div class="lib-grid">
             ${list.map(([t, langs, level, kind, url, lic, how, note, site], i) => `<div class="lib-tile book-tile" data-langs="${langs}" data-level="${level}">

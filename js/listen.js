@@ -3,7 +3,9 @@
  *  - speech is played through ONE <audio> element that is never left idle (iPhone keeps an audio element playing when
  *    the screen is locked; the browser voice (speechSynthesis) stops there and stalls in a background tab — so it is
  *    only the last resort on a visible Mac/PC page when the audio clips keep failing);
- *  - voice: your cloud voice if set up (Azure / Google Cloud / ElevenLabs / Edge), otherwise the free Google voice;
+ *  - voice: your cloud voice if set up (Azure / Google Cloud / ElevenLabs / Edge / Norsk Kort Pro / Piper), otherwise — on the
+ *    owner's Mac — the free Google voice. The unofficial Google voice is Mac-only (docs/release-architecture.md §1.3 S4): in the
+ *    public build (the site, phones, the store apps) a language without an audio voice is read by the device's own voice;
  *  - pauses are short silent audio clips made right here, so the playlist never "breaks" in the pocket;
  *  - lock screen & headphone buttons: play / pause / next / previous (Media Session);
  *  - 🌑 dark screen: black, touch-locked screen that stays awake (for when the phone must stay on).
@@ -37,6 +39,11 @@
     await Promise.all(Array.from({ length: Math.min(n, jobs.length) }, run));
     return out;
   }
+  /** the unofficial Google voice may be used: the owner's Mac only (NK_CONFIG.publicBuild false) */
+  const gtrOk = () => !(window.NK_CONFIG && NK_CONFIG.publicBuild);
+  /** the Mac bridge answered (js/net.js) — the only case for /api/proxy */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  const NOVOICE = 'голос не ответил';
   /** the free Google voice: ≤200 chars per piece */
   function googleUrls(text, lang, rate) {
     const parts = [];
@@ -74,6 +81,7 @@
         return [{ url: await Voices.synth(eng, text, lang, rate, voice), eng }];
       } catch (e) { Voices.warn(eng, e); }
     }
+    if (!gtrOk()) throw new Error(NOVOICE); // S4: the public build reads it with the device's voice (Listen.voiceOnly)
     const urls = googleUrls(text, lang, rate);
     if (urls.length < 2) return urls.map(url => ({ url }));
     // which words each clip says (the parts are the phrase cut at its punctuation, in order)
@@ -340,7 +348,15 @@
       if (o && window.ListenX && ListenX.cache.complete(o.deckId)) return true;
       // every language of the deck needs a voice that makes audio (🔊 Голоса) — or the Google voice through the bridge
       const tl = st().transLang === 'both' ? ['ru', 'uk'] : [st().transLang === 'uk' ? 'uk' : 'ru'];
-      return !!(window.Voices && ['no'].concat(tl).every(l => Voices.audioEngine(l, PLACE))) || !!(window.AI && AI.bridge.up);
+      return !!(window.Voices && ['no'].concat(tl).every(l => Voices.audioEngine(l, PLACE))) || (gtrOk() && macBridge());
+    },
+    /** the public build and a language of this session has no voice that makes audio (no Google voice there): the whole
+     *  session is read by the device's own voice from the start (no three silent failures first) */
+    voiceOnly(o) {
+      if (gtrOk() || !o || o.media) return false;
+      if (o.deckId && window.ListenX && ListenX.cache.complete(o.deckId)) return false;
+      const tl = st().transLang === 'both' ? ['ru', 'uk'] : [st().transLang === 'uk' ? 'uk' : 'ru'];
+      return !(window.Voices && ['no'].concat(tl).every(l => Voices.audioEngine(l, PLACE)));
     },
     audioCtx() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -361,7 +377,7 @@
       if (eng) {
         try { return await dec(await (await fetch(await timeout(Voices.synth(eng, it.text, it.lang, rate, Voices.voice(eng, it.lang, PLACE)), CLIP_MS))).arrayBuffer()); } catch (e) { /* the Google voice below */ }
       }
-      if (!(window.AI && AI.bridge.up)) throw new Error('голос не ответил');
+      if (!(gtrOk() && macBridge())) throw new Error(NOVOICE);
       const out = [];
       for (const url of googleUrls(it.text, it.lang, rate)) {
         const ctl = window.AbortController ? new AbortController() : null;
@@ -651,7 +667,7 @@
       audio.addEventListener('playing', () => { if (this.p === p && p.cur && !p.cur.silent) p.streak = 0; });
       audio.addEventListener('error', () => {
         if (this.p !== p || p.voice || !p.cur || audio.src !== p.curSrc) return;
-        if (p.cur.silent) this.step(); else this.clipFailed(p, p.cur.media ? (p.o.mediaAudio ? 'запись не воспроизводится' : 'видео не воспроизводится') : 'голос Google не отвечает', true);
+        if (p.cur.silent) this.step(); else this.clipFailed(p, p.cur.media ? (p.o.mediaAudio ? 'запись не воспроизводится' : 'видео не воспроизводится') : gtrOk() ? 'голос Google не отвечает' : 'голос не отвечает', true);
       });
       if (o.media) {
         // 🎬 the time inside the video: Now Playing, the lock screen and the remembered place follow it
@@ -665,7 +681,8 @@
       }
       this.bar();
       if (o.dark) this.dark(true);
-      this.step();
+      if (this.voiceOnly(o)) { p.voiceOnly = true; this._voiceToast = true; this.toVoice(''); UI.toast('Читает голос устройства — экран не выключайте. Голоса, которые звучат и с выключенным экраном, — в «Голосах»', '', 5500); }
+      else this.step();
       this.started(p);
     },
     /** a session has started (new or remade with other options): offline clips, volume, the output device, the extras */
@@ -731,7 +748,7 @@
       clearTimeout(p.wd);
       if (p.o.media) {
         // 🎬 a video that does not play: the next one (never the system voice); three in a row — stop and say so
-        if (p.streak >= 3) { this.pause(); UI.toast(`🎧 ${reason} — проверьте, что мост на Mac запущен`, 'warn', 6000); return; }
+        if (p.streak >= 3) { this.pause(); UI.toast(`${reason} — ${macBridge() || (window.Net && Net.onMac && Net.onMac()) ? 'проверьте, что мост на Mac запущен' : 'проверьте интернет и попробуйте ещё раз'}`, 'warn', 6000); return; }
         if (!p.playing) return;
         UI.toast(`🎬 ${reason} — включаю следующее`, 'warn', 3500);
         p.queue = []; p.k = 0;
@@ -1310,10 +1327,11 @@
   document.addEventListener('visibilitychange', () => {
     const p = Listen.p;
     // background tab: the system voice's pauses stall there (timers) — go back to audio clips
-    if (document.visibilityState === 'hidden') { if (p && p.voice) Listen.toClips(); return; }
+    // (the public build without an audio voice keeps the device's voice: there are no clips to go back to)
+    if (document.visibilityState === 'hidden') { if (p && p.voice && !p.voiceOnly) Listen.toClips(); return; }
     if (document.querySelector('.dark-screen')) Listen.dark(true); // the wake lock again (the browser dropped it)
     // back in front and the clips kept failing in the background: now the system voice can help
-    if (p && !p.voice && !p.rendered && p.streak >= 3 && !TTS.IOS) Listen.toVoice('голос Google не отвечает');
+    if (p && !p.voice && !p.rendered && p.streak >= 3 && !TTS.IOS) Listen.toVoice(gtrOk() ? 'голос Google не отвечает' : 'голос не отвечает');
   });
 
   window.Listen = Listen;

@@ -154,6 +154,7 @@
         <button type="button" class="btn ab-btn ab-upd" data-ab="update" title="Спросить сервер, нет ли версии новее, и обновиться">${IC('refresh', 20)}<span>Проверить обновления</span></button>
         <button type="button" class="btn ab-btn ab-bug" data-ab="report" title="Скопировать сведения о версии, браузере и экране — без ключей и личных данных">${IC('report', 20)}<span>Сообщить о проблеме</span></button>
       </div>
+      ${window.Account && Account.user && window.Views && Views.deleteAccountFlow ? `<p class="ab-del"><button type="button" class="btn ab-btn ab-del-btn ghost" data-ab="delete" title="Удалить аккаунт и облачную копию — сначала покажу, что удалится и что останется">${IC('trash', 20)}<span>Удалить аккаунт</span></button></p>` : ''}
       <p class="ab-status" data-ab-status role="status" aria-live="polite"></p>
       <details class="ab-diag" data-ab-diag hidden><summary>Что скопировано</summary><pre data-ab-diag-text></pre></details>
       <section class="ab-sec" aria-labelledby="ab-news-h">
@@ -193,6 +194,9 @@
         if (pre) pre.textContent = t; if (d) d.hidden = false;
         UI.toast(ok ? 'Сведения для отчёта скопированы — вставьте их в письмо или сообщение и опишите, что случилось' : 'Не получилось скопировать — сведения показаны ниже, выделите их вручную', ok ? 'good' : 'warn', 5200);
         if (!ok && d) d.open = true;
+      } else if (k === 'delete') {
+        // the same flow as Settings → «Аккаунт и Norsk Kort Pro» → «Удалить аккаунт» (js/views.js)
+        if (window.Views && Views.deleteAccountFlow) Views.deleteAccountFlow();
       } else if (k === 'update') {
         b.disabled = true; b.classList.add('busy');
         let r = null;

@@ -80,3 +80,19 @@
   .nw-pct { margin-right: 0; width: 100%; }
   .nw-pop .sp-row { flex-wrap: wrap; }
 }
+
+/* ---- touch targets ≥ 44 px on phones (phone audit 2026-11-23: the translation-mode buttons «Как есть / По предложениям /
+   Слово (перевод)» were 36 px, the source tabs 32–37 px) and a visible hover on every control of the window ---- */
+.nw-tabs button { min-height: 44px; }
+.nw-modal .seg-mini.ex-view button, .nw-chips .chip, .nw-tools .btn.sm, .nw-tools-row .btn.sm,
+.nw-pop .sp-row .btn, .nw-pop .sp-row .media-btn, .nw-pop .sp-row .icon-btn { min-height: 44px; }
+.nw-modal .seg-mini.ex-view { align-items: stretch; }
+.nw-modal .seg-mini.ex-view button { min-width: 44px; padding-inline: 12px; display: inline-flex; align-items: center; justify-content: center; }
+.nw-pop .sp-row .media-btn, .nw-pop .sp-row .icon-btn, .nw-tools-row [data-nw="refresh"] { min-width: 44px; }
+.nw-check { min-height: 44px; }
+.nw-chips .chip { display: inline-flex; align-items: center; transition: background .18s, color .18s, border-color .18s; }
+.nw-chips .chip:not(.active):hover { color: var(--text); border-color: color-mix(in srgb, #7c6cff 45%, var(--panel-border)); background: color-mix(in srgb, #7c6cff 12%, transparent); }
+.nw-tabs button:not(.active):hover { background: color-mix(in srgb, #7c6cff 12%, transparent); }
+.nw-modal .seg-mini.ex-view button:not(.active):hover { color: var(--text); background: color-mix(in srgb, #8b80ff 16%, transparent); }
+.nw-check:hover { color: var(--text); }
+@media (max-width: 720px) { .nw-tabs button { padding: 8px 6px; } }

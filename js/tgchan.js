@@ -16,7 +16,12 @@
  *    channels): text with Telegram's formatting, pictures, video / sound in the app's players, views, reactions — so
  *    protected channels are readable too; «＋ В карточки» takes the words selected in the post (or the whole post), and
  *    cards from a protected channel say «из канала @… (личное обучение)» in their source;
- *  - the intro window (paper plane + chat bubbles) on the first visit of the Telegram section, then a soft reminder.
+ *  - 🌐 off the Mac (the site, the store apps) with the Norsk Kort server: «Читать здесь» draws the posts of a CURATED channel
+ *    (data/tg-channels.json) from the server's tg-public — text, picture, «＋ В карточки» with the post's own words. A channel
+ *    outside that list (added by the user) is never shown inside the app: «Открыть в Телеграме» (Net.linkOut on not_curated).
+ *    No server yet → Telegram's own widget, as before. The owner's Mac: everything exactly as before;
+ *  - the intro window (paper plane + chat bubbles) on the first visit of the Telegram section, then a soft reminder — only
+ *    when no other guide is on screen (one guide at a time: the intro also counts as the section's coach marks).
  * Everything that comes from outside (the shared file, Telegram) is cleaned (Store.Safe) and escaped (U.esc): text only.
  */
 (function () {
@@ -29,6 +34,14 @@
   const reduce = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const TG = (s = 18) => Telegram.TG_SVG(s);
   const modalOpen = () => !!document.querySelector('#modal-root > .modal-backdrop:not(.closing)');
+  /** another guide is on screen (a tour, coach marks, the welcome, a hint bubble, the preloader) — ours waits: one at a time */
+  const otherGuide = () => {
+    try {
+      if (window.Help && (Help.touring || (Help.now && Help.now()) || Help._here)) return true;
+      if (window.CoachMarks && CoachMarks.running && CoachMarks.running()) return true;
+    } catch (e) { /* not loaded */ }
+    return !!document.querySelector('#nkp, body > .hl, .hc-here, .nk-here, .nk-hint, .hc-hint, .lt-hint, .guide-modal, .hc-modal');
+  };
 
   const CATS = [['lessons', '📘', 'уроки'], ['words', '🔤', 'слова'], ['video', '🎬', 'видео'], ['news', '📰', 'новости'], ['chat', '💬', 'общение']];
   const CAT = Object.fromEntries(CATS.map(([k, i, t]) => [k, { i, t }]));
@@ -56,6 +69,13 @@
   const okUser = u => /^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(String(u || ''));
   /** the owner's own machine (or the app opened as a file): the Mac bridge may be mentioned there — never on the site */
   const atHome = () => (window.Telegram && Telegram.home ? Telegram.home() : true);
+  /** the Mac bridge answered (js/net.js) — the only case for /api/tg/* */
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  /** the Norsk Kort server is set up — tg-public draws curated channels off the Mac */
+  const serverOn = () => !!(window.Net && Net.callFn && window.NKConfig && NKConfig.ready());
+  const IC = (n, sz) => (window.NavIcons && NavIcons.icon ? NavIcons.icon(n, sz) : '');
+  /** off the Mac only the shipped (curated) list is read inside the app; the rest opens in Telegram */
+  const readable = c => atHome() || macBridge() || !c || c.from === 'ship';
   const ids = a => (Array.isArray(a) ? [...new Set(a.map(n => Math.round(+n)).filter(n => n > 0 && n < 1e10))].sort((x, y) => y - x).slice(0, 40) : []);
   /** «@name», «t.me/name», «https://t.me/s/name/123», «telegram.me/name» → name; invite links (private) → '' */
   function parseUser(v) {
@@ -215,6 +235,25 @@
     });
     return out + part(at, text.length);
   }
+  /** the server's html_safe once more on this side: only b strong i em u s code pre br and https links survive (text otherwise) */
+  const KEEP = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'S', 'CODE', 'PRE', 'BR', 'A']);
+  function cleanHtml(h) {
+    const box = new DOMParser().parseFromString(`<div>${String(h || '').slice(0, 40000)}</div>`, 'text/html').body.firstChild;
+    const walk = n => [...n.childNodes].forEach(c => {
+      if (c.nodeType === 3) return;
+      if (c.nodeType !== 1 || !KEEP.has(c.tagName)) { if (c.nodeType === 1) { walk(c); c.replaceWith(...c.childNodes); } else c.remove(); return; }
+      const href = c.tagName === 'A' ? c.getAttribute('href') || '' : '';
+      [...c.attributes].forEach(a => c.removeAttribute(a.name));
+      if (c.tagName === 'A') {
+        if (!/^https:\/\/[^\s"'<>]+$/i.test(href)) { walk(c); c.replaceWith(...c.childNodes); return; }
+        c.setAttribute('href', href); c.setAttribute('target', '_blank'); c.setAttribute('rel', 'noopener noreferrer nofollow');
+      }
+      walk(c);
+    });
+    if (!box) return '';
+    walk(box);
+    return box.innerHTML;
+  }
   const mss = t => { t = Math.max(0, Math.floor(t || 0)); const h = Math.floor(t / 3600); return h ? `${h}:${String(Math.floor(t % 3600 / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}` : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
   const mb = n => (n >= 1e6 ? `${(n / 1e6).toFixed(1).replace('.', ',')} МБ` : `${Math.max(1, Math.round((n || 0) / 1e3))} КБ`);
   function whenRu(iso) {
@@ -303,8 +342,9 @@
             ${c.about ? `<p class="tgc-about">${esc(c.about)}</p>` : ''}
           </div>
           <div class="tgc-acts">
-            <button type="button" class="btn sm primary tgc-read" data-tgc-read="${u}" title="Свежие посты канала — прямо здесь, без входа в Телеграм">📖 Читать здесь</button>
-            <a class="btn sm tgc-open" href="https://t.me/${u}" target="_blank" rel="noopener noreferrer" data-tgc-open="${u}">${TG(16)} Открыть в Телеграме</a>
+            ${readable(c) ? `<button type="button" class="btn sm primary tgc-read" data-tgc-read="${u}" title="Свежие посты канала — прямо здесь, без входа в Телеграм">📖 Читать здесь</button>
+            <a class="btn sm tgc-open" href="https://t.me/${u}" target="_blank" rel="noopener noreferrer" data-tgc-open="${u}">${TG(16)} Открыть в Телеграме</a>`
+              : `<a class="btn sm primary tgc-open" href="https://t.me/${u}" target="_blank" rel="noopener noreferrer" data-tgc-open="${u}" title="Этого канала нет в проверенном списке — он открывается в самом Телеграме">${TG(16)} Открыть в Телеграме</a>`}
             ${on ? `<button type="button" class="btn sm tgc-in" data-tgc-out="${u}" title="Уже в поиске по слову — нажмите, чтобы убрать">✓ В поиске</button>`
               : `<button type="button" class="btn sm tgc-addbtn" data-tgc-add="${u}" title="Посты канала будут искаться во вкладке «Найти по слову»">➕ В поиск по слову</button>`}
             <button type="button" class="btn sm ghost tgc-del" data-tgc-del="${u}" title="Убрать из этого списка">Убрать</button>
@@ -347,6 +387,7 @@
       let filter = 'all';
       const draw = async () => {
         const all = await this.list();
+        el._tgcAll = all;
         const list = o.compact ? all.slice(0, 4) : all.filter(c => filter === 'all' || c.category === filter);
         const fl = el.querySelector('[data-tgcf]');
         const used = new Set(all.map(c => c.category));
@@ -373,7 +414,7 @@
           const add = e.target.closest('[data-tgc-add]');
           if (add) {
             this.addToApp(add.dataset.tgcAdd);
-            UI.toast(AI.bridge.up ? `Канал @${add.dataset.tgcAdd} добавлен — его посты теперь ищутся во вкладках «Найти по слову» и «Создать карточки из чата»` : `Канал @${add.dataset.tgcAdd} добавлен в поиск по слову. А читать его можно прямо здесь — кнопка «📖 Читать здесь»`, 'good', 6000);
+            UI.toast(macBridge() ? `Канал @${add.dataset.tgcAdd} добавлен — его посты теперь ищутся во вкладках «Найти по слову» и «Создать карточки из чата»` : `Канал @${add.dataset.tgcAdd} добавлен в поиск по слову${readable((el._tgcAll || []).find(x => lower(x.username) === lower(add.dataset.tgcAdd))) ? '. А читать его можно прямо здесь — кнопка «📖 Читать здесь»' : ' — посты откроются в Телеграме'}`, 'good', 6000);
             el._tgcDraw(); return;
           }
           const out = e.target.closest('[data-tgc-out]');
@@ -505,8 +546,16 @@
         const end = el.querySelector('.tcr-end'); if (end) end.remove();
       };
 
+      // 🌐 off the Mac: a channel outside the curated list is never shown inside the app (13+, docs/store/compliance.md §0)
+      if (!atHome() && !macBridge()) {
+        if (!(window.Telegram && Telegram.isCurated ? await Telegram.isCurated(u) : c.from === 'ship')) { this.notCurated(el, u, link); return; }
+        if (serverOn()) {
+          const r = await this.readPublic(el, S);
+          if (!alive() || r === 'ok' || r === 'gone') return;
+        }
+      }
       // 0) the user's own Telegram on the Mac: the app draws the posts itself — every channel is readable, protected ones too
-      const up = !!(window.AI && AI.bridge && AI.bridge.up);
+      const up = macBridge();
       let acc = up ? Telegram.status : null;
       if (up && (!acc || acc.authorized === undefined)) { try { acc = await Telegram.accStatus(); } catch (e) { acc = null; } }
       if (!alive()) return;
@@ -603,6 +652,91 @@
       await S.page();
     },
 
+    /** 🌐 a channel that is not in the curated list, off the Mac: one calm card and «Открыть в Телеграме» — nothing from it here */
+    notCurated(el, u, link) {
+      const st = el.querySelector('[data-tcr-status]'); if (st) st.hidden = true;
+      const note = el.querySelector('[data-tcr-note]'); if (note) note.hidden = true;
+      const list = el.querySelector('[data-tcr-list]');
+      if (list) list.innerHTML = `<div class="tgc-empty tcr-empty"><div class="tgc-empty-ico" aria-hidden="true">${TG(40)}</div><b>Этот канал открывается в Телеграме</b>
+          <p>Внутри приложения мы показываем только проверенные каналы о норвежском. @${esc(u)} можно читать в самом Телеграме — а понравившиеся слова скопировать и вставить в приложение: оно сделает из них карточки.</p>
+          <div class="tcr-empty-acts"><a class="btn primary" href="${link}" target="_blank" rel="noopener noreferrer">${TG(18)} Открыть в Телеграме</a></div></div>`;
+      const more = el.querySelector('[data-tcr-more]'); if (more) more.hidden = true;
+    },
+    /** 🌐 the posts of a curated channel through the Norsk Kort server (tg-public): 'ok' | 'gone' (not curated → link out) | 'fail'
+     *  (→ Telegram's own widget below, as before). The server's html_safe keeps only b/i/u/s/code/pre/br and https links. */
+    async readPublic(el, S) {
+      const $ = s => el.querySelector(s);
+      const alive = () => el._tcr === S && el.isConnected;
+      const list = $('[data-tcr-list]'), more = $('[data-tcr-more]');
+      $('[data-tcr-status]').hidden = true;
+      list.classList.add('tcn-list'); list.setAttribute('aria-busy', 'true');
+      list.innerHTML = `<span class="tcn-sr" role="status">Загружаю посты…</span>${SKEL(3)}`;
+      let j;
+      try { j = await Telegram.tgPublic(S.u); } catch (e) {
+        if (!alive()) return 'ok';
+        list.removeAttribute('aria-busy'); list.classList.remove('tcn-list'); list.innerHTML = '';
+        if (e && e.code === 'not_curated') { this.notCurated(el, S.u, esc(e.link || `https://t.me/${S.u}`)); return 'gone'; }
+        if (e && e.key === 'err.tgNotPublic') { list.innerHTML = `<div class="tgc-empty tcr-empty"><div class="tgc-empty-ico" aria-hidden="true">${IC('lock', 36)}</div><p>${esc(e.message)}. Читать его можно в самом Телеграме.</p><div class="tcr-empty-acts"><a class="btn primary" href="https://t.me/${esc(S.u)}" target="_blank" rel="noopener noreferrer">${TG(18)} Открыть в Телеграме</a></div></div>`; more.hidden = true; return 'gone'; }
+        $('[data-tcr-status]').hidden = false;
+        return 'fail';
+      }
+      if (!alive()) return 'ok';
+      list.removeAttribute('aria-busy');
+      const ch = j.channel || {};
+      const N = S.nat = { pub: true, chat: { title: ch.title, protected: false }, next: j.next, posts: new Map(), ava: ch.photo || '' };
+      if (ch.title && (!S.c.title || /^@/.test(S.c.title))) { const t = $('[data-tcr-title]'); if (t) t.textContent = ch.title; }
+      if (N.ava) { const a = $('[data-tcr-ava]'); if (a && !a.querySelector('img')) { a.classList.add('has-img'); a.insertAdjacentHTML('afterbegin', `<img src="${esc(N.ava)}" alt="" referrerpolicy="no-referrer">`); } }
+      const note = $('[data-tcr-note]');
+      note.innerHTML = `<span aria-hidden="true">${IC('info', 18)}</span><span>Свежие посты проверенного канала — без входа в Телеграм. Выделите слова в посте и нажмите <b>«＋ В карточки»</b> (или нажмите сразу — возьмётся весь пост).</span>`;
+      list.innerHTML = '';
+      const add = posts => list.insertAdjacentHTML('beforeend', posts.filter(p => !N.posts.has(p.id)).map(p => { N.posts.set(p.id, p); return this.publicHtml(S, p); }).join(''));
+      add(j.posts);
+      if (!N.posts.size) list.innerHTML = '<div class="tgc-empty tcr-empty"><div class="tgc-empty-ico" aria-hidden="true">📭</div><b>В канале пока нет постов</b></div>';
+      const endNote = () => { if (!$('.tcr-end') && N.posts.size) more.parentElement.insertAdjacentHTML('beforeend', `<p class="tcr-end small muted">Более ранние посты — <a href="https://t.me/${esc(S.u)}" target="_blank" rel="noopener noreferrer">в самом канале ↗</a></p>`); };
+      S.page = async () => {
+        if (S.busy || !N.next || !alive()) return;
+        S.busy = true;
+        more.disabled = true; more.innerHTML = '<span class="spinner sm"></span> загружаю посты…';
+        list.insertAdjacentHTML('beforeend', SKEL(2));
+        let r = null;
+        try { r = await Telegram.tgPublic(S.u, { before: N.next }); } catch (e) { r = { err: e }; }
+        if (!alive()) return;
+        list.querySelectorAll('.tcn-skel').forEach(x => x.remove());
+        S.busy = false; more.disabled = false; more.textContent = 'Показать ещё';
+        if (r.err) { UI.toast(r.err.nk ? r.err.message : 'Телеграм сейчас не ответил — нажмите «Показать ещё» ещё раз', 'warn', 4500); return; }
+        N.next = r.next && r.next !== N.next ? r.next : 0;
+        add(r.posts);
+        more.hidden = !N.next;
+        if (!N.next) endNote();
+      };
+      more.hidden = !N.next;
+      more.textContent = 'Показать ещё';
+      if (!N.next) endNote();
+      return 'ok';
+    },
+    /** one post from tg-public as the app's own card: who · when, the picture, the text (server-made safe HTML), actions */
+    publicHtml(S, p) {
+      const N = S.nat, title = N.chat.title || S.c.title || '@' + S.u;
+      const pic = (p.photos && p.photos[0]) || (p.video && p.video.thumb) || '';
+      const media = pic ? `<div class="tcn-media">${p.video
+        ? `<a class="tcn-tile vid" href="${esc(p.link)}" target="_blank" rel="noopener noreferrer" style="aspect-ratio:16/9" aria-label="Смотреть видео в Телеграме"><img src="${esc(pic)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="tcn-play" aria-hidden="true">▶</span></a>`
+        : `<button type="button" class="tcn-tile" data-tcn-photo="${esc(pic)}" style="aspect-ratio:4/3" aria-label="Открыть картинку крупно"><img src="${esc(pic)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"></button>`}</div>`
+        : p.video ? `<a class="tcn-file" href="${esc(p.link)}" target="_blank" rel="noopener noreferrer"><span class="tcn-fi" aria-hidden="true">▶</span><span class="tcn-fn">Видео — в Телеграме</span></a>` : '';
+      const text = String(p.text || '');
+      const long = text.length > 700 || text.split('\n').length > 14;
+      return `<article class="tcn-post" data-tcn="${+p.id}">
+          <header class="tcn-head"><span class="tcn-ava${N.ava ? ' has-img' : ''}" style="--h:${hue(S.u)}" aria-hidden="true">${N.ava ? `<img src="${esc(N.ava)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<b>${esc((title.replace(/[^\p{L}\p{N}]/gu, '')[0] || S.u[0]).toUpperCase())}</b></span>
+            <span class="tcn-who"><b>${esc(title)}</b><small><time datetime="${esc(p.date || '')}">${esc(whenRu(p.date))}</time></small></span></header>
+          ${media}
+          ${text.trim() ? `<div class="tcn-text${long ? ' clamp' : ''}" data-tcn-text>${p.html ? cleanHtml(p.html) : esc(text).replace(/\n/g, '<br>')}</div>${long ? '<button type="button" class="tcn-more" data-tcn-more aria-expanded="false">Читать дальше</button>' : ''}` : ''}
+          ${p.file ? `<div class="tcn-files"><a class="tcn-file" href="${esc(p.link)}" target="_blank" rel="noopener noreferrer"><span class="tcn-fi" aria-hidden="true">${p.file.audio ? '▶' : '📄'}</span><span class="tcn-fn">${p.file.audio ? 'Аудио' : 'Файл'} — в Телеграме</span></a></div>` : ''}
+          <footer class="tcn-foot">
+            <span class="tcn-stats"></span>
+            <a class="tcn-open" href="${esc(p.link)}" target="_blank" rel="noopener noreferrer">Открыть в Телеграме ↗</a>
+            <button type="button" class="btn sm primary tcn-card" data-tcn-card="${+p.id}" title="Выделите слова в посте — возьмутся только они. Без выделения — весь пост">＋ В карточки</button>
+          </footer>
+        </article>`;
+    },
     /** 📖 the posts through the user's own Telegram (the Mac bridge): 'ok' | 'old' (the bridge has no /api/tg/posts) | 'fail' */
     async readNative(el, S) {
       const $ = s => el.querySelector(s);
@@ -695,6 +829,11 @@
       const sel = selIn(post) || btn._sel || '';
       btn._sel = '';
       const ch = N.chat, title = ch.title || R.c.title || '@' + R.u;
+      if (N.pub) {
+        Telegram.toCards({ src: 'public', ch: R.u, chatTitle: ch.title || title, id: p.id, post: `${R.u}/${p.id}`, link: p.link || `https://t.me/${R.u}/${p.id}`,
+          text: sel || String(p.text || ''), photos: sel ? [] : (p.photos || []), video: null, file: null, date: p.date || '' }, null, null);
+        return;
+      }
       const media = Array.isArray(p.media) ? p.media : [];
       const v = sel ? null : media.find(m => m.type === 'video');
       Telegram.toCards({
@@ -886,7 +1025,7 @@
     },
     /** the newest posts of each channel (the owner's Telegram through the bridge): `last` + up to 20 post numbers, albums once */
     async withPosts(list, onLog) {
-      if (!(window.AI && AI.bridge && AI.bridge.up)) return list;
+      if (!macBridge()) return list;
       let k = 0;
       for (const c of list) {
         k++;
@@ -922,8 +1061,10 @@
     intro() {
       patch({ intro: state().intro || Date.now() });
       if (window.Guides) Guides.setOff('tg-intro');
+      // one guide at a time (phone audit 2026-11-23): this intro explains the section, so its coach marks are not shown after it
+      try { const h = JSON.parse(localStorage.getItem('nk-help') || '{}') || {}; h.coach = Object.assign({}, h.coach, { 'cm-telegram': Date.now() }); localStorage.setItem('nk-help', JSON.stringify(h)); } catch (e) { /* private mode */ }
       const auth = !!(Telegram.status && Telegram.status.authorized);
-      const home = atHome() || !!(window.AI && AI.bridge && AI.bridge.up); // the site without the bridge: no «connect your Telegram»
+      const home = atHome() || macBridge(); // the site without the bridge: no «connect your Telegram»
       const m = UI.modal({
         title: '', cls: 'narrow tgi-intro',
         body: `<div class="tgi-stage ${reduce() ? 'still' : ''}" aria-hidden="true">
@@ -966,8 +1107,8 @@
       return m;
     },
     firstVisit() {
-      if (state().intro || (window.Help && Help.touring)) return;
-      setTimeout(() => { if (!state().intro && !(window.Help && Help.touring) && document.querySelector('#modal-root .tg-modal')) this.intro(); }, 450);
+      if (state().intro || otherGuide()) return;
+      setTimeout(() => { if (!state().intro && !otherGuide() && document.querySelector('#modal-root .tg-modal')) this.intro(); }, 450);
     },
     /** the soft reminder: after the intro, until Telegram is really used — a dot + a bubble ≤ once a day, ≤ 5 times */
     remind() {
@@ -981,7 +1122,7 @@
       let tries = 0;
       const t = setInterval(() => {
         if (++tries > 120) { clearInterval(t); return; }
-        if (!(App.view && App.view.name === 'home') || modalOpen() || (window.Help && Help.touring) || document.querySelector('.lt-hint, .hc-hint, .tgr-hint')) return;
+        if (!(App.view && App.view.name === 'home') || modalOpen() || otherGuide() || document.querySelector('.tgr-hint')) return;
         const b = anchor(); if (!b) return;
         clearInterval(t);
         patch({ shown: (state().shown || 0) + 1, last: Date.now() });

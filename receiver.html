@@ -8,7 +8,7 @@
   Needs: this file on the site over https (on GitHub Pages: https://redsprut.github.io/norsk-kort-site/receiver.html —
   the sub-path is part of the URL to register) + a Cast App ID registered for that URL in the Google Cast SDK Developer
   Console (a one-time developer registration fee, about US$5; until the app is published there it opens only on TVs
-  registered as test devices), put into CAST_APP_ID in js/subs.js. Not registered (now): the app uses Google's standard
+  registered as test devices), put into NK_CONFIG.castAppId in js/config.js (one place; js/subs.js reads it). Not registered (now): the app uses Google's standard
   receiver — NRK's own Norwegian subtitles on the TV, the line with the Russian translation on the phone screen.
   Works without the Mac bridge: the TV fetches the programme from NRK itself, the lines come from the phone.
   🎤 «Бегущая строка» (karaoke): with the lines come the start of every word (+ the end of the last one) and, in the
@@ -18,10 +18,14 @@
   🌀 «Кто переводит»: the app sends tr: { k, n, on, bg, svg, g } — the translator's / AI's coin (the same drawing as in
   the app), its name and whether it translates right now. A small badge in a corner shows it for a few seconds (glowing
   while it works, calm when not) and fades away. tr: null — nobody yet; an older app sends nothing — no badge.
+  W6: the page works from the public site as it is (relative to nothing, no bridge, no secrets). Opened in an ordinary
+  browser (not a Cast device) it does not start the receiver — it says calmly what it is for.
 -->
 <html lang="nb">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Norsk Kort · TV</title>
   <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
   <style>
@@ -101,15 +105,36 @@
       #trw.on .tw-halo, #trw.on .tw-coin, #trw.on .tw-spark, #trw.on .tw-spark-p { animation: none; }
       #trw.on .tw-coin { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18), 0 0 22px 0 var(--g1); }
     }
-    #brand { position: absolute; top: 28px; left: 36px; z-index: 10; color: rgba(255, 255, 255, .7); font: 600 22px/1 "Google Sans", Roboto, Arial, sans-serif; }
+    #brand { position: absolute; top: 28px; left: 36px; z-index: 10; color: rgba(255, 255, 255, .7); font: 600 22px/1 "Google Sans", Roboto, Arial, sans-serif; display: flex; align-items: center; gap: 10px; }
+    #brand svg { width: 26px; height: 26px; }
+    /* opened in an ordinary browser: a calm note instead of a receiver that cannot start */
+    #notcast { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; box-sizing: border-box; color: #e8e8f0; background: #0d0f16;
+      font: 400 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; text-align: center; }
+    #notcast[hidden] { display: none; }
+    #notcast .box { max-width: 520px; }
+    #notcast h1 { font-size: 22px; margin: 14px 0 8px; }
+    #notcast p { margin: 0 0 16px; color: #b8bccb; }
+    #notcast a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border-radius: 12px; background: #7c6cff; color: #fff; text-decoration: none; font-weight: 700; }
+    #notcast a:hover { background: #6b5cf0; }
   </style>
 </head>
 <body>
   <cast-media-player></cast-media-player>
-  <div id="brand">🇳🇴 ⇄ 🇺🇦 🇷🇺 Norsk Kort</div>
+  <div id="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.4" y="5.4" width="17.2" height="13.2" rx="2.6" fill="currentColor" fill-opacity=".22"/><path d="M7 11.6h5M14.4 11.6H17M7 15h2.6M12 15h5"/></svg>Norsk Kort</div>
+  <div id="notcast" hidden><div class="box">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 14.6V6.9c0-1.05.85-1.9 1.9-1.9h13.4c1.05 0 1.9.85 1.9 1.9v9.2c0 1.05-.85 1.9-1.9 1.9H13.6"/><path d="M3.4 14.9a6.1 6.1 0 0 1 6.1 6.1"/><path d="M3.4 18.1a2.9 2.9 0 0 1 2.9 2.9"/></svg>
+    <h1>Это страница для телевизора</h1>
+    <p>Её открывает сам телевизор (Chromecast, Android TV, Google TV), когда в Norsk Kort нажимают «На телевизор». В обычном браузере здесь ничего не показывается.</p>
+    <a href="./">Открыть Norsk Kort</a></div></div>
   <div id="subs" aria-live="polite"></div>
   <div id="trw" hidden><span class="tw-coin"><span class="tw-halo"></span></span><span class="tw-txt"><span class="tw-name"></span><span class="tw-sub"></span></span></div>
   <script>
+    // an ordinary browser (not a Cast device) — or the Cast library did not load: a calm note, no receiver, no errors
+    const IS_CAST = /CrKey|Android TV|GoogleTV|AFT|BRAVIA|Chromecast|SMART-TV|Fuchsia/i.test(navigator.userAgent) && !!(window.cast && cast.framework);
+    if (!IS_CAST) {
+      document.getElementById('notcast').hidden = false;
+      document.querySelectorAll('cast-media-player, #brand, #subs, #trw').forEach(e => e.remove());
+    } else (function () {
     const NS = 'urn:x-cast:no.norskkort.subs';
     const ctx = cast.framework.CastReceiverContext.getInstance();
     const pm = ctx.getPlayerManager();
@@ -283,6 +308,7 @@
     const opts = new cast.framework.CastReceiverOptions();
     opts.customNamespaces = { [NS]: cast.framework.system.MessageType.JSON };
     ctx.start(opts);
+    })();
   </script>
 </body>
 </html>

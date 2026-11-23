@@ -1,7 +1,9 @@
 /* ============ 🌐 More sources for the card's word: podcasts with transcripts, VK, TikTok, Instagram, Pinterest, Reddit ============
  * 🎧 Podcasts — «Норвежский акселератор обучения» (70 episodes, transcripts with Russian + Norwegian lines): find the word,
  *    play the audio exactly from that sentence, turn the pair into a card. Other learner podcasts: episodes by title/description.
- * 🟦 VK — public communities, through the Mac bridge with a free VK service key (VK does not let websites read walls).
+ * 🟦 VK — public communities with the user's own free VK service key (VK does not let websites read walls): through the Mac
+ *    bridge on the owner's Mac, through native HTTP in the store apps (Net.native — the key stays on the device). The site has
+ *    no VK tab (docs/release-architecture.md §1.4 P8).
  * 🎵 TikTok / 📸 Instagram / 📌 Pinterest — paste a link -> watch here -> its text into cards; search opens the site.
  * Everything taken keeps its source (platform + link) on the card.
  */
@@ -15,6 +17,11 @@
   ];
   const VK_GROUPS = [['norge_ru', 'Norge.ru — Норвегия по-русски'], ['norwegianschool', 'На пути в Норвегию (norwegianschool)']];
   const st = () => Store.settings;
+  const macBridge = () => (window.Net && Net.isMacBridge ? Net.isMacBridge() : !!(window.AI && AI.bridge && AI.bridge.up));
+  const native = () => !!(window.Net && Net.isNative && Net.isNative());
+  const onMac = () => !!(window.Net && Net.onMac ? Net.onMac() : /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:');
+  /** where VK can be read at all: the owner's Mac (with the bridge) and the store apps */
+  const vkHere = () => onMac() || native();
   const fav = (d, s = 18) => `<img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" width="${s}" height="${s}" alt="" onerror="this.replaceWith(document.createTextNode('🌐'))">`;
 
   /* ---------- podcasts ---------- */
@@ -55,10 +62,13 @@
     return pairs;
   }
 
-  /* ---------- VK (bridge + service key) ---------- */
+  /* ---------- VK (the user's service key: the Mac bridge, or native HTTP in the store apps) ---------- */
   async function vkSearch(group, q) {
     const url = `https://api.vk.com/method/wall.search?domain=${enc(group)}&query=${enc(q)}&owners_only=1&count=20&v=5.199&access_token=${enc(st().vkToken || '')}`;
-    const r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
+    let r = null;
+    if (native()) r = await Net.native(url, { method: 'GET' }).catch(() => null);
+    else if (macBridge()) r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url, method: 'GET' }) });
+    if (!r) throw new Error('ВКонтакте сейчас не ответил — попробуйте позже');
     const j = await r.json().catch(() => ({}));
     if (j.error) throw new Error(j.error.error_msg || 'VK: ошибка');
     return ((j.response || {}).items || []).map(p => ({ group, id: p.id, owner: p.owner_id, text: p.text || '', date: p.date * 1000, link: `https://vk.com/wall${p.owner_id}_${p.id}`,
@@ -110,13 +120,13 @@
       const q0 = card ? Ordbok.bare(card.no) : '';
       const m = UI.modal({ title: `🌐 Ещё источники${q0 ? `: «${U.esc(q0)}»` : ''}`, cls: 'wide social-modal', body: '<div data-so></div>' });
       const box = m.$('[data-so]');
-      const tabs = [['pod', '🎧 Подкасты'], ['vk', '🟦 ВКонтакте'], ['link', '🔗 TikTok · Instagram · Pinterest — по ссылке'], ['search', '🔎 Искать везде']];
+      const tabs = [['pod', '🎧 Подкасты']].concat(vkHere() ? [['vk', '🟦 ВКонтакте']] : [], [['link', '🔗 TikTok · Instagram · Pinterest — по ссылке'], ['search', '🔎 Искать везде']]);
       const go = t => {
         box.innerHTML = `<div class="tg-tabs">${tabs.map(([k, l]) => `<button class="chip ${k === t ? 'active' : ''}" data-sotab="${k}">${l}</button>`).join('')}</div><div data-sobody></div>`;
         this['tab_' + t](box.querySelector('[data-sobody]'), card, q0, m);
       };
       box.addEventListener('click', e => { const t = e.target.closest('[data-sotab]'); if (t) go(t.dataset.sotab); });
-      go(tab);
+      go(tabs.some(x => x[0] === tab) ? tab : 'pod');
     },
 
     /** item -> cards through the shared pairs editor (source: platform + link) */
@@ -176,8 +186,8 @@
 
     tab_vk(el, card, q0) {
       const groups = VK_GROUPS.concat((st().vkExtra || []).map(g => [g, g]));
-      const ready = AI.bridge.up && (st().vkToken || '').trim();
-      el.innerHTML = `${ready ? '' : `<div class="mt-warn">ℹ️ <span><b>ВКонтакте не даёт сайтам читать стены сообществ.</b> Нужно: 1) мост на Mac; 2) бесплатный сервисный ключ VK — <a href="https://dev.vk.com/ru/admin/apps-list" target="_blank" rel="noopener">dev.vk.com → Мои приложения</a> → создать приложение → «Сервисный ключ доступа» → вставьте ниже. ВКонтакте недоступен в Украине.</span></div>`}
+      const ready = (macBridge() || native()) && (st().vkToken || '').trim();
+      el.innerHTML = `${ready ? '' : `<div class="mt-warn">ℹ️ <span><b>ВКонтакте не даёт сайтам читать стены сообществ.</b> Нужно: ${native() ? '' : '1) мост на Mac; 2) '}бесплатный сервисный ключ VK — <a href="https://dev.vk.com/ru/admin/apps-list" target="_blank" rel="noopener">dev.vk.com → Мои приложения</a> → создать приложение → «Сервисный ключ доступа» → вставьте ниже. ВКонтакте недоступен в Украине.</span></div>`}
         <div class="row" style="gap:6px;margin:6px 0"><input class="input grow" type="password" data-vktok value="${U.esc(st().vkToken || '')}" placeholder="сервисный ключ VK" autocomplete="off"><button class="btn sm" data-vksave>Сохранить</button></div><div class="key-local">🔒 Ключ хранится только на этом устройстве — разработчики приложения его не видят</div>
         <div class="row" style="gap:8px"><input class="input grow" data-vq value="${U.esc(q0)}"><button class="btn primary" data-vgo ${ready ? '' : 'disabled'}>🔎 Найти в сообществах</button></div>
         <div class="small muted" style="margin:6px 0">Сообщества: ${groups.map(([g, n]) => `<a href="https://vk.com/${enc(g)}" target="_blank" rel="noopener">${U.esc(n)}</a>`).join(' · ')} · <a href="https://vk.com/search/communities?q=${enc('норвежский язык')}" target="_blank" rel="noopener">найти ещё ↗</a>

@@ -148,3 +148,9 @@
   .cmp-row[data-state="ok"] .cmp-res > * { animation: none; }
   .cmp-bar > i, .cmp-row, .cmp-site > summary::before { transition: none; }
 }
+
+/* touch targets ≥ 44 px on phones (phone audit 2026-11-23) */
+@media (pointer: coarse) {
+  .cmp-modal .btn.sm, .cmp-modal .cmp-btn, .cmp-key .btn.sm, .cmp-site summary { min-height: 44px; }
+  .cmp-site summary { display: flex; align-items: center; }
+}
