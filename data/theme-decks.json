@@ -1,0 +1,2093 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "group": "themes",
+ "attribution": "Собственный материал Norsk Kort: слова, примеры и переводы написаны для приложения; написание и род сверены с ordbokene.no",
+ "decks": [
+  {
+   "id": "theme-viking",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "viking",
+   "theme": "viking",
+   "name": "Викинги",
+   "nameUk": "Вікінги",
+   "nameNo": "Vikinger",
+   "icon": "⛵",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "viking"
+   ],
+   "description": "Корабли, оружие, руны и жизнь на хуторе — слова для музеев, книг и фильмов о викингах. Можно включить оформление карточек «Викинги».",
+   "cards": [
+    {
+     "key": "theme:viking:viking",
+     "no": "en viking",
+     "ru": "викинг",
+     "uk": "вікінг",
+     "wordClass": "substantiv",
+     "example": "Vikingene seilte over havet til England.",
+     "exampleRu": "Викинги плавали через море в Англию.",
+     "exampleUk": "Вікінги плавали через море до Англії."
+    },
+    {
+     "key": "theme:viking:vikingtiden",
+     "no": "vikingtiden",
+     "ru": "эпоха викингов",
+     "uk": "доба вікінгів",
+     "wordClass": "substantiv",
+     "example": "Vikingtiden varte omtrent fra år 800 til 1050.",
+     "exampleRu": "Эпоха викингов длилась примерно с 800 по 1050 год.",
+     "exampleUk": "Доба вікінгів тривала приблизно з 800 по 1050 рік.",
+     "description": "💡 Пишется слитно: vikingtiden (или vikingtida)."
+    },
+    {
+     "key": "theme:viking:vikingskip",
+     "no": "et vikingskip",
+     "ru": "корабль викингов",
+     "uk": "корабель вікінгів",
+     "wordClass": "substantiv",
+     "example": "Vikingskipet var langt og smalt.",
+     "exampleRu": "Корабль викингов был длинным и узким.",
+     "exampleUk": "Корабель вікінгів був довгим і вузьким."
+    },
+    {
+     "key": "theme:viking:seil",
+     "no": "et seil",
+     "ru": "парус",
+     "uk": "вітрило",
+     "wordClass": "substantiv",
+     "example": "Seilet var rødt og hvitt.",
+     "exampleRu": "Парус был красно-белым.",
+     "exampleUk": "Вітрило було червоно-білим."
+    },
+    {
+     "key": "theme:viking:are",
+     "no": "en åre",
+     "ru": "весло",
+     "uk": "весло",
+     "wordClass": "substantiv",
+     "example": "Hver mann hadde sin egen åre.",
+     "exampleRu": "У каждого гребца было своё весло.",
+     "exampleUk": "Кожен веслувальник мав своє весло."
+    },
+    {
+     "key": "theme:viking:a-seile",
+     "no": "å seile",
+     "ru": "ходить под парусом",
+     "uk": "ходити під вітрилом",
+     "wordClass": "verb",
+     "example": "Vi seilte langs kysten hele juli.",
+     "exampleRu": "Весь июль мы ходили под парусом вдоль побережья.",
+     "exampleUk": "Весь липень ми ходили під вітрилом уздовж узбережжя."
+    },
+    {
+     "key": "theme:viking:a-ro",
+     "no": "å ro",
+     "ru": "грести",
+     "uk": "веслувати",
+     "wordClass": "verb",
+     "example": "Når det ikke blåste, måtte de ro.",
+     "exampleRu": "Когда не было ветра, приходилось грести.",
+     "exampleUk": "Коли не було вітру, доводилося веслувати."
+    },
+    {
+     "key": "theme:viking:sverd",
+     "no": "et sverd",
+     "ru": "меч",
+     "uk": "меч",
+     "wordClass": "substantiv",
+     "example": "Sverdet er over tusen år gammelt.",
+     "exampleRu": "Этому мечу больше тысячи лет.",
+     "exampleUk": "Цьому мечеві понад тисячу років."
+    },
+    {
+     "key": "theme:viking:skjold",
+     "no": "et skjold",
+     "ru": "щит",
+     "uk": "щит",
+     "wordClass": "substantiv",
+     "example": "Krigeren holdt skjoldet foran seg.",
+     "exampleRu": "Воин держал щит перед собой.",
+     "exampleUk": "Воїн тримав щит перед собою."
+    },
+    {
+     "key": "theme:viking:oks",
+     "no": "en øks",
+     "ru": "топор",
+     "uk": "сокира",
+     "wordClass": "substantiv",
+     "example": "Han hogget ved med en gammel øks.",
+     "exampleRu": "Он колол дрова старым топором.",
+     "exampleUk": "Він рубав дрова старою сокирою."
+    },
+    {
+     "key": "theme:viking:hjelm",
+     "no": "en hjelm",
+     "ru": "шлем",
+     "uk": "шолом",
+     "wordClass": "substantiv",
+     "example": "Hjelmen var laget av jern.",
+     "exampleRu": "Шлем был сделан из железа.",
+     "exampleUk": "Шолом був зроблений із заліза.",
+     "description": "💡 На настоящих шлемах викингов не было рогов — рога придумали художники XIX века."
+    },
+    {
+     "key": "theme:viking:hovding",
+     "no": "en høvding",
+     "ru": "вождь",
+     "uk": "вождь",
+     "wordClass": "substantiv",
+     "example": "Høvdingen bestemte hvem som skulle reise.",
+     "exampleRu": "Вождь решал, кто отправится в путь.",
+     "exampleUk": "Вождь вирішував, хто вирушить у дорогу."
+    },
+    {
+     "key": "theme:viking:rune",
+     "no": "en rune",
+     "ru": "руна",
+     "uk": "руна",
+     "wordClass": "substantiv",
+     "example": "Runer ble ofte risset inn i stein eller tre.",
+     "exampleRu": "Руны часто вырезали на камне или дереве.",
+     "exampleUk": "Руни часто вирізали на камені або дереві."
+    },
+    {
+     "key": "theme:viking:runestein",
+     "no": "en runestein",
+     "ru": "рунический камень",
+     "uk": "рунічний камінь",
+     "wordClass": "substantiv",
+     "example": "På runesteinen står det et navn.",
+     "exampleRu": "На руническом камне написано имя.",
+     "exampleUk": "На рунічному камені написано ім'я."
+    },
+    {
+     "key": "theme:viking:tokt",
+     "no": "et tokt",
+     "ru": "набег, военный поход",
+     "uk": "набіг, військовий похід",
+     "wordClass": "substantiv",
+     "example": "Om sommeren dro de på tokt.",
+     "exampleRu": "Летом они отправлялись в набеги.",
+     "exampleUk": "Улітку вони вирушали в набіги."
+    },
+    {
+     "key": "theme:viking:a-plyndre",
+     "no": "å plyndre",
+     "ru": "грабить",
+     "uk": "грабувати",
+     "wordClass": "verb",
+     "example": "Vikingene plyndret klosteret på Lindisfarne i 793.",
+     "exampleRu": "В 793 году викинги разграбили монастырь на острове Линдисфарн.",
+     "exampleUk": "У 793 році вікінги пограбували монастир на острові Ліндисфарн."
+    },
+    {
+     "key": "theme:viking:gard",
+     "no": "en gård",
+     "ru": "хутор, усадьба",
+     "uk": "хутір, садиба",
+     "wordClass": "substantiv",
+     "example": "De fleste vikinger var bønder og bodde på gårder.",
+     "exampleRu": "Большинство викингов были крестьянами и жили на хуторах.",
+     "exampleUk": "Більшість вікінгів були селянами й жили на хуторах."
+    },
+    {
+     "key": "theme:viking:bonde",
+     "no": "en bonde",
+     "ru": "крестьянин, фермер",
+     "uk": "селянин, фермер",
+     "wordClass": "substantiv",
+     "example": "Bonden hadde kyr, sauer og geiter.",
+     "exampleRu": "У крестьянина были коровы, овцы и козы.",
+     "exampleUk": "У селянина були корови, вівці й кози.",
+     "description": "💡 Множественное число неправильное: en bonde — bønder."
+    },
+    {
+     "key": "theme:viking:langhus",
+     "no": "et langhus",
+     "ru": "длинный дом",
+     "uk": "довгий будинок",
+     "wordClass": "substantiv",
+     "example": "Hele familien bodde i det samme langhuset.",
+     "exampleRu": "Вся семья жила в одном длинном доме.",
+     "exampleUk": "Уся родина жила в одному довгому будинку."
+    },
+    {
+     "key": "theme:viking:handelsmann",
+     "no": "en handelsmann",
+     "ru": "торговец",
+     "uk": "торговець",
+     "wordClass": "substantiv",
+     "example": "Handelsmennene reiste helt til Konstantinopel.",
+     "exampleRu": "Торговцы доходили до самого Константинополя.",
+     "exampleUk": "Торговці діставалися аж до Константинополя.",
+     "description": "💡 Мн. ч.: handelsmenn (как mann — menn)."
+    },
+    {
+     "key": "theme:viking:gud",
+     "no": "en gud",
+     "ru": "бог",
+     "uk": "бог",
+     "wordClass": "substantiv",
+     "example": "Tor var guden for torden og lyn.",
+     "exampleRu": "Тор был богом грома и молнии.",
+     "exampleUk": "Тор був богом грому й блискавки.",
+     "description": "💡 От имени Тора — torsdag, «четверг»."
+    }
+   ]
+  },
+  {
+   "id": "theme-troll",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "troll",
+   "theme": "troll",
+   "name": "Тролли и сказки",
+   "nameUk": "Тролі й казки",
+   "nameNo": "Troll og eventyr",
+   "icon": "🧌",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "troll"
+   ],
+   "description": "Слова из норвежских народных сказок: тролли, принцессы, Аскеладден и хюльдра. Пригодятся, чтобы читать сказки детям. Оформление — «Тролли».",
+   "cards": [
+    {
+     "key": "theme:troll:troll",
+     "no": "et troll",
+     "ru": "тролль",
+     "uk": "троль",
+     "wordClass": "substantiv",
+     "example": "Trollet bodde inne i fjellet.",
+     "exampleRu": "Тролль жил внутри горы.",
+     "exampleUk": "Троль жив усередині гори."
+    },
+    {
+     "key": "theme:troll:eventyr",
+     "no": "et eventyr",
+     "ru": "сказка; приключение",
+     "uk": "казка; пригода",
+     "wordClass": "substantiv",
+     "example": "Bestemor leste et eventyr for barna.",
+     "exampleRu": "Бабушка прочитала детям сказку.",
+     "exampleUk": "Бабуся прочитала дітям казку.",
+     "description": "💡 Eventyr — и «сказка», и «приключение»."
+    },
+    {
+     "key": "theme:troll:det-var-en-gang",
+     "no": "Det var en gang …",
+     "ru": "Жил-был… / Давным-давно…",
+     "uk": "Жив-був… / Колись давно…",
+     "wordClass": "frase",
+     "example": "Det var en gang en fattig gutt som het Askeladden.",
+     "exampleRu": "Жил-был бедный парень по имени Аскеладден.",
+     "exampleUk": "Жив-був бідний хлопець на ім'я Аскеладден.",
+     "description": "💡 Так начинаются почти все норвежские сказки."
+    },
+    {
+     "key": "theme:troll:snipp-snapp-snute-sa-er-eventyret-ute",
+     "no": "Snipp, snapp, snute, så er eventyret ute.",
+     "ru": "Вот и сказке конец.",
+     "uk": "Ось і казці кінець.",
+     "wordClass": "uttrykk",
+     "example": "Bestemor sluttet alltid med «snipp, snapp, snute».",
+     "exampleRu": "Бабушка всегда заканчивала словами «snipp, snapp, snute».",
+     "exampleUk": "Бабуся завжди закінчувала словами «snipp, snapp, snute».",
+     "description": "💡 Традиционная концовка сказки, как наше «вот и сказке конец»."
+    },
+    {
+     "key": "theme:troll:prinsesse",
+     "no": "en prinsesse",
+     "ru": "принцесса",
+     "uk": "принцеса",
+     "wordClass": "substantiv",
+     "example": "Prinsessen ville ikke gifte seg med trollet.",
+     "exampleRu": "Принцесса не хотела выходить замуж за тролля.",
+     "exampleUk": "Принцеса не хотіла виходити заміж за троля."
+    },
+    {
+     "key": "theme:troll:prins",
+     "no": "en prins",
+     "ru": "принц",
+     "uk": "принц",
+     "wordClass": "substantiv",
+     "example": "Prinsen red gjennom skogen.",
+     "exampleRu": "Принц скакал через лес.",
+     "exampleUk": "Принц їхав верхи через ліс."
+    },
+    {
+     "key": "theme:troll:konge",
+     "no": "en konge",
+     "ru": "король",
+     "uk": "король",
+     "wordClass": "substantiv",
+     "example": "Kongen lovet prinsessen og halve kongeriket til den som kunne redde henne.",
+     "exampleRu": "Король пообещал принцессу и полкоролевства тому, кто её спасёт.",
+     "exampleUk": "Король пообіцяв принцесу й пів королівства тому, хто її врятує.",
+     "description": "💡 «Prinsessen og halve kongeriket» — обычная награда героя норвежской сказки."
+    },
+    {
+     "key": "theme:troll:slott",
+     "no": "et slott",
+     "ru": "замок, дворец",
+     "uk": "замок, палац",
+     "wordClass": "substantiv",
+     "example": "Slottet lå på toppen av et høyt fjell.",
+     "exampleRu": "Замок стоял на вершине высокой горы.",
+     "exampleUk": "Замок стояв на вершині високої гори."
+    },
+    {
+     "key": "theme:troll:skog",
+     "no": "en skog",
+     "ru": "лес",
+     "uk": "ліс",
+     "wordClass": "substantiv",
+     "example": "Gutten gikk alene inn i den mørke skogen.",
+     "exampleRu": "Мальчик один пошёл в тёмный лес.",
+     "exampleUk": "Хлопчик сам пішов у темний ліс."
+    },
+    {
+     "key": "theme:troll:bru",
+     "no": "ei bru",
+     "ru": "мост",
+     "uk": "міст",
+     "wordClass": "substantiv",
+     "example": "Under brua bodde et stort, stygt troll.",
+     "exampleRu": "Под мостом жил большой страшный тролль.",
+     "exampleUk": "Під мостом жив великий страшний троль.",
+     "description": "💡 Можно и en bro — обе формы правильные."
+    },
+    {
+     "key": "theme:troll:bukk",
+     "no": "en bukk",
+     "ru": "козёл",
+     "uk": "цап",
+     "wordClass": "substantiv",
+     "example": "Bukken ville over brua for å spise gress.",
+     "exampleRu": "Козёл хотел перейти мост, чтобы пощипать травы.",
+     "exampleUk": "Цап хотів перейти міст, щоб поласувати травою."
+    },
+    {
+     "key": "theme:troll:hode",
+     "no": "et hode",
+     "ru": "голова",
+     "uk": "голова",
+     "wordClass": "substantiv",
+     "example": "Trollet hadde tre hoder.",
+     "exampleRu": "У тролля было три головы.",
+     "exampleUk": "Троль мав три голови."
+    },
+    {
+     "key": "theme:troll:a-sprekke",
+     "no": "å sprekke",
+     "ru": "лопнуть",
+     "uk": "луснути",
+     "wordClass": "verb",
+     "example": "Når sola skinner på trollet, sprekker det.",
+     "exampleRu": "Когда на тролля падает солнце, он лопается.",
+     "exampleUk": "Коли на троля світить сонце, він луснє.",
+     "description": "💡 В сказках тролли боятся солнца: на свету они лопаются или превращаются в камень."
+    },
+    {
+     "key": "theme:troll:a-lure",
+     "no": "å lure",
+     "ru": "обмануть, перехитрить",
+     "uk": "обдурити, перехитрити",
+     "wordClass": "verb",
+     "example": "Askeladden lurte trollet.",
+     "exampleRu": "Аскеладден перехитрил тролля.",
+     "exampleUk": "Аскеладден перехитрив троля.",
+     "description": "💡 А «å lure på» — «задаваться вопросом»: Jeg lurer på … — Интересно, …"
+    },
+    {
+     "key": "theme:troll:heks",
+     "no": "en heks",
+     "ru": "ведьма",
+     "uk": "відьма",
+     "wordClass": "substantiv",
+     "example": "Heksen bodde i et lite hus i skogen.",
+     "exampleRu": "Ведьма жила в маленьком домике в лесу.",
+     "exampleUk": "Відьма жила в маленькій хатинці в лісі."
+    },
+    {
+     "key": "theme:troll:nisse",
+     "no": "en nisse",
+     "ru": "ниссе, домовой",
+     "uk": "ніссе, домовик",
+     "wordClass": "substantiv",
+     "example": "Nissen bor på låven og passer på dyrene.",
+     "exampleRu": "Ниссе живёт в амбаре и присматривает за животными.",
+     "exampleUk": "Ніссе живе в стодолі й доглядає за тваринами.",
+     "description": "💡 Ниссе — маленький домовой в красной шапке; на Рождество ему оставляют миску каши."
+    },
+    {
+     "key": "theme:troll:hulder",
+     "no": "ei hulder",
+     "ru": "хюльдра (лесная дева)",
+     "uk": "гульдра (лісова діва)",
+     "wordClass": "substantiv",
+     "example": "Huldra hadde en lang kuhale.",
+     "exampleRu": "У хюльдры был длинный коровий хвост.",
+     "exampleUk": "Гульдра мала довгий коров'ячий хвіст.",
+     "description": "💡 Красавица из поверий, которая заманивает людей в лес; выдаёт её коровий хвост."
+    },
+    {
+     "key": "theme:troll:skatt",
+     "no": "en skatt",
+     "ru": "сокровище; налог",
+     "uk": "скарб; податок",
+     "wordClass": "substantiv",
+     "example": "Trollet voktet en stor skatt av gull.",
+     "exampleRu": "Тролль сторожил большое золотое сокровище.",
+     "exampleUk": "Троль стеріг великий золотий скарб.",
+     "description": "💡 Skatt — ещё и «налог»: Skatteetaten — налоговая служба."
+    },
+    {
+     "key": "theme:troll:sterk",
+     "no": "sterk",
+     "ru": "сильный",
+     "uk": "сильний",
+     "wordClass": "adjektiv",
+     "example": "Trollet var sterkt, men ikke særlig klokt.",
+     "exampleRu": "Тролль был сильным, но не очень умным.",
+     "exampleUk": "Троль був сильний, але не дуже розумний.",
+     "description": "💡 После et troll прилагательное с -t: sterkt."
+    },
+    {
+     "key": "theme:troll:klok",
+     "no": "klok",
+     "ru": "умный, мудрый",
+     "uk": "розумний, мудрий",
+     "wordClass": "adjektiv",
+     "example": "Den yngste broren var den klokeste av dem alle.",
+     "exampleRu": "Младший брат был умнее всех.",
+     "exampleUk": "Наймолодший брат був наймудріший з усіх."
+    },
+    {
+     "key": "theme:troll:stygg",
+     "no": "stygg",
+     "ru": "уродливый, страшный",
+     "uk": "потворний, страшний",
+     "wordClass": "adjektiv",
+     "example": "Ingen ville bo ved siden av det stygge trollet.",
+     "exampleRu": "Никто не хотел жить рядом со страшным троллем.",
+     "exampleUk": "Ніхто не хотів жити поруч зі страшним тролем."
+    }
+   ]
+  },
+  {
+   "id": "theme-fjord",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "fjord",
+   "theme": "fjord",
+   "name": "Фьорды и природа",
+   "nameUk": "Фіорди й природа",
+   "nameNo": "Fjord og natur",
+   "icon": "🏔",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "fjord"
+   ],
+   "description": "Горы, фьорды, водопады и острова — слова для поездок по Норвегии и прогулок на природе. Оформление — «Фьорд».",
+   "cards": [
+    {
+     "key": "theme:fjord:fjord",
+     "no": "en fjord",
+     "ru": "фьорд",
+     "uk": "фіорд",
+     "wordClass": "substantiv",
+     "example": "Fjorden er smal og veldig dyp.",
+     "exampleRu": "Фьорд узкий и очень глубокий.",
+     "exampleUk": "Фіорд вузький і дуже глибокий."
+    },
+    {
+     "key": "theme:fjord:fjell",
+     "no": "et fjell",
+     "ru": "гора",
+     "uk": "гора",
+     "wordClass": "substantiv",
+     "example": "Fra toppen av fjellet ser vi hele fjorden.",
+     "exampleRu": "С вершины горы виден весь фьорд.",
+     "exampleUk": "З вершини гори видно весь фіорд."
+    },
+    {
+     "key": "theme:fjord:foss",
+     "no": "en foss",
+     "ru": "водопад",
+     "uk": "водоспад",
+     "wordClass": "substantiv",
+     "example": "Fossen bruser høyt om våren.",
+     "exampleRu": "Весной водопад шумит особенно громко.",
+     "exampleUk": "Навесні водоспад шумить особливо гучно."
+    },
+    {
+     "key": "theme:fjord:isbre",
+     "no": "en isbre",
+     "ru": "ледник",
+     "uk": "льодовик",
+     "wordClass": "substantiv",
+     "example": "Isbreen blir mindre for hvert år.",
+     "exampleRu": "Ледник с каждым годом становится меньше.",
+     "exampleUk": "Льодовик щороку меншає."
+    },
+    {
+     "key": "theme:fjord:dal",
+     "no": "en dal",
+     "ru": "долина",
+     "uk": "долина",
+     "wordClass": "substantiv",
+     "example": "Gården ligger nederst i dalen.",
+     "exampleRu": "Хутор стоит в самом низу долины.",
+     "exampleUk": "Хутір стоїть у самому низу долини."
+    },
+    {
+     "key": "theme:fjord:elv",
+     "no": "en elv",
+     "ru": "река",
+     "uk": "річка",
+     "wordClass": "substantiv",
+     "example": "Elva renner ut i fjorden.",
+     "exampleRu": "Река впадает во фьорд.",
+     "exampleUk": "Річка впадає у фіорд."
+    },
+    {
+     "key": "theme:fjord:vann",
+     "no": "et vann",
+     "ru": "вода; озеро",
+     "uk": "вода; озеро",
+     "wordClass": "substantiv",
+     "example": "Vi badet i et lite vann i skogen.",
+     "exampleRu": "Мы купались в маленьком лесном озере.",
+     "exampleUk": "Ми купалися в маленькому лісовому озері.",
+     "description": "💡 Vann — и «вода», и небольшое озеро; большое озеро — en innsjø."
+    },
+    {
+     "key": "theme:fjord:oy",
+     "no": "ei øy",
+     "ru": "остров",
+     "uk": "острів",
+     "wordClass": "substantiv",
+     "example": "Vi tok ferja ut til ei lita øy.",
+     "exampleRu": "Мы доплыли на пароме до маленького острова.",
+     "exampleUk": "Ми допливли поромом до маленького острова.",
+     "description": "💡 Можно и en øy — en liten øy."
+    },
+    {
+     "key": "theme:fjord:kyst",
+     "no": "en kyst",
+     "ru": "побережье",
+     "uk": "узбережжя",
+     "wordClass": "substantiv",
+     "example": "Norge har en veldig lang kyst.",
+     "exampleRu": "У Норвегии очень длинное побережье.",
+     "exampleUk": "Норвегія має дуже довге узбережжя."
+    },
+    {
+     "key": "theme:fjord:strand",
+     "no": "ei strand",
+     "ru": "пляж",
+     "uk": "пляж",
+     "wordClass": "substantiv",
+     "example": "Om sommeren er stranda full av folk.",
+     "exampleRu": "Летом пляж полон людей.",
+     "exampleUk": "Улітку пляж повний людей."
+    },
+    {
+     "key": "theme:fjord:bolge",
+     "no": "en bølge",
+     "ru": "волна",
+     "uk": "хвиля",
+     "wordClass": "substantiv",
+     "example": "Bølgene var høye i går.",
+     "exampleRu": "Вчера были высокие волны.",
+     "exampleUk": "Учора були високі хвилі."
+    },
+    {
+     "key": "theme:fjord:ferje",
+     "no": "ei ferje",
+     "ru": "паром",
+     "uk": "пором",
+     "wordClass": "substantiv",
+     "example": "Vi må ta ferja over fjorden.",
+     "exampleRu": "Нам нужно переправиться через фьорд на пароме.",
+     "exampleUk": "Нам треба переправитися через фіорд поромом."
+    },
+    {
+     "key": "theme:fjord:tunnel",
+     "no": "en tunnel",
+     "ru": "тоннель",
+     "uk": "тунель",
+     "wordClass": "substantiv",
+     "example": "Norge har mange lange tunneler.",
+     "exampleRu": "В Норвегии много длинных тоннелей.",
+     "exampleUk": "У Норвегії багато довгих тунелів."
+    },
+    {
+     "key": "theme:fjord:landskap",
+     "no": "et landskap",
+     "ru": "пейзаж, ландшафт",
+     "uk": "краєвид, ландшафт",
+     "wordClass": "substantiv",
+     "example": "Landskapet på Vestlandet er helt fantastisk.",
+     "exampleRu": "Природа на западе Норвегии просто потрясающая.",
+     "exampleUk": "Краєвиди на заході Норвегії просто неймовірні."
+    },
+    {
+     "key": "theme:fjord:utsikt",
+     "no": "en utsikt",
+     "ru": "вид (с горы, из окна)",
+     "uk": "краєвид, вид",
+     "wordClass": "substantiv",
+     "example": "Fra hytta har vi utsikt over fjorden.",
+     "exampleRu": "Из нашего домика виден фьорд.",
+     "exampleUk": "З нашої хатинки видно фіорд."
+    },
+    {
+     "key": "theme:fjord:regnbue",
+     "no": "en regnbue",
+     "ru": "радуга",
+     "uk": "веселка",
+     "wordClass": "substantiv",
+     "example": "Etter regnet så vi en regnbue over fjorden.",
+     "exampleRu": "После дождя мы увидели над фьордом радугу.",
+     "exampleUk": "Після дощу ми побачили над фіордом веселку."
+    },
+    {
+     "key": "theme:fjord:a-padle",
+     "no": "å padle",
+     "ru": "грести (на каяке, байдарке)",
+     "uk": "веслувати (на каяку)",
+     "wordClass": "verb",
+     "example": "I går padlet vi kajakk på fjorden.",
+     "exampleRu": "Вчера мы плавали на каяке по фьорду.",
+     "exampleUk": "Учора ми плавали на каяку фіордом."
+    },
+    {
+     "key": "theme:fjord:bratt",
+     "no": "bratt",
+     "ru": "крутой (о склоне)",
+     "uk": "крутий (про схил)",
+     "wordClass": "adjektiv",
+     "example": "Stien opp til toppen er bratt og smal.",
+     "exampleRu": "Тропа на вершину крутая и узкая.",
+     "exampleUk": "Стежка на вершину крута й вузька."
+    },
+    {
+     "key": "theme:fjord:vakker",
+     "no": "vakker",
+     "ru": "красивый",
+     "uk": "гарний, вродливий",
+     "wordClass": "adjektiv",
+     "example": "Det er en vakker dag ved fjorden.",
+     "exampleRu": "У фьорда чудесный день.",
+     "exampleUk": "Біля фіорду чудовий день."
+    },
+    {
+     "key": "theme:fjord:allemannsretten",
+     "no": "allemannsretten",
+     "ru": "право свободного доступа к природе",
+     "uk": "право вільного доступу до природи",
+     "wordClass": "substantiv",
+     "example": "Allemannsretten gir alle lov til å gå tur i naturen.",
+     "exampleRu": "По праву свободного доступа каждый может гулять на природе.",
+     "exampleUk": "Право вільного доступу дозволяє кожному гуляти на природі.",
+     "description": "💡 Можно гулять, купаться и ставить палатку на неогороженной земле — но не ближе 150 м к жилому дому."
+    }
+   ]
+  },
+  {
+   "id": "theme-stavkirke",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "stavkirke",
+   "theme": "stavkirke",
+   "name": "Ставкирки и Средневековье",
+   "nameUk": "Ставкірки й Середньовіччя",
+   "nameNo": "Stavkirker og middelalder",
+   "icon": "⛪",
+   "level": "B1",
+   "tags": [
+    "kultur",
+    "stavkirke"
+   ],
+   "description": "Деревянные церкви, монастыри, рыцари и паломники — слова для экскурсий и музеев. Оформление — «Ставкирка».",
+   "cards": [
+    {
+     "key": "theme:stavkirke:stavkirke",
+     "no": "en stavkirke",
+     "ru": "ставкирка (деревянная каркасная церковь)",
+     "uk": "ставкірка (дерев'яна каркасна церква)",
+     "wordClass": "substantiv",
+     "example": "Heddal stavkirke er den største stavkirken i Norge.",
+     "exampleRu": "Хеддальская ставкирка — самая большая в Норвегии.",
+     "exampleUk": "Ставкірка в Геддалі — найбільша в Норвегії."
+    },
+    {
+     "key": "theme:stavkirke:middelalderen",
+     "no": "middelalderen",
+     "ru": "Средневековье",
+     "uk": "Середньовіччя",
+     "wordClass": "substantiv",
+     "example": "Stavkirkene ble bygd i middelalderen.",
+     "exampleRu": "Ставкирки строили в Средние века.",
+     "exampleUk": "Ставкірки будували в Середньовіччі."
+    },
+    {
+     "key": "theme:stavkirke:kirke",
+     "no": "en kirke",
+     "ru": "церковь",
+     "uk": "церква",
+     "wordClass": "substantiv",
+     "example": "Kirken ligger midt i bygda.",
+     "exampleRu": "Церковь стоит в центре деревни.",
+     "exampleUk": "Церква стоїть посеред села."
+    },
+    {
+     "key": "theme:stavkirke:tre",
+     "no": "et tre",
+     "ru": "дерево; древесина",
+     "uk": "дерево; деревина",
+     "wordClass": "substantiv",
+     "example": "Stavkirkene er bygd av tre.",
+     "exampleRu": "Ставкирки построены из дерева.",
+     "exampleUk": "Ставкірки збудовані з дерева.",
+     "description": "💡 Tre — и «дерево», и число «три»."
+    },
+    {
+     "key": "theme:stavkirke:a-bygge",
+     "no": "å bygge",
+     "ru": "строить",
+     "uk": "будувати",
+     "wordClass": "verb",
+     "example": "Det tok mange år å bygge kirken.",
+     "exampleRu": "Церковь строили много лет.",
+     "exampleUk": "Церкву будували багато років."
+    },
+    {
+     "key": "theme:stavkirke:tarn",
+     "no": "et tårn",
+     "ru": "башня",
+     "uk": "вежа",
+     "wordClass": "substantiv",
+     "example": "Tårnet kan ses på lang avstand.",
+     "exampleRu": "Башню видно издалека.",
+     "exampleUk": "Вежу видно здалеку."
+    },
+    {
+     "key": "theme:stavkirke:drage",
+     "no": "en drage",
+     "ru": "дракон",
+     "uk": "дракон",
+     "wordClass": "substantiv",
+     "example": "Det er drager på taket av den gamle kirken.",
+     "exampleRu": "На крыше старой церкви сидят драконы.",
+     "exampleUk": "На даху старої церкви сидять дракони."
+    },
+    {
+     "key": "theme:stavkirke:treskjaering",
+     "no": "en treskjæring",
+     "ru": "резьба по дереву",
+     "uk": "різьблення по дереву",
+     "wordClass": "substantiv",
+     "example": "Portalen er dekket av vakre treskjæringer.",
+     "exampleRu": "Портал покрыт красивой резьбой.",
+     "exampleUk": "Портал вкритий гарним різьбленням."
+    },
+    {
+     "key": "theme:stavkirke:klokke",
+     "no": "ei klokke",
+     "ru": "колокол; часы",
+     "uk": "дзвін; годинник",
+     "wordClass": "substantiv",
+     "example": "Klokkene i kirken ringer hver søndag.",
+     "exampleRu": "Церковные колокола звонят каждое воскресенье.",
+     "exampleUk": "Церковні дзвони дзвонять щонеділі.",
+     "description": "💡 Klokke — и «колокол», и «часы»; Hva er klokka? — Который час?"
+    },
+    {
+     "key": "theme:stavkirke:lys",
+     "no": "et lys",
+     "ru": "свеча; свет",
+     "uk": "свічка; світло",
+     "wordClass": "substantiv",
+     "example": "Vi tente et lys i kirken.",
+     "exampleRu": "Мы зажгли в церкви свечу.",
+     "exampleUk": "Ми запалили в церкві свічку."
+    },
+    {
+     "key": "theme:stavkirke:gammel",
+     "no": "gammel",
+     "ru": "старый",
+     "uk": "старий",
+     "wordClass": "adjektiv",
+     "example": "Kirken er over åtte hundre år gammel.",
+     "exampleRu": "Церкви больше восьмисот лет.",
+     "exampleUk": "Церкві понад вісімсот років.",
+     "description": "💡 Возраст по-норвежски: Hun er tjue år gammel — Ей двадцать лет."
+    },
+    {
+     "key": "theme:stavkirke:munk",
+     "no": "en munk",
+     "ru": "монах",
+     "uk": "чернець",
+     "wordClass": "substantiv",
+     "example": "Munkene bodde i et kloster på øya.",
+     "exampleRu": "Монахи жили в монастыре на острове.",
+     "exampleUk": "Ченці жили в монастирі на острові."
+    },
+    {
+     "key": "theme:stavkirke:kloster",
+     "no": "et kloster",
+     "ru": "монастырь",
+     "uk": "монастир",
+     "wordClass": "substantiv",
+     "example": "Ruinene av klosteret ligger ved sjøen.",
+     "exampleRu": "Руины монастыря стоят у моря.",
+     "exampleUk": "Руїни монастиря стоять біля моря."
+    },
+    {
+     "key": "theme:stavkirke:ruin",
+     "no": "en ruin",
+     "ru": "руины, развалины",
+     "uk": "руїна",
+     "wordClass": "substantiv",
+     "example": "Vi gikk rundt i ruinene av en gammel borg.",
+     "exampleRu": "Мы бродили по развалинам старой крепости.",
+     "exampleUk": "Ми блукали руїнами старої фортеці."
+    },
+    {
+     "key": "theme:stavkirke:borg",
+     "no": "en borg",
+     "ru": "крепость, замок",
+     "uk": "фортеця, замок",
+     "wordClass": "substantiv",
+     "example": "Borgen ble bygd for å beskytte byen.",
+     "exampleRu": "Крепость построили, чтобы защищать город.",
+     "exampleUk": "Фортецю збудували, щоб захищати місто."
+    },
+    {
+     "key": "theme:stavkirke:ridder",
+     "no": "en ridder",
+     "ru": "рыцарь",
+     "uk": "лицар",
+     "wordClass": "substantiv",
+     "example": "Ridderen kjempet for kongen.",
+     "exampleRu": "Рыцарь сражался за короля.",
+     "exampleUk": "Лицар бився за короля."
+    },
+    {
+     "key": "theme:stavkirke:helgen",
+     "no": "en helgen",
+     "ru": "святой",
+     "uk": "святий",
+     "wordClass": "substantiv",
+     "example": "Olav den hellige er Norges mest kjente helgen.",
+     "exampleRu": "Олав Святой — самый известный святой Норвегии.",
+     "exampleUk": "Олаф Святий — найвідоміший святий Норвегії."
+    },
+    {
+     "key": "theme:stavkirke:pilegrim",
+     "no": "en pilegrim",
+     "ru": "паломник",
+     "uk": "паломник",
+     "wordClass": "substantiv",
+     "example": "Pilegrimer går fortsatt til Nidarosdomen i Trondheim.",
+     "exampleRu": "Паломники и сегодня идут к собору Нидарос в Тронхейме.",
+     "exampleUk": "Паломники й досі йдуть до собору Нідарос у Тронгеймі."
+    },
+    {
+     "key": "theme:stavkirke:domkirke",
+     "no": "en domkirke",
+     "ru": "кафедральный собор",
+     "uk": "кафедральний собор",
+     "wordClass": "substantiv",
+     "example": "Nidarosdomen er en domkirke fra middelalderen.",
+     "exampleRu": "Нидаросский собор — средневековый кафедральный собор.",
+     "exampleUk": "Нідароський собор — середньовічний кафедральний собор."
+    },
+    {
+     "key": "theme:stavkirke:svartedauden",
+     "no": "svartedauden",
+     "ru": "Чёрная смерть (чума)",
+     "uk": "Чорна смерть (чума)",
+     "wordClass": "substantiv",
+     "example": "Svartedauden kom til Norge i 1349.",
+     "exampleRu": "Чума пришла в Норвегию в 1349 году.",
+     "exampleUk": "Чума прийшла до Норвегії в 1349 році.",
+     "description": "💡 После эпидемии многие хутора опустели — и многие ставкирки забросили."
+    }
+   ]
+  },
+  {
+   "id": "theme-mat",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "frokost",
+   "theme": "frokost",
+   "name": "Норвежская еда",
+   "nameUk": "Норвезька їжа",
+   "nameNo": "Norsk mat",
+   "icon": "🧇",
+   "level": "A1",
+   "tags": [
+    "kultur",
+    "frokost"
+   ],
+   "description": "Бутерброды с собой, коричневый сыр, вафли и форикол — что едят норвежцы и что говорят за столом. Оформление — «Норвежский завтрак».",
+   "cards": [
+    {
+     "key": "theme:mat:brodskive",
+     "no": "ei brødskive",
+     "ru": "ломтик хлеба, бутерброд",
+     "uk": "скибка хліба, бутерброд",
+     "wordClass": "substantiv",
+     "example": "Til frokost spiser jeg to brødskiver med ost.",
+     "exampleRu": "На завтрак я ем два бутерброда с сыром.",
+     "exampleUk": "На сніданок я їм два бутерброди із сиром."
+    },
+    {
+     "key": "theme:mat:palegg",
+     "no": "et pålegg",
+     "ru": "то, что кладут на хлеб",
+     "uk": "те, що кладуть на хліб",
+     "wordClass": "substantiv",
+     "example": "Hva vil du ha som pålegg?",
+     "exampleRu": "Что положить тебе на хлеб?",
+     "exampleUk": "Що тобі покласти на хліб?",
+     "description": "💡 Pålegg — всё, что кладут на хлеб: сыр, колбаса, паштет, варенье. В русском одного такого слова нет."
+    },
+    {
+     "key": "theme:mat:matpakke",
+     "no": "en matpakke",
+     "ru": "бутерброды с собой",
+     "uk": "бутерброди з собою",
+     "wordClass": "substantiv",
+     "example": "Barna har med seg matpakke på skolen.",
+     "exampleRu": "Дети берут в школу бутерброды из дома.",
+     "exampleUk": "Діти беруть до школи бутерброди з дому.",
+     "description": "💡 Matpakke — бутерброды в бумаге, которые берут на работу и в школу."
+    },
+    {
+     "key": "theme:mat:a-smore",
+     "no": "å smøre",
+     "ru": "намазывать",
+     "uk": "намазувати",
+     "wordClass": "verb",
+     "example": "Jeg smører matpakke til barna hver morgen.",
+     "exampleRu": "Каждое утро я делаю детям бутерброды с собой.",
+     "exampleUk": "Щоранку я роблю дітям бутерброди з собою.",
+     "description": "💡 Å smøre matpakke — сделать бутерброды с собой."
+    },
+    {
+     "key": "theme:mat:brunost",
+     "no": "brunost",
+     "ru": "коричневый сыр",
+     "uk": "коричневий сир",
+     "wordClass": "substantiv",
+     "example": "Brunost smaker søtt, nesten som karamell.",
+     "exampleRu": "Коричневый сыр сладкий, почти как карамель.",
+     "exampleUk": "Коричневий сир солодкий, майже як карамель."
+    },
+    {
+     "key": "theme:mat:ostehovel",
+     "no": "en ostehøvel",
+     "ru": "сырорезка",
+     "uk": "сирорізка",
+     "wordClass": "substantiv",
+     "example": "Ostehøvelen er en norsk oppfinnelse.",
+     "exampleRu": "Сырорезку изобрели в Норвегии.",
+     "exampleUk": "Сирорізку винайшли в Норвегії."
+    },
+    {
+     "key": "theme:mat:vaffel",
+     "no": "en vaffel",
+     "ru": "вафля",
+     "uk": "вафля",
+     "wordClass": "substantiv",
+     "example": "Vi steker vafler og spiser dem med rømme og syltetøy.",
+     "exampleRu": "Мы печём вафли и едим их со сметаной и вареньем.",
+     "exampleUk": "Ми печемо вафлі та їмо їх зі сметаною й варенням.",
+     "description": "💡 Вафли — сердечками, их пекут в вафельнице (et vaffeljern)."
+    },
+    {
+     "key": "theme:mat:romme",
+     "no": "rømme",
+     "ru": "сметана",
+     "uk": "сметана",
+     "wordClass": "substantiv",
+     "example": "Kan jeg få litt rømme på?",
+     "exampleRu": "Можно мне немного сметаны сверху?",
+     "exampleUk": "Можна мені трохи сметани зверху?"
+    },
+    {
+     "key": "theme:mat:syltetoy",
+     "no": "et syltetøy",
+     "ru": "варенье",
+     "uk": "варення",
+     "wordClass": "substantiv",
+     "example": "Jordbærsyltetøy er godt på vafler.",
+     "exampleRu": "Клубничное варенье отлично подходит к вафлям.",
+     "exampleUk": "Полуничне варення чудово пасує до вафель."
+    },
+    {
+     "key": "theme:mat:laks",
+     "no": "en laks",
+     "ru": "лосось",
+     "uk": "лосось",
+     "wordClass": "substantiv",
+     "example": "Laks er en av Norges viktigste eksportvarer.",
+     "exampleRu": "Лосось — один из главных экспортных товаров Норвегии.",
+     "exampleUk": "Лосось — один із головних експортних товарів Норвегії."
+    },
+    {
+     "key": "theme:mat:torsk",
+     "no": "en torsk",
+     "ru": "треска",
+     "uk": "тріска",
+     "wordClass": "substantiv",
+     "example": "Torsk med poteter er vanlig middag i Nord-Norge.",
+     "exampleRu": "Треска с картошкой — обычный ужин на севере Норвегии.",
+     "exampleUk": "Тріска з картоплею — звичайна вечеря на півночі Норвегії."
+    },
+    {
+     "key": "theme:mat:potet",
+     "no": "en potet",
+     "ru": "картофелина",
+     "uk": "картоплина",
+     "wordClass": "substantiv",
+     "example": "Vil du ha flere poteter?",
+     "exampleRu": "Хочешь ещё картошки?",
+     "exampleUk": "Хочеш ще картоплі?",
+     "description": "💡 Картошка в норвежском исчисляемая: flere poteter."
+    },
+    {
+     "key": "theme:mat:farikal",
+     "no": "fårikål",
+     "ru": "форикол (баранина с капустой)",
+     "uk": "форікол (баранина з капустою)",
+     "wordClass": "substantiv",
+     "example": "Fårikål er Norges nasjonalrett.",
+     "exampleRu": "Форикол — национальное блюдо Норвегии.",
+     "exampleUk": "Форікол — національна страва Норвегії."
+    },
+    {
+     "key": "theme:mat:kjottkake",
+     "no": "ei kjøttkake",
+     "ru": "мясная котлета",
+     "uk": "м'ясна котлета",
+     "wordClass": "substantiv",
+     "example": "Mormor lager de beste kjøttkakene.",
+     "exampleRu": "Бабушка делает самые вкусные котлеты.",
+     "exampleUk": "Бабуся робить найсмачніші котлети."
+    },
+    {
+     "key": "theme:mat:polse",
+     "no": "ei pølse",
+     "ru": "сосиска",
+     "uk": "сосиска",
+     "wordClass": "substantiv",
+     "example": "Vi grillet pølser på stranda.",
+     "exampleRu": "Мы жарили сосиски на пляже.",
+     "exampleUk": "Ми смажили сосиски на пляжі."
+    },
+    {
+     "key": "theme:mat:middag",
+     "no": "en middag",
+     "ru": "обед-ужин (горячая еда около 16–18 ч)",
+     "uk": "обід-вечеря (гаряча їжа близько 16–18 год)",
+     "wordClass": "substantiv",
+     "example": "Vi spiser middag klokka fem.",
+     "exampleRu": "Мы садимся за стол в пять.",
+     "exampleUk": "Ми сідаємо за стіл о п'ятій.",
+     "description": "💡 Middag — главная горячая еда дня, обычно в 16–18 часов. В полдень едят lunsj, чаще всего бутерброды."
+    },
+    {
+     "key": "theme:mat:a-smake",
+     "no": "å smake",
+     "ru": "пробовать на вкус; иметь вкус",
+     "uk": "куштувати; мати смак",
+     "wordClass": "verb",
+     "example": "Vil du smake på suppa?",
+     "exampleRu": "Хочешь попробовать суп?",
+     "exampleUk": "Хочеш скуштувати суп?"
+    },
+    {
+     "key": "theme:mat:sot",
+     "no": "søt",
+     "ru": "сладкий; милый",
+     "uk": "солодкий; милий",
+     "wordClass": "adjektiv",
+     "example": "Kaka er litt for søt for meg.",
+     "exampleRu": "Торт для меня сладковат.",
+     "exampleUk": "Торт для мене трохи засолодкий."
+    },
+    {
+     "key": "theme:mat:takk-for-maten",
+     "no": "Takk for maten!",
+     "ru": "Спасибо, было вкусно!",
+     "uk": "Дякую, було смачно!",
+     "wordClass": "frase",
+     "example": "Takk for maten, det var kjempegodt!",
+     "exampleRu": "Спасибо, было очень вкусно!",
+     "exampleUk": "Дякую, було дуже смачно!",
+     "description": "💡 Так благодарят после еды того, кто готовил или угощал. Не сказать — невежливо."
+    },
+    {
+     "key": "theme:mat:velbekomme",
+     "no": "Velbekomme!",
+     "ru": "На здоровье! (в ответ на «спасибо за еду»)",
+     "uk": "На здоров'я! (у відповідь на подяку за їжу)",
+     "wordClass": "frase",
+     "example": "– Takk for maten! – Velbekomme!",
+     "exampleRu": "— Спасибо, было вкусно! — На здоровье!",
+     "exampleUk": "— Дякую, було смачно! — На здоров'я!",
+     "description": "💡 Можно писать и раздельно: vel bekomme."
+    },
+    {
+     "key": "theme:mat:skal",
+     "no": "Skål!",
+     "ru": "Будем! / За здоровье!",
+     "uk": "Будьмо!",
+     "wordClass": "frase",
+     "example": "Skål for bursdagsbarnet!",
+     "exampleRu": "За именинника!",
+     "exampleUk": "За іменинника!"
+    }
+   ]
+  },
+  {
+   "id": "theme-mai17",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "mai17",
+   "theme": "mai17",
+   "name": "17 мая — День Конституции",
+   "nameUk": "17 травня — День Конституції",
+   "nameNo": "17. mai",
+   "icon": "🇳🇴",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "mai17"
+   ],
+   "description": "Флаги, детское шествие, бунады и мороженое — всё о главном празднике Норвегии. Оформление — «17. mai».",
+   "cards": [
+    {
+     "key": "theme:mai17:nasjonaldag",
+     "no": "en nasjonaldag",
+     "ru": "национальный праздник",
+     "uk": "національне свято",
+     "wordClass": "substantiv",
+     "example": "17. mai er Norges nasjonaldag.",
+     "exampleRu": "17 мая — национальный праздник Норвегии.",
+     "exampleUk": "17 травня — національне свято Норвегії."
+    },
+    {
+     "key": "theme:mai17:grunnlov",
+     "no": "en grunnlov",
+     "ru": "конституция",
+     "uk": "конституція",
+     "wordClass": "substantiv",
+     "example": "Grunnloven ble underskrevet 17. mai 1814.",
+     "exampleRu": "Конституцию подписали 17 мая 1814 года.",
+     "exampleUk": "Конституцію підписали 17 травня 1814 року."
+    },
+    {
+     "key": "theme:mai17:selvstendig",
+     "no": "selvstendig",
+     "ru": "независимый",
+     "uk": "незалежний",
+     "wordClass": "adjektiv",
+     "example": "Norge ble helt selvstendig i 1905.",
+     "exampleRu": "Полностью независимой Норвегия стала в 1905 году.",
+     "exampleUk": "Повністю незалежною Норвегія стала 1905 року."
+    },
+    {
+     "key": "theme:mai17:a-feire",
+     "no": "å feire",
+     "ru": "праздновать",
+     "uk": "святкувати",
+     "wordClass": "verb",
+     "example": "Hvordan feirer dere nasjonaldagen?",
+     "exampleRu": "Как вы празднуете национальный праздник?",
+     "exampleUk": "Як ви святкуєте національне свято?"
+    },
+    {
+     "key": "theme:mai17:gratulerer-med-dagen",
+     "no": "Gratulerer med dagen!",
+     "ru": "С праздником! / С днём рождения!",
+     "uk": "Зі святом! / З днем народження!",
+     "wordClass": "frase",
+     "example": "Gratulerer med dagen, alle sammen!",
+     "exampleRu": "Всех с праздником!",
+     "exampleUk": "Усіх зі святом!",
+     "description": "💡 Так поздравляют и с 17 мая, и с днём рождения."
+    },
+    {
+     "key": "theme:mai17:hurra",
+     "no": "Hurra!",
+     "ru": "Ура!",
+     "uk": "Ура!",
+     "wordClass": "frase",
+     "example": "Hipp hipp hurra for 17. mai!",
+     "exampleRu": "Гип-гип-ура 17 мая!",
+     "exampleUk": "Гіп-гіп-ура 17 травня!"
+    },
+    {
+     "key": "theme:mai17:barnetog",
+     "no": "et barnetog",
+     "ru": "детское шествие",
+     "uk": "дитяча хода",
+     "wordClass": "substantiv",
+     "example": "Hele skolen går i barnetoget.",
+     "exampleRu": "Вся школа идёт в детском шествии.",
+     "exampleUk": "Уся школа йде в дитячій ході.",
+     "description": "💡 Главное 17 мая — не военный парад, а шествие детей со школьными оркестрами."
+    },
+    {
+     "key": "theme:mai17:tog",
+     "no": "et tog",
+     "ru": "поезд; шествие",
+     "uk": "потяг; хода",
+     "wordClass": "substantiv",
+     "example": "Toget går gjennom hele sentrum.",
+     "exampleRu": "Шествие проходит через весь центр.",
+     "exampleUk": "Хода проходить через увесь центр.",
+     "description": "💡 Tog — и «поезд», и «шествие»."
+    },
+    {
+     "key": "theme:mai17:flagg",
+     "no": "et flagg",
+     "ru": "флаг",
+     "uk": "прапор",
+     "wordClass": "substantiv",
+     "example": "Vi henger ut flagget tidlig om morgenen.",
+     "exampleRu": "Рано утром мы вывешиваем флаг.",
+     "exampleUk": "Рано вранці ми вивішуємо прапор."
+    },
+    {
+     "key": "theme:mai17:a-vifte",
+     "no": "å vifte",
+     "ru": "махать",
+     "uk": "махати",
+     "wordClass": "verb",
+     "example": "Barna vifter med små flagg.",
+     "exampleRu": "Дети машут маленькими флажками.",
+     "exampleUk": "Діти махають маленькими прапорцями."
+    },
+    {
+     "key": "theme:mai17:bunad",
+     "no": "en bunad",
+     "ru": "бунад (народный костюм)",
+     "uk": "бунад (народний костюм)",
+     "wordClass": "substantiv",
+     "example": "Mange tar på seg bunad på 17. mai.",
+     "exampleRu": "Многие надевают 17 мая бунад.",
+     "exampleUk": "Багато хто вбирається 17 травня в бунад.",
+     "description": "💡 У каждого района свой бунад; хороший бунад шьют годами и передают по наследству."
+    },
+    {
+     "key": "theme:mai17:korps",
+     "no": "et korps",
+     "ru": "духовой оркестр",
+     "uk": "духовий оркестр",
+     "wordClass": "substantiv",
+     "example": "Skolekorpset spiller i toget.",
+     "exampleRu": "Школьный оркестр играет в шествии.",
+     "exampleUk": "Шкільний оркестр грає в ході."
+    },
+    {
+     "key": "theme:mai17:russ",
+     "no": "en russ",
+     "ru": "выпускник (в дни праздника выпускников)",
+     "uk": "випускник (у дні свята випускників)",
+     "wordClass": "substantiv",
+     "example": "Russen feirer i røde og blå klær.",
+     "exampleRu": "Выпускники празднуют в красных и синих комбинезонах.",
+     "exampleUk": "Випускники святкують у червоних і синіх комбінезонах.",
+     "description": "💡 Russ — выпускники школы; празднуют до 17 мая и в этот день идут в своём шествии."
+    },
+    {
+     "key": "theme:mai17:is",
+     "no": "en is",
+     "ru": "мороженое; лёд",
+     "uk": "морозиво; лід",
+     "wordClass": "substantiv",
+     "example": "Barna får is og pølser på 17. mai.",
+     "exampleRu": "17 мая детям покупают мороженое и сосиски.",
+     "exampleUk": "17 травня дітям купують морозиво й сосиски."
+    },
+    {
+     "key": "theme:mai17:frokost",
+     "no": "en frokost",
+     "ru": "завтрак",
+     "uk": "сніданок",
+     "wordClass": "substantiv",
+     "example": "Vi inviterer naboene til 17. mai-frokost.",
+     "exampleRu": "Мы приглашаем соседей на праздничный завтрак 17 мая.",
+     "exampleUk": "Ми запрошуємо сусідів на святковий сніданок 17 травня."
+    },
+    {
+     "key": "theme:mai17:tale",
+     "no": "en tale",
+     "ru": "речь",
+     "uk": "промова",
+     "wordClass": "substantiv",
+     "example": "Rektor holdt en kort tale før toget.",
+     "exampleRu": "Перед шествием директор школы произнёс короткую речь.",
+     "exampleUk": "Перед ходою директор школи виголосив коротку промову."
+    },
+    {
+     "key": "theme:mai17:sloyfe",
+     "no": "ei sløyfe",
+     "ru": "бант, ленточка",
+     "uk": "бант, стрічка",
+     "wordClass": "substantiv",
+     "example": "Hun har ei rød, hvit og blå sløyfe på jakka.",
+     "exampleRu": "У неё на куртке красно-бело-синий бант.",
+     "exampleUk": "У неї на куртці червоно-біло-синій бант."
+    },
+    {
+     "key": "theme:mai17:kongefamilien",
+     "no": "kongefamilien",
+     "ru": "королевская семья",
+     "uk": "королівська родина",
+     "wordClass": "substantiv",
+     "example": "Kongefamilien vinker fra balkongen på Slottet.",
+     "exampleRu": "Королевская семья машет с балкона дворца.",
+     "exampleUk": "Королівська родина махає з балкона палацу."
+    },
+    {
+     "key": "theme:mai17:fri",
+     "no": "fri",
+     "ru": "свободный; выходной",
+     "uk": "вільний; вихідний",
+     "wordClass": "adjektiv",
+     "example": "På 17. mai har nesten alle fri.",
+     "exampleRu": "17 мая почти у всех выходной.",
+     "exampleUk": "17 травня майже в усіх вихідний.",
+     "description": "💡 Å ha fri — не работать, быть выходным."
+    },
+    {
+     "key": "theme:mai17:stolt",
+     "no": "stolt",
+     "ru": "гордый",
+     "uk": "гордий",
+     "wordClass": "adjektiv",
+     "example": "Vi er stolte av landet vårt.",
+     "exampleRu": "Мы гордимся своей страной.",
+     "exampleUk": "Ми пишаємося своєю країною.",
+     "description": "💡 Å være stolt av — гордиться чем-то."
+    }
+   ]
+  },
+  {
+   "id": "theme-jul",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "jul",
+   "theme": "jul",
+   "name": "Рождество в Норвегии",
+   "nameUk": "Різдво в Норвегії",
+   "nameNo": "Jul",
+   "icon": "🎄",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "jul"
+   ],
+   "description": "Сочельник, подарки, рисовая каша и семь видов печенья — как празднуют Рождество в Норвегии. Оформление — «Jul».",
+   "cards": [
+    {
+     "key": "theme:jul:jul",
+     "no": "en jul",
+     "ru": "Рождество",
+     "uk": "Різдво",
+     "wordClass": "substantiv",
+     "example": "Hva gjør dere i jula?",
+     "exampleRu": "Что вы делаете на Рождество?",
+     "exampleUk": "Що ви робите на Різдво?",
+     "description": "💡 Чаще всего с определённой формой: i jula / i julen — на Рождество."
+    },
+    {
+     "key": "theme:jul:god-jul",
+     "no": "God jul!",
+     "ru": "С Рождеством!",
+     "uk": "З Різдвом!",
+     "wordClass": "frase",
+     "example": "God jul og godt nytt år!",
+     "exampleRu": "С Рождеством и Новым годом!",
+     "exampleUk": "З Різдвом і Новим роком!"
+    },
+    {
+     "key": "theme:jul:godt-nyttar",
+     "no": "Godt nyttår!",
+     "ru": "С Новым годом!",
+     "uk": "З Новим роком!",
+     "wordClass": "frase",
+     "example": "Godt nyttår, og takk for det gamle!",
+     "exampleRu": "С Новым годом! И спасибо за уходящий!",
+     "exampleUk": "З Новим роком! І дякую за старий!",
+     "description": "💡 «Takk for det gamle» — спасибо за всё хорошее в уходящем году."
+    },
+    {
+     "key": "theme:jul:julaften",
+     "no": "en julaften",
+     "ru": "Сочельник (24 декабря)",
+     "uk": "Святвечір (24 грудня)",
+     "wordClass": "substantiv",
+     "example": "I Norge åpner vi gavene på julaften.",
+     "exampleRu": "В Норвегии подарки открывают в сочельник.",
+     "exampleUk": "У Норвегії подарунки відкривають на Святвечір.",
+     "description": "💡 Главный вечер Рождества в Норвегии — 24 декабря."
+    },
+    {
+     "key": "theme:jul:gave",
+     "no": "en gave",
+     "ru": "подарок",
+     "uk": "подарунок",
+     "wordClass": "substantiv",
+     "example": "Hvor mange gaver ligger under treet?",
+     "exampleRu": "Сколько подарков лежит под ёлкой?",
+     "exampleUk": "Скільки подарунків лежить під ялинкою?"
+    },
+    {
+     "key": "theme:jul:a-onske-seg",
+     "no": "å ønske seg",
+     "ru": "хотеть в подарок",
+     "uk": "хотіти в подарунок",
+     "wordClass": "verb",
+     "example": "Jeg ønsker meg en ny sykkel til jul.",
+     "exampleRu": "На Рождество я хочу новый велосипед.",
+     "exampleUk": "На Різдво я хочу новий велосипед."
+    },
+    {
+     "key": "theme:jul:juletre",
+     "no": "et juletre",
+     "ru": "рождественская ёлка",
+     "uk": "ялинка",
+     "wordClass": "substantiv",
+     "example": "Vi pynter juletreet sammen med barna.",
+     "exampleRu": "Мы наряжаем ёлку вместе с детьми.",
+     "exampleUk": "Ми прикрашаємо ялинку разом із дітьми."
+    },
+    {
+     "key": "theme:jul:a-pynte",
+     "no": "å pynte",
+     "ru": "украшать, наряжать",
+     "uk": "прикрашати",
+     "wordClass": "verb",
+     "example": "Vi pynter huset til jul.",
+     "exampleRu": "Мы украшаем дом к Рождеству.",
+     "exampleUk": "Ми прикрашаємо дім до Різдва."
+    },
+    {
+     "key": "theme:jul:julesang",
+     "no": "en julesang",
+     "ru": "рождественская песня",
+     "uk": "різдвяна пісня",
+     "wordClass": "substantiv",
+     "example": "Vi går rundt juletreet og synger julesanger.",
+     "exampleRu": "Мы водим хоровод вокруг ёлки и поём рождественские песни.",
+     "exampleUk": "Ми водимо хоровод довкола ялинки й співаємо різдвяних пісень."
+    },
+    {
+     "key": "theme:jul:julenisse",
+     "no": "en julenisse",
+     "ru": "Санта, рождественский дед",
+     "uk": "Санта, різдвяний дід",
+     "wordClass": "substantiv",
+     "example": "Julenissen kommer med gaver på julaften.",
+     "exampleRu": "В сочельник приходит Санта с подарками.",
+     "exampleUk": "На Святвечір приходить Санта з подарунками."
+    },
+    {
+     "key": "theme:jul:ribbe",
+     "no": "ei ribbe",
+     "ru": "свиные рёбрышки",
+     "uk": "свинячі реберця",
+     "wordClass": "substantiv",
+     "example": "Hos oss spiser vi ribbe på julaften.",
+     "exampleRu": "У нас в сочельник едят свиные рёбрышки.",
+     "exampleUk": "У нас на Святвечір їдять свинячі реберця."
+    },
+    {
+     "key": "theme:jul:pinnekjott",
+     "no": "pinnekjøtt",
+     "ru": "пиннекьёт (солёные бараньи рёбра)",
+     "uk": "піннек'єт (солоні баранячі реберця)",
+     "wordClass": "substantiv",
+     "example": "Pinnekjøtt er vanlig julemat på Vestlandet.",
+     "exampleRu": "На западе Норвегии на Рождество обычно едят пиннекьёт.",
+     "exampleUk": "На заході Норвегії на Різдво зазвичай їдять піннек'єт."
+    },
+    {
+     "key": "theme:jul:risengrynsgrot",
+     "no": "en risengrynsgrøt",
+     "ru": "рисовая каша",
+     "uk": "рисова каша",
+     "wordClass": "substantiv",
+     "example": "Den som finner mandelen i grøten, får en marsipangris.",
+     "exampleRu": "Кто найдёт в каше миндалину, получит марципановую свинку.",
+     "exampleUk": "Хто знайде в каші мигдалину, отримає марципанову свинку."
+    },
+    {
+     "key": "theme:jul:pepperkake",
+     "no": "ei pepperkake",
+     "ru": "имбирное печенье",
+     "uk": "імбирне печиво",
+     "wordClass": "substantiv",
+     "example": "Barna baker pepperkaker i desember.",
+     "exampleRu": "В декабре дети пекут имбирное печенье.",
+     "exampleUk": "У грудні діти печуть імбирне печиво."
+    },
+    {
+     "key": "theme:jul:sju-slag",
+     "no": "sju slag",
+     "ru": "семь видов печенья",
+     "uk": "сім видів печива",
+     "wordClass": "uttrykk",
+     "example": "Mormor baker fortsatt sju slag til jul.",
+     "exampleRu": "Бабушка до сих пор печёт к Рождеству семь видов печенья.",
+     "exampleUk": "Бабуся досі пече на Різдво сім видів печива.",
+     "description": "💡 Старая традиция — испечь к Рождеству семь видов печенья."
+    },
+    {
+     "key": "theme:jul:julekalender",
+     "no": "en julekalender",
+     "ru": "адвент-календарь",
+     "uk": "адвент-календар",
+     "wordClass": "substantiv",
+     "example": "Hver morgen åpner barna en luke i julekalenderen.",
+     "exampleRu": "Каждое утро дети открывают окошко в адвент-календаре.",
+     "exampleUk": "Щоранку діти відкривають віконце в адвент-календарі."
+    },
+    {
+     "key": "theme:jul:romjul",
+     "no": "ei romjul",
+     "ru": "дни между Рождеством и Новым годом",
+     "uk": "дні між Різдвом і Новим роком",
+     "wordClass": "substantiv",
+     "example": "I romjula besøker vi familien.",
+     "exampleRu": "В дни между Рождеством и Новым годом мы навещаем родных.",
+     "exampleUk": "У дні між Різдвом і Новим роком ми відвідуємо рідних."
+    },
+    {
+     "key": "theme:jul:sno",
+     "no": "snø",
+     "ru": "снег",
+     "uk": "сніг",
+     "wordClass": "substantiv",
+     "example": "Barna håper på snø til jul.",
+     "exampleRu": "Дети надеются, что на Рождество будет снег.",
+     "exampleUk": "Діти сподіваються, що на Різдво буде сніг.",
+     "description": "💡 Hvit jul — Рождество со снегом."
+    },
+    {
+     "key": "theme:jul:koselig",
+     "no": "koselig",
+     "ru": "уютный, приятный",
+     "uk": "затишний, приємний",
+     "wordClass": "adjektiv",
+     "example": "Det er så koselig med levende lys i desember.",
+     "exampleRu": "В декабре так уютно с живыми свечами.",
+     "exampleUk": "У грудні так затишно з живими свічками.",
+     "description": "💡 Koselig — одно из самых норвежских слов: уютно, тепло, по-домашнему."
+    },
+    {
+     "key": "theme:jul:lys",
+     "no": "et lys",
+     "ru": "свеча; свет",
+     "uk": "свічка; світло",
+     "wordClass": "substantiv",
+     "example": "Vi tenner et nytt lys hver søndag i advent.",
+     "exampleRu": "Каждое воскресенье Адвента мы зажигаем новую свечу.",
+     "exampleUk": "Щонеділі в Адвент ми запалюємо нову свічку."
+    }
+   ]
+  },
+  {
+   "id": "theme-hytte",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "fjellhytte",
+   "theme": "fjellhytte",
+   "name": "Хютте и жизнь на природе",
+   "nameUk": "Гютте й життя на природі",
+   "nameNo": "Friluftsliv og hytte",
+   "icon": "🏡",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "fjellhytte"
+   ],
+   "description": "Поход, палатка, костёр, лыжи и домик в горах — слова для выходных по-норвежски. Оформление — «Хютте».",
+   "cards": [
+    {
+     "key": "theme:hytte:hytte",
+     "no": "ei hytte",
+     "ru": "домик за городом, хютте",
+     "uk": "хатинка за містом, гютте",
+     "wordClass": "substantiv",
+     "example": "Vi drar på hytta i påsken.",
+     "exampleRu": "На Пасху мы едем в свой домик.",
+     "exampleUk": "На Великдень ми їдемо до своєї хатинки.",
+     "description": "💡 На хютте едут не «в», а «på»: på hytta."
+    },
+    {
+     "key": "theme:hytte:friluftsliv",
+     "no": "friluftsliv",
+     "ru": "отдых на природе",
+     "uk": "відпочинок на природі",
+     "wordClass": "substantiv",
+     "example": "Friluftsliv er en viktig del av norsk kultur.",
+     "exampleRu": "Жизнь на природе — важная часть норвежской культуры.",
+     "exampleUk": "Відпочинок на природі — важлива частина норвезької культури."
+    },
+    {
+     "key": "theme:hytte:a-ga-pa-tur",
+     "no": "å gå på tur",
+     "ru": "ходить на прогулку, в поход",
+     "uk": "ходити на прогулянку, в похід",
+     "wordClass": "frase",
+     "example": "Skal vi gå på tur i morgen?",
+     "exampleRu": "Пойдём завтра гулять?",
+     "exampleUk": "Підемо завтра гуляти?",
+     "description": "💡 Tur — и короткая прогулка, и долгий поход в горы."
+    },
+    {
+     "key": "theme:hytte:ryggsekk",
+     "no": "en ryggsekk",
+     "ru": "рюкзак",
+     "uk": "рюкзак",
+     "wordClass": "substantiv",
+     "example": "Husk å pakke ryggsekken kvelden før.",
+     "exampleRu": "Не забудь собрать рюкзак накануне вечером.",
+     "exampleUk": "Не забудь зібрати рюкзак напередодні ввечері."
+    },
+    {
+     "key": "theme:hytte:sti",
+     "no": "en sti",
+     "ru": "тропа",
+     "uk": "стежка",
+     "wordClass": "substantiv",
+     "example": "Stien går gjennom skogen og opp til vannet.",
+     "exampleRu": "Тропа идёт через лес к озеру.",
+     "exampleUk": "Стежка йде через ліс до озера."
+    },
+    {
+     "key": "theme:hytte:topp",
+     "no": "en topp",
+     "ru": "вершина",
+     "uk": "вершина",
+     "wordClass": "substantiv",
+     "example": "Vi nådde toppen etter tre timer.",
+     "exampleRu": "Через три часа мы поднялись на вершину.",
+     "exampleUk": "Через три години ми піднялися на вершину."
+    },
+    {
+     "key": "theme:hytte:kart",
+     "no": "et kart",
+     "ru": "карта",
+     "uk": "мапа",
+     "wordClass": "substantiv",
+     "example": "Ta med kart og kompass i fjellet.",
+     "exampleRu": "В горы берите карту и компас.",
+     "exampleUk": "У гори беріть мапу й компас."
+    },
+    {
+     "key": "theme:hytte:telt",
+     "no": "et telt",
+     "ru": "палатка",
+     "uk": "намет",
+     "wordClass": "substantiv",
+     "example": "Vi sov i telt ved vannet.",
+     "exampleRu": "Мы ночевали в палатке у озера.",
+     "exampleUk": "Ми ночували в наметі біля озера."
+    },
+    {
+     "key": "theme:hytte:sovepose",
+     "no": "en sovepose",
+     "ru": "спальный мешок",
+     "uk": "спальний мішок",
+     "wordClass": "substantiv",
+     "example": "Det var kaldt, men soveposen var varm.",
+     "exampleRu": "Было холодно, но в спальнике было тепло.",
+     "exampleUk": "Було холодно, але в спальнику було тепло."
+    },
+    {
+     "key": "theme:hytte:bal",
+     "no": "et bål",
+     "ru": "костёр",
+     "uk": "багаття",
+     "wordClass": "substantiv",
+     "example": "Vi grillet pølser på bålet.",
+     "exampleRu": "Мы жарили сосиски на костре.",
+     "exampleUk": "Ми смажили сосиски на багатті.",
+     "description": "💡 С 15 апреля по 15 сентября жечь костёр в лесу или рядом с ним обычно запрещено."
+    },
+    {
+     "key": "theme:hytte:fyrstikk",
+     "no": "en fyrstikk",
+     "ru": "спичка",
+     "uk": "сірник",
+     "wordClass": "substantiv",
+     "example": "Har noen fyrstikker? Vi må tenne bålet.",
+     "exampleRu": "У кого-нибудь есть спички? Надо разжечь костёр.",
+     "exampleUk": "У когось є сірники? Треба розпалити багаття."
+    },
+    {
+     "key": "theme:hytte:termos",
+     "no": "en termos",
+     "ru": "термос",
+     "uk": "термос",
+     "wordClass": "substantiv",
+     "example": "Vi har med varm kakao på termos.",
+     "exampleRu": "Мы взяли с собой горячее какао в термосе.",
+     "exampleUk": "Ми взяли з собою гаряче какао в термосі."
+    },
+    {
+     "key": "theme:hytte:ved",
+     "no": "ved",
+     "ru": "дрова",
+     "uk": "дрова",
+     "wordClass": "substantiv",
+     "example": "Vi må hogge ved til peisen.",
+     "exampleRu": "Надо наколоть дров для камина.",
+     "exampleUk": "Треба нарубати дров для каміна."
+    },
+    {
+     "key": "theme:hytte:peis",
+     "no": "en peis",
+     "ru": "камин",
+     "uk": "камін",
+     "wordClass": "substantiv",
+     "example": "Om kvelden sitter vi foran peisen.",
+     "exampleRu": "Вечером мы сидим у камина.",
+     "exampleUk": "Увечері ми сидимо біля каміна."
+    },
+    {
+     "key": "theme:hytte:utedo",
+     "no": "en utedo",
+     "ru": "туалет на улице",
+     "uk": "туалет надворі",
+     "wordClass": "substantiv",
+     "example": "Hytta har ikke innlagt vann, bare utedo.",
+     "exampleRu": "В домике нет водопровода, только туалет на улице.",
+     "exampleUk": "У хатинці немає водогону, тільки туалет надворі.",
+     "description": "💡 На многих старых хюттах нет водопровода: воду носят из ручья или колодца."
+    },
+    {
+     "key": "theme:hytte:ski",
+     "no": "en ski",
+     "ru": "лыжа",
+     "uk": "лижа",
+     "wordClass": "substantiv",
+     "example": "Vi går på ski hver søndag om vinteren.",
+     "exampleRu": "Зимой мы каждое воскресенье ходим на лыжах.",
+     "exampleUk": "Узимку ми щонеділі ходимо на лижах.",
+     "description": "💡 Мн. ч. то же: ski. «Gå på ski» — ходить на лыжах."
+    },
+    {
+     "key": "theme:hytte:loype",
+     "no": "ei løype",
+     "ru": "лыжня",
+     "uk": "лижня",
+     "wordClass": "substantiv",
+     "example": "Løypene er fine etter snøfallet i natt.",
+     "exampleRu": "После ночного снегопада лыжни отличные.",
+     "exampleUk": "Після нічного снігопаду лижні чудові."
+    },
+    {
+     "key": "theme:hytte:a-fiske",
+     "no": "å fiske",
+     "ru": "ловить рыбу",
+     "uk": "рибалити",
+     "wordClass": "verb",
+     "example": "Bestefar lærte meg å fiske i fjellvannet.",
+     "exampleRu": "Дедушка научил меня рыбачить на горном озере.",
+     "exampleUk": "Дідусь навчив мене рибалити на гірському озері."
+    },
+    {
+     "key": "theme:hytte:sliten",
+     "no": "sliten",
+     "ru": "уставший",
+     "uk": "втомлений",
+     "wordClass": "adjektiv",
+     "example": "Etter turen var vi slitne, men glade.",
+     "exampleRu": "После похода мы устали, но были довольны.",
+     "exampleUk": "Після походу ми втомилися, але були задоволені."
+    },
+    {
+     "key": "theme:hytte:ut-pa-tur-aldri-sur",
+     "no": "Ut på tur, aldri sur!",
+     "ru": "На прогулке не грустят!",
+     "uk": "На прогулянці не сумують!",
+     "wordClass": "uttrykk",
+     "example": "Kom igjen, ut på tur, aldri sur!",
+     "exampleRu": "Давай, пошли гулять — на прогулке не грустят!",
+     "exampleUk": "Давай, ходімо гуляти — на прогулянці не сумують!",
+     "description": "💡 Популярная поговорка: на природе плохому настроению не место."
+    },
+    {
+     "key": "theme:hytte:det-finnes-ikke-darlig-vaer-bare-darlige",
+     "no": "Det finnes ikke dårlig vær, bare dårlige klær.",
+     "ru": "Нет плохой погоды, есть неподходящая одежда.",
+     "uk": "Немає поганої погоди, є невідповідний одяг.",
+     "wordClass": "uttrykk",
+     "example": "Ta på deg regnjakka – det finnes ikke dårlig vær, bare dårlige klær!",
+     "exampleRu": "Надевай дождевик: плохой погоды не бывает, бывает неподходящая одежда!",
+     "exampleUk": "Вдягай дощовик: поганої погоди не буває, буває невідповідний одяг!"
+    }
+   ]
+  },
+  {
+   "id": "theme-vinter",
+   "ver": 1,
+   "kind": "word",
+   "group": "themes",
+   "section": "aurora",
+   "theme": "aurora",
+   "name": "Северное сияние и зима",
+   "nameUk": "Північне сяйво й зима",
+   "nameNo": "Nordlys og vinter",
+   "icon": "🌌",
+   "level": "A2",
+   "tags": [
+    "kultur",
+    "aurora"
+   ],
+   "description": "Полярная ночь, мороз, гололёд и северное сияние — слова, чтобы пережить норвежскую зиму. Оформление — «Северное сияние».",
+   "cards": [
+    {
+     "key": "theme:vinter:nordlys",
+     "no": "et nordlys",
+     "ru": "северное сияние",
+     "uk": "північне сяйво",
+     "wordClass": "substantiv",
+     "example": "I kveld kan vi kanskje se nordlyset.",
+     "exampleRu": "Сегодня вечером, может быть, увидим северное сияние.",
+     "exampleUk": "Сьогодні ввечері, можливо, побачимо північне сяйво."
+    },
+    {
+     "key": "theme:vinter:morketid",
+     "no": "ei mørketid",
+     "ru": "полярная ночь",
+     "uk": "полярна ніч",
+     "wordClass": "substantiv",
+     "example": "I Tromsø varer mørketida fra slutten av november til midten av januar.",
+     "exampleRu": "В Тромсё полярная ночь длится с конца ноября до середины января.",
+     "exampleUk": "У Тромсе полярна ніч триває з кінця листопада до середини січня."
+    },
+    {
+     "key": "theme:vinter:midnattssol",
+     "no": "ei midnattssol",
+     "ru": "полуночное солнце",
+     "uk": "опівнічне сонце",
+     "wordClass": "substantiv",
+     "example": "Om sommeren kan du se midnattssola i Nord-Norge.",
+     "exampleRu": "Летом на севере Норвегии можно увидеть полуночное солнце.",
+     "exampleUk": "Улітку на півночі Норвегії можна побачити опівнічне сонце."
+    },
+    {
+     "key": "theme:vinter:stjernehimmel",
+     "no": "en stjernehimmel",
+     "ru": "звёздное небо",
+     "uk": "зоряне небо",
+     "wordClass": "substantiv",
+     "example": "Uten bylys ser du en fantastisk stjernehimmel.",
+     "exampleRu": "Вдали от городских огней видно потрясающее звёздное небо.",
+     "exampleUk": "Далеко від міських вогнів видно неймовірне зоряне небо."
+    },
+    {
+     "key": "theme:vinter:mork",
+     "no": "mørk",
+     "ru": "тёмный",
+     "uk": "темний",
+     "wordClass": "adjektiv",
+     "example": "Om vinteren er det mørkt når jeg går på jobb.",
+     "exampleRu": "Зимой, когда я иду на работу, ещё темно.",
+     "exampleUk": "Узимку, коли я йду на роботу, ще темно.",
+     "description": "💡 Det er mørkt — темно (форма на -t, как kaldt)."
+    },
+    {
+     "key": "theme:vinter:kald",
+     "no": "kald",
+     "ru": "холодный",
+     "uk": "холодний",
+     "wordClass": "adjektiv",
+     "example": "Det er kaldt ute, ta på deg lua.",
+     "exampleRu": "На улице холодно, надень шапку.",
+     "exampleUk": "Надворі холодно, вдягни шапку."
+    },
+    {
+     "key": "theme:vinter:det-er-bikkjekaldt",
+     "no": "Det er bikkjekaldt!",
+     "ru": "Собачий холод!",
+     "uk": "Собачий холод!",
+     "wordClass": "uttrykk",
+     "example": "Ta på deg ullundertøy, det er bikkjekaldt i dag!",
+     "exampleRu": "Надень шерстяное бельё, сегодня собачий холод!",
+     "exampleUk": "Вдягни вовняну білизну, сьогодні собачий холод!",
+     "description": "💡 Bikkje — разговорное «собака»: совпадение с русским выражением!"
+    },
+    {
+     "key": "theme:vinter:minusgrad",
+     "no": "en minusgrad",
+     "ru": "градус мороза",
+     "uk": "градус морозу",
+     "wordClass": "substantiv",
+     "example": "I natt var det tjue minusgrader.",
+     "exampleRu": "Ночью было двадцать градусов мороза.",
+     "exampleUk": "Уночі було двадцять градусів морозу."
+    },
+    {
+     "key": "theme:vinter:a-fryse",
+     "no": "å fryse",
+     "ru": "мёрзнуть; замерзать",
+     "uk": "мерзнути; замерзати",
+     "wordClass": "verb",
+     "example": "Jeg fryser på hendene.",
+     "exampleRu": "У меня мёрзнут руки.",
+     "exampleUk": "У мене мерзнуть руки.",
+     "description": "💡 Jeg fryser — «мне холодно» (дословно «я мёрзну»)."
+    },
+    {
+     "key": "theme:vinter:lue",
+     "no": "ei lue",
+     "ru": "шапка",
+     "uk": "шапка",
+     "wordClass": "substantiv",
+     "example": "Glem ikke lua og vottene!",
+     "exampleRu": "Не забудь шапку и варежки!",
+     "exampleUk": "Не забудь шапку й рукавиці!"
+    },
+    {
+     "key": "theme:vinter:vott",
+     "no": "en vott",
+     "ru": "варежка",
+     "uk": "рукавиця",
+     "wordClass": "substantiv",
+     "example": "Barna mistet vottene sine i snøen.",
+     "exampleRu": "Дети потеряли варежки в снегу.",
+     "exampleUk": "Діти загубили рукавиці в снігу."
+    },
+    {
+     "key": "theme:vinter:skjerf",
+     "no": "et skjerf",
+     "ru": "шарф",
+     "uk": "шарф",
+     "wordClass": "substantiv",
+     "example": "Hun strikket et skjerf til meg.",
+     "exampleRu": "Она связала мне шарф.",
+     "exampleUk": "Вона зв'язала мені шарф."
+    },
+    {
+     "key": "theme:vinter:glatt",
+     "no": "glatt",
+     "ru": "скользкий",
+     "uk": "слизький",
+     "wordClass": "adjektiv",
+     "example": "Det er glatt på fortauet i dag, gå forsiktig!",
+     "exampleRu": "Сегодня на тротуаре скользко, иди осторожно!",
+     "exampleUk": "Сьогодні на тротуарі слизько, йди обережно!"
+    },
+    {
+     "key": "theme:vinter:brodd",
+     "no": "en brodd",
+     "ru": "шип для обуви",
+     "uk": "шип на взуття",
+     "wordClass": "substantiv",
+     "example": "Med brodder på skoene sklir du ikke.",
+     "exampleRu": "С шипами на обуви не поскользнёшься.",
+     "exampleUk": "Із шипами на взутті не посковзнешся.",
+     "description": "💡 Brodder — съёмные шипы на обувь, зимой их носят очень многие."
+    },
+    {
+     "key": "theme:vinter:a-make-sno",
+     "no": "å måke snø",
+     "ru": "чистить снег",
+     "uk": "прибирати сніг",
+     "wordClass": "frase",
+     "example": "Hver morgen må vi måke snø foran huset.",
+     "exampleRu": "Каждое утро приходится чистить снег перед домом.",
+     "exampleUk": "Щоранку доводиться прибирати сніг перед будинком."
+    },
+    {
+     "key": "theme:vinter:vinterdekk",
+     "no": "et vinterdekk",
+     "ru": "зимняя шина",
+     "uk": "зимова шина",
+     "wordClass": "substantiv",
+     "example": "Vi må bytte til vinterdekk før det blir glatt.",
+     "exampleRu": "Нужно поставить зимнюю резину, пока не начался гололёд.",
+     "exampleUk": "Треба поставити зимові шини, поки не почалася ожеледиця."
+    },
+    {
+     "key": "theme:vinter:snomann",
+     "no": "en snømann",
+     "ru": "снеговик",
+     "uk": "сніговик",
+     "wordClass": "substantiv",
+     "example": "Barna laget en stor snømann i hagen.",
+     "exampleRu": "Дети слепили в саду большого снеговика.",
+     "exampleUk": "Діти зліпили в саду великого сніговика."
+    },
+    {
+     "key": "theme:vinter:a-ake",
+     "no": "å ake",
+     "ru": "кататься на санках",
+     "uk": "кататися на санчатах",
+     "wordClass": "verb",
+     "example": "Barna aker ned bakken etter skolen.",
+     "exampleRu": "После школы дети катаются с горки на санках.",
+     "exampleUk": "Після школи діти катаються з гірки на санчатах."
+    },
+    {
+     "key": "theme:vinter:reinsdyr",
+     "no": "et reinsdyr",
+     "ru": "северный олень",
+     "uk": "північний олень",
+     "wordClass": "substantiv",
+     "example": "Vi så en flokk reinsdyr ved veien.",
+     "exampleRu": "У дороги мы увидели стадо оленей.",
+     "exampleUk": "Біля дороги ми побачили стадо оленів.",
+     "description": "💡 Мн. ч. то же: reinsdyr (как et dyr — dyr)."
+    },
+    {
+     "key": "theme:vinter:isbjorn",
+     "no": "en isbjørn",
+     "ru": "белый медведь",
+     "uk": "білий ведмідь",
+     "wordClass": "substantiv",
+     "example": "Isbjørnen lever på Svalbard.",
+     "exampleRu": "Белый медведь живёт на Шпицбергене.",
+     "exampleUk": "Білий ведмідь живе на Шпіцбергені."
+    },
+    {
+     "key": "theme:vinter:kakao",
+     "no": "en kakao",
+     "ru": "какао",
+     "uk": "какао",
+     "wordClass": "substantiv",
+     "example": "Etter skituren drikker vi varm kakao.",
+     "exampleRu": "После лыжной прогулки мы пьём горячее какао.",
+     "exampleUk": "Після лижної прогулянки ми п'ємо гаряче какао."
+    }
+   ]
+  }
+ ]
+}

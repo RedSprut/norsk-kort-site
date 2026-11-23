@@ -1,0 +1,81 @@
+/* ============ ℹ️ «О приложении» (js/about.js) + its entries: the footer line, the settings panel ============ */
+.ab { display: flex; flex-direction: column; gap: 14px; padding-bottom: 6px; }
+.ab-hero { display: flex; align-items: center; gap: 16px; }
+.ab-logo { flex: none; width: 76px; height: 76px; border-radius: 20px; box-shadow: 0 14px 30px -18px var(--accent); }
+.ab-id { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ab-name { margin: 0; font-size: 24px; line-height: 1.15; letter-spacing: -.01em; }
+.ab-ver { margin: 0; color: var(--muted); font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.ab-desc { margin: 0; font-size: 15px; line-height: 1.45; }
+.ab-author { margin: 0; color: var(--muted); font-size: 14px; }
+
+/* every button here: ≥ 44 px, a visible hover, a calm press */
+.ab .ab-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .15s, border-color .15s, background .15s, box-shadow .15s; }
+.ab .ab-btn.sm { padding: 8px 14px; font-size: 14px; }
+.ab .ab-btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+.ab .ab-btn:focus-visible, .ab summary:focus-visible, .ab-cr-a:focus-visible, .ab-foot-link:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.ab .ab-btn:disabled { opacity: .7; cursor: progress; }
+.ab-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+/* «Проверить обновления» while it asks: its own drawn arrow turns (the `rotate` property); a button without an icon gets a ring */
+.ab-btn.busy .ui-ico { animation: ab-turn 1s linear infinite; }
+@keyframes ab-turn { to { rotate: 1turn; } }
+.ab-btn.busy:not(:has(.ui-ico))::before { content: ''; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: ab-spin .8s linear infinite; }
+@keyframes ab-spin { to { transform: rotate(360deg); } }
+.ab-status { margin: -4px 0 0; min-height: 1.4em; font-size: 14px; color: var(--muted); }
+.ab-status[data-kind="good"] { color: var(--good); }
+.ab-status[data-kind="warn"] { color: var(--warn); }
+.ab-diag summary { list-style: none; cursor: pointer; color: var(--muted); font-size: 13.5px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; margin-left: -8px; border-radius: 10px; transition: background .15s, color .15s; }
+.ab-diag summary::-webkit-details-marker { display: none; }
+.ab-diag summary::before { content: '›'; font-size: 18px; transition: transform .2s; }
+.ab-diag[open] summary::before { transform: rotate(90deg); }
+.ab-diag summary:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.ab-status:empty { display: none; }
+.ab-diag pre { margin: 4px 0 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--text) 6%, transparent); font-size: 12px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; user-select: all; }
+
+.ab-sec { border-top: 1px solid var(--panel-border); padding-top: 12px; }
+.ab-sec h4 { margin: 0 0 8px; font-size: 16px; }
+.ab-sec h4.ui-t { display: flex; }
+.ab-news { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ab-news li { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; line-height: 1.4; }
+.ab-news-b { flex: none; min-width: 40px; padding: 1px 7px; border-radius: 8px; text-align: center; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.ab-news-t { min-width: 0; display: flex; flex-direction: column; }
+.ab-news-t small { color: var(--muted); font-size: 12px; }
+.ab-news-wait { color: var(--muted); }
+
+.ab-lic > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 4px; border-radius: 12px; font-weight: 700; font-size: 16px; transition: background .15s; }
+.ab-lic > summary::-webkit-details-marker { display: none; }
+.ab-lic > summary::after { content: '›'; font-size: 22px; color: var(--muted); transition: transform .2s; }
+.ab-lic[open] > summary::after { transform: rotate(90deg); }
+.ab-lic > summary:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.ab-lic h5 { margin: 12px 0 6px; font-size: 14px; color: var(--muted); text-transform: none; }
+.ab-crs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ab-cr { display: flex; flex-direction: column; gap: 2px; padding: 4px 0; min-width: 0; }
+.ab-cr small { color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.ab-cr-a { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 32px; color: var(--text); text-decoration: none; border-radius: 8px; }
+.ab-cr-a:hover b { color: var(--accent2); text-decoration: underline; }
+.ab-tag { flex: none; padding: 1px 7px; border-radius: 7px; font-size: 11.5px; font-weight: 700; color: var(--muted); background: color-mix(in srgb, var(--text) 8%, transparent); }
+
+/* the footer line under every screen (Views.footHtml) and the settings panel */
+.ab-foot-row { display: flex; justify-content: center; margin-top: 14px; }
+.ab-foot-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 16px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px;
+  color: var(--muted); background: none; border: 1px solid transparent; transition: color .15s, border-color .15s, background .15s; }
+.ab-foot-link b { color: var(--text); font-weight: 600; }
+.ab-foot-link:hover { color: var(--text); border-color: var(--panel-border); background: var(--panel); }
+.st-about { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.st-about img { width: 48px; height: 48px; border-radius: 14px; flex: none; }
+.st-about .st-about-t { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; }
+.st-about .st-about-t h3 { margin: 0; }
+.st-about .st-about-t h3.ui-t { display: flex; }
+.st-about .btn { min-height: 44px; }
+
+@media (max-width: 560px) {
+  .ab-hero { gap: 12px; }
+  .ab-logo { width: 64px; height: 64px; border-radius: 17px; }
+  .ab-name { font-size: 21px; }
+  .ab-actions, .ab-crs { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab .ab-btn, .ab-lic > summary, .ab-lic > summary::after, .ab-diag summary, .ab-diag summary::before, .ab-foot-link { transition: none; }
+  .ab .ab-btn:hover { transform: none; }
+  .ab-btn.busy::before, .ab-btn.busy .ui-ico { animation-duration: 2.4s; }
+}

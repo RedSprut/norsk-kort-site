@@ -76,68 +76,300 @@
     });
   };
 
-  /* «Быстрые действия» — compact tiles in groups that fold; which groups are folded is remembered on this device */
-  const QA_KEY = 'nk-home-qa';
-  const qaClosed = () => { try { return (JSON.parse(localStorage.getItem(QA_KEY) || '{}') || {}).closed || {}; } catch (e) { return {}; } };
-  Views.qaToggle = function (id, btn) {
-    const g = btn && btn.closest('.qa-group'); if (!g) return;
-    const close = !g.classList.contains('collapsed');
-    g.classList.toggle('collapsed', close);
-    btn.setAttribute('aria-expanded', String(!close));
-    const body = g.querySelector('.qa-body'); if (body) body.hidden = close;
-    try { const c = qaClosed(); if (close) c[id] = 1; else delete c[id]; localStorage.setItem(QA_KEY, JSON.stringify({ closed: c })); } catch (e) { /* private mode: just not remembered */ }
-    const side = g.closest('.home-side'); if (side) side.dispatchEvent(new Event('scroll'));
+  /* =====================================================================
+   * 🧭 SECTIONS (v210, design/declutter.html): the big tiles on home, the side menu and the phone menu open the same
+   * windows — Mobile.sheet: a centred window on a computer, a sheet on a phone (Back / Esc / pull down close it).
+   * Nothing was removed: every former «Быстрое действие» has its row in one of these windows.
+   * ===================================================================== */
+  const SVG = (d, cls = 'sx-svg') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
+  const SEC_SVG = {
+    // the round play button in the app's purple→pink (gradient #nkg-play lives in index.html)
+    video: () => SVG('<circle cx="12" cy="12" r="10.5" fill="url(#nkg-play)"/><path d="M10 8.2v7.6l6-3.8z" fill="#fff"/>', 'sx-svg sx-fill'),
+    radio: () => SVG('<rect x="3" y="8.5" width="18" height="12" rx="3"/><path d="M7.5 8.5 17 3.8"/><circle cx="15.8" cy="14.5" r="2.9"/><path d="M6.8 12.8h3.6M6.8 16.2h3.6"/>'),
+    read: () => SVG('<path d="M12 6.6C10 5 7.3 4.4 3.5 4.6v13.6c3.8-.2 6.5.4 8.5 2 2-1.6 4.7-2.2 8.5-2V4.6C16.7 4.4 14 5 12 6.6z"/><path d="M12 6.6v13.6"/>'),
+    drills: () => SVG('<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>'),
+    telegram: s => (window.Telegram && Telegram.TG_SVG ? Telegram.TG_SVG(s || 20) : '✈️'),
   };
-  function quickActionsHtml(all, decks) {
-    // a guided tour points at these buttons: everything open while it runs
-    const closed = window.Help && Help.touring ? {} : qaClosed();
-    const tile = (attr, ico, label, title = '', dis = false) => `<button type="button" class="qa-tile" ${attr}${title ? ` title="${U.esc(title)}"` : ''}${dis ? ' disabled' : ''}><span class="qa-ico" aria-hidden="true">${ico}</span><span class="qa-lbl">${label}</span></button>`;
-    const act = a => `data-act="${a}"`;
-    const chev = '<svg class="qa-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-    const group = (id, title, tiles, lead = '') => {
-      const c = !!closed[id];
-      return `<section class="qa-group ${c ? 'collapsed' : ''}" data-qa-group="${id}">
-        <button type="button" class="qa-head" data-qa-toggle="${id}" aria-expanded="${!c}" aria-controls="qa-${id}" title="Свернуть или развернуть"><span>${title}</span><span class="qa-n">${tiles.length}</span>${chev}</button>
-        ${lead}<div class="qa-body" id="qa-${id}"${c ? ' hidden' : ''}>${tiles.join('')}</div></section>`;
-    };
-    const trash = Store.trashCount();
-    return `<aside class="panel home-side" aria-label="Быстрые действия">
-      <h3>Быстрые действия</h3>
-      ${group('learn', 'Учить', [
-        tile(act('drills'), '🏋️', 'Упражнения', '«Вставь слово» в предложение, формы слов (сильные глаголы, артикли, прилагательные), следующие частые слова A1–B2'),
-        tile('data-klokka-open', '🕐', 'Время по-норвежски', 'Klokka: «halv fire» — это 3:30! Урок с часами и игры на очки'),
-        tile('data-prove-open', '📝', 'Тесты по главам', 'Тесты как на курсе: аудирование, грамматика и письмо — с баллами и процентами'),
-        tile('data-dialogs-open', '🎭', 'Диалоги по ролям', 'Магазин, врач, NAV, работа: слушайте разговор и играйте роль — отвечайте голосом или текстом'),
-        tile('data-gramref-open', '📗', 'Справочник грамматики', 'Вся грамматика A1–B1 по-русски: правило, таблица форм, примеры с озвучкой и типичные ошибки'),
-        ...(window.MyCourse && MyCourse.available() ? [tile('data-mycourse-open', '🗂', 'Колоды моих учебников', 'Карточки по главам ваших учебников (God i norsk, På vei…): формы, точный перевод — только на этом Mac. Читать сами тексты — в «📚 Библиотеке»')] : []),
-        tile('data-ordtr="hub"', '🧩', 'Порядок слов и вопросы', 'Собери предложение, «å или нет?», вопросительные слова и готовые колоды грамматики: модальные глаголы, глаголы с å'),
-        tile('data-speech-open', '🗣', 'Произношение и диктант', 'Проверка произношения (распознавание речи прямо на устройстве), диктант, норвежский голос без интернета'),
-        tile(act('genders'), '<span class="g-icos">🌳👦👧</span>', 'Колоды по родам', 'Колоды по родам: et · en · ei'),
-      ], `<button class="btn primary qa-main" data-act="study-all" ${all.total ? '' : 'disabled'}>🧠 Повторить всё (${all.due + all.new ? all.due : 0} к повторению)</button>`)}
-      ${group('add', 'Добавить слова', [
-        tile(act('create'), '💬', 'Что вы хотите выучить?', 'Тема, фото, PDF / EPUB — соберу карточки'),
-        tile(act('new-deck'), '➕', 'Новая колода'),
-        tile(act('import'), '📥', 'Импорт', 'Импорт карточек — любой файл'),
-        tile(act('photo-cards'), '📷', 'Фото / скан', 'Фото страницы, тетради, карточек со словами: норвежский с переводом или только норвежский — нет перевода, переведу сам (с пометкой, кто переводил)'),
-        tile(act('telegram'), Telegram.TG_SVG(18), 'Telegram → карточки', 'Каналы и группы о норвежском: слова, фразы, картинки-карточки, видео → в карточки (через мост на Mac)'),
-        tile(act('library'), '🃏', 'Колода выражений', 'Колода устойчивых выражений — faste uttrykk: учите готовые выражения, а не отдельные слова'),
-        tile(act('gen-deck'), '✨', 'Колода по теме', `${AI.name()}: создать колоду по теме`),
-      ])}
-      ${group('watch', 'Читать, смотреть и слушать', [
-        tile(act('bookshelf'), '📚', 'Библиотека — читать и слушать', 'Все книги и аудио в одном месте: продолжить с той же страницы, свои книги, учебники, аудиокнига с таймером сна, аудиокурсы, бесплатные книги'),
-        tile(act('nrk'), '📺', 'NRK TV', 'Передачи NRK TV прямо в приложении: норвежские субтитры и перевод, нажал на слово — пауза и «в карточку»'),
-        tile(act('nrkradio'), '📻', 'NRK Радио и подкасты', 'Радио NRK в прямом эфире и подкасты NRK: приложение само создаёт норвежские субтитры, с переводом и карточками'),
-        tile(act('youtube'), YouTube.YT_SVG(18), 'YouTube', 'Видео учителей норвежского прямо в приложении: норвежские субтитры и перевод строкой, нажал на слово — пауза и «в карточку»'),
-        tile(act('news'), '📰', 'Новости', 'Новости простым языком: Klar Tale, NRK и детский подкаст Supernytt — слова подсвечены по вашим карточкам: знаю / учу / новое'),
-        tile(act('subs'), '🎬', 'Субтитры', 'Ваше видео или аудио + файл субтитров (.srt/.vtt): текущая фраза подсвечена, нажал на слово — перевод, на строку — карточка с настоящим звуком фразы'),
-      ])}
-      ${group('more', 'Ещё', [
-        tile(act('export'), '📤', 'Экспорт', 'Сохранить карточки в файл'),
-        tile(act('share'), ShareApp.SHARE_SVG(18), 'Поделиться', 'Поделиться колодами — одной, несколькими или всеми', !decks.length),
-        tile(act('exams'), '🎓', 'Экзамены', 'Norskprøven A1–B2, тест на гражданство, обществознание: официальные пробные задания и что в приложении помогает'),
-      ].concat(trash ? [tile(act('trash'), '🗑', `Корзина (${trash})`, `Вернуть удалённое — хранится ${Store.TRASH_DAYS} дней`)] : []))}
-    </aside>`;
+  Views.SEC_SVG = SEC_SVG;
+  /** 🤖 v212: the app's one brand robot (js/app.js App.robotSvg) wherever an AI / neural network is meant */
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖');
+  Views.BOT = BOT;
+  /** AI.icon (js/ai.js) draws a 🤖 emoji for the subscriptions without a site logo — here it is the brand robot too */
+  const aiIco = (id, size) => { const h = window.AI && AI.icon ? AI.icon(id, size) : ''; return !h || />🤖</.test(h) ? BOT(size) : h; };
+  const CHEV = '<svg class="ico sx-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+  /** every place a row / tile / chip can open (a missing module is skipped quietly) */
+  const GO = {
+    youtube: () => YouTube.open(null), nrk: () => NrkTV.open(), subs: () => Subs.open(), nrkradio: () => NrkRadio.open(),
+    books: () => Books.open(), bookshelf: () => Views.openLibrary(), news: () => News.open(), textbook: () => Textbook.open(),
+    telegram: () => Telegram.open(null, 'channels'),
+    drills: () => Drills.open(), phrases: () => Library.open(), create: () => Create.open(), ordtr: () => OrdTrainer.open('hub'),
+    gramref: () => GramRef.open(''), speech: () => Speech.open(), klokka: () => Klokka.open(), dialogs: () => Dialogs.open(),
+    exams: () => Exams.open(), levels: () => Levels.open(), prove: () => Prove.open(),
+    examprep: a => Views.examPrep().then(X => X.open((a && a.xp) || 'hub')).catch(() => UI.toast('«Подготовка к экзамену» не загрузилась — проверьте интернет', 'warn')),
+    'cont-book': a => Reader.openBook(a.id, { cont: true }), 'cont-ac': a => AudioCourse.play(a.cid),
+    // v212: 🌅 фраза дня, 🎯 тест уровня, 🧪 тренировка Norskprøven, ⭐ очки, 📈 «Мой прогресс»
+    phraseday: () => PhraseDay.open(), leveltest: () => LevelTest.open(), examtr: () => ExamTrainer.open(), xp: () => XP.open(),
+    progress: () => (App.goAsk ? App.goAsk('progress') : App.go('progress')),
+    // 🎓 «Учить по материалам» (js/learnby.js, #/learn)
+    learn: () => (App.goAsk ? App.goAsk('learn') : App.go('learn')),
+  };
+  /** 🎓 js/examprep.js + css/examprep.css, the first time «Подготовка к экзамену» is opened (the same version as this file) */
+  let xpP = null;
+  Views.examPrep = function () {
+    if (window.ExamPrep) return Promise.resolve(window.ExamPrep);
+    if (xpP) return xpP;
+    const q = (((document.querySelector('script[src*="js/views.js"]') || {}).src || '').match(/\?v=[^&#]+/) || [''])[0];
+    if (!document.querySelector('link[href*="css/examprep.css"]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/examprep.css' + q; document.head.appendChild(l); }
+    xpP = new Promise((res, rej) => {
+      const sc = document.createElement('script'); sc.src = 'js/examprep.js' + q; sc.async = true;
+      sc.onload = () => (window.ExamPrep ? res(window.ExamPrep) : rej(new Error('no exam prep')));
+      sc.onerror = () => rej(new Error('no exam prep'));
+      document.head.appendChild(sc);
+    });
+    xpP.catch(() => { xpP = null; });
+    return xpP;
+  };
+  Views.go = function (k, a = {}) {
+    const f = GO[k]; if (!f) return;
+    try { f(a); } catch (e) { console.warn('open', k, e); UI.toast('Этот раздел сейчас не открылся — попробуйте ещё раз', 'warn'); }
+  };
+  const sxRow = (k, ico, title, sub = '', extra = '') => `<button type="button" class="m-row sx-row" data-sx="${k}" ${extra}><span class="m-place-i sx-i" aria-hidden="true">${ico}</span><span class="m-row-t"><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span>${CHEV}</button>`;
+  const sxGroup = (title, rows, cls = '') => `${title ? `<div class="m-sec-t sx-gt">${title}</div>` : ''}<div class="m-list sx-list ${cls}">${rows.join('')}</div>`;
+  /** a window of rows: a tap closes it, then opens the place (a window never opens on top of this one) */
+  function sxSheet(title, body, o = {}) {
+    if (!window.Mobile || !Mobile.sheet) { UI.modal({ title, body, cls: 'sx-modal' }); return null; }
+    return Mobile.sheet(Object.assign({ title, body, cls: 'sx-sheet ' + (o.cls || ''), detent: o.detent || 'medium',
+      onClick(e, sh) {
+        const b = e.target.closest('[data-sx]'); if (!b || b.disabled) return;
+        const k = b.dataset.sx, data = Object.assign({}, b.dataset);
+        sh.close();
+        setTimeout(() => { if (o.run) o.run(k, data, b); else Views.go(k, data); }, 40);
+      } }, o.sheet || {}));
   }
+  Views.sxSheet = sxSheet; Views.sxRow = sxRow; Views.sxGroup = sxGroup;
+
+  /** «▶ Смотреть видео» · «📖 Читать» · «🏋️ Упражнения» windows; «📻 Радио» and «Telegram» open at once */
+  Views.section = function (k) {
+    if (k === 'radio') return Views.go('nrkradio');
+    if (k === 'telegram') return Views.go('telegram');
+    if (k === 'looks') return window.AppThemes || window.ArtCards ? Views.looksSheet(App.view && App.view.name === 'deck' ? App.view.params.id : null) : App.go('settings');
+    if (k === 'decks') {
+      const at = () => { const el = document.getElementById('my-decks'); if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); };
+      if (App.view.name !== 'home') { App.goAsk('home'); setTimeout(at, 420); } else at();
+      return null;
+    }
+    if (k === 'video') return sxSheet(`${SEC_SVG.video()} Смотреть видео`, sxGroup('', [
+      sxRow('youtube', window.YouTube ? YouTube.YT_SVG(22) : '▶️', 'YouTube', 'каналы учителей норвежского, поиск по слову'),
+      sxRow('nrk', '📺', 'NRK TV', 'сериалы, новости, детские передачи — с субтитрами и переводом'),
+      sxRow('subs', '🎬', 'Своё видео с субтитрами', 'файл с компьютера или телефона + субтитры .srt — на двух языках'),
+    ]) + '<p class="m-note">Нажмите на слово в субтитрах — пауза, перевод и «В карточку».</p>', { cls: 'sx-video' });
+    if (k === 'read') {
+      const cont = contItems();
+      return sxSheet(`${SEC_SVG.read()} Читать`, (cont.length ? sxGroup('', cont.map(x => sxRow(x.act, x.ico, U.esc(x.title.replace(/^Продолжить [^:]+: /, 'Продолжить: ')), U.esc(x.sub), x.act === 'cont-book' ? `data-id="${U.esc(x.attr.match(/data-id="([^"]*)"/)[1])}"` : `data-cid="${U.esc(x.attr.match(/data-cid="([^"]*)"/)[1])}"`)), 'sx-cont') : '')
+        + sxGroup(cont.length ? 'Что почитать' : '', [
+          sxRow('books', '📚', 'Книги', 'читать и слушать: выделили слово — карточка'),
+          sxRow('bookshelf', '🗂', 'Библиотека', 'всё, что вы добавили: книги, аудиокниги, аудиокурсы'),
+          sxRow('news', '📰', 'Новости', 'Klar Tale, NRK и Supernytt — простым языком'),
+          sxRow('textbook', '📘', 'Мой учебник', 'страница или новые слова → карточки'),
+        ], 'sx-two'), { cls: 'sx-read' });
+    }
+    if (k === 'drills') return sxSheet(`${SEC_SVG.drills()} Упражнения`,
+      sxGroup('Слова и грамматика', [
+        sxRow('drills', '🏋️', 'Упражнения', 'вставьте слово, формы слов, следующие частые слова'),
+        sxRow('phrases', '🃏', 'Выражения', 'устойчивые фразы и идиомы с переводом'),
+        sxRow('create', '💬', 'Что выучить?', 'напишите тему — получите карточки'),
+        sxRow('ordtr', '🧩', 'Порядок слов и вопросы', 'соберите предложение, «å или нет?»'),
+        sxRow('gramref', '📗', 'Справочник грамматики', 'правило, таблица форм и примеры A1–B1'),
+      ])
+      + sxGroup('Говорить и понимать', [
+        window.PhraseDay ? sxRow('phraseday', '🌅', 'Фраза дня', 'одна живая фраза в день: послушать, разобрать, сказать самому') : '',
+        sxRow('speech', '🗣', 'Произношение и диктант', 'скажите вслух — приложение проверит'),
+        sxRow('klokka', '🕐', 'Время · Klokka', '«halv fire» — это 3:30'),
+        sxRow('dialogs', '🎭', 'Диалоги по ролям', 'магазин, врач, NAV — играйте свою роль'),
+      ])
+      + '<div class="sx-note"><span aria-hidden="true">💡</span><span><b>Почему «Произношение» здесь, а не в «Радио»?</b> Радио — это слушать. Произношение — тренировка, где говорите вы сами.</span></div>'
+      + sxGroup('Проверить себя', [
+        sxRow('examprep', '🎓', 'Подготовка к экзамену', 'конструктор ответа, темы, пробный устный экзамен, маршруты'),
+        window.ExamTrainer ? sxRow('examtr', '🧪', 'Тренировка Norskprøven', 'чтение, аудирование, письмо и устная часть — с таймером и баллами') : '',
+        window.LevelTest ? sxRow('leveltest', '🎯', 'Тест уровня', '10–20 вопросов — и вы знаете свой уровень, от A1 до B2') : '',
+        sxRow('exams', '🏛', 'Экзамены: официально', 'Norskprøven и тест на гражданство — пробные задания на сайтах'),
+        sxRow('levels', '🪜', 'Уровни A1–C2', 'колоды по темам для каждого уровня'),
+        sxRow('prove', '📝', 'Тесты по главам', 'аудирование, грамматика и письмо — с баллами'),
+      ]), { cls: 'sx-drills', detent: 'large' });
+    return null;
+  };
+
+  /** the big tiles under «▶ Учить» */
+  function sectionTilesHtml() {
+    const chip = (attr, label) => `<button type="button" class="mchip" ${attr}>${label}</button>`;
+    return `<section class="mgrid" aria-label="Разделы: видео, радио, чтение, Telegram, упражнения">
+      <div class="mt video">
+        <button type="button" class="mt-main" data-act="sec-video" aria-label="Смотреть видео: YouTube, NRK TV, своё видео с субтитрами" title="YouTube, NRK TV и своё видео с субтитрами"></button>
+        <div class="playbig" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6.5 4.2v15.6L19.5 12z" fill="url(#nkg-play)" stroke="url(#nkg-play)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+        <h3>Смотреть видео</h3>
+        <p>Норвежские передачи и ролики с двойными субтитрами — любое слово сразу в карточку</p>
+        <div class="mchips">${chip('data-act="youtube" title="Видео учителей норвежского с субтитрами и переводом"', `${window.YouTube ? YouTube.YT_SVG(16) : ''} YouTube`)}${chip('data-act="nrk" title="Передачи NRK TV с субтитрами и переводом"', '📺 NRK TV')}${chip('data-act="subs" title="Ваше видео или аудио + файл субтитров"', '🎬 Своё видео')}</div>
+      </div>
+      ${Views.learn ? `<div class="mt learn">
+        <button type="button" class="mt-main" data-act="learn" aria-label="Учить по материалам: видео, радио, книга, песня — по частям" title="Фильм, передача, песня или книга — по частям, с колодой и пятью шагами"></button>
+        <span class="mt-deco" aria-hidden="true">🎓</span>
+        <div class="tops"><span class="mi mi-learn" aria-hidden="true">🎓</span><div><h3>Учить по материалам</h3><p>фильм, передача, песня или книга — по частям: колода с голосом героев и пять шагов до «на слух»</p></div></div>
+        <div class="mchips">${chip('data-act="learn-video" title="NRK TV, YouTube, своё видео, Telegram"', '🎬 По видео')}${chip('data-act="learn-radio" title="NRK Радио, подкасты, аудио из Telegram"', '📻 По радио')}${chip('data-act="learn-book" title="Книги, учебник, новости"', '📖 По книге')}${chip('data-act="learn-song" title="Песня, которую узнал плеер"', '🎵 По песне')}</div>
+      </div>` : ''}
+      <div class="mt radio">
+        <button type="button" class="mt-main" data-act="nrkradio" aria-label="Радио: NRK в прямом эфире и подкасты" title="NRK Радио: прямой эфир и подкасты — субтитры создаст приложение"></button>
+        <span class="mt-deco" aria-hidden="true">${SEC_SVG.radio()}</span>
+        <div class="tops"><span class="mi" aria-hidden="true">${SEC_SVG.radio()}</span><div><h3>Радио</h3><p>NRK в прямом эфире и подкасты — с субтитрами</p></div></div>
+      </div>
+      <div class="mt read">
+        <button type="button" class="mt-main" data-act="sec-read" aria-label="Читать: книги, библиотека, новости" title="Книги, аудиокниги и новости простым языком"></button>
+        <span class="mt-deco" aria-hidden="true">${SEC_SVG.read()}</span>
+        <div class="tops"><span class="mi" aria-hidden="true">${SEC_SVG.read()}</span><div><h3>Читать</h3><p>книги, аудиокниги и новости простым языком</p></div></div>
+        <div class="mchips">${chip('data-act="books"', '📚 Книги')}${chip('data-act="bookshelf"', '🗂 Библиотека')}${chip('data-act="news"', '📰 Новости')}</div>
+      </div>
+      <div class="mt tg">
+        <button type="button" class="mt-main" data-act="telegram" aria-label="Telegram: каналы о норвежском" title="Норвежские каналы в Телеграме — читать прямо здесь"></button>
+        <span class="mt-deco" aria-hidden="true">${SEC_SVG.telegram(120)}</span>
+        <div class="tops"><span class="mi mi-tg" aria-hidden="true">${SEC_SVG.telegram(30)}</span><div><h3>Telegram</h3><p>каналы о норвежском — читать прямо здесь</p></div></div>
+      </div>
+      <div class="mt drill">
+        <button type="button" class="mt-main" data-act="sec-drills" aria-label="Упражнения: грамматика, время, произношение, экзамены" title="Грамматика, время, произношение, экзамены"></button>
+        <span class="mt-deco" aria-hidden="true">${SEC_SVG.drills()}</span>
+        <div class="tops"><span class="mi" aria-hidden="true">${SEC_SVG.drills()}</span><div><h3>Упражнения</h3><p>грамматика, время, произношение, экзамены</p></div></div>
+        <div class="mchips">${chip('data-klokka-open title="Время по-норвежски: урок с часами и игры"', '🕐 Klokka')}${chip('data-speech-open title="Проверка произношения и диктант"', '🗣 Произношение')}${chip('data-act="examprep" title="Подготовка к экзамену Norskprøven: ответы, темы, пробный экзамен"', '🎓 Экзамен')}</div>
+      </div>
+    </section>
+    `;
+  }
+
+  /** v211: the three wide plaques of the footer — the navigator, the look of the app, «Поделиться» (one height, one style).
+   *  Own attributes (data-appnav / data-foot), so a screen's own click handler (the study screen's too) never sees them. */
+  Views.plaquesHtml = function () {
+    const p = (attrs, cls, ico, t, sub) => `<button type="button" class="hp-card ${cls}" ${attrs}><span class="hp-i" aria-hidden="true">${ico}</span><span class="hp-t"><b>${t}</b><small>${sub}</small></span><span class="hp-go" aria-hidden="true">›</span></button>`;
+    return [
+      window.AppNav ? p('data-appnav aria-haspopup="dialog" title="Экскурсия по экрану, помощь по разделам и быстрые пути"', 'hp-nav', '🧭', 'Навигатор по приложению', 'экскурсия по экрану, помощь и быстрые пути') : '',
+      window.AppThemes || window.ArtCards ? p('data-foot="looks" aria-haspopup="dialog" title="Темы приложения и вид карточек"', 'hp-looks', '🎨', 'Оформление', 'викинги, тролли, праздники…') : '',
+      window.ShareApp ? p('data-foot="share" aria-haspopup="dialog" title="Ссылка на приложение — другу, в группу, в соцсети"', 'hp-share', ShareApp.SHARE_SVG(22), 'Поделиться приложением', 'с друзьями учить веселее') : '',
+    ].join('');
+  };
+  /** 🦶 one footer for every screen (home, deck, statistics, settings, account, levels, the study screen): the app shell
+   *  (App.render) puts it under the screen's content; it follows the content (not fixed) and keeps the content's width */
+  Views.footHtml = function () {
+    const cards = Views.plaquesHtml();
+    return cards ? `<footer class="app-foot hp" data-app-foot aria-label="Навигатор, оформление и «Поделиться»">
+        <p class="hp-lead">Нравится Norsk Kort? Расскажите друзьям <span aria-hidden="true">💙</span></p>
+        <div class="hp-grid" style="--hp-n:${(cards.match(/class="hp-card/g) || []).length}">${cards}</div>
+        ${window.About && window.APP ? `<div class="ab-foot-row"><button type="button" class="ab-foot-link" data-about aria-haspopup="dialog" title="Версия, что нового, проверка обновлений, лицензии">${window.NavIcons ? NavIcons.icon('info', 18) : ''}<span>О приложении · <b>${U.esc(APP.name)} ${U.esc(APP.version)}</b> · сборка ${U.esc(APP.build)}</span></button></div>` : ''}
+      </footer>` : '';
+  };
+  let footMo = null, footRo = null, footRoEl = null;
+  Views.mountFoot = function (root, view) {
+    root = root || document.getElementById('view'); if (!root) return;
+    const put = () => {
+      let f = root.querySelector(':scope > [data-app-foot]');
+      if (f && f === root.lastElementChild) return f;
+      if (!f) { const t = document.createElement('div'); t.innerHTML = Views.footHtml(); f = t.firstElementChild; if (!f) return null; }
+      root.appendChild(f); // a screen that redraws itself (statistics, the study screen) — the footer stays last
+      return f;
+    };
+    const f = put();
+    if (!footMo) {
+      footMo = new MutationObserver(() => { if (document.body.dataset.view && !root.querySelector(':scope > [data-app-foot]:last-child')) put(); syncW(); });
+      footMo.observe(root, { childList: true });
+    }
+    // the study screen: the footer is as wide as the study grid (card + side panels), not wider
+    function syncW() {
+      const ft = root.querySelector(':scope > [data-app-foot]'); if (!ft) return;
+      const st = document.body.dataset.view === 'study' ? root.querySelector(':scope > .study') : null;
+      ft.style.maxWidth = st ? Math.round(st.getBoundingClientRect().width) + 'px' : '';
+      if (st === footRoEl) return;
+      footRoEl = st;
+      if (!window.ResizeObserver) return;
+      if (!footRo) footRo = new ResizeObserver(() => syncW());
+      footRo.disconnect(); if (st) footRo.observe(st);
+    }
+    syncW();
+    return f;
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-foot]'); if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    const v = window.App && App.view ? App.view : { name: 'home', params: {} };
+    if (b.dataset.foot === 'looks') Views.looksSheet(v.name === 'deck' ? v.params.id : null);
+    else if (b.dataset.foot === 'share' && window.ShareApp) ShareApp.open();
+  }, true);
+  /** 🎨 «Оформление»: one window, two parts — the look of the cards (js/artcards.js) and the theme of the whole app (AppThemes) */
+  Views.looksSheet = function (deckId) {
+    const d = deckId && Store.deck(deckId);
+    let art = '', theme = '';
+    try { const th = window.ArtCards && ArtCards.THEMES[(Store.Safe && Store.Safe.art ? Store.Safe.art(Store.settings.art) : Store.settings.art || {}).theme || 'fjord']; if (th) art = `${th.icon} ${th.name}`; } catch (e) { /* default */ }
+    try { const c = AppThemes.current(), t = AppThemes.get(c.id); if (t) theme = `${t.emoji} ${t.name}`; } catch (e) { /* no themes */ }
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const appRows = window.AppThemes ? [
+      sxRow('lk-app', '🎨', 'Темы приложения', `${theme ? `сейчас: ${U.esc(theme)} · ` : ''}викинги, тролли, Лофотены, праздники…`),
+      sxRow('lk-mode', dark ? '🌞' : '🌙', dark ? 'Светлая тема' : 'Тёмная тема', 'переключить сразу, без лишних окон'),
+    ] : [];
+    const cardRows = window.ArtCards ? [
+      sxRow('lk-studio', '🃏', 'Шаблоны карточек, шрифты и цвета', `${art ? `сейчас: ${U.esc(art)} · ` : ''}Викинги, Тролли, Ставкирка, праздники…`),
+      ...(d ? [sxRow('lk-gallery', '🖼', ArtCards.deckOn(d) ? 'Колода уже в художественном виде' : 'Художественный вид колоды', 'картинка во всю карточку, крупное слово, цвет рода')] : []),
+    ] : [];
+    return sxSheet('🎨 Оформление', (cardRows.length ? sxGroup('Вид карточек', cardRows) : '') + (appRows.length ? sxGroup('Тема приложения', appRows) : '')
+      + '<p class="m-note">Шаблон карточек меняет и карточки в занятии. Тема приложения — фон, цвета и праздничные украшения везде.</p>', { cls: 'sx-looks', run: k => {
+      if (k === 'lk-app') return AppThemes.open();
+      if (k === 'lk-mode') { if (AppThemes.setMode) AppThemes.setMode(dark ? 'light' : 'dark'); else { Store.setSetting('theme', dark ? 'light' : 'dark'); App.applyTheme(); } if (App.view.name === 'settings') App.render(); return; }
+      if (k === 'lk-gallery' && d) { Store.updateDeck(d.id, { art: 'on' }); if (App.view.name === 'deck' && App.view.params.id === d.id) App.render(); else App.go('deck', { id: d.id }); return; }
+      if (k === 'lk-studio') { const b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.artAct = 'studio'; document.body.appendChild(b); b.click(); b.remove(); }
+    } });
+  };
+
+  /** 🖨 «Печать и файлы» (js/printx.js): a deck, all decks (null) or only the chosen cards */
+  Views.printDeck = function (id, ids) {
+    if (!window.PrintX) { UI.toast('Печать ещё загружается — попробуйте через секунду'); return null; }
+    try { return ids && ids.length ? PrintX.deck(id, { cardIds: ids, filter: 'selected' }) : PrintX.deck(id); }
+    catch (e) { UI.toast(U.niceErr ? U.niceErr(e, 'Печать') : 'Печать: не получилось — попробуйте ещё раз', 'bad'); return null; }
+  };
+
+  /** ⋯ next to «Мои колоды»: everything about all decks at once */
+  Views.decksMore = function () {
+    const n = Store.decks().length, trash = Store.trashCount();
+    return sxSheet('Мои колоды', sxGroup('', [
+      sxRow('d-create', '➕', 'Создать карточки', 'тема, список слов, фото, файл, готовые колоды'),
+      sxRow('d-new', '🗂', 'Новая колода', 'название и обложка'),
+      sxRow('d-import', '📥', 'Импорт из файла', 'Excel, Anki, CSV, PDF… — или перетащите файл в окно'),
+    ]) + sxGroup('Поделиться и сохранить', [
+      sxRow('d-share', ShareApp.SHARE_SVG(18), 'Поделиться колодами', 'одной, несколькими или всеми', n ? '' : 'disabled'),
+      ...(window.PrintX ? [sxRow('d-print', '🖨', 'Печать и файлы', 'все колоды: таблица, карточки для вырезания, Excel, Word', n ? '' : 'disabled')] : []),
+      sxRow('d-export', '📤', 'Экспорт в файл', 'все карточки — для другого приложения или на память'),
+    ]) + sxGroup('', [sxRow('d-looks', '🎨', 'Оформление', 'темы приложения и вид карточек'),
+      sxRow('d-trash', '🗑', trash ? `Корзина (${trash})` : 'Корзина', `удалённое хранится ${Store.TRASH_DAYS} дней — можно вернуть`)]), {
+      run: k => ({ 'd-create': () => Create.open(), 'd-new': () => Views.deckEditor(null, d => App.go('deck', { id: d.id })), 'd-import': () => App.pickFiles(),
+        'd-share': () => Share.open(), 'd-export': () => Views.exportDialog(null), 'd-print': () => Views.printDeck(null), 'd-trash': () => Views.trashDialog(), 'd-looks': () => Views.looksSheet(null) })[k](),
+    });
+  };
+
+  /* 👋 one small hint for people who knew the old screens: everything is still here, just sorted (dismissible, never blocks) */
+  const HINT_KEY = 'nk-declutter-hint';
+  const hintSeen = w => { try { return !!(JSON.parse(localStorage.getItem(HINT_KEY) || '{}') || {})[w]; } catch (e) { return true; } };
+  const hintDone = w => { try { const o = JSON.parse(localStorage.getItem(HINT_KEY) || '{}') || {}; o[w] = Date.now(); localStorage.setItem(HINT_KEY, JSON.stringify(o)); } catch (e) { /* private mode */ } };
+  function hintHtml(where) {
+    if (hintSeen(where) || (window.Help && Help.touring)) return '';
+    const txt = where === 'deck'
+      ? 'Импорт, экспорт, «Поделиться», картинки, «Выбрать» и «Удалить колоду» — в <b>«⋯ Ещё»</b>. Режим, направление и сколько карт — в <b>«✎ Изменить»</b>.'
+      : 'Видео, радио, книги, Telegram и упражнения — в больших плитках ниже. Новая колода, импорт и фото — в <b>«➕ Создать карточки»</b>, экспорт и корзина — в <b>«⋯»</b> у «Мои колоды».';
+    // v211: the title on its own line, the text under it, the buttons in one row — and real spaces between them
+    // (it read «…по разделамИмпорт…» where the styles did not apply)
+    return `<div class="dc-hint" role="note" data-dc-hint="${where}"><span class="dc-hint-i" aria-hidden="true">🧭</span>
+      <div class="dc-hint-t"><p class="dc-hint-h"><b>Всё на месте — просто разложено по разделам</b></p> <p class="dc-hint-p">${txt}</p></div>
+      <div class="dc-hint-btns"><button type="button" class="btn dc-hint-ok" data-dc-hint-ok="${where}">Понятно</button>
+      <button type="button" class="icon-btn dc-hint-x" data-dc-hint-ok="${where}" aria-label="Скрыть подсказку" title="Скрыть подсказку">✕</button></div></div>`;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-dc-hint-ok]'); if (!b) return;
+    e.stopPropagation();
+    hintDone(b.dataset.dcHintOk);
+    const h = b.closest('.dc-hint'); if (!h) return;
+    h.classList.add('gone'); setTimeout(() => h.remove(), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 260);
+  }, true);
 
   /* =====================================================================
    * 📚 LIBRARY: one place for books and audio (js/bookshelf.js); the old windows open from there
@@ -172,6 +404,8 @@
     return out;
   }
   function contStripHtml() {
+    // v211: one «Продолжить» card for everything unfinished (js/continue.js); the old strip stays as a fallback
+    if (window.Continue && Continue.html) { try { return Continue.html(); } catch (e) { console.warn('continue', e); } }
     return contItems().map(x => `<div class="home-cont-item" data-cont-key="${U.esc(x.key)}">
         <button type="button" class="home-cont-go" data-act="${x.act}" ${x.attr} title="${U.esc(x.tip)}">
           <span class="home-cont-ico" aria-hidden="true">${x.ico}</span>
@@ -196,6 +430,12 @@
     const html = contStripHtml();
     box.innerHTML = html; box.hidden = !html;
   };
+  // the deck page's «Голос» buttons follow a pick made in the chooser (it opens over the page, the page isn't redrawn)
+  const deckVoiceSync = () => document.querySelectorAll('.deck-voice [data-dv-l]').forEach(s => { if (window.Voices) s.textContent = Voices.label(s.parentNode.dataset.voicesOpen, '', 'cards'); });
+  document.addEventListener('voices-pick', deckVoiceSync);
+  document.addEventListener('voices-changed', deckVoiceSync);
+  // ⭐ the XP badge on home follows new points (js/xp.js fires 'nk-xp' on window)
+  window.addEventListener('nk-xp', () => { if (window.XP) document.querySelectorAll('#view [data-xp-badge]').forEach(b => { b.innerHTML = XP.badgeHtml(); }); });
   document.addEventListener('reader-shelf', () => { if (window.App && App.view && App.view.name === 'home') setTimeout(() => Views.refreshContinue(), 50); });
   document.addEventListener('listen-state', () => {
     if (!(window.App && App.view && App.view.name === 'home')) return;
@@ -227,6 +467,8 @@
       tests: () => { if (window.Prove && Prove.open) Prove.open(); else UI.toast('Тесты сейчас недоступны — откройте их на главной', 'warn'); },
     };
     acts.prove = acts.tests;
+    acts.exam = () => Views.go('examprep'); // 🎓 also from the calendar events of a route (?open=exam-track)
+    acts['exam-track'] = () => Views.go('examprep', { xp: 'tracks' });
     const f = acts[v];
     if (!f) return;
     setTimeout(() => { try { f(); } catch (e) { console.warn('deep link', e); } }, 350);
@@ -236,61 +478,70 @@
    * HOME
    * ===================================================================== */
   Views.home = function (root) {
-    const decks = Store.decks();
+    const decks = Store.decksByUse ? Store.decksByUse() : Store.decks(); // 🕘 📌 pinned, then the decks in work first (Settings → «Порядок колод»)
     const all = Store.deckStats(null);
     const streak = Store.streakDays();
-    const today = Store.state.log.filter(l => l.ts >= U.startOfDay()).length;
     const contHtml = contStripHtml();
+    // ▶ one big «Учить»: the day's goal (it was «Ещё 20 карточек» + «🧠 Повторить всё» — the same thing twice)
+    const gs = Store.settings, goalOn = gs.goalOn !== false, goal = gs.goal || 20, done = Progress.todayCount(), left = Math.max(0, goal - done);
+    let hTitle, hBtn, hAct = 'study-all', hPct = goalOn ? Math.min(100, Math.round(done / goal * 100)) : all.learnedPct;
+    if (!all.total) { hTitle = 'Начнём с карточек'; hBtn = '➕ Создать карточки'; hAct = 'create'; }
+    else if (goalOn && left) { hTitle = `Сегодня: ${done ? 'ещё ' : ''}${left} ${U.plural(left, ['карточка', 'карточки', 'карточек'])}`; hBtn = `▶ Учить · ${left} ${U.plural(left, ['карточка', 'карточки', 'карточек'])}`; hAct = 'goal-go'; }
+    else if (goalOn) { hTitle = 'Цель на сегодня выполнена 🎉'; hBtn = all.due ? `▶ Повторить ещё · ${all.due}` : '▶ Учить ещё'; }
+    else { hTitle = all.due ? `К повторению: ${all.due}` : 'Учить сегодня'; hBtn = '▶ Учить'; }
+    const know = Progress.knowledgeNow();
+    // v212: «📚 Мои колоды | ⏳ В процессе» — the list under the switch (remembered in Store.settings.homeList)
+    const inProc = window.MyPath && MyPath.mountInline ? MyPath.openCount() : -1;
+    const listMode = inProc >= 0 && gs.homeList === 'progress' ? 'progress' : 'decks';
+    const tabBtn = (k, ico, label, n, tip) => `<button type="button" class="hl-tab" data-act="home-list" data-list="${k}" aria-pressed="${listMode === k}" title="${tip}"><span aria-hidden="true">${ico}</span><span class="hl-l">${label}</span><span class="chip">${n}</span></button>`;
     root.innerHTML = `
       <div class="home-cont" data-home-cont${contHtml ? '' : ' hidden'}>${contHtml}</div>
-      <div class="home-search"><input class="input" data-home-search placeholder="🔍 Поиск по всем карточкам — норвежский, русский, описание…" autocomplete="off"><div class="home-search-res" data-search-res></div></div>
-      <section class="home-widgets">
-        ${Progress.goalTileHtml()}
-        ${Progress.streakTileHtml()}
-        <button class="know-tile" data-act="nav-stats" title="Статистика"><b>🧠 ${Progress.knowledgeNow()}%</b><small>Знание — вероятность вспомнить ваши карточки сегодня</small><span>Статистика ›</span></button>
-      </section>
-      <section class="home-layout">
-        <div class="home-main">
-        <div class="panel home-stats">
-          <h1>Hei! 👋 Lær norsk raskt</h1>
-          <p class="muted" style="margin:0 0 14px">Норвежский ⇄ русский · интервальные повторения FSRS · озвучка · картинки · проверка нейросетями (Claude, ChatGPT, Gemini, DeepSeek…)</p>
-          <div class="stat-grid">
-            <div class="stat"><b>${all.total}</b><span>всего карт</span></div>
-            <div class="stat"><b style="color:var(--warn)">${all.due}</b><span>к повторению</span></div>
-            <div class="stat"><b style="color:var(--debt)">${all.debt}</b><span>долговые</span></div>
-            <div class="stat"><b style="color:var(--done)">${all.learned}</b><span>выучено</span></div>
-          </div>
-          <div style="margin-top:16px" class="col">
-            <div class="row small"><span class="muted">Общий прогресс</span><span class="grow"></span><b>${all.learnedPct}%</b></div>
-            <div class="progress lg"><div class="fill" style="width:${all.learnedPct}%"></div><div class="label">${all.learned} из ${all.total} выучено</div></div>
-            ${UI.stacked(all)}
-            <div class="row small muted">🔥 Серия: <b style="color:var(--text)">${streak} ${U.plural(streak, ['день', 'дня', 'дней'])}</b> · Сегодня ответов: <b style="color:var(--text)">${today}</b></div>
-            ${(() => { const firm = Store.firmCount(); return `<div class="row small muted" title="Честный счёт: слово считается прочно выученным, когда по расчёту FSRS вы будете помнить его больше 3 недель (а не после трёх верных ответов за один день)">📌 Прочно знаю: <b style="color:var(--text)">${firm} ${U.plural(firm, ['слово', 'слова', 'слов'])}</b>&nbsp;— помните больше 3 недель</div>`; })()}
-            ${(() => {
-              // 🛟 too many overdue reviews: new words wait — say it plainly, with the way out
-              if (!Study.backlogPaused(all.due)) return '';
-              return `<div class="mt-warn backlog"><span>🛟</span><span><b>Накопилось ${all.due} ${U.plural(all.due, ['повторение', 'повторения', 'повторений'])}</b> — новые слова на паузе, пока не догоните (иначе завал только растёт). Повторяйте понемногу — каждый день. Пауза снимется сама, когда останется меньше ${Study.backlogLimit()}. <a href="#" data-act="study-all">Догнать сейчас ›</a></span></div>`;
-            })()}
-          </div>
+      <div class="home-top${window.PhraseDay ? ' has-pd' : ''}">
+      <section class="home-hero ${goalOn && !left && all.total ? 'done' : ''}">
+        <div class="hh-txt">
+          <h1>${hTitle}</h1>
+          <div class="hh-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${hPct}" aria-label="${goalOn ? `Цель дня: ${Math.min(done, goal)} из ${goal}` : 'Общий прогресс'}"><i style="width:${hPct}%"></i></div>
+          <div class="hh-meta">${all.total ? `${window.XP ? `<button type="button" class="hh-xp" data-act="xp" data-xp-badge title="Очки и серия дней подряд: за что начислены и сколько за неделю">${XP.badgeHtml()}</button>` : `<span>🔥 серия ${streak} ${U.plural(streak, ['день', 'дня', 'дней'])}</span>`}<span>🧠 знание ${know}%</span><span>выучено ${all.learned} из ${all.total}</span>` : '<span>Напишите тему, вставьте список слов или возьмите готовую колоду</span>'}
+            <button type="button" class="hh-link" data-act="nav-stats" title="Серия по дням, знание, ответы и прогноз повторений"><i class="nav-ico" aria-hidden="true">${window.NavIcons ? NavIcons.html('stats') : '📊'}</i>Статистика ›</button></div>
         </div>
-        <div class="section-title" id="my-decks"><h2>Мои колоды</h2><span class="chip">${decks.length}</span></div>
-        ${decks.length ? `<div class="deck-grid">${decks.map((d, i) => deckCard(d, i)).join('')}</div>` : `
-          <div class="panel empty"><div class="big">🗂️</div><h3>Пока нет колод</h3>
-          <p>Создайте колоду, перетащите сюда файл с карточками или загрузите пример.</p>
-          <div class="row" style="justify-content:center"><button class="btn primary" data-act="new-deck">➕ Новая колода</button>
-          <button class="btn" data-act="import">📥 Импорт</button><button class="btn" data-act="sample">🎁 Пример колоды</button></div></div>`}
-        </div>
-        ${quickActionsHtml(all, decks)}
+        <button type="button" class="btn lg hh-go home-go" data-act="${hAct}"${hAct === 'goal-go' ? ` title="Цель на сегодня — ${goal} ${U.plural(goal, ['карточка', 'карточки', 'карточек'])}: повторения и немного новых"` : ''}>${hBtn}</button>
       </section>
-      <footer class="home-foot"><span>Нравится Norsk Kort? Расскажите друзьям 💙</span>
-        <button class="btn share-foot" data-act="share-app">${ShareApp.SHARE_SVG(18)} Поделиться приложением</button></footer>
-    `;
+      ${window.PhraseDay ? '<div class="home-pd" data-pd-home></div>' : ''}
+      </div>
+      ${Study.backlogPaused(all.due) ? `<div class="mt-warn backlog"><span>🛟</span><span><b>Накопилось ${all.due} ${U.plural(all.due, ['повторение', 'повторения', 'повторений'])}</b> — новые слова на паузе, пока не догоните (иначе завал только растёт). Повторяйте понемногу — каждый день. Пауза снимется сама, когда останется меньше ${Study.backlogLimit()}. <a href="#" data-act="study-all">Догнать сейчас ›</a></span></div>` : ''}
+      ${hintHtml('home')}
+      ${sectionTilesHtml()}
+      <div class="home-xp" data-xp-home-mount><button type="button" class="home-xp-plaque" data-act="examprep" title="Конструктор ответа, темы, аудирование, письмо-жалоба, пробный устный экзамен, учебные маршруты"><span class="home-xp-i" aria-hidden="true">🎓</span><span class="home-xp-t"><b>Подготовка к экзамену</b><small>Norskprøven A1–B2: каркасы ответов, темы, пробный устный экзамен и маршруты на 6–8 недель</small></span><span class="home-xp-go" aria-hidden="true">›</span></button></div>
+      <div class="section-title home-decks-h" id="my-decks">${inProc >= 0
+        ? `<div class="home-list-sw" role="group" aria-label="Что показать: колоды или начатое">${tabBtn('decks', '📚', 'Мои колоды', decks.length, 'Все ваши колоды')}${tabBtn('progress', '⏳', 'В процессе', inProc, 'Всё начатое и незаконченное: видео, книги, курсы, колоды')}</div>`
+        : `<h2>Мои колоды</h2><span class="chip">${decks.length}</span>`}<span class="grow"></span>
+        <div class="home-search"><input class="input" type="search" data-home-search placeholder="🔍 Найти карточку…" aria-label="Поиск по всем карточкам — норвежский, русский, описание" autocomplete="off"></div>
+        <button type="button" class="icon-btn hs-toggle" data-act="search-toggle" aria-label="Найти карточку" title="Найти карточку во всех колодах">🔍</button>
+        <button type="button" class="btn hd-create" data-act="create" title="Тема, список слов, фото, файл, готовые колоды — всё здесь"><span aria-hidden="true">➕</span><span class="hd-l"> Создать карточки</span></button>
+        <button type="button" class="icon-btn hd-looks" data-act="looks" aria-label="Оформление: темы приложения и вид карточек" title="🎨 Оформление: темы приложения и вид карточек">🎨</button>
+        <button type="button" class="icon-btn hd-more" data-act="decks-more" aria-label="Ещё: поделиться колодами, экспорт, корзина" title="Поделиться колодами, экспорт, корзина">⋯</button>
+      </div>
+      <div class="home-search-res" data-search-res></div>
+      ${listMode === 'progress' ? '<div class="home-inproc" data-mp-inline></div>' : decks.length ? `<div class="deck-grid home-decks">${decks.map((d, i) => deckCard(d, i)).join('')}</div>` : `
+        <div class="panel empty"><div class="big">🗂️</div><h3>Пока нет колод</h3>
+        <p>Создайте колоду, перетащите сюда файл с карточками или загрузите пример.</p>
+        <div class="row" style="justify-content:center"><button class="btn primary" data-act="create">➕ Создать карточки</button>
+        <button class="btn" data-act="import">📥 Импорт</button><button class="btn" data-act="sample">🎁 Пример колоды</button></div></div>`}
+    `; // the footer (🧭 navigator · 🎨 оформление · поделиться) is added by the app shell under every screen: Views.mountFoot
+
     deepLink();
+    // 🌅 фраза дня (js/phraseday.js) · ⏳ «В процессе» (js/mypath.js) — drawn into their places after the screen
+    const pdEl = root.querySelector('[data-pd-home]');
+    if (pdEl) PhraseDay.mount(pdEl).catch(e => console.warn('phrase of the day', e));
+    const mpEl = root.querySelector('[data-mp-inline]');
+    if (mpEl) { try { MyPath.mountInline(mpEl); } catch (e) { console.warn('mypath inline', e); } }
+    // 🎓 a route is on: «Сегодня по маршруту» replaces the plaque (js/examprep.js is loaded only then)
+    if (Store.settings.examPrep && Store.settings.examPrep.track) Views.examPrep().then(X => X.homeMount(root.querySelector('[data-xp-home-mount]'))).catch(() => {});
     // ↓ «Ещё N колод ниже»: a small bubble at the bottom centre while some decks are still below the screen.
     // N counts only the decks not seen yet (the first cards already on screen are not counted);
     // tap = scroll to the next unseen deck; the bubble goes away once every deck has been on screen.
     const decksAt = root.querySelector('#my-decks');
-    if (decksAt && 'IntersectionObserver' in window) {
+    if (decksAt && listMode === 'decks' && 'IntersectionObserver' in window) {
       const cards = [...root.querySelectorAll('.deck-grid .deck-card')];
       const targets = cards.length ? cards : [decksAt];
       const seen = new Set();
@@ -326,14 +577,6 @@
         (next === targets[0] || !seen.size ? decksAt : next).scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
     }
-    // the quick actions scroll inside their column on a low screen: a soft fade at the bottom says «there is more»
-    const side = root.querySelector('.home-side');
-    if (side) {
-      const more = () => side.classList.toggle('qa-more', side.scrollHeight - side.scrollTop - side.clientHeight > 6);
-      side.addEventListener('scroll', more, { passive: true });
-      if ('ResizeObserver' in window) new ResizeObserver(more).observe(side);
-      more();
-    }
     // (decks without a picture get a Norwegian photo in App.render — on every screen)
     // 🔍 search across all cards (Norwegian, Russian, English, description, tags)
     const sIn = root.querySelector('[data-home-search]'), sOut = root.querySelector('[data-search-res]');
@@ -351,45 +594,51 @@
       }, 160);
     });
     root.onclick = async e => {
-      const qt = e.target.closest('[data-qa-toggle]');
-      if (qt) { Views.qaToggle(qt.dataset.qaToggle, qt); return; }
       const a = e.target.closest('[data-act]');
       if (!a) { const dc = e.target.closest('.deck-card'); if (dc) App.go('deck', { id: dc.dataset.id }); return; }
       e.stopPropagation();
       const id = a.dataset.id;
       switch (a.dataset.act) {
-        case 'study-all': Study.start({ deckId: null }); break;
+        case 'study-all': e.preventDefault(); Study.start({ deckId: null }); break;
         case 'new-deck': Views.deckEditor(null, d => App.go('deck', { id: d.id })); break;
         case 'deck-edit': Views.deckEditor(id); break;
         case 'import': App.pickFiles(); break;
         case 'export': Views.exportDialog(null); break;
         case 'gen-deck': Views.generateDeckDialog(); break;
         case 'library': Library.open(); break;
-        case 'books': Books.open(); break;
-        case 'textbook': Textbook.open(); break;
-        case 'reader': if (window.Reader) Reader.open(); break;
-        case 'bookshelf': Views.openLibrary(); break;
-        case 'cont-book': if (window.Reader) Reader.openBook(id, { cont: true }); break;
-        case 'cont-ac': if (window.AudioCourse) AudioCourse.play(a.dataset.cid); break;
         case 'cont-hide': contHide(a); break;
         case 'photo-cards': Create.pickPhotos(null); break;
-        case 'telegram': Telegram.open(null, 'vocab'); break;
-        case 'nrk': NrkTV.open(); break;
-        case 'nrkradio': NrkRadio.open(); break;
-        case 'youtube': YouTube.open(null); break;
-        case 'exams': Exams.open(); break;
-        case 'news': News.open(); break;
-        case 'subs': Subs.open(); break;
-        case 'drills': Drills.open(); break;
+        case 'sec-video': Views.section('video'); break;
+        case 'learn': Views.go('learn'); break;
+        case 'learn-video': case 'learn-radio': case 'learn-book': case 'learn-song': if (window.LearnBy) LearnBy.entry(a.dataset.act.slice(6)); break;
+        case 'sec-read': Views.section('read'); break;
+        case 'sec-drills': Views.section('drills'); break;
+        case 'looks': Views.section('looks'); break;
+        case 'showcase': if (window.Showcase) Showcase.open(); break;
+        case 'decks-more': Views.decksMore(); break;
+        case 'search-toggle': {
+          const box = root.querySelector('.home-search'); const on = !box.classList.contains('open');
+          box.classList.toggle('open', on); a.setAttribute('aria-expanded', String(on));
+          if (on) sIn.focus(); else { sIn.value = ''; sOut.innerHTML = ''; }
+          break;
+        }
         case 'listen': if (window.ListenUI) ListenUI.deck(id); else Listen.open(id); break;
         case 'share': Share.open(id || undefined); break;
         case 'share-app': ShareApp.open(); break;
         case 'genders': Genders.open(); break;
         case 'create': Create.open(); break;
         case 'nav-stats': App.go('stats'); break;
+        case 'home-list': {
+          const v = a.dataset.list === 'progress' ? 'progress' : 'decks';
+          if (v === listMode) break;
+          Store.setSetting('homeList', v);
+          App.render();
+          const sw = document.querySelector(`#view .hl-tab[data-list="${v}"]`); if (sw) sw.focus({ preventScroll: true });
+          break;
+        }
         case 'goal-go': {
-          const left = Math.max(5, (Store.settings.goal || 20) - Progress.todayCount());
-          Study.start({ deckId: null, size: left });
+          const n = Math.max(5, (Store.settings.goal || 20) - Progress.todayCount());
+          Study.start({ deckId: null, size: n });
           break;
         }
         case 'search-card': { const c = Store.card(id); if (c) Views.viewCard(c.id, [...sOut.querySelectorAll('[data-act="search-card"]')].map(b => b.dataset.id), { deckId: c.deckId }); break; }
@@ -397,8 +646,9 @@
         case 'sample': App.addSampleDeck(); App.render(); break;
         case 'study': Study.start({ deckId: id }); break;
         case 'open': App.go('deck', { id }); break;
-        case 'deck-menu': deckMenu(a, id); break;
+        case 'deck-menu': Views.deckMore(id); break;
         case 'deck-delete': Views.deleteDeck(id); break;
+        default: if (GO[a.dataset.act]) Views.go(a.dataset.act, Object.assign({}, a.dataset));
       }
     };
   };
@@ -412,13 +662,12 @@
   };
   Views.deckCoverHtml = function (d, st, big) {
     const bg = d.cover ? `style="background-image:url('${U.esc(d.cover)}')"` : '';
+    const sub = big ? [Views.deckShortDesc(d), U.cards(st.total), `выучено ${st.learnedPct}%`].filter(Boolean).join(' · ') : `⚡ ${st.total} · ${st.learnedPct}%`;
     return `<div class="deck-cover ${d.cover ? '' : 'empty'} ${big ? 'big' : ''}" ${bg} data-act="${big ? 'deck-edit' : 'open'}" data-id="${d.id}" title="${big ? 'Изменить название и обложку' : 'Открыть колоду'}">
       ${d.cover ? '' : `<span class="deck-cover-hint">🖼 ${big ? 'Нажмите, чтобы добавить обложку' : ''}</span>`}
-      <div class="deck-cover-title"><b>${U.esc(d.name)}</b><span>⚡ ${st.total} · ${st.learnedPct}%</span></div>
+      <div class="deck-cover-title">${big ? `<h1 data-act="rename" title="Переименовать">${U.esc(d.name)}</h1>` : `<b>${d.pinned ? '<span class="dc-pin" title="Закреплена наверху" aria-label="Закреплена наверху">📌</span> ' : ''}${U.esc(d.name)}</b>`}<span>${U.esc(sub)}</span></div>
       <div class="deck-cover-tools">
-        <button class="icon-btn sm deck-cover-btn" data-act="share" data-id="${d.id}" title="Поделиться колодой — со всеми картинками и пояснениями">${ShareApp.SHARE_SVG(17)}</button>
-        <button class="icon-btn sm deck-cover-btn deck-del-btn" data-act="deck-delete" data-id="${d.id}" title="Удалить колоду (с подтверждением; 30 дней можно вернуть из корзины)">${UI.TRASH_SVG(16)}</button>
-        <button class="icon-btn sm deck-cover-btn" data-act="deck-edit" data-id="${d.id}" title="Изменить название, описание и обложку"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
+        <button class="icon-btn sm deck-cover-btn" data-act="deck-edit" data-id="${d.id}" title="Изменить название, описание и обложку" aria-label="Изменить название, описание и обложку"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
       </div>
     </div>`;
   };
@@ -475,22 +724,24 @@
       if (e.target.closest('[data-rm]')) { cover = ''; credit = ''; removed = true; drawCover(); return; }
       if (e.target.closest('[data-pick]') || e.target.closest('.de-cover.empty')) {
         const name = m.$('[data-name]').value.trim();
-        Photos.pick({ title: '🖼 Обложка колоды', query: name && !/[а-яё]/i.test(name) ? name + ' norge' : 'norge fjord', max: 1100, onPick: (data, cr) => { cover = data; credit = cr; drawCover(); } });
+        coverPick(name && !/[а-яё]/i.test(name) ? name + ' norge' : 'norway fjord', (data, cr) => { cover = data; credit = cr; drawCover(); });
       }
     });
     m.$('[data-cancel]').onclick = () => m.tryClose();
     m.$('[data-save]').onclick = () => {
-      let name = m.$('[data-name]').value.trim();
-      // a source was chosen but no name: a sensible one instead of stopping the user
-      if (!name && !d && source !== 'manual') name = `${Create.SOURCES.find(x => x.k === source).t} · ${new Date().toLocaleDateString('ru-RU')}`;
+      let name = m.$('[data-name]').value.trim(), auto = false;
+      // a source was chosen but no name: «Новая колода» for now — named from its cards when they arrive (Store.autoNameDeck)
+      if (!name && !d && source !== 'manual') { name = Store.AUTO_DECK; auto = true; }
       if (!name) { UI.toast('Введите название колоды', 'warn'); m.$('[data-name]').focus(); return; }
       // no AI connected: say how to connect it — and don't leave an empty deck behind
       if (!d && source === 'ai' && !AI.available()) { Guides.needAI('Колода по теме'); return; }
       // a removed picture stays removed (no automatic Norwegian photo again)
       const patch = { name, description: m.$('[data-desc]').value.trim().slice(0, 500), cover, coverCredit: credit, ...(removed ? { coverTried: true, coverAuto: false } : cover && d && cover !== d.cover ? { coverAuto: false } : {}) };
+      // 🏷 the user named the deck himself: never renamed automatically again
+      if (d && d.autoName && name !== d.name) patch.autoName = false;
       let deck;
       if (d) deck = Store.updateDeck(d.id, patch);
-      else { deck = Store.addDeck(name, patch.description); Store.updateDeck(deck.id, { cover, coverCredit: credit }); }
+      else { deck = Store.addDeck(name, patch.description, auto ? { autoName: true } : null); Store.updateDeck(deck.id, { cover, coverCredit: credit }); }
       m.close();
       if (onDone) onDone(deck); else App.render();
       // right away, still inside the click: Safari opens the photo / file picker only on a direct tap
@@ -499,53 +750,96 @@
     setTimeout(() => { if (!d) m.$('[data-name]').focus(); }, 60);
   };
   function deckCard(d, i) {
-    const st = Store.deckStats(d.id);
+    const st = Store.deckStats(d.id), sd = Views.deckShortDesc(d);
     return `<div class="deck-card has-cover" data-id="${d.id}" style="animation-delay:${Math.min(i, 12) * 40}ms">
       ${Views.deckCoverHtml(d, st)}
-      <div class="row" style="flex-wrap:nowrap">
-        <div class="grow" style="min-width:0">
-        <div class="small muted deck-card-sub">${U.cards(st.total)}${Views.deckShortDesc(d) ? ' · ' + U.esc(Views.deckShortDesc(d)) : ''}</div></div>
-        <div class="ring" style="--p:${st.learnedPct}"><b>${st.learnedPct}%</b></div>
-      </div>
+      <div class="dc-info"><span class="small muted deck-card-sub">${U.cards(st.total)}${st.due ? ` · к повторению ${st.due}` : ''}${sd ? ' · ' + U.esc(sd) : ''}</span><b>${st.learnedPct}%</b></div>
       ${UI.stacked(st)}
-      <div class="row" style="gap:6px">
-        <span class="chip new">${st.new} нов.</span><span class="chip learning">${st.learning} изуч.</span>
-        <span class="chip debt">${st.debt} долг</span><span class="chip learned">${st.learned} выуч.</span>
-        ${st.due ? `<span class="chip due">⏰ ${st.due}</span>` : ''}
-        ${window.ListenX ? ListenX.offlineChip(d.id) : ''}
-        <button class="chip share-chip" data-act="share" data-id="${d.id}" title="Поделиться колодой">${ShareApp.SHARE_SVG(14)} Поделиться</button>
-      </div>
+      ${window.ListenX && ListenX.offlineChip(d.id) ? `<div class="row" style="gap:6px">${ListenX.offlineChip(d.id)}</div>` : ''}
       <div class="actions">
         <button class="btn primary grow" data-act="study" data-id="${d.id}" ${st.total ? '' : 'disabled'}>▶ Учить</button>
-        <button class="btn listen-cta" data-act="listen" data-id="${d.id}" data-listen-btn data-label="Слушать" aria-label="Слушать колоду «${U.esc(d.name)}» — в наушниках или через динамик" title="🎧 Слушать колоду — сразу, в наушниках или через динамик; экран можно выключить" ${st.total ? '' : 'disabled'}></button>
-        <button class="btn" data-act="open" data-id="${d.id}">Открыть</button>
-        <button class="icon-btn" data-act="deck-menu" data-id="${d.id}" title="Ещё" aria-label="Ещё">⋯</button>
+        <button class="btn listen-cta dc-listen" data-act="listen" data-id="${d.id}" data-listen-btn aria-label="Слушать колоду «${U.esc(d.name)}» — в наушниках или через динамик" title="🎧 Слушать колоду — сразу, в наушниках или через динамик; экран можно выключить" ${st.total ? '' : 'disabled'}></button>
+        <button class="icon-btn dc-more" data-act="deck-menu" data-id="${d.id}" title="Ещё: поделиться, экспорт, проверить, удалить…" aria-label="Ещё — колода «${U.esc(d.name)}»">⋯</button>
       </div>
     </div>`;
   }
-  function deckMenu(anchor, id) {
-    const d = Store.deck(id);
-    UI.menu(anchor, [
-      { label: '✏️ Название, описание и обложка', action: () => Views.deckEditor(id) },
-      { label: '🖼 Сменить обложку', action: () => Photos.pick({ title: '🖼 Обложка колоды', query: /[а-яё]/i.test(d.name) ? 'norge fjord' : d.name + ' norge', max: 1100, onPick: (data, cr) => { Store.updateDeck(id, { cover: data, coverCredit: cr }); App.render(); } }) },
-      { html: `${ShareApp.SHARE_SVG(16)} Поделиться колодой (со всем содержимым)`, action: () => Share.open(id) },
-      { label: '📤 Экспорт', action: () => Views.exportDialog(id) },
-      { label: !window.ListenX ? '' : ListenX.cache.status(id).state === 'done' ? '🎧 Озвучка колоды: ✓ доступна офлайн' : '⬇ Скачать озвучку колоды (слушать без интернета)', action: () => ListenX.download(id) },
-      ...(window.ListenX && ListenX.hasPlace && ListenX.hasPlace(id) ? [{ label: '📍 Сбросить место прослушивания', action: () => { ListenX.forgetDeck(id); UI.toast('Место забыто — колода зазвучит с первой карточки', 'good'); } }] : []),
-      { label: `🤖 Проверить всё (${AI.name()})`, action: () => Views.runAiCheck(Store.cards(id)) },
-      { label: '🖼 Картинки для всех', action: () => Views.batchImages(Store.cards(id)) },
-      { label: '🎨 Перерисовать все картинки по смыслу', action: () => Views.redrawImages(Store.cards(id)) },
-      { label: '➕ Добавить объяснения (где их нет)', action: () => Views.addExplanations(Store.cards(id), true) },
-      { label: '📚 Заполнить формы слов (где их нет)', action: () => Views.enrichMany(Store.cards(id), 'forms', true) },
-      { label: '📖 Статьи Ordbøkene с переводом (где их нет)', action: () => Views.ordbokMany(Store.cards(id)) },
-      { label: '🔁 Добавить синонимы (где их нет)', action: () => Views.enrichMany(Store.cards(id), 'synonyms', true) },
-      { label: '💬 Добавить примеры по формам (где их нет)', action: () => Views.enrichMany(Store.cards(id), 'examples', true) },
-      { label: '✨ Добавить новые карточки по теме', action: () => Views.generateDeckDialog(id) },
-      { label: '🃏 Добавить устойчивые выражения (библиотека)', action: () => Library.open(id) },
-      { label: '♻️ Сбросить прогресс', action: async () => { if (await UI.confirm('Сбросить прогресс изучения этой колоды?', { danger: true })) { Store.resetProgress(Store.cards(id).map(c => c.id)); App.render(); } } },
-      { label: '🗑 Удалить колоду', danger: true, action: () => Views.deleteDeck(id) },
-    ].filter(x => x.label || x.html));
-  }
+  /** «⋯ Ещё» of a deck — the same window on the deck page and on its tile at home (it was a menu of 16 lines and a row of 12 buttons) */
+  Views.deckMore = function (id) {
+    const d = Store.deck(id); if (!d) return null;
+    const on = AI.available(), sel = App.view.name === 'deck' && App.view.params.id === id && Views.sel.size ? [...Views.sel] : null;
+    const lx = window.ListenX, off = lx && lx.cache && lx.cache.status(id).state === 'done';
+    const fill = (k, ico, t, sub) => sxRow(k, ico, t, sub);
+    // 📌 first line: keep this deck on top of the deck lists (sidebar, «Мои колоды») — or let it go back into the order
+    const body = sxGroup('', [d.pinned ? sxRow('unpin', '📌', 'Открепить', 'колода снова встанет в общий порядок списка') : sxRow('pin', '📌', 'Закрепить наверху', 'всегда первой — в боковом меню и в «Моих колодах»')], 'sx-pin')
+      + sxGroup('Добавить карточки', [
+      sxRow('import', '📥', 'Импорт из файла', 'Excel, Anki, CSV, PDF… — или перетащите файл в окно'),
+      sxRow('gen', '✨', 'Новые карточки по теме', on ? `сделает нейросеть (${U.esc(AI.name())})` : 'нужна нейросеть — Gemini или Groq бесплатно'),
+      sxRow('library', '🃏', 'Устойчивые выражения', 'идиомы и фразы с переводом'),
+      sxRow('create', '➕', 'Другие способы…', 'фото, список, из видео — окно «Создать карточки»'),
+    ]) + sxGroup('Поделиться и сохранить', [
+      sxRow('share', ShareApp.SHARE_SVG(18), 'Поделиться колодой', 'со всеми картинками и пояснениями'),
+      ...(window.PrintX ? [sxRow('print', '🖨', sel ? `Печать выбранных (${sel.length})` : 'Печать и файлы', 'таблица, карточки для вырезания, Excel, Word')] : []),
+      sxRow('export', '📤', sel ? `Экспорт выбранных (${sel.length})` : 'Экспорт в файл', 'для другого приложения или на память'),
+      ...(lx ? [sxRow('offline', off ? '🎧' : '⬇️', off ? 'Озвучка скачана ✓' : 'Скачать озвучку', off ? 'колоду можно слушать без интернета' : 'слушать без интернета')] : []),
+    ]) + sxGroup('Проверить и дополнить', [
+      sxRow('ai-check', BOT(24), 'Проверить все карточки', `нейросеть сверит переводы, род и написание${on ? ` · ${U.esc(AI.name())}` : ''}`),
+      sxRow('images', '🖼', 'Картинки для всех', 'найдёт картинку там, где её нет'),
+      sxRow('redraw', '🎨', 'Перерисовать картинки по смыслу', 'нейросеть нарисует заново'),
+    ]) + `<details class="sx-more"><summary class="m-row sx-row"><span class="m-place-i sx-i" aria-hidden="true">📚</span><span class="m-row-t"><b>Дополнить карточки…</b><small>объяснения, формы, Ordbøkene, синонимы, примеры — где их нет</small></span>${CHEV}</summary>
+        <div class="m-list sx-list">${[fill('explain', '📝', 'Объяснения', 'коротко, по-русски'), fill('forms', '📚', 'Формы слов', 'род, множественное число, времена'),
+          fill('ordbok', '📖', 'Статьи Ordbøkene', 'с переводом'), fill('synonyms', '🔁', 'Синонимы', ''), fill('examples', '💬', 'Примеры по формам', '')].join('')}</div></details>`
+      + sxGroup('Вид', [
+        ...(window.ArtCards ? [sxRow('art-on', '🖼', 'Художественный вид', 'колода как галерея картинок — обратно одним нажатием'),
+          sxRow('art-looks', '🎨', 'Оформление карточек', 'Викинги, Тролли, Ставкирка, Лофотены, праздники…')] : []),
+      ])
+      + sxGroup('Управление колодой', [
+        sxRow('edit', '✏️', 'Название, описание, обложка', ''),
+        sxRow('cover', '🏔', 'Сменить обложку', 'фото по теме колоды'),
+        sxRow('select', '☑', 'Выбрать карточки', 'переместить, добавить тег, удалить несколько'),
+        ...(lx && lx.hasPlace && lx.hasPlace(id) ? [sxRow('place', '📍', 'Сбросить место прослушивания', 'колода зазвучит с первой карточки')] : []),
+        sxRow('reset', '♻️', 'Начать заново', 'сбросить прогресс изучения этой колоды'),
+        `<button type="button" class="m-row sx-row sx-red" data-sx="delete"><span class="m-place-i sx-i" aria-hidden="true">${UI.TRASH_SVG(18)}</span><span class="m-row-t"><b>Удалить колоду</b><small>30 дней можно вернуть из корзины</small></span>${CHEV}</button>`,
+      ]);
+    const cards = () => (sel ? sel.map(x => Store.card(x)) : Store.cards(id)).filter(Boolean);
+    return sxSheet(U.esc(d.name), body, { cls: 'sx-deck', detent: 'large', run: k => ({
+      import: () => App.pickFiles(id), gen: () => Views.generateDeckDialog(id), library: () => Library.open(id), create: () => Create.open(id),
+      share: () => Share.open(id), export: () => Views.exportDialog(id, sel), print: () => Views.printDeck(id, sel), offline: () => lx.download(id),
+      'ai-check': () => { Store.touchDeck(id); return sel ? Views.runAiCheck(cards()) : window.AIHub ? AIHub.checkDecks([id]) : Views.runAiCheck(cards()); },
+      pin: () => { Store.pinDeck(id, true); UI.toast('📌 Колода закреплена наверху', 'good', 2200); App.render(); },
+      unpin: () => { Store.pinDeck(id, false); UI.toast('Колода откреплена', '', 2200); App.render(); },
+      images: () => Views.batchImages(cards()), redraw: () => Views.redrawImages(cards()),
+      explain: () => Views.addExplanations(cards(), true), forms: () => Views.enrichMany(cards(), 'forms', true), ordbok: () => Views.ordbokMany(cards()),
+      synonyms: () => Views.enrichMany(cards(), 'synonyms', true), examples: () => Views.enrichMany(cards(), 'examples', true),
+      'art-on': () => { Store.updateDeck(id, { art: 'on' }); if (App.view.name === 'deck' && App.view.params.id === id) App.render(); else App.go('deck', { id }); },
+      'art-looks': () => Views.cardLooks(id),
+      edit: () => Views.deckEditor(id),
+      cover: () => coverPick(/[а-яё]/i.test(d.name) ? 'norway fjord' : d.name + ' norge', (data, cr) => { Store.updateDeck(id, { cover: data, coverCredit: cr, coverAuto: false }); App.render(); }),
+      select: () => {
+        if (!(App.view.name === 'deck' && App.view.params.id === id)) App.go('deck', { id });
+        Views.selecting = true; App.render();
+        UI.toast('Нажимайте на карточки, чтобы выбрать. Потом — «Действия» над списком.', '', 4000);
+      },
+      place: () => { lx.forgetDeck(id); UI.toast('Место забыто — колода зазвучит с первой карточки', 'good'); },
+      reset: async () => { if (await UI.confirm('Сбросить прогресс изучения этой колоды? Карточки снова станут новыми.', { danger: true, ok: 'Сбросить' })) { Store.resetProgress(Store.cards(id).map(c => c.id)); App.render(); } },
+      delete: () => Views.deleteDeck(id),
+    })[k]() });
+  };
+  /** 🎨 «Оформление карточек»: the art-card templates (js/artcards.js studio) and the gallery view of this deck */
+  Views.cardLooks = function (id) {
+    if (!window.ArtCards) return null;
+    let cur = '';
+    try { const th = ArtCards.THEMES[(Store.Safe && Store.Safe.art ? Store.Safe.art(Store.settings.art) : Store.settings.art || {}).theme || 'fjord']; if (th) cur = `${th.icon} ${th.name}`; } catch (e) { /* default */ }
+    const d = id && Store.deck(id);
+    return sxSheet('🎨 Оформление карточек', sxGroup('', [
+      sxRow('studio', '🎨', 'Шаблоны, шрифты и цвета', `сейчас: ${U.esc(cur || 'Фьорд')} · Викинги, Тролли, Ставкирка, Лофотены, праздники…`),
+      ...(d ? [sxRow('gallery', '🖼', ArtCards.deckOn(d) ? 'Колода уже в художественном виде' : 'Художественный вид колоды', 'картинка во всю карточку, крупное слово, цвет рода')] : []),
+    ]) + '<p class="m-note">Шаблон меняет и карточки в занятии. В «Галерее картинок» первыми будут фото под выбранный шаблон.</p>', { cls: 'sx-looks', run: k => {
+      if (k === 'gallery' && d) { Store.updateDeck(d.id, { art: 'on' }); if (App.view.name === 'deck' && App.view.params.id === d.id) App.render(); else App.go('deck', { id: d.id }); return; }
+      // the studio of js/artcards.js opens through its own button handler (it picks sample cards of this deck)
+      const b = document.createElement('button'); b.type = 'button'; b.hidden = true; b.dataset.artAct = 'studio';
+      document.body.appendChild(b); b.click(); b.remove();
+    } });
+  };
   /** 🗑 delete a deck — always asks first; the deck stays in the trash for 30 days, «↶ Вернуть» right after */
   Views.deleteDeck = async function (id, after) {
     const d = Store.deck(id); if (!d) return false;
@@ -563,7 +857,8 @@
   Views.deck = function (root, params) {
     const deck = Store.deck(params.id);
     if (!deck) { App.go('home'); return; }
-    const st = Store.settings;
+    // 🎨 «Художественный вид» of this deck (js/artcards.js): the gallery instead of the list — «▦ Обычный вид» there returns here
+    if (window.ArtCards && ArtCards.deckOn(deck)) { ArtCards.gallery(root, deck); return; }
     const stats = Store.deckStats(deck.id);
     const f = Views.deckFilter;
     const q = Views.deckSearch.trim().toLowerCase();
@@ -581,84 +876,67 @@
       return true;
     });
     const shown = cards.slice(0, Views.deckLimit);
-    const studyCount = Study.buildQueue({ deckId: deck.id, filter: st.filter, dir: st.direction, size: st.sessionSize, dryRun: true }).length;
-    const chip = (key, label, n, cls) => `<button class="chip ${cls || ''} ${f === key ? 'active' : ''}" data-act="filter" data-f="${key}">${label} ${n}</button>`;
+    const studyCount = sessionCount(deck.id);
+    // filters with nothing in them stay hidden (the chosen one and «Все» always show)
+    const chip = (key, label, n, cls) => (n || f === key || key === 'all' ? `<button class="chip ${cls || ''} ${f === key ? 'active' : ''}" data-act="filter" data-f="${key}" aria-pressed="${f === key}">${label} ${n}</button>` : '');
+    const running = !!(window.AIHub && AIHub.state && AIHub.state().run);
+    const selN = Views.sel.size;
     root.innerHTML = `
-      ${Views.deckCoverHtml(deck, stats, true)}
       <div class="deck-head">
-        <button class="icon-btn" data-act="back" title="Назад">←</button>
-        <div class="grow col" style="gap:6px;min-width:240px">
-          <h1 data-act="rename" style="cursor:pointer" title="Переименовать">${U.esc(deck.name)}</h1>
-          ${deck.description ? (deck.description.length > 140 || deck.description.includes('\n')
-            ? `<details class="deck-about muted"><summary>${Views.deckShortDesc(deck) ? U.esc(Views.deckShortDesc(deck)) + ' · ' : ''}ℹ️ Об этой колоде и источники</summary><div style="white-space:pre-line;margin-top:6px">${U.esc(deck.description)}</div></details>`
-            : `<div class="muted">${U.esc(deck.description)}</div>`) : ''}
+        <button class="icon-btn" data-act="back" title="Назад" aria-label="Назад">←</button>
+        <div class="grow col dk-about">
           ${UI.stacked(stats)}
+          ${deck.description && (deck.description.length > 140 || deck.description.includes('\n'))
+            ? `<details class="deck-about muted"><summary>ℹ️ Об этой колоде и источники</summary><div style="white-space:pre-line;margin-top:6px">${U.esc(deck.description)}</div></details>`
+            : deck.description && !Views.deckShortDesc(deck) ? `<div class="muted small">${U.esc(deck.description)}</div>` : ''}
         </div>
-        <button class="btn lg listen-cta deck-listen" data-act="listen" data-id="${deck.id}" data-listen-btn data-label="Слушать колоду" aria-label="Слушать колоду — в наушниках или через динамик" title="🎧 Слушать колоду — сразу, в наушниках или через динамик; экран можно выключить" ${stats.total ? '' : 'disabled'}></button>
-        <div class="ring" style="--p:${stats.learnedPct};width:76px;height:76px"><b>${stats.learnedPct}%</b></div>
+        <div class="ring" style="--p:${stats.learnedPct}" title="Выучено ${stats.learnedPct}%"><b>${stats.learnedPct}%</b></div>
       </div>
-
-      <div class="panel launcher" style="margin-top:18px">
-        <div class="opt"><span class="lbl">Режим</span>${UI.seg('mode', MODES, st.mode)}</div>
-        <div class="opt"><span class="lbl">Направление</span>${UI.seg('direction', dirsNow(), st.direction)}</div>
-        <div class="opt"><span class="lbl">Перевод</span>${UI.seg('transLang', TRLANGS, Study.trLang())}</div>
-        <div class="opt"><span class="lbl">Какие карты</span>${UI.seg('filter', FILTERS, st.filter)}</div>
-        <div class="opt"><span class="lbl">Сколько</span>${UI.seg('sessionSize', SIZES, st.sessionSize)}
-          <span style="width:12px"></span>${UI.switchHtml('shuffle', st.shuffle, 'Перемешать')}</div>
-        <div class="row">
-          <button class="btn primary lg" data-act="start" ${studyCount ? '' : 'disabled'}>▶ Начать · ${U.cards(studyCount)}</button>
-          ${!studyCount && stats.total ? '<span class="muted small">По этому фильтру сейчас нет карт — выберите «Все» или другой фильтр.</span>' : ''}
+      ${Views.deckCoverHtml(deck, stats, true)}
+      <div class="launcher dk-launch">
+        <div class="dk-go">
+          <button class="btn primary lg dk-start" data-act="start" ${studyCount ? '' : 'disabled'}>▶ Начать · ${U.cards(studyCount)}</button>
+          ${deckAiBtn(deck, stats, running, selN)}
+        </div>
+        <div class="dk-sumrow">
+          <button type="button" class="dk-sum" data-act="session" aria-haspopup="dialog" title="Настройки занятия: как учить, направление, какие карты, сколько, голоса">${sessionSumHtml()}</button>
+          <button type="button" class="btn dk-edit" data-act="session" aria-haspopup="dialog" title="Изменить настройки занятия">✎ Изменить</button>
+        </div>
+        ${!studyCount && stats.total ? '<p class="muted small dk-none">По этим настройкам сейчас нет карт — нажмите «✎ Изменить» и выберите «Все» или другой набор.</p>' : ''}
+        ${window.AIChooser && AIChooser.stripHtml ? AIChooser.stripHtml() : ''}
+        <div class="toolbar dk-acts">
+          <button class="btn" data-act="add">➕ Карточка</button>
+          <button class="btn listen-cta deck-listen" data-act="listen" data-id="${deck.id}" data-listen-btn data-label="Слушать" aria-label="Слушать колоду — в наушниках или через динамик" title="🎧 Слушать колоду — сразу, в наушниках или через динамик; экран можно выключить" ${stats.total ? '' : 'disabled'}></button>
+          ${window.ArtCards || window.AppThemes ? '<button class="btn dk-looks" data-act="looks" aria-haspopup="dialog" title="Вид карточек (Викинги, Тролли, Ставкирка, праздники) и тема всего приложения">🎨 Оформление</button>' : ''}
+          ${window.PrintX ? `<button class="btn dk-print" data-act="print" aria-haspopup="dialog" title="Распечатать колоду (таблица, карточки для вырезания, «Проверь себя») или сохранить в Excel и Word${selN ? ` — только выбранные: ${selN}` : ''}">🖨 Печать и файлы</button>` : ''}
+          <button class="btn dk-more" data-act="deck-more" aria-haspopup="dialog" title="Импорт, экспорт, поделиться, картинки, выбрать, удалить">⋯ Ещё</button>
         </div>
       </div>
-
-      <div class="toolbar">
-        <button class="btn primary" data-act="add">➕ Карточка</button>
-        <button class="btn" data-act="import">📥 Импорт</button>
-        <button class="btn" data-act="export">📤 Экспорт</button>
-        <button class="btn ai" data-act="ai-check">🤖 Проверить ${Views.sel.size ? 'выбранные (' + Views.sel.size + ')' : 'всё'}</button>
-        <button class="btn" data-act="share" title="Отправить колоду другому человеку — со всеми картинками и пояснениями">${ShareApp.SHARE_SVG(18)} Поделиться</button>
-        <button class="btn listen-btn" data-act="listen" data-listen-btn data-label="Слушать вслух" title="🎧 Слушать колоду вслух — через динамик или в наушниках"></button>
-        <button class="btn" data-act="images">🖼 Картинки</button>
-        ${Library.buttonHtml('btn', 'Выражения')}
-        <button class="btn" data-act="select">${Views.sel.size ? '✖ Снять выбор' : '☑ Выбрать'}</button>
-        ${Views.sel.size ? `<button class="btn" data-act="bulk">Действия (${Views.sel.size}) ▾</button>` : ''}
-        <button class="btn ghost danger-btn" data-act="deck-delete" title="Удалить колоду вместе с карточками — с подтверждением; 30 дней её можно вернуть из корзины">🗑 Удалить колоду</button>
+      ${hintHtml('deck')}
+      <div class="dk-listbar">
+        <input class="input dk-search" type="search" placeholder="🔍 Поиск в колоде…" aria-label="Поиск в колоде" value="${U.esc(Views.deckSearch)}" data-act-input="search">
+        <div class="dk-chips" role="group" aria-label="Какие карточки показать">
+          ${chip('all', 'Все', stats.total)}${chip('new', 'Новые', stats.new, 'new')}${chip('learning', 'Изучаю', stats.learning, 'learning')}
+          ${chip('debt', 'Долговые', stats.debt, 'debt')}${chip('learned', 'Выученные', stats.learned, 'learned')}${chip('due', '⏰ К повторению', stats.due, 'due')}
+          ${chip('leech', '🐛 Трудные', stats.leech)}${chip('noai', `${BOT()} Не проверены`, stats.total - stats.aiChecked, 'ai')}
+        </div>
         <span class="grow"></span>
-        <input class="input" style="max-width:240px" placeholder="🔍 Поиск…" value="${U.esc(Views.deckSearch)}" data-act-input="search">
+        ${Views.selecting || selN ? `<button class="btn sm" data-act="select">✖ Снять выбор</button>` : ''}
+        ${selN && window.PrintX ? `<button class="btn sm dk-print-sel" data-act="print-sel" aria-haspopup="dialog" title="Распечатать или сохранить в файл только выбранные карточки (${selN})">🖨 Печать выбранных</button>` : ''}
+        ${selN ? `<button class="btn sm primary" data-act="bulk" aria-haspopup="menu">Действия (${selN}) ▾</button>` : ''}
+        ${cards.length > 1 ? `<button class="btn sm ${ord ? 'primary' : ''}" data-act="order" aria-haspopup="menu" title="Перемешать список, учить или слушать в этом порядке">⇅ Порядок ▾</button>` : ''}
       </div>
-      <div class="row" style="gap:6px;margin-bottom:12px">
-        ${chip('all', 'Все', stats.total)}${chip('new', 'Новые', stats.new, 'new')}${chip('learning', 'Изучаю', stats.learning, 'learning')}
-        ${chip('debt', 'Долговые', stats.debt, 'debt')}${chip('learned', 'Выученные', stats.learned, 'learned')}${chip('due', '⏰ К повторению', stats.due, 'due')}
-        ${chip('leech', '🐛 Трудные', stats.leech)}${chip('noai', '🤖 Не проверены', stats.total - stats.aiChecked, 'ai')}
-      </div>
-      ${cards.length > 1 ? `<div class="row list-order">
-        <button class="btn sm ${ord ? 'primary' : ''}" data-act="shuffle-list" title="${ord ? 'Перемешать ещё раз' : 'Перемешать карты в списке — и учить в этом порядке'}">🔀 ${ord ? 'Перемешать ещё' : 'Перемешать'}</button>
-        ${ord ? '<button class="btn sm" data-act="order-list" title="Вернуть обычный порядок">↕ По порядку</button>' : ''}
-        <button class="btn sm" data-act="study-list" title="Учить все карты списка — сверху вниз, как они показаны">▶ Учить в этом порядке · ${U.cards(cards.length)}</button>
-        <button class="btn sm listen-cta" data-act="listen-list" title="Слушать карты этого списка по порядку — в наушниках или через динамик">${Listen.HEADPHONES(16, true)} Слушать список</button>
-        <span class="small muted">Нажмите на карту — откроется просмотр; оттуда можно начать учить с неё.</span>
-      </div>` : ''}
-      ${shown.length ? `<div class="card-grid">${shown.map((c, i) => miniCard(c, i)).join('')}</div>` : `<div class="panel empty"><div class="big">🃏</div>
+      ${shown.length ? `<div class="card-grid" title="Нажмите на карту — откроется просмотр; оттуда можно начать учить с неё">${shown.map((c, i) => miniCard(c, i)).join('')}</div>` : `<div class="panel empty"><div class="big">🃏</div>
         <p>${stats.total ? 'Ничего не найдено' : 'В колоде пока нет карточек'}</p>
         <div class="row" style="justify-content:center"><button class="btn primary" data-act="add">➕ Добавить карточку</button><button class="btn" data-act="import">📥 Импорт</button>
-        ${AI.available() ? `<button class="btn ai" data-act="gen">✨ Сгенерировать (${U.esc(AI.name())})</button>` : ''}</div></div>`}
+        ${AI.available() ? `<button class="btn ai" data-act="gen">✨ Сгенерировать (${U.esc(AI.name())})</button>` : ''}<button class="btn" data-act="create-more">➕ Другие способы…</button></div></div>`}
       ${cards.length > shown.length ? `<div class="center" style="margin-top:14px"><button class="btn" data-act="more">Показать ещё (${cards.length - shown.length})</button></div>` : ''}
     `;
 
     const search = root.querySelector('[data-act-input="search"]');
     search.oninput = U.debounce(() => { Views.deckSearch = search.value; Views.deckLimit = 120; App.render(); setTimeout(() => { const s = root.querySelector('[data-act-input="search"]'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }, 0); }, 250);
-    root.onchange = e => {
-      const k = e.target.dataset.key;
-      if (k) { Store.setSetting(k, e.target.checked); App.render(); }
-    };
+    root.onchange = null;
     root.onclick = async e => {
-      const segBtn = e.target.closest('[data-seg] button');
-      if (segBtn) {
-        const key = segBtn.parentElement.dataset.seg;
-        const v = segBtn.dataset.v;
-        Store.setSetting(key, key === 'sessionSize' ? +v : v);
-        App.render(); return;
-      }
       const a = e.target.closest('[data-act]');
       const mc = e.target.closest('.mini-card');
       if (!a && mc) {
@@ -673,25 +951,32 @@
         case 'back': App.go('home'); break;
         case 'rename': case 'deck-edit': Views.deckEditor(deck.id); break;
         case 'start': Study.start({ deckId: deck.id }); break;
+        case 'session': Views.sessionSheet(deck.id); break;
+        case 'deck-more': Views.deckMore(deck.id); break;
+        case 'looks': Views.looksSheet(deck.id); break;
+        case 'print': Views.printDeck(deck.id, Views.sel.size ? [...Views.sel] : null); break;
+        case 'print-sel': Views.printDeck(deck.id, [...Views.sel]); break;
+        case 'ai-run': if (window.AIHub && AIHub.showRun) AIHub.showRun(); break;
         case 'add': Views.editCard(null, deck.id, () => App.render()); break;
         case 'import': App.pickFiles(deck.id); break;
-        case 'export': Views.exportDialog(deck.id, Views.sel.size ? [...Views.sel] : null); break;
-        case 'ai-check': Views.runAiCheck(Views.sel.size ? [...Views.sel].map(id => Store.card(id)).filter(Boolean) : Store.cards(deck.id)); break;
-        case 'library': Library.open(deck.id); break;
+        case 'create-more': Create.open(deck.id); break;
+        case 'ai-check': Store.touchDeck(deck.id); if (Views.sel.size) Views.runAiCheck([...Views.sel].map(id => Store.card(id)).filter(Boolean)); else if (window.AIHub) AIHub.checkDecks([deck.id]); else Views.runAiCheck(Store.cards(deck.id)); break;
         case 'listen': if (window.ListenUI) ListenUI.deck(deck.id); else Listen.open(deck.id); break;
-        case 'listen-list': ListenUI.cards(cards.map(c => c.id), 0, `${deck.name} · список`); break;
-        case 'share': Share.open(deck.id); break;
-        case 'images': Views.batchImages((Views.sel.size ? [...Views.sel].map(id => Store.card(id)) : Store.cards(deck.id)).filter(Boolean)); break;
         case 'gen': Views.generateDeckDialog(deck.id); break;
         case 'filter': Views.deckFilter = a.dataset.f; Views.deckLimit = 120; App.render(); break;
-        case 'shuffle-list': {
-          const pos = {}; U.shuffle(Store.cards(deck.id).map(c => c.id)).forEach((cid, k) => { pos[cid] = k; });
-          Views.deckOrder = { deck: deck.id, pos };
-          App.render(); UI.toast('🔀 Карты перемешаны — «▶ Учить в этом порядке» пойдёт так же', 'good', 2500); break;
+        case 'order': {
+          UI.menu(a, [
+            { label: ord ? '🔀 Перемешать ещё раз' : '🔀 Перемешать список', action: () => {
+              const pos = {}; U.shuffle(Store.cards(deck.id).map(c => c.id)).forEach((cid, k) => { pos[cid] = k; });
+              Views.deckOrder = { deck: deck.id, pos };
+              App.render(); UI.toast('🔀 Карты перемешаны — «▶ Учить в этом порядке» пойдёт так же', 'good', 2500);
+            } },
+            ...(ord ? [{ label: '↕ Вернуть обычный порядок', action: () => { Views.deckOrder = null; App.render(); } }] : []),
+            { label: `▶ Учить в этом порядке · ${U.cards(cards.length)}`, action: () => Study.start({ deckId: deck.id, cardIds: cards.map(c => c.id), filter: 'all', size: 0, shuffle: false }) },
+            { label: '🎧 Слушать список по порядку', action: () => (window.ListenUI ? ListenUI.cards(cards.map(c => c.id), 0, `${deck.name} · список`) : Listen.open(deck.id)) },
+          ]);
+          break;
         }
-        case 'order-list': Views.deckOrder = null; App.render(); break;
-        case 'deck-delete': Views.deleteDeck(deck.id); break;
-        case 'study-list': Study.start({ deckId: deck.id, cardIds: cards.map(c => c.id), filter: 'all', size: 0, shuffle: false }); break;
         case 'more': Views.deckLimit += 300; App.render(); break;
         case 'select':
           if (Views.sel.size || Views.selecting) { Views.sel.clear(); Views.selecting = false; }
@@ -705,12 +990,72 @@
       }
     };
   };
+  /* ⚙ «Настройки занятия»: one summary line on the deck page, every choice in one window (phone and computer alike) */
+  const SUM_F = { smart: 'умное повторение', all: 'все карты', new: 'только новые', debt: 'долговые', learning: 'изучаю', learned: 'выученные', leech: 'трудные' };
+  const sessionCount = deckId => { const st = Store.settings; return Study.buildQueue({ deckId, filter: st.filter, dir: st.direction, size: st.sessionSize, dryRun: true }).length; };
+  function sessionSumHtml() {
+    const st = Store.settings, lab = (list, v) => ((list.find(x => String(x[0]) === String(v)) || [])[1] || '');
+    const parts = [lab(MODES, st.mode), lab(dirsNow(), st.direction), SUM_F[st.filter] || lab(FILTERS, st.filter),
+      +st.sessionSize ? U.cards(+st.sessionSize) : 'все карты', st.shuffle ? 'вперемешку' : 'по порядку'].filter(Boolean);
+    // real spaces around «·» (copy, screen readers and every browser read «Карточки · 🇳🇴 → 🇷🇺 · …», never glued words)
+    return `<span class="dk-sum-t">${parts.map((p, i) => `${i ? '<span class="dk-dot" aria-hidden="true"> · </span>' : ''}<span class="dk-part">${U.esc(p)}</span>`).join('')}</span>`;
+  }
+  /** 🤖 «Проверить нейросетью» right beside «▶ Начать» — the AI is the app's calling card, never hidden in a menu */
+  function deckAiBtn(deck, stats, running, selN) {
+    if (running) {
+      let pct = 0; try { const st = AIHub.state(); pct = st.total ? Math.round(st.done / st.total * 100) : 0; } catch (e) { /* ignore */ }
+      return `<button class="btn lg ai dk-ai" data-act="ai-run" title="Проверка нейросетью идёт — открыть"><span class="dk-ai-i" aria-hidden="true">⏳</span><span class="dk-ai-t"><b>Проверка нейросетью · ${pct}%</b><small>идёт — открыть</small></span></button>`;
+    }
+    const on = AI.available(), left = stats.total - stats.aiChecked;
+    const sub = selN ? `выбранные карточки: ${selN}` : !stats.total ? 'сначала добавьте карточки' : on ? (left ? `${U.esc(AI.name())} · не проверено: ${left}` : `${U.esc(AI.name())} · все проверены ✓ · можно заново`) : 'подключить — Gemini и Groq бесплатно';
+    const tip = selN ? `Нейросеть проверит выбранные карточки (${selN}): перевод, род, написание` : 'Нейросеть сверит переводы, род и написание всех карточек колоды и предложит исправления';
+    return `<button class="btn lg ai dk-ai" data-act="ai-check" ${stats.total ? '' : 'disabled'} title="${tip}"><span class="dk-ai-i nk-bot-i" aria-hidden="true">${BOT(34)}</span><span class="dk-ai-t"><b>Проверить нейросетью${selN ? ` · ${selN}` : ''}</b><small>${sub}</small></span></button>`;
+  }
+  Views.sessionSheet = function (deckId) {
+    const voices = () => (window.Voices && Voices.openChooser ? `<div class="ss-opt"><div class="ss-l">Голоса</div><div class="row deck-voices">${[['no', '🇳🇴', 'Норвежский'], ['uk', '🇺🇦', 'Украинский'], ['ru', '🇷🇺', 'Русский']].map(([l, fl, n]) =>
+      `<button type="button" class="btn sm deck-voice" data-voices-open="${l}" data-voices-place="cards" aria-label="${n} голос для карточек — выбрать" title="${n} голос для карточек — выбрать (или как везде)">${fl} <b class="dv-lang">${n}:</b> <span data-dv-l>${U.esc(Voices.label(l, '', 'cards'))}</span> <span aria-hidden="true">›</span></button>`).join('')}</div></div>` : '');
+    const body = () => {
+      const st = Store.settings, n = sessionCount(deckId);
+      return `<div class="ss-opt"><div class="ss-l">Как учить</div>${UI.seg('mode', MODES, st.mode)}</div>
+        <div class="ss-opt"><div class="ss-l">Что показывать</div>${UI.seg('direction', dirsNow(), st.direction)}</div>
+        <div class="ss-opt"><div class="ss-l">Язык перевода</div>${UI.seg('transLang', TRLANGS, Study.trLang())}</div>
+        <div class="ss-opt"><div class="ss-l">Какие карты</div>${UI.seg('filter', FILTERS, st.filter)}</div>
+        <div class="ss-opt"><div class="ss-l">Сколько</div><div class="row ss-size">${UI.seg('sessionSize', SIZES, st.sessionSize)}${UI.switchHtml('shuffle', st.shuffle, 'Перемешать')}</div></div>
+        ${voices()}
+        <div class="ss-foot"><span class="small muted">Выбор запоминается — потом просто «▶ Начать».</span>
+          <button type="button" class="btn primary lg" data-ss="start" ${n ? '' : 'disabled'}>▶ Начать · ${U.cards(n)}</button></div>
+        ${n ? '' : '<p class="small muted" style="margin:6px 4px 0">По этим настройкам сейчас нет карт — выберите «Все» или другой набор.</p>'}`;
+    };
+    if (!window.Mobile || !Mobile.sheet) return null;
+    let sh = null;
+    const redraw = focus => {
+      sh.body.innerHTML = body();
+      App.render(); // the summary line and «▶ Начать · N» on the page behind follow at once
+      if (focus) { const b = sh.body.querySelector(focus); if (b) b.focus({ preventScroll: true }); }
+    };
+    sh = Mobile.sheet({ title: '⚙ Настройки занятия', body: body(), cls: 'sx-sheet ss-sheet', detent: 'large',
+      onClick(e) {
+        const sb = e.target.closest('[data-seg] button');
+        if (sb) {
+          const key = sb.parentElement.dataset.seg, v = sb.dataset.v;
+          Store.setSetting(key, key === 'sessionSize' ? +v : v);
+          redraw(`[data-seg="${key}"] button[data-v="${CSS.escape(v)}"]`); return;
+        }
+        if (e.target.closest('[data-ss="start"]')) { sh.close(); Study.start({ deckId }); }
+      } });
+    sh.body.addEventListener('change', e => { const k = e.target.dataset && e.target.dataset.key; if (k) { Store.setSetting(k, e.target.checked); redraw(`[data-key="${k}"]`); } });
+    return sh;
+  };
   function toggleSel(id) { if (Views.sel.has(id)) Views.sel.delete(id); else Views.sel.add(id); Views.selecting = true; }
   function bulkMenu(anchor, deck, visible) {
     const ids = [...Views.sel];
     UI.menu(anchor, [
       { label: '☑ Выбрать все видимые', action: () => { visible.forEach(c => Views.sel.add(c.id)); App.render(); } },
       { label: '▶ Учить выбранные', action: () => Study.start({ deckId: deck.id, cardIds: ids, filter: 'all' }) },
+      { html: `${BOT()} Проверить выбранные (${U.esc(AI.name())})`, action: () => Views.runAiCheck(ids.map(id => Store.card(id)).filter(Boolean)) },
+      { label: '🖼 Картинки для выбранных', action: () => Views.batchImages(ids.map(id => Store.card(id)).filter(Boolean)) },
+      { label: '📤 Экспорт выбранных', action: () => Views.exportDialog(deck.id, ids) },
+      ...(window.PrintX ? [{ label: `🖨 Печать выбранных (${ids.length})`, action: () => Views.printDeck(deck.id, ids) }] : []),
       { label: '📦 Переместить в колоду…', action: () => moveDialog(ids) },
       { label: '🏷 Добавить тег…', action: async () => { const t = await UI.prompt('Тег', '', 'например: глаголы'); if (t) { ids.forEach(id => { const c = Store.card(id); if (c && !c.tags.includes(t)) Store.updateCard(id, { tags: c.tags.concat(t) }); }); App.render(); } } },
       { label: '⇄ Поменять стороны NO/RU', action: () => { ids.forEach(id => { const c = Store.card(id); if (c) Store.updateCard(id, { no: c.ru, ru: c.no }); }); App.render(); } },
@@ -724,7 +1069,7 @@
     ]);
   }
   function moveDialog(ids) {
-    const decks = Store.decks();
+    const decks = Store.decksByUse ? Store.decksByUse() : Store.decks();
     const m = UI.modal({
       title: 'Переместить карточки', cls: 'narrow',
       body: `<select class="input">${decks.map(d => `<option value="${d.id}">${U.esc(d.name)}</option>`).join('')}<option value="__new">➕ Новая колода…</option></select>`,
@@ -772,12 +1117,12 @@
       m.$('[data-cv]').innerHTML = `
         <div class="cv-front">
           ${img}
-          <div class="cv-word"><span>${UI.rich(c.no)}</span> ${say(String(c.no).split('\n')[0], 'no')}</div>
+          <div class="cv-word"><span>${UI.rich(c.no)}</span> ${say(String(c.no).split('\n')[0], 'no')}${aim(c, 'no', 'aim-view')}</div>
           <div class="cv-meta">${UI.statusChip(Store.status(c))}${c.wordClass ? `<span class="chip gt-chip">${window.Gram ? Gram.pos(c.wordClass) : U.esc(c.wordClass)}</span>` : ''}${window.Gram && Gram.cardGender(c) ? `<span class="chip gt-chip">${Gram.gender(Gram.cardGender(c))}</span>` : ''}${Prov.badges(c, 16)}</div>
         </div>
         <div class="cv-back ${hide ? 'veiled' : ''}" data-cv="reveal" title="${hide ? 'Нажмите, чтобы увидеть перевод' : ''}">
           ${hide ? '<div class="cv-veil">🙈 Вспомните перевод — и нажмите, чтобы проверить</div>' : ''}
-          ${trBox(c)}
+          ${aim(c, 'tr', 'aim-view aim-float')}${trBox(c)}
           ${Study.viewBarHtml(c)}
           ${c.description ? `<div class="desc cv-desc" data-desc-box>${Study.descHtml(c)}</div>` : ''}
           ${Study.formsHtml(c)}${Study.synonymsHtml(c)}${Study.examplesHtml(c)}
@@ -844,6 +1189,8 @@
     draw();
     return m;
   };
+  /** ✓ «проверено нейросетью» mark of one side (js/aihub.js): 'no' = the Norwegian side, 'tr' = the translation */
+  const aim = (c, side, cls) => (window.AIHub && AIHub.markHtml ? AIHub.markHtml(c, side, { cls: cls || 'aim-list' }) : '');
   function miniCard(c, i) {
     const s = Store.status(c);
     const sel = Views.sel.has(c.id);
@@ -852,8 +1199,8 @@
       ${Views.selecting || Views.sel.size ? `<input type="checkbox" class="sel" data-act="sel" data-id="${c.id}" ${sel ? 'checked' : ''}>` : ''}
       <div class="thumb">${UI.imgThumb(c)}</div>
       <div class="txt">
-        <div class="no" title="${U.esc(c.no)}">${UI.rich(first(c.no))}</div>
-        <div class="ru" title="${U.esc(Study.tr(c))}">${Study.trRuOnly(c) ? '<span class="tr-fb-mini" title="Украинского перевода пока нет — показан русский">🇷🇺</span> ' : ''}${UI.rich(first(Study.tr(c)))}</div>
+        <div class="no${aim(c, 'no') ? ' has-aim' : ''}" title="${U.esc(c.no)}"><span class="mc-t">${UI.rich(first(c.no))}</span>${aim(c, 'no')}</div>
+        <div class="ru${aim(c, 'tr') ? ' has-aim' : ''}" title="${U.esc(Study.tr(c))}"><span class="mc-t">${Study.trRuOnly(c) ? '<span class="tr-fb-mini" title="Украинского перевода пока нет — показан русский">🇷🇺</span> ' : ''}${UI.rich(first(Study.tr(c)))}</span>${aim(c, 'tr')}</div>
         <div class="meta">${UI.statusChip(s)}${Prov.badges(c, 14)}${Store.isLeech(c) ? '<span class="chip debt">🐛</span>' : ''}</div>
       </div>
       <div class="tools">
@@ -863,6 +1210,190 @@
       </div>
     </div>`;
   }
+
+  /* =====================================================================
+   * 🖼 THE PICTURE OF A CARD — every source in one place.
+   * The card editor (its picture buttons) and the study card («🖼 Заменить фото», «📌 Картинка из Pinterest»)
+   * use the same code: Views.picSource(kind, card, hooks) runs one source, Views.pickCardImage(card, onDone) is
+   * the chooser with all of them. A picked picture is a patch with its credit / licence:
+   * { image, imageAuto, imageSrc, imageCredit, imageCreditUrl, imageNone }.
+   * ===================================================================== */
+  const PIC_SOURCES = [
+    // 📌 the gallery = «Pinterest inside the app»: a photo wall with Norwegian themes; real Pinterest (copy → paste) is its second tab
+    { k: 'feed', ic: '📌', l: 'Галерея картинок', t: 'Как в Pinterest — фото по слову и норвежским темам, прямо здесь' },
+    { k: 'search', ic: '📷', l: 'Wikimedia и Википедия', t: 'Свободные фото, свои и вставленные — автор сохранится' },
+    { k: 'photo', ic: '🌍', l: 'Реальное фото', t: 'Подберётся само по смыслу слова' },
+    { k: 'gen', ic: '✨', l: 'Нарисовать', t: 'Новая картинка по смыслу слова' },
+    { k: 'emoji', ic: '😀', l: 'Из эмодзи', t: 'Мгновенно, без интернета' },
+    { k: 'hist', ic: '🏛', l: 'Исторические фото', t: 'Старая Норвегия, с автором', ok: () => !!(window.ArtCards && ArtCards.historicPick) },
+    { k: 'url', ic: '🔗', l: 'По ссылке', t: 'Адрес картинки https://…' },
+    { k: 'file', ic: '📁', l: 'С устройства', t: 'Файл, галерея или камера' },
+  ];
+  const picWord = card => String((card && card.no) || '').split('\n')[0].replace(/^(en|ei|et|å)\s+/i, '').trim().slice(0, 60);
+  /** a calm Russian sentence instead of a technical error */
+  const picErr = e => (U.niceErr ? U.niceErr(e) : (/[а-яё]/i.test((e && e.message) || '') ? e.message : 'Картинка не получилась — попробуйте другой источник'));
+  /** the stored picture fields: a new picture always replaces the old credit (no wrong author under a new photo) */
+  const picPatch = (image, extra) => Object.assign({ image: image || '', imageAuto: false, imageSrc: '', imageCredit: '', imageCreditUrl: '', imageNone: '' }, extra || {});
+  /**
+   * run one picture source for a card. hooks: { onPick(patch), busy(on) — a spinner while drawing / loading,
+   * variant (another picture each time), again (a new AI variant, not the cached one) }.
+   * Sources with their own window (search, Pinterest, history, link) call onPick only when a picture was chosen.
+   */
+  Views.picSource = function (kind, card, h = {}) {
+    const pick = p => { if (p && h.onPick) h.onPick(p); };
+    const run = async fn => {
+      if (h.busy) h.busy(true);
+      try { pick(await fn()); } catch (err) { UI.toast(picErr(err), err && err.noFit ? 'warn' : 'bad', 5000); }
+      finally { if (h.busy) h.busy(false); }
+    };
+    // drawn / found automatically: where it came from and the photo's author go with it (like Images.ensure)
+    const auto = img => {
+      if (Images.lastSource !== 'ai' && Images.limited()) Guides.images();
+      return picPatch(img, { imageAuto: true, imageSrc: Images.lastSource || '', imageCredit: Images.lastCredit || '', imageCreditUrl: Images.lastCreditUrl || '' });
+    };
+    const variant = h.variant || 0;
+    const prov = Store.settings.imageProvider === 'off' ? 'pollinations' : Store.settings.imageProvider;
+    switch (kind) {
+      // 🔎 «Лента фото» (js/gallery.js): Openverse + Wikimedia (+ own Unsplash / Pexels keys); 📌 Pinterest is its second tab
+      case 'feed': return Views.gallery({
+        title: '📌 Галерея картинок', word: picWord(card), en: card.en || '', max: 900,
+        hint: String((window.Study && Study.tr ? Study.tr(card) : card.ru) || '').split('\n')[0].slice(0, 60),
+        onPick: r => pick(picPatch(r.image, { imageSrc: r.src || 'photo', imageCredit: r.credit || '', imageCreditUrl: /^https:\/\//i.test(r.page || '') ? r.page : '' })),
+        onPinterest: window.ArtCards && ArtCards.pinterestPick ? () => Views.picSource('pin', card, h) : null,
+      });
+      case 'gen': return run(async () => auto(await Images.generate(card, h.again
+        ? { provider: prov === 'emoji' || prov === 'wikimedia' ? 'pollinations' : prov, seed: Math.floor(Math.random() * 1e6), variant, newScene: variant > 3 }
+        : { provider: prov })));
+      case 'photo': return run(async () => auto(await Images.generate(card, { provider: 'wikimedia', variant })));
+      case 'emoji': return run(async () => auto(await Images.generate(card, { provider: 'emoji', variant })));
+      case 'search': return Photos.pick({
+        title: '🔎 Фото для карточки', query: card.en || picWord(card) || 'norge', max: 900,
+        onPick: (data, credit, page) => {
+          const mine = /^(моё фото|вставлено)$/.test(credit || '');
+          pick(picPatch(data, mine ? {} : { imageSrc: 'photo', imageCredit: credit || '', imageCreditUrl: /^https:\/\//i.test(page || '') ? page : '' }));
+        },
+      });
+      case 'pin': return ArtCards.pinterestPick({ word: card.no, onPick: src => {
+        const s = Store.Safe.image(src);
+        if (s) pick(picPatch(s, { imageSrc: 'pinterest' }));
+        else UI.toast('Эта картинка не подходит — выберите JPG, PNG или WebP', 'warn');
+      } });
+      // 🏛 a free licence: the author, the licence and the source page stay with the picture
+      case 'hist': return ArtCards.historicPick({ word: card.no, onPick: r => pick(picPatch(r.image, { imageSrc: r.src, imageCredit: r.credit, imageCreditUrl: r.page })) });
+      case 'url': return (async () => {
+        const u = String((await UI.prompt('Ссылка на картинку', '', 'https://…')) || '').trim();
+        if (!u) return;
+        const s = Store.Safe.image(u);
+        if (!s) { UI.toast('Нужна ссылка на саму картинку: https://… (JPG, PNG, WebP или GIF)', 'warn', 5000); return; }
+        run(async () => {
+          try { await Images.preload(s, 20000); } catch (e) { throw new Error('По этой ссылке картинка не открылась — скопируйте саму картинку и вставьте её через «🔎 Найти фото»'); }
+          let data = ''; try { data = await U.compressImage(s, 900, 0.86); } catch (e) { data = ''; } // a copy inside the app when the site allows it
+          return picPatch(Store.Safe.image(data) || s, { imageCreditUrl: s });
+        });
+      })();
+      case 'file': {
+        const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+        inp.onchange = () => {
+          const f = inp.files && inp.files[0]; if (!f) return;
+          if (!/^image\//.test(f.type) || /svg/i.test(f.type)) { UI.toast('Подойдут JPG, PNG, WebP или GIF', 'warn'); return; }
+          run(async () => { try { return picPatch(await U.compressImage(f, 900, 0.86)); } catch (e) { throw new Error('Эту картинку не получилось открыть — попробуйте другую'); } });
+        };
+        inp.click(); return;
+      }
+      // ✕ no picture — and none is drawn again by itself (remembered like «nothing fits»)
+      case 'none': return pick(picPatch('', { imageNone: Images.noneKey ? Images.noneKey(card) : '' }));
+    }
+  };
+  /* 🔎 «Лента фото» — js/gallery.js + css/gallery.css, loaded on first use (like «🔊 Голоса») */
+  let galUi = null;
+  Views.loadGallery = function () {
+    if (galUi) return galUi;
+    const v = (document.querySelector('script[src*="js/views.js"]') || {}).src || '';
+    const q = (v.match(/\?v=[^&]+/) || [''])[0];
+    if (!document.querySelector('link[data-gallery]')) {
+      const l = document.createElement('link');
+      l.rel = 'stylesheet'; l.href = 'css/gallery.css' + q; l.setAttribute('data-gallery', '');
+      document.head.appendChild(l);
+    }
+    galUi = window.Gallery ? Promise.resolve(window.Gallery) : new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'js/gallery.js' + q; s.async = true;
+      s.onload = () => (window.Gallery ? res(window.Gallery) : rej(new Error('no gallery')));
+      s.onerror = () => rej(new Error('no gallery'));
+      document.head.appendChild(s);
+    });
+    galUi.catch(() => { galUi = null; });
+    return galUi;
+  };
+  /** open the feed: { word, hint, en, query, title, applyLabel, max, onPick({ image, src, credit, page }), onPinterest, onOther } */
+  Views.gallery = async function (o) {
+    o = Object.assign({}, o || {});
+    // 🎨 the chosen card template (Викинги, Тролли, Лофотены…) suggests its own photos first (js/gallery.js)
+    if (o.artTheme === undefined) { try { o.artTheme = ((Store.Safe && Store.Safe.art ? Store.Safe.art(Store.settings.art) : Store.settings.art) || {}).theme || ''; } catch (e) { o.artTheme = ''; } }
+    try { const G = await Views.loadGallery(); return G.open(o); }
+    catch (e) { UI.toast('Ленту фото не получилось открыть — проверьте интернет и попробуйте ещё раз', 'warn'); return null; }
+  };
+  /** a deck's cover from the feed (📁 the device, ⌘V and Wikimedia stay one tab away) */
+  const coverPick = (query, onPick) => Views.gallery({
+    title: '🖼 Обложка колоды', query, max: 1100, applyLabel: '✓ Сделать обложкой',
+    onPick: r => onPick(r.image, r.credit || ''),
+    onOther: () => Photos.pick({ title: '🖼 Обложка колоды', query, max: 1100, onPick: (data, cr) => onPick(data, cr) }),
+    otherLabel: '📁 С устройства и Wikimedia',
+  });
+
+  /** store a picked picture on a card + one «↶ Вернуть» toast (the previous one goes: no pile of toasts). onUndo(before) */
+  let picToast = null;
+  Views.picApply = function (id, patch, msg, onUndo) {
+    const f = Store.card(id); if (!f) return;
+    const before = picPatch(f.image, { imageAuto: !!f.imageAuto, imageSrc: f.imageSrc || '', imageCredit: f.imageCredit || '', imageCreditUrl: f.imageCreditUrl || '', imageNone: f.imageNone || '' });
+    Store.updateCard(id, patch);
+    if (picToast) picToast.close();
+    const t = picToast = UI.toastAction(msg, '↶ Вернуть', () => {
+      if (picToast === t) picToast = null;
+      if (!Store.card(id)) return;
+      Store.updateCard(id, before);
+      if (onUndo) onUndo(before);
+    }, 8000, '🖼');
+  };
+  /**
+   * 🖼 the chooser: every picture source for this card, the current picture on top.
+   * onDone(patch) gets the chosen picture; opts.save !== false → it is stored on the card right away (with ↶ undo).
+   */
+  Views.pickCardImage = function (card, onDone, opts = {}) {
+    const cur = (card && card.id && Store.card(card.id)) || card;
+    if (!cur) return null;
+    const has = !!(cur.image && !(Images.isRemoteAI && Images.isRemoteAI(cur.image)));
+    const credit = has && cur.imageCredit ? (/^https:\/\//i.test(cur.imageCreditUrl || '') ? `<a href="${U.esc(cur.imageCreditUrl)}" target="_blank" rel="noopener">${U.esc(cur.imageCredit)}</a>` : U.esc(cur.imageCredit)) : '';
+    Views.loadGallery().catch(() => {}); // «🔎 Лента фото» opens at once (its styles also mark its tile)
+    const tile = s => `<button type="button" class="pic-src ${s.k === 'feed' ? 'pic-src-feed' : ''}" data-pic="${s.k}"><span class="pic-src-i" aria-hidden="true">${s.ic}</span><span class="pic-src-t"><b>${s.l}</b><small>${s.t}</small></span></button>`;
+    let variant = 0, busyOn = false;
+    const m = UI.modal({
+      title: has ? '🖼 Заменить фото' : '🖼 Добавить фото', cls: 'pic-modal',
+      body: `<div class="pic-cur">${has ? `<img src="${U.esc(cur.image)}" alt="Сейчас на карточке">` : '<span class="pic-cur-none" aria-hidden="true">🖼</span>'}
+          <div class="pic-cur-t"><b lang="no">${U.esc(String(cur.no || '').split('\n')[0].slice(0, 80))}</b><span class="small muted">${has ? (credit || 'Сейчас на карточке') : 'У карточки пока нет картинки'}</span></div></div>
+        <div class="pic-grid" role="group" aria-label="Откуда взять картинку">${PIC_SOURCES.filter(s => !s.ok || s.ok()).map(tile).join('')}</div>
+        ${has ? '<div class="pic-foot-row"><button type="button" class="btn ghost sm" data-pic="none">✕ Без фото</button></div>' : ''}`,
+    });
+    const busy = on => {
+      busyOn = on;
+      m.el.classList.toggle('pic-busy', on);
+      m.$$('[data-pic]').forEach(b => { b.disabled = on; });
+      const box = m.$('.pic-cur');
+      if (on) box.insertAdjacentHTML('beforeend', '<span class="spinner pic-spin" role="status" aria-label="Подбираю картинку…"></span>');
+      else { const s = box.querySelector('.pic-spin'); if (s) s.remove(); }
+    };
+    const apply = patch => {
+      m.close(); // (a picture chosen after the chooser was closed is still wanted — it is applied all the same)
+      if (opts.save !== false && cur.id && Store.card(cur.id)) Views.picApply(cur.id, patch, patch.image ? (has ? 'Фото заменено' : 'Фото добавлено') : 'Фото убрано с карточки', p => onDone && onDone(p, true));
+      if (onDone) onDone(patch);
+    };
+    m.el.addEventListener('click', e => {
+      const b = e.target.closest('[data-pic]'); if (!b || busyOn) return;
+      const k = b.dataset.pic;
+      Views.picSource(k, Store.card(cur.id) || cur, { onPick: apply, busy, variant: k === 'gen' || k === 'photo' || k === 'emoji' ? variant++ : 0, again: has || variant > 1 });
+    });
+    return m;
+  };
 
   /* =====================================================================
    * CARD EDITOR
@@ -876,7 +1407,10 @@
     if (!existing && opts.mtWarn) c.mtWarn = opts.mtWarn;
     const srcBy = !existing && opts.fieldBy ? (opts.srcBy || opts.fieldBy.no) : null;
     let variants = c.image ? [c.image] : [];
-    const ta = (k, label, rows, ph = '') => `<label class="field"><span>${label}</span><textarea class="input" data-f="${k}" rows="${rows}" placeholder="${ph}">${U.esc(c[k])}</textarea></label>`;
+    // 🔊 the voice of this side (the cards' own voice, or «как везде») — right at the field; after the textarea so the label still names it
+    const voiceBtn = k => window.Voices && Voices.openChooser && ['no', 'ru', 'uk'].includes(k)
+      ? `<button type="button" class="ed-voice" data-voices-open="${k}" data-voices-place="cards" title="Голос для карточек: ${k === 'no' ? 'норвежский' : k === 'uk' ? 'украинский' : 'русский'} — выбрать">🔊 Голос</button>` : '';
+    const ta = (k, label, rows, ph = '') => `<label class="field ed-field"><span>${label}</span><textarea class="input" data-f="${k}" rows="${rows}" placeholder="${ph}">${U.esc(c[k])}</textarea>${voiceBtn(k)}</label>`;
     const rowsFor = s => Math.min(10, Math.max(1, String(s || '').split('\n').length + (String(s || '').length > 60 ? 1 : 0)));
     // unsaved changes are never lost silently: ✕ / Esc / tap outside / «Отмена» ask first
     let saving = false, initial = null;
@@ -895,15 +1429,15 @@
             ${ta('uk', '🇺🇦 Українською <small class="muted">· перевод на украинский, необязательно</small>', rowsFor(c.uk), 'например: машина')}
           </div>
         </div>
-        <div class="ed-ai-row"><span class="small muted">🤖 Нейросети:</span>${Translators.aiRailHtml('horizontal', existing)}</div>
-        <div class="small muted tr-hint">🌐 Переводчики (между полями) и 🤖 нейросети: заполнена одна сторона — переведут во вторую; заполнены обе — сверят перевод. ⚖️ — сравнить все сразу.</div>
+        <div class="ed-ai-row"><span class="small muted">${BOT()} Нейросети:</span>${Translators.aiRailHtml('horizontal', existing)}</div>
+        <div class="small muted tr-hint">🌐 Переводчики (между полями) и ${BOT()} нейросети: заполнена одна сторона — переведут во вторую; заполнены обе — сверят перевод. ⚖️ — сравнить все сразу.</div>
         <div data-tr-out></div>
         <div class="row" style="gap:8px">
           <button class="btn sm" data-act="speak-no">🔊 NO</button><button class="btn sm" data-act="speak-ru">🔊 RU</button>
           <button class="btn sm" data-act="swap">⇄ Поменять стороны</button>
           <span class="grow"></span>
-          <button class="btn sm ai" data-act="ai-fill">${AI.icon(AI.current(), 14) || '🤖'} ${U.esc(AI.name())}: заполнить</button>
-          <button class="btn sm ai" data-act="ai-check">${AI.icon(AI.current(), 14) || '🤖'} ${U.esc(AI.name())}: проверить</button>
+          <button class="btn sm ai" data-act="ai-fill">${aiIco(AI.current(), 14)} ${U.esc(AI.name())}: заполнить</button>
+          <button class="btn sm ai" data-act="ai-check">${aiIco(AI.current(), 14)} ${U.esc(AI.name())}: проверить</button>
           <button class="btn sm ai" data-act="ai-explain" title="Нейросеть допишет объяснение: формы, примеры, выражения — перевод в скобках">➕ Объяснение</button>
         </div>
         ${ta('description', '📝 Описание / грамматика / заметки', Math.max(3, rowsFor(c.description)), 'формы слова, нюансы, ваши заметки')}
@@ -938,8 +1472,12 @@
               <button class="btn sm primary" data-act="img-gen">✨ Сгенерировать</button>
               <button class="btn sm" data-act="img-again">🔄 Другой вариант</button>
               <button class="btn sm" data-act="img-photo">🌍 Реальное фото</button>
+              <button class="btn sm" data-act="img-feed" title="Галерея картинок, как в Pinterest: фото по слову и норвежским темам — свободные лицензии, с автором">📌 Галерея</button>
+              <button class="btn sm" data-act="img-search" title="Поиск фото: Wikimedia Commons и Википедия — свободные лицензии, с автором">📷 Wikimedia</button>
+              <button class="btn sm" data-act="img-emoji" title="Картинка из эмодзи — мгновенно, без интернета">😀 Эмодзи</button>
               <button class="btn sm" data-act="img-upload">📁 Загрузить</button>
               <button class="btn sm" data-act="img-url">🔗 URL</button>
+              ${window.ArtCards && ArtCards.historicPick ? '<button class="btn sm" data-act="img-hist" title="Исторические фото Норвегии — только свободные лицензии, с автором">🏛 История</button>' : ''}
               <button class="btn sm" data-act="img-del">✕ Убрать</button>
             </div>
             <div class="img-variants"></div>
@@ -1014,7 +1552,7 @@
       pendingHist.push(Prov.entry(trBy(id), 'verify', null, `${from === 'no' ? 'NO→RU' : 'RU→NO'}: «${res}» — ${agree ? 'совпадает с карточкой' : 'отличается от карточки'}`));
       lightRail(id);
       m.$('[data-tr-out]').innerHTML = `<div class="tr-out ${agree ? 'ok' : 'diff'}">
-        ${id === 'ai' && curProv ? AI.icon(curProv, 20) : Translators.icon(id, 20)} <b>${U.esc(label)}:</b> <span>${UI.rich(res)}</span>
+        ${id === 'ai' && curProv ? aiIco(curProv, 20) : Translators.icon(id, 20)} <b>${U.esc(label)}:</b> <span>${UI.rich(res)}</span>
         <span class="chip ${agree ? 'learned' : 'due'}">${agree ? '✓ совпадает с карточкой' : '≠ отличается'}</span>
         <span class="grow"></span>
         ${agree ? '' : `<button class="btn sm" data-tr-apply="replace">Заменить</button><button class="btn sm" data-tr-apply="add">Добавить вариант</button>`}
@@ -1142,21 +1680,36 @@
       variants = variants.slice(0, 8);
       m.$('.img-variants').innerHTML = variants.length > 1 ? variants.map(v => `<img src="${U.esc(v)}" data-v="${U.esc(v)}" title="Выбрать">`).join('') : '';
     };
-    const busyImg = async (fn, auto) => {
-      const box = m.$('#ed-img');
-      box.insertAdjacentHTML('beforeend', '<span class="spinner"></span>');
-      try {
-        setImg(await fn());
-        c.imageAuto = !!auto;
-        if (auto) Object.assign(c, { imageSrc: Images.lastSource || '', imageCredit: Images.lastCredit || '', imageCreditUrl: Images.lastCreditUrl || '', imageNone: '' });
-        else Object.assign(c, { imageSrc: '', imageCredit: '', imageCreditUrl: '' });
-        if (auto && Images.lastSource !== 'ai' && Images.limited()) {
-          Guides.images();
-        }
-      }
-      catch (err) { UI.toast(err.message, 'bad'); box.querySelector('.spinner') && box.querySelector('.spinner').remove(); }
-    };
+    /* the picture buttons: one shared source each (js/views.js Views.picSource — the study card uses the same);
+       the patch keeps where the picture came from and its author / licence */
+    const imgFrom = (kind, again) => Views.picSource(kind, tmpCard(), {
+      variant: variants.length, again,
+      busy: on => { const box = m.$('#ed-img'); const sp = box.querySelector('.spinner'); if (on && !sp) box.insertAdjacentHTML('beforeend', '<span class="spinner"></span>'); else if (!on && sp) sp.remove(); },
+      onPick: p => { setImg(p.image); Object.assign(c, p); },
+    });
     const tmpCard = () => Object.assign({ id: existing ? existing.id : 'tmp' }, read());
+    // ✓ the editor's own AI check marks the card «проверено нейросетью» (js/ai.js → stamp, js/aihub.js draws the marks):
+    // the stored card gets them at once when it already holds the checked text, else they come with «Сохранить»;
+    // a side edited after the check loses its mark there
+    let edAi = null;
+    const faceNow = () => { const o = {}; Store.AI_FACE.front.concat(Store.AI_FACE.back).forEach(k => { o[k] = Store.faceText(c[k]); }); return o; };
+    const aiMark = (by, o) => {
+      const stamp = AI.stamp(existing || c, by, Object.assign({ action: 'check' }, o));
+      const ac = stamp.aiCheck; delete stamp.aiCheck;
+      Object.assign(c, stamp);
+      edAi = ac ? { ac, face: faceNow() } : null;
+      if (existing) { const f = edAi && edAi.face; if (f && Object.keys(f).every(k => f[k] === Store.faceText(existing[k]))) stamp.aiCheck = ac; Store.updateCard(existing.id, stamp); }
+    };
+    const aiOnSave = () => {
+      if (!edAi) return null;
+      const now = faceNow(), a = JSON.parse(JSON.stringify(edAi.ac));
+      ['front', 'back'].forEach(side => {
+        if (Store.AI_FACE[side].every(k => now[k] === edAi.face[k])) return;
+        delete a[side]; delete a[side === 'front' ? 'byFront' : 'byBack'];
+        if (a.fixed) Store.AI_FACE[side].forEach(k => { delete a.fixed[k]; });
+      });
+      return a.front || a.back ? a : null;
+    };
     const save = async (more) => {
       if (saving) return; // a second Ctrl+Enter / click while closing must not add the card twice
       read();
@@ -1164,8 +1717,11 @@
       saving = true;
       let saved;
       const history = historyOnSave();
-      if (existing) saved = Store.updateCard(existing.id, { no: c.no, ru: c.ru, uk: c.uk || '', en: c.en, description: c.description, example: c.example, exampleRu: c.exampleRu, wordClass: c.wordClass, tags: c.tags, image: c.image, imagePrompt: c.imagePrompt, imageAuto: !!c.imageAuto, ...(c.imageSrc !== undefined ? { imageSrc: c.imageSrc, imageCredit: c.imageCredit || '', imageCreditUrl: c.imageCreditUrl || '', imageNone: c.imageNone || '' } : {}), forms: c.forms || [], examples: c.examples || [], synonyms: c.synonyms || [], history, ...(c.mtWarn !== undefined ? { mtWarn: c.mtWarn } : {}) });
+      const aiS = aiOnSave();
+      if (!existing && edAi) { if (aiS) c.aiCheck = aiS; else delete c.aiCheck; }
+      if (existing) saved = Store.updateCard(existing.id, { ...(aiS ? { aiCheck: aiS } : {}), no: c.no, ru: c.ru, uk: c.uk || '', en: c.en, description: c.description, example: c.example, exampleRu: c.exampleRu, wordClass: c.wordClass, tags: c.tags, image: c.image, imagePrompt: c.imagePrompt, imageAuto: !!c.imageAuto, ...(c.imageSrc !== undefined ? { imageSrc: c.imageSrc, imageCredit: c.imageCredit || '', imageCreditUrl: c.imageCreditUrl || '', imageNone: c.imageNone || '' } : {}), forms: c.forms || [], examples: c.examples || [], synonyms: c.synonyms || [], history, ...(c.mtWarn !== undefined ? { mtWarn: c.mtWarn } : {}) });
       else saved = Store.addCard(deckId, Object.assign(c, { history }));
+      if (saved) Store.touchDeck(saved.deckId); // 🕘 the deck is in work
       UI.toast(existing ? 'Сохранено' : 'Карточка добавлена', 'good', 1600);
       m.close();
       onSaved && onSaved(saved);
@@ -1216,8 +1772,13 @@
             } else {
               const [res] = await AI.checkCards([tmpCard()]);
               if (!res || (!Object.keys(res.changes).length && res.ok)) UI.toast(`${AI.name(res && res.by)}: карточка в порядке ✓`, 'good');
-              else Views.aiReview([res], { inline: (id, fields, by) => { const p = {}; Object.entries(fields).forEach(([k, v]) => { if (k === 'en') c.en = v; else p[k] = v; }); write(p, 'ai:' + by); lightRail('ai'); const stamp = AI.stamp(existing || c, by, { history: false }); Object.assign(c, stamp); if (existing) Store.updateCard(existing.id, stamp); }, cards: [tmpCard()] });
-              if (res && !Object.keys(res.changes).length && res.ok) { const stamp = AI.stamp(existing || c, res.by, { action: 'check', note: 'без замечаний ✓' }); Object.assign(c, stamp); if (existing) Store.updateCard(existing.id, stamp); }
+              else Views.aiReview([res], { inline: (id, fields, by) => {
+                const p = {}, old = {}; Object.entries(fields).forEach(([k, v]) => { if (k === 'en') c.en = v; else { p[k] = v; old[k] = c[k]; } });
+                write(p, 'ai:' + by); lightRail('ai');
+                const acc = {}; Object.keys(p).forEach(k => { acc[k] = { old: old[k], new: c[k] }; });
+                aiMark(by, { history: false, fields: acc });
+              }, cards: [tmpCard()] });
+              if (res && !Object.keys(res.changes).length && res.ok) aiMark(res.by, { note: 'без замечаний ✓' });
             }
           } catch (err) { UI.toast(err.message, 'bad', 6000); }
           a.innerHTML = label; a.disabled = false; break;
@@ -1282,16 +1843,17 @@
           } catch (err) { UI.toast(err.message, 'bad', 6000); }
           a.disabled = false; a.innerHTML = label; break;
         }
-        case 'img-gen': busyImg(() => Images.generate(tmpCard(), { provider: Store.settings.imageProvider === 'off' ? 'pollinations' : Store.settings.imageProvider }), true); break;
-        case 'img-again': busyImg(() => Images.generate(tmpCard(), { provider: 'pollinations', seed: Math.floor(Math.random() * 1e6), variant: variants.length, newScene: variants.length > 3 }), true); break;
-        case 'img-photo': busyImg(() => Images.generate(tmpCard(), { provider: 'wikimedia', variant: variants.length }), true); break;
-        case 'img-del': setImg(''); break;
-        case 'img-url': { const u = await UI.prompt('Ссылка на картинку', '', 'https://…'); if (u) busyImg(async () => { await Images.preload(u, 20000); return u; }); break; }
-        case 'img-upload': {
-          const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-          inp.onchange = () => { const f = inp.files[0]; if (f) busyImg(() => U.compressImage(f, 640)); };
-          inp.click(); break;
-        }
+        case 'img-gen': imgFrom('gen'); break;
+        case 'img-again': imgFrom('gen', true); break;
+        case 'img-photo': imgFrom('photo'); break;
+        case 'img-feed': imgFrom('feed'); break;
+        case 'img-search': imgFrom('search'); break;
+        case 'img-emoji': imgFrom('emoji'); break;
+        case 'img-del': imgFrom('none'); break;
+        case 'img-pin': imgFrom('feed'); break;
+        case 'img-hist': imgFrom('hist'); break;
+        case 'img-url': imgFrom('url'); break;
+        case 'img-upload': imgFrom('file'); break;
       }
       // keep english hint for images in sync
       if (existing && c.en !== existing.en && c.en) existing.en = c.en;
@@ -1336,7 +1898,7 @@
     const fieldOrder = ['no', 'ru', 'description', 'example', 'exampleRu', 'wordClass', 'en', 'imagePrompt'];
     const short = s => { s = String(s || ''); return s.length > 400 ? s.slice(0, 400) + '…' : s; };
     const m = UI.modal({
-      title: `${AI.icon(results[0] && results[0].by, 22)} ${U.esc(AI.name(results[0] && results[0].by))}: предложения по улучшению`, cls: 'wide',
+      title: `${aiIco(results[0] && results[0].by, 22)} ${U.esc(AI.name(results[0] && results[0].by))}: предложения по улучшению`, cls: 'wide',
       body: `
         <div class="row small"><span class="chip learned">✓ без замечаний: ${okCount}</span><span class="chip due">✎ с предложениями: ${items.length}</span>
           <span class="grow"></span><button class="btn sm" data-act="all">Отметить всё</button><button class="btn sm" data-act="none">Снять всё</button>
@@ -1669,7 +2231,7 @@
       '👨‍👩‍👧 Семья', '💼 Работа и собеседование', '🏛 NAV, налоги, документы', '🏫 Школа и барнехаге', '🌦 Погода и природа', '⏰ Время и дни',
       '😊 Чувства и характер', '💬 Разговорные фразы', '🔧 Инструменты и ремонт', '⚽ Спорт и отдых', '🧾 Банк и деньги', '📞 Телефон и сообщения'];
     const m = UI.modal({
-      title: `${AI.icon(AI.current(), 22)} ${U.esc(AI.name())}: новая колода по теме`, cls: 'wide',
+      title: `${aiIco(AI.current(), 22)} ${U.esc(AI.name())}: новая колода по теме`, cls: 'wide',
       body: `<div class="small muted">Нейросеть подберёт самые нужные слова по теме, переведёт, добавит формы, примеры и выражения — норвежский с переводом в скобках.</div>
         <div class="row" style="gap:6px" data-topics>${TOPICS.map(t => `<button class="chip" data-topic="${U.esc(t)}">${U.esc(t)}</button>`).join('')}</div>
         <label class="field"><span>Тема (можно своя)</span><input class="input" data-f="topic" placeholder="например: на кухне, работа уборщиком, у врача"></label>
@@ -1715,6 +2277,7 @@
         const by = AI.lastProvider || AI.current();
         const deck = deckId ? Store.deck(deckId) : Store.addDeck(topic[0].toUpperCase() + topic.slice(1), `${AI.name(by)} · ${level}`);
         all.slice(0, count).forEach(c => Store.addCard(deck.id, Object.assign({}, c, AI.stamp(null, by, { action: 'generate', note: `тема: ${topic} · ${level}` }))));
+        Store.touchDeck(deck.id); Store.autoNameDeck(deck.id, topic); // 🏷 a deck without a name: the topic
         m.close();
         UI.toast(`Создано ${U.cards(Math.min(all.length, count))}`, 'good');
         App.go('deck', { id: deck.id });
@@ -1787,7 +2350,7 @@
             ${UI.switchHtml('split', false, 'Многострочный перевод: 1-я строка → перевод, остальное → описание')}
           </div>
           <div class="row" style="gap:16px">
-            ${UI.switchHtml('ai', st.aiAutoImport && AI.available(), `🤖 Проверить нейросетью (${AI.name()}) после импорта` + (AI.available() ? '' : ' — не подключена'))}
+            ${UI.switchHtml('ai', st.aiAutoImport && AI.available(), `${BOT()} Проверить нейросетью (${U.esc(AI.name())}) после импорта` + (AI.available() ? '' : ' — не подключена'))}
             ${UI.switchHtml('img', false, '🖼 Сгенерировать картинки')}
           </div>
           <div class="small muted">Колонки определены автоматически. Если что-то не так — выберите поле над колонкой. Текст переносится как есть: переносы строк, скобки (перевод), примеры.</div>
@@ -1855,6 +2418,7 @@
             c.history = [Prov.entry('import', 'import', null, `${res.format || 'файл'} · ${res.name}`)];
             added.push(Store.addCard(targetId, c));
           });
+          if (added.length) { Store.touchDeck(targetId); Store.autoNameDeck(targetId, baseName); } // 🏷 a deck without a name: the file's title or its first card
           await Store.saveNow();
           m.close();
           UI.toast(`Импортировано: ${U.cards(added.length)}${skipped ? `, пропущено дубликатов: ${skipped}` : ''}`, 'good', 5000);
@@ -1960,7 +2524,8 @@
       return `<div title="${U.fmtDate(t)}: ${n}" style="width:13px;height:13px;border-radius:3px;background:${n ? `color-mix(in srgb, var(--good) ${Math.round(a * 100)}%, transparent)` : 'var(--panel-border)'}"></div>`;
     }).join('');
     root.innerHTML = `
-      <h1>📊 Статистика</h1>
+      <h1 class="st-h1"><i class="nav-ico" aria-hidden="true">${window.NavIcons ? NavIcons.html('stats') : '📊'}</i>Статистика</h1>
+      <section class="home-widgets st-week" aria-label="Цель дня и серия">${Progress.goalTileHtml()}${Progress.streakTileHtml()}</section>
       <div class="pg-cards">${Progress.statsCardsHtml()}</div>
       <div class="stat-grid" style="margin-top:16px">
         <div class="stat"><b>${all.total}</b><span>карт</span></div>
@@ -1989,6 +2554,7 @@
         </tbody></table></div></div>`;
     root.onclick = e => {
       if (e.target.closest('[data-act="pg-info"]')) { Progress.infoDialog(); return; }
+      if (e.target.closest('[data-act="goal-go"]')) { Study.start({ deckId: null, size: Math.max(5, (Store.settings.goal || 20) - Progress.todayCount()) }); return; }
       const a = e.target.closest('[data-deck]'); if (a) { e.preventDefault(); App.go('deck', { id: a.dataset.deck }); }
     };
   };
@@ -1996,12 +2562,48 @@
   /* =====================================================================
    * SETTINGS
    * ===================================================================== */
+  /* ↺ «Вернуть настройки по умолчанию»: preferences only — never decks, cards, progress, keys, accounts, Telegram or the bridge.
+     Asks first (with the list of what stays), then a toast «Отменить» brings the old settings back at once. */
+  const RESET_KEEP = new Set(['userName', 'aiProvider', 'aiMode', 'bridgeModel', 'plan', 'claudeModel', 'translators', 'restDays', 'vacation',
+    'fsrsW', 'fsrsOpt', 'artSeasonSeen', 'artMotionNote', 'keysNoteSeen', 'avatar', 'imageTemplate']);
+  const RESET_KEEP_RE = /key|token|secret|anon|cloud|url|region|^tg|^vk|bridge|account|^ai[A-Z]|^claude|^azure|^gcloud|^gemini|^eleven|^deepl|^ms[A-Z]|^yt/i;
+  // a few preferences other parts of the app keep in Store.settings (not in the defaults list): back to «no choice»
+  const RESET_EXTRA = ['exView', 'viewHide', 'listenMediaRate', 'dictMode', 'asrQuality', 'guidesOff', 'listen'];
+  Views.resetSettings = async function () {
+    const ok = await UI.confirm(`<p style="margin:0 0 8px"><b>Вернуть обычные значения настроек?</b></p>
+      <p class="small" style="margin:0 0 6px">Станет как в новом приложении: как учить и направление, какие карты и сколько, подсказки, выбор голосов и скорость, жесты, картинки${window.AppThemes ? ', тема и оформление' : ''}.</p>
+      <p class="small" style="margin:0 0 4px"><b>Останется как есть:</b></p>
+      <ul class="small st-keep"><li>колоды и карточки</li><li>прогресс, серия и статистика</li><li>ключи нейросетей и переводчиков, вход в облако</li><li>Telegram и мост на Mac</li><li>имя, фото и расписание отдыха</li></ul>
+      <p class="small muted" style="margin:6px 0 0">Передумаете — сразу после этого будет кнопка «Отменить».</p>`, { ok: '↺ Вернуть по умолчанию' });
+    if (!ok) return;
+    const st = Store.state.settings, D = Store.DEFAULT_SETTINGS || {};
+    const before = JSON.parse(JSON.stringify(st));
+    Object.keys(D).forEach(k => { if (RESET_KEEP.has(k) || RESET_KEEP_RE.test(k)) return; st[k] = D[k] && typeof D[k] === 'object' ? JSON.parse(JSON.stringify(D[k])) : D[k]; });
+    RESET_EXTRA.forEach(k => { if (k in st) delete st[k]; });
+    Store.save();
+    let themes = null;
+    try { if (window.AppThemes && typeof AppThemes.resetDefaults === 'function') themes = AppThemes.resetDefaults({ silent: true }); } catch (e) { console.warn('apptheme reset', e); }
+    App.applyTheme(); App.updateBadge(); App.render();
+    try { document.dispatchEvent(new CustomEvent('voices-changed')); } catch (e) { /* ignore */ }
+    const undo = () => {
+      Object.keys(Store.state.settings).forEach(k => { if (!(k in before)) delete Store.state.settings[k]; });
+      Object.assign(Store.state.settings, before);
+      Store.save();
+      try { if (themes && themes.undo) themes.undo(); } catch (e) { /* ignore */ }
+      App.applyTheme(); App.updateBadge(); App.render();
+      try { document.dispatchEvent(new CustomEvent('voices-changed')); } catch (e) { /* ignore */ }
+      UI.toast('↩ Ваши настройки вернулись', 'good', 3000);
+    };
+    if (UI.toastAction) UI.toastAction('Настройки как по умолчанию. Колоды и прогресс не тронуты', 'Отменить', undo, 12000, '↺');
+    else UI.toast('Настройки как по умолчанию', 'good');
+  };
+
   Views.settings = function (root) {
     const s = Store.settings;
     const voiceOpts = lang => {
       const list = TTS.voicesFor(lang);
-      const cur = lang === 'no' ? s.voiceNo : s.voiceRu;
-      return `<option value="">Авто${list.length ? '' : ' (нет системного голоса → онлайн)'}</option>` + list.map(v => `<option ${v.name === cur ? 'selected' : ''}>${U.esc(v.name)}</option>`).join('');
+      const cur = lang === 'no' ? s.voiceNo : lang === 'uk' ? s.voiceUk : s.voiceRu;
+      return `<option value="">Авто${list.length ? '' : lang === 'uk' ? ' (нет голоса → онлайн-голос Google)' : ' (нет системного голоса → онлайн)'}</option>` + list.map(v => `<option ${v.name === cur ? 'selected' : ''}>${U.esc(v.name)}</option>`).join('');
     };
     const set = (label, desc, ctl) => `<div class="setting"><div><div>${label}</div>${desc ? `<div class="desc">${desc}</div>` : ''}</div><div class="ctl">${ctl}</div></div>`;
     const sw = k => UI.switchHtml(k, s[k]);
@@ -2016,20 +2618,29 @@
         body = AI.bridge.ok
           ? `<div style="color:var(--good)">✓ Мост работает · Claude Code ${U.esc(AI.bridge.version)}</div>
              <label class="field"><span>Модель</span><select class="input" data-ai="claude.model">${[['', 'По умолчанию'], ['sonnet', 'Sonnet (быстро)'], ['opus', 'Opus (умнее)'], ['haiku', 'Haiku (очень быстро)']].map(([v, l]) => `<option value="${v}" ${(c.model || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>`
-          : AI.bridge.up
+          : AI.bridge.up && AI.bridge.auth === 'bad'
+            // v212: the login expired — one button (js/claudelogin.js → bridge POST /api/claude/login opens the Terminal)
+            ? `<div class="cl-card"><div class="cl-card-h"><span aria-hidden="true">🔑</span><div><b>Вход в Claude закончился — войдите ещё раз</b>
+                 <small>Один раз примерно на год: откроется окно Терминала и страница Claude в браузере — войдите своим аккаунтом и нажмите «Authorize».</small></div></div>
+               ${window.ClaudeLogin ? ClaudeLogin.buttonHtml() : `<div class="small muted">В Терминале: <code style="user-select:all">${U.esc(AI.bridge.tokenCmd || 'bash "tools/claude-token.sh"')}</code></div>`}</div>`
+          : AI.bridge.up && !AI.bridge.path && /не найден/i.test(AI.bridge.error || '')
             ? `<div style="color:var(--warn)">Мост запущен, но Claude Code не найден на этом Mac.</div>
                <div class="small muted">Установите его в Терминале и войдите своим аккаунтом, затем перезапустите мост:<br>
                <code style="user-select:all">curl -fsSL https://claude.ai/install.sh | bash</code><br>потом <code>claude</code> → <code>/login</code></div>`
-            : `<div style="color:var(--warn)">Мост не запущен.</div>
-               <div class="small muted">В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> — откроется http://localhost:8787</div>`;
+          : AI.bridge.up
+            ? `<div class="small muted">Мост работает, Claude Code найден${AI.bridge.version ? ` (${U.esc(AI.bridge.version)})` : ''}. ${AI.bridge.checking ? 'Проверяю вход — это несколько секунд…' : 'Claude пока не ответил — нажмите «🔌 Проверить».'}</div>`
+            : AI.onMac()
+              ? `<div style="color:var(--warn)">Мост не запущен.</div>
+               <div class="small muted">В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> — откроется http://localhost:8787</div>`
+              : `<div class="small muted">ℹ️ Claude по подписке работает только в приложении на Mac — в версии на сайте это пока недоступно. Подключите любую другую нейросеть ниже: <b>Gemini</b> и <b>Groq</b> — бесплатно, нужен только ключ.</div>`;
       } else {
         body = `${p.editableBase || id === 'ollama' ? `<label class="field"><span>Адрес API (OpenAI-совместимый)</span><input class="input" data-ai="${id}.base" value="${U.esc(c.base || p.base)}" placeholder="https://…/v1"></label>` : ''}
           ${p.noKey ? '<div class="small muted">Ключ не нужен.</div>' : `<label class="field"><span>API-ключ ${p.keyUrl ? `· <a href="${p.keyUrl}" target="_blank">получить ключ →</a>` : ''}</span>
             <input class="input" type="password" data-ai="${id}.key" value="${U.esc(c.key || '')}" autocomplete="off" placeholder="вставьте ключ"></label>`}
           <label class="field"><span>Модель</span><input class="input" data-ai="${id}.model" value="${U.esc(c.model || '')}" placeholder="${U.esc(p.model)}" list="ml-${id}">
-            <datalist id="ml-${id}">${p.models.map(m => `<option value="${U.esc(m)}">`).join('')}</datalist></label>`;
+            <datalist id="ml-${id}">${p.models.map(m => `<option value="${U.esc(m)}"${p.modelNames && p.modelNames[m] ? ` label="${U.esc(p.modelNames[m])}"` : ''}>`).join('')}</datalist></label>`;
       }
-      return `<details class="prov" ${curId === id ? 'open' : ''}><summary>${AI.icon(id, 20)} <b>${U.esc(p.name)}</b> ${chips}</summary>
+      return `<details class="prov" ${curId === id || (p.type === 'bridge' && id === 'claude' && AI.bridge.up && AI.bridge.auth === 'bad') ? 'open' : ''}><summary>${aiIco(id, 20)} <b>${U.esc(p.name)}</b> ${chips}</summary>
         <div class="col" style="padding:10px 2px 4px">${p.note ? `<div class="small muted">${U.esc(p.note)}</div>` : ''}${body}
           <div class="row"><button class="btn sm ai" data-act="test-prov" data-id="${id}">🔌 Проверить</button>
           <button class="btn sm" data-act="use-prov" data-id="${id}">★ Сделать активной</button><span class="small" data-prov-status="${id}"></span></div></div></details>`;
@@ -2039,7 +2650,7 @@
       ${UI.keysNoteHtml()}
       <div class="settings-grid" style="margin-top:16px">
         <div class="panel" style="grid-column:1/-1">
-          <h3>🤖 Нейросети — проверка и улучшение карточек</h3>
+          <h3 class="set-ai-h">${BOT(22)} Нейросети — проверка и улучшение карточек</h3>
           <div class="field-row" style="margin-top:10px">
             <label class="field"><span>👤 Ваше имя</span><input class="input" data-text="userName" value="${U.esc(s.userName)}" placeholder="Alex"></label>
             <label class="field"><span>Тариф Claude</span><input class="input" data-text="plan" value="${U.esc(s.plan)}" list="plans"><datalist id="plans"><option value="Max"><option value="Pro"><option value="Team"></datalist></label>
@@ -2068,7 +2679,7 @@
             <div class="prov">
               <label class="switch" style="width:100%"><input type="checkbox" data-trtoggle="${id}" ${(s.translators || []).includes(id) ? 'checked' : ''}><span class="track"></span>
                 <span>${Translators.icon(id, 18)} <b>${U.esc(t.ai ? 'ИИ-перевод (' + AI.name() + ')' : t.name)}</b>${t.free ? ' <span class="chip learned">бесплатно</span>' : ''}${t.web ? ' <span class="chip">сайт</span>' : ''}<br><span class="small muted">${U.esc(t.note)}</span></span></label>
-              ${id === 'deepl' ? `<label class="field" style="margin-top:8px"><span>Ключ DeepL API Free · <a href="${t.keyUrl}" target="_blank">получить →</a> · работает через мост на Mac; без ключа/моста откроется deepl.com</span>
+              ${id === 'deepl' ? `<label class="field" style="margin-top:8px"><span>Ключ DeepL API Free · <a href="${t.keyUrl}" target="_blank">получить →</a> · ${AI.onMac() ? 'работает через мост на Mac; без ключа/моста откроется deepl.com' : 'перевод в карточке — только в приложении на Mac; здесь откроется deepl.com с вашим словом'}</span>
                 <input class="input" type="password" data-text="deeplKey" value="${U.esc(s.deeplKey || '')}" placeholder="xxxxxxxx-…:fx" autocomplete="off"></label>` : ''}
               ${id === 'microsoft' ? `<div class="field-row" style="margin-top:8px"><label class="field"><span>Ключ Azure Translator · <a href="${t.keyUrl}" target="_blank">как получить →</a></span>
                 <input class="input" type="password" data-text="msKey" value="${U.esc(s.msKey || '')}" autocomplete="off"></label>
@@ -2123,11 +2734,9 @@
         <div class="panel">
           <h3>🔊 Озвучка</h3>
           ${Voices.settingsHtml()}
-          ${set('💻 Системный норвежский голос', 'Для движков «Авто» и «Системные голоса»', `<select class="input" data-sel="voiceNo">${voiceOpts('no')}</select>`)}
-          ${set('💻 Системный русский голос', '', `<select class="input" data-sel="voiceRu">${voiceOpts('ru')}</select>`)}
           ${set('Скорость', '', `<input type="range" min="0.5" max="1.4" step="0.05" data-num="ttsRate" value="${s.ttsRate}">`)}
           ${set('Автоматически произносить норвежский', 'При показе норвежской стороны', sw('autoSpeak'))}
-          <div class="row"><button class="btn" data-act="test-no">🇳🇴 Тест: «God morgen»</button><button class="btn" data-act="test-ru">🇷🇺 Тест: «Доброе утро»</button></div>
+          <div class="row"><button class="btn" data-act="test-no">🇳🇴 Тест: «God morgen»</button><button class="btn" data-act="test-uk">🇺🇦 Тест: «Доброго ранку»</button><button class="btn" data-act="test-ru">🇷🇺 Тест: «Доброе утро»</button></div>
           <div class="row"><button class="btn listen-cta" data-listen-choose>${Listen.HEADPHONES(18, true)} Слушать в наушниках</button><button class="btn ghost" data-listen-intro>❔ Как слушать</button></div>
         </div>
         <div class="panel">
@@ -2141,13 +2750,14 @@
           ${set('Источник', 'Картинка есть всегда: если ИИ недоступен — фото, иначе эмодзи-картинка', sel('imageProvider', [['pollinations', '🎨 ИИ-рисунок → фото → эмодзи'], ['wikimedia', '📷 Реальное фото → эмодзи'], ['emoji', '😀 Эмодзи-картинки (мгновенно, офлайн)'], ['off', 'Выключено']]))}
           <label class="field"><span>🔑 Ключ Pollinations — бесплатно, снимает лимит «1 ИИ-картинка в 45 сек» · <a href="https://enter.pollinations.ai" target="_blank">получить →</a></span>
             <input class="input" type="password" data-text="pollinationsToken" value="${U.esc(s.pollinationsToken || '')}" placeholder="необязательно" autocomplete="off"></label>
+          <div class="row" style="gap:6px;align-items:center"><button class="btn sm" data-act="gallery-keys">📌 Галерея картинок: свои ключи Unsplash / Pexels</button><span class="small muted">необязательно — без ключей галерея ищет в Openverse и Wikimedia</span></div>
           ${set('Стиль', '', sel('imageStyle', Object.entries(Images.STYLE_NAMES)))}
           ${set('Автоматически создавать картинки', 'Для новых карт и при изучении', sw('autoImages'))}
           <label class="field"><span>Шаблон URL генератора ({prompt}, {seed})</span><input class="input" data-text="imageTemplate" value="${U.esc(s.imageTemplate)}"></label>
         </div>
         <div class="panel">
           <h3>☁️ Облако — вход и синхронизация</h3>
-          <p class="small muted">Личный кабинет со входом по почте, через Google, Apple, Facebook, X и синхронизация колод между телефоном и компьютером. Нужен бесплатный проект Supabase: supabase.com → New project (регион Stockholm) → Settings → API → скопируйте <b>Project URL</b> и <b>anon public</b> ключ. Ключ <b>service_role</b> сюда не вставляйте никогда.</p>
+          <p class="small muted">Личный кабинет со входом по почте, через Google, Apple, Facebook, X и синхронизация колод между телефоном и компьютером. Нужен бесплатный проект Supabase: supabase.com → New project (регион Stockholm) → Settings → API → скопируйте <b>Project URL</b> и <b>anon public</b> ключ. Ключ <b>service_role</b> сюда не вставляйте никогда. Для синхронизации один раз выполните в Supabase → SQL Editor скрипт <b>supabase/norsk-kort-sync.sql</b> (пошагово — docs/cloud-sync-setup.md). Ключи API в облако не попадают никогда.</p>
           <label class="field"><span>Project URL</span><input class="input" data-text="cloudUrl" value="${U.esc(s.cloudUrl || '')}" placeholder="https://xxxx.supabase.co"></label>
           <label class="field"><span>anon public key (не секретный — так задумано Supabase)</span><input class="input" data-text="cloudAnon" value="${U.esc(s.cloudAnon || '')}" placeholder="eyJ…" autocomplete="off"></label>
           <label class="field"><span>Адрес приложения для «Поделиться» (например, https://имя.github.io/norsk-kort/)</span><input class="input" data-text="appUrl" value="${U.esc(s.appUrl || '')}" placeholder="определяется автоматически на GitHub"></label>
@@ -2167,9 +2777,12 @@
         </div>
         <div class="panel">
           <h3>🎨 Внешний вид</h3>
+          <button type="button" class="st-looks" data-act="looks-open" aria-haspopup="dialog"><span class="st-looks-i" aria-hidden="true">🎨</span><span class="st-looks-t"><b>Оформление</b><small>темы приложения — викинги, тролли, праздники — и вид карточек</small></span><span class="st-looks-go" aria-hidden="true">›</span></button>
           ${set('Тема', '', sel('theme', [['dark', '🌙 Тёмная'], ['light', '☀️ Светлая'], ['auto', 'Как в системе']]))}
+          ${set('🗂 Порядок колод', 'В боковом меню и в «Моих колодах». «Недавние сверху» — колода, которую вы учите или открывали, поднимается первой. 📌 Закреплённые (в «⋯» колоды) — всегда наверху', sel('deckSort', [['recent', 'Недавние сверху'], ['created', 'Как создавал'], ['abc', 'По алфавиту']]))}
           ${set('Русский текст — голубым', 'Норвежский белым, русский светло-голубым (и в скобках тоже)', sw('highlightRu'))}
         </div>
+        ${window.ArtCards ? ArtCards.settingsHtml() : ''}
         <div class="panel" style="grid-column:1/-1">
           <h3>🧭 Что работает и на сколько</h3>
           <p class="small muted">Состояние всех сервисов с вашими текущими настройками и что сделать, чтобы каждый работал на 100%.</p>
@@ -2196,6 +2809,11 @@
               <img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" width="22" height="22" alt="" onerror="this.replaceWith(document.createTextNode('🌐'))">
               <span><b>${U.esc(n)}</b><small>${U.esc(t)}</small></span></a>`).join('')}</div>
         </div>
+        <div class="panel st-reset">
+          <h3>↺ Настройки по умолчанию</h3>
+          <p class="small muted">Вернёт обычные значения настроек: как учить, направление, какие карты и сколько, подсказки, голоса, жесты, картинки и оформление. Колоды, карточки, прогресс, ключи и аккаунты останутся как есть.</p>
+          <button type="button" class="btn" data-act="settings-reset">↺ Вернуть настройки по умолчанию</button>
+        </div>
         <div class="panel">
           <h3>💾 Данные</h3>
           <p class="small muted">Всё хранится локально в браузере (IndexedDB). Делайте резервные копии.</p>
@@ -2203,6 +2821,9 @@
           <button class="btn" data-act="sample">🎁 Добавить пример колоды</button><button class="btn" data-act="trash">🗑 Корзина (${Store.trashCount()})</button><button class="btn bad" data-act="wipe">Удалить всё</button></div>
           ${window.Resume ? `<div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" data-act="resume-forget" title="Видео, передачи, подкасты, книги и прослушивание колод снова начнутся сначала">📍 Забыть все места продолжения</button><span class="small muted">${(n => n ? `запомнено мест: ${n}` : 'пока ничего не запомнено')(Resume.count())}</span></div>` : ''}
         </div>
+        ${window.About && window.APP ? `<div class="panel st-about" style="grid-column:1/-1"><img src="icons/icon.svg" width="48" height="48" alt="">
+          <div class="st-about-t"><h3 class="ui-t">${window.NavIcons ? NavIcons.icon('info', 20) : ''}<span>О приложении</span></h3><span class="small muted">${U.esc(APP.name)} · версия ${U.esc(APP.version)} · сборка ${U.esc(APP.build)} — что нового, обновления, лицензии</span></div>
+          <button type="button" class="btn" data-about aria-haspopup="dialog">${window.NavIcons ? NavIcons.icon('info', 18) : ''}<span>О приложении</span></button></div>` : ''}
       </div>`;
     root.oninput = e => {
       const t = e.target;
@@ -2231,6 +2852,7 @@
       if (t.dataset.sel) {
         Store.setSetting(t.dataset.sel, t.value);
         if (t.dataset.sel === 'theme') App.applyTheme();
+        if (t.dataset.sel === 'deckSort') App.renderSidebar(); // 🕘 the sidebar list at once (home redraws when you go there)
         if (t.dataset.sel === 'aiProvider' || t.dataset.sel === 'dictTranslator' || t.dataset.sel === 'ttsEngine') { if (window.Voices) Voices.resetWarnings(); App.updateBadge(); App.render(); }
         if (t.dataset.sel === 'swipeStyle' && demo) demoFly('right'); // show the new animation right away
       }
@@ -2279,6 +2901,7 @@
       switch (a.dataset.act) {
         case 'interp-try': await Interp.toggle(); App.render(); break;
         case 'to-account': App.go('account'); break;
+        case 'gallery-keys': Views.loadGallery().then(G => G.keys()).catch(() => UI.toast('Не получилось открыть — проверьте интернет и попробуйте ещё раз', 'warn')); break;
         case 'share-app': ShareApp.open(); break;
         case 'keys-note-ok': Store.setSetting('keysNoteSeen', true); a.closest('details').open = false; break;
         case 'show-key': { const i = root.querySelector('[data-text="claudeKey"]'); i.type = i.type === 'password' ? 'text' : 'password'; break; }
@@ -2288,7 +2911,7 @@
           if (id === 'claude') await AI.detectBridge();
           status.innerHTML = '<span class="spinner sm"></span>';
           try { const r = await AI.test(id); status.innerHTML = `<span style="color:var(--good)">✓ Работает: «${U.esc(r)}»</span>`; App.updateBadge(); }
-          catch (err) { status.innerHTML = `<span style="color:var(--bad)">${U.esc(err.message)}</span>`; }
+          catch (err) { status.innerHTML = `<span style="color:var(--bad)">${U.esc(U.niceErr(err))}</span>`; }
           break;
         }
         case 'use-prov':
@@ -2321,8 +2944,12 @@
         }
         case 'test-no': TTS.speak('God morgen! Hvordan har du det?', 'no'); break;
         case 'test-ru': TTS.speak('Доброе утро! Как дела?', 'ru'); break;
+        case 'test-uk': TTS.speak('Доброго ранку! Як справи?', 'uk'); break;
+        case 'uk-voice-help': UI.modal({ title: '🇺🇦 Украинский голос', body: TTS.ukHelpHtml() + '<div class="small muted" style="margin-top:8px">После установки перезапустите браузер и выберите голос: Настройки → 🔊 Озвучка → «💻 Системный украинский голос».</div>' }); break;
         case 'backup': Exporter.backup(); break;
         case 'restore': App.pickFiles(); break;
+        case 'looks-open': Views.looksSheet(null); break;
+        case 'settings-reset': Views.resetSettings(); break;
         case 'resume-forget':
           if (window.Resume && await UI.confirm('Забыть, где вы остановились, во всех видео, передачах, подкастах, книгах и при прослушивании колод?<br><span class="small muted">Всё снова начнётся сначала. Карточки и прогресс изучения не изменятся. Книги в Читалке хранят свои страницы — их сбрасывают в меню книги.</span>', { ok: 'Забыть', title: '📍 Места продолжения' })) {
             Resume.clearAll(); UI.toast('Места продолжения забыты', 'good'); App.render();
@@ -2330,8 +2957,13 @@
           break;
         case 'sample': App.addSampleDeck(); UI.toast('Пример колоды добавлен', 'good'); break;
         case 'wipe':
-          if (await UI.confirm('Точно удалить ВСЕ колоды и карточки?<br><span class="small muted">Они попадут в 🗑 Корзину и их можно вернуть в течение 30 дней. Статистика ответов будет очищена.</span>', { danger: true, ok: 'Да, удалить всё' })) {
-            await Store.clearAll(); UI.toast('Все колоды перемещены в корзину', 'warn'); App.go('home');
+          // the biggest loss in the app: two steps (a question, then the word typed by hand) and a safety copy first
+          if (await UI.confirm('Точно удалить ВСЕ колоды и карточки?<br><span class="small muted">Колоды попадут в 🗑 Корзину — их можно вернуть в течение 30 дней. А вот статистика ответов будет очищена навсегда. Перед удалением приложение само скачает резервную копию всех ваших данных.</span>', { danger: true, ok: 'Дальше', title: '⚠️ Удалить всё' })) {
+            const w = await UI.prompt('Чтобы подтвердить, напишите слово УДАЛИТЬ', '', 'удалить');
+            if (w == null) break;
+            if (String(w).trim().toLowerCase() !== 'удалить') { UI.toast('Слово не совпало — ничего не удалено 💚', 'good'); break; }
+            try { Exporter.backup(); } catch (e) { /* the download failed — the user confirmed twice */ }
+            await Store.clearAll(); UI.toast('Все колоды перемещены в корзину. Резервная копия скачана в «Загрузки»', 'warn', 6000); App.go('home');
           }
           break;
         case 'trash': Views.trashDialog(); break;

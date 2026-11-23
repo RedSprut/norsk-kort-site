@@ -5,8 +5,19 @@
   Chrome / Edge (Windows, Linux, Mac, Android). It plays the program with the TV's own player and draws OUR
   subtitles on top: the Norwegian line (white) and the Russian translation (yellow) — exactly like in the app.
   The lines come from the app through a custom message channel (urn:x-cast:no.norskkort.subs).
-  Needs: this file on the site over https + a Cast App ID registered for its URL (Google Cast SDK Developer Console),
-  put into CAST_APP_ID in js/subs.js. Without that the app uses Google's standard receiver (subtitles as a text track).
+  Needs: this file on the site over https (on GitHub Pages: https://redsprut.github.io/norsk-kort-site/receiver.html —
+  the sub-path is part of the URL to register) + a Cast App ID registered for that URL in the Google Cast SDK Developer
+  Console (a one-time developer registration fee, about US$5; until the app is published there it opens only on TVs
+  registered as test devices), put into CAST_APP_ID in js/subs.js. Not registered (now): the app uses Google's standard
+  receiver — NRK's own Norwegian subtitles on the TV, the line with the Russian translation on the phone screen.
+  Works without the Mac bridge: the TV fetches the programme from NRK itself, the lines come from the phone.
+  🎤 «Бегущая строка» (karaoke): with the lines come the start of every word (+ the end of the last one) and, in the
+  «Слово (перевод)» mode, the gloss of every word; kar: { on, mode: 'hl' | 'wbw', sh } says how. The words light up by
+  the TV's own clock (the player's time), exactly like on the phone: ✨ the word being said in a pink pill with a thin
+  filling line under it, the words to come dimmer; 👣 the words appear one by one, keeping their places.
+  🌀 «Кто переводит»: the app sends tr: { k, n, on, bg, svg, g } — the translator's / AI's coin (the same drawing as in
+  the app), its name and whether it translates right now. A small badge in a corner shows it for a few seconds (glowing
+  while it works, calm when not) and fades away. tr: null — nobody yet; an older app sends nothing — no badge.
 -->
 <html lang="nb">
 <head>
@@ -18,33 +29,124 @@
     cast-media-player { --theme-hue: 250; --progress-color: #7c6cff; position: absolute; inset: 0; }
     #subs { position: absolute; left: 5%; right: 5%; bottom: 10%; z-index: 10; text-align: center; pointer-events: none;
       font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif; }
-    #subs .box { display: inline-block; max-width: 100%; background: rgba(0, 0, 0, .62); border-radius: 16px; padding: 14px 30px 16px; }
-    #subs .no { color: #fff; font-size: 46px; font-weight: 700; line-height: 1.25; text-shadow: 0 2px 8px #000; }
-    #subs .ru { color: #ffd76a; font-size: 36px; line-height: 1.25; margin-top: 8px; text-shadow: 0 2px 8px #000; }
+    /* 🔲 «Подложка» (the app's setting, sent with the lines): the dark strip — or, without it, a black outline */
+    #subs .box { display: inline-block; max-width: 100%; background: transparent; border-radius: 16px; padding: 14px 30px 16px; }
+    #subs.bg .box { background: rgba(0, 0, 0, .62); }
+    #subs .no { color: #fff; font-size: 46px; font-weight: 700; line-height: 1.25; }
+    #subs .ru { color: #ffd76a; font-size: 36px; line-height: 1.25; margin-top: 8px; }
+    #subs .no, #subs .ru { text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 0 4px #000, 0 2px 10px #000; }
+    #subs.bg .no, #subs.bg .ru { text-shadow: 0 2px 8px #000; }
+    /* ⊞ «Положение субтитров» (the app's setting, sent with the lines): bottom (as always) · top · the whole picture ·
+       a column on the right / left · the Norwegian line and the translation in two columns. Too long for the room: smaller. */
+    #subs { --k: 1; } #subs .box { overflow-wrap: break-word; }
+    #subs .no { font-size: calc(46px * var(--k)); } #subs .ru { font-size: calc(36px * var(--k)); }
+    #subs[data-pos="top"] { bottom: auto; top: 9%; }
+    #subs[data-pos="full"] { top: 8%; bottom: 9%; display: flex; align-items: center; justify-content: center; }
+    #subs[data-pos="full"] .no { font-size: calc(84px * var(--k)); } #subs[data-pos="full"] .ru { font-size: calc(62px * var(--k)); }
+    #subs[data-pos="left"], #subs[data-pos="right"] { top: 11%; bottom: 12%; width: 32%; display: flex; align-items: center; }
+    #subs[data-pos="left"] { left: 3%; right: auto; justify-content: flex-start; text-align: left; }
+    #subs[data-pos="right"] { right: 3%; left: auto; justify-content: flex-end; text-align: right; }
+    #subs[data-pos^="split"] { left: 3%; right: 3%; top: 11%; bottom: 12%; }
+    #subs[data-pos^="split"] .box { position: absolute; top: 50%; transform: translateY(-50%); max-width: 44%; box-sizing: border-box; }
+    #subs[data-pos^="split"] .box.a { left: 0; text-align: left; } #subs[data-pos^="split"] .box.b { right: 0; text-align: right; }
+    #subs[data-pos^="split"] .ru { margin-top: 0; }
+    #subs[data-pos="left"] .box, #subs[data-pos="right"] .box, #subs[data-pos^="split"] .box { padding: 12px 20px 14px; }
+    #subs[data-pos="left"] .no, #subs[data-pos="right"] .no, #subs[data-pos^="split"] .no { font-size: calc(38px * var(--k)); }
+    #subs[data-pos="left"] .ru, #subs[data-pos="right"] .ru, #subs[data-pos^="split"] .ru { font-size: calc(32px * var(--k)); }
+    /* «Слово (перевод)»: the gloss after each word (its size — the app's «Перевод слов в скобках») */
+    #subs .g { font-size: calc(var(--gs, .62) * 1em); font-weight: 600; color: #ffd76a; }
+    /* 🎤 «Бегущая строка»: kp — said · kc — being said · kf — still to come (the same look as on the phone) */
+    #subs .w, #subs .g { border-radius: .22em; transition: opacity .22s ease, background-color .22s ease, box-shadow .22s ease; }
+    #subs.kar:not(.wbw) .kf { opacity: .42; }
+    #subs.kar .w.kc { background-color: rgba(236, 64, 150, .82); box-shadow: 0 0 0 .12em rgba(236, 64, 150, .82), 0 0 .7em rgba(255, 90, 170, .55); }
+    #subs.kar .g.kc { background-color: rgba(236, 64, 150, .45); box-shadow: 0 0 0 .1em rgba(236, 64, 150, .45); }
+    #subs.kar:not(.wbw) .w.kc { background-image: linear-gradient(#ffd76a, #ffd76a); background-repeat: no-repeat; background-position: 0 100%; background-size: calc(var(--kp, 0) * 100%) .12em; }
+    #subs.kar.wbw .kf { visibility: hidden; }
+    #subs.kar.wbw .kc { animation: kar-pop .32s ease-out both; }
+    @keyframes kar-pop { from { opacity: 0; } 35% { opacity: 1; } }
+    /* 🌀 who translates: a coin + its name in a corner, inside the TV's safe area (overscan), big enough for the sofa */
+    #trw { --g1: #8b80ff; --g2: #29c7ff; --g3: #b4acff; position: absolute; z-index: 11; top: max(48px, 5vh); right: max(72px, 4.5vw);
+      display: flex; align-items: center; gap: 18px; padding: 10px 28px 10px 10px; border-radius: 999px; pointer-events: none;
+      background: rgba(12, 12, 20, .78); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .14), 0 6px 26px rgba(0, 0, 0, .55);
+      font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif; color: #fff;
+      opacity: 0; transform: translateY(-10px); transition: opacity .8s ease, transform .8s ease, box-shadow .8s ease; }
+    #trw[hidden] { display: none; }
+    #trw.show { opacity: 1; transform: none; }
+    /* ⊞ the lines at the top / in two columns: the badge goes down, out of their way */
+    #trw.low { top: auto; bottom: max(48px, 5vh); transform: translateY(10px); }
+    #trw.low.show { transform: none; }
+    #trw .tw-coin { position: relative; flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--c, #5b6bff); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18); isolation: isolate; }
+    #trw .tw-coin svg { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: visible; }
+    #trw .tw-halo { position: absolute; inset: -6px; border-radius: 50%; z-index: -1; opacity: 0; transition: opacity .6s;
+      background: conic-gradient(from 0deg, var(--g1), var(--g2), var(--g3), var(--g1));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); }
+    #trw .tw-txt { display: flex; flex-direction: column; line-height: 1.15; text-shadow: 0 1px 3px #000; white-space: nowrap; }
+    #trw .tw-name { font-size: 32px; font-weight: 700; letter-spacing: .01em; }
+    #trw .tw-sub { font-size: 22px; font-weight: 500; color: rgba(255, 255, 255, .78); margin-top: 3px; }
+    /* translating now: the halo flows, the coin glows softly; idle: calm */
+    #trw.on { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--g1) 55%, transparent), 0 0 34px -6px var(--g1), 0 6px 26px rgba(0, 0, 0, .55); }
+    #trw.on .tw-halo { opacity: 1; animation: tw-spin 2.8s linear infinite; }
+    #trw.on .tw-coin { animation: tw-glow 1.8s ease-in-out infinite; }
+    /* Claude's filled spark: turns slowly and pulses gently, with a soft warm glow (the same as the app's .aiw-spark) */
+    #trw .tw-spark, #trw .tw-spark-p { transform-box: view-box; transform-origin: 12px 12px; }
+    #trw.on .tw-spark { animation: tw-spin 14s linear infinite; }
+    #trw.on .tw-spark-p { animation: tw-pulse 2.2s ease-in-out infinite; }
+    #trw.on.tw-claude .tw-coin svg { filter: drop-shadow(0 0 4px #ffe6d6); }
+    @keyframes tw-spin { to { transform: rotate(360deg); } }
+    @keyframes tw-glow { 0%, 100% { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18), 0 0 10px -2px var(--g1); } 50% { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18), 0 0 30px 2px var(--g1); } }
+    @keyframes tw-pulse { 0%, 100% { transform: scale(.9); } 50% { transform: scale(1.05); } }
+    @media (prefers-reduced-motion: reduce) {
+      #trw { transition: opacity .8s ease; transform: none !important; }
+      #trw.on .tw-halo, #trw.on .tw-coin, #trw.on .tw-spark, #trw.on .tw-spark-p { animation: none; }
+      #trw.on .tw-coin { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .18), 0 0 22px 0 var(--g1); }
+    }
     #brand { position: absolute; top: 28px; left: 36px; z-index: 10; color: rgba(255, 255, 255, .7); font: 600 22px/1 "Google Sans", Roboto, Arial, sans-serif; }
   </style>
 </head>
 <body>
   <cast-media-player></cast-media-player>
-  <div id="brand">🇳🇴 ⇄ 🇷🇺 Norsk Kort</div>
+  <div id="brand">🇳🇴 ⇄ 🇺🇦 🇷🇺 Norsk Kort</div>
   <div id="subs" aria-live="polite"></div>
+  <div id="trw" hidden><span class="tw-coin"><span class="tw-halo"></span></span><span class="tw-txt"><span class="tw-name"></span><span class="tw-sub"></span></span></div>
   <script>
     const NS = 'urn:x-cast:no.norskkort.subs';
     const ctx = cast.framework.CastReceiverContext.getInstance();
     const pm = ctx.getPlayerManager();
-    let cues = [], show = true, showRu = true;            // cue: [start, end, norwegian, russian]
+    // cue: [start, end, norwegian, russian, 🎤 word starts + the end of the last word (or 0), glosses of the words]
+    let cues = [], show = true, showRu = true;
+    const POS = ['bottom', 'top', 'full', 'right', 'left', 'split-no', 'split-tr'];
+    let pos = 'bottom';
+    const kar = { on: false, mode: 'hl', sh: 0 };        // 🎤 «Бегущая строка»: on, the look, «Сдвиг слов» (s)
     ctx.addCustomMessageListener(NS, e => {
       const d = e.data || {};
       if (d.reset) cues = [];
       if (Array.isArray(d.cues)) { cues = cues.concat(d.cues); cues.sort((a, b) => a[0] - b[0]); }
       if (typeof d.show === 'boolean') show = d.show;
       if (typeof d.ru === 'boolean') showRu = d.ru;
+      if (typeof d.bg === 'boolean') box.classList.toggle('bg', d.bg);
+      if (typeof d.pos === 'string' && POS.includes(d.pos)) { pos = d.pos; box.dataset.pos = pos; }
+      if (d.kar && typeof d.kar === 'object') { kar.on = !!d.kar.on; kar.mode = d.kar.mode === 'wbw' ? 'wbw' : 'hl'; kar.sh = Math.max(-1, Math.min(1, +d.kar.sh || 0)); }
+      if (typeof d.gs === 'number' && d.gs >= 0.4 && d.gs <= 1.2) box.style.setProperty('--gs', String(d.gs));
+      if ('tr' in d) { try { Who.set(d.tr); } catch (err) { /* the badge only — the lines go on */ } }
+      if (typeof d.pos === 'string') Who.place();
       last = -2;
     });
     const box = document.getElementById('subs');
     const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     let last = -2;
-    setInterval(() => {
+    /** the Norwegian line: every word its own span (data-wi = its index, like in the app), its «(перевод)» after it */
+    const wordsHtml = (txt, gl) => {
+      let k = -1;
+      return String(txt == null ? '' : txt).split(/\s+/).filter(Boolean).map(tok => {
+        if (!/\p{L}/u.test(tok)) return esc(tok);
+        k++;
+        const g = Array.isArray(gl) && gl[k] ? ` <span class="g" data-wi="${k}">(${esc(gl[k])})</span>` : '';
+        return `<span class="w" data-wi="${k}">${esc(tok)}</span>${g}`;
+      }).join(' ');
+    };
+    let words = null, wkey = null, fill = [];             // 🎤 the words of the line on the screen now
+    function tick() {
       let t = 0;
       try { t = pm.getCurrentTimeSec(); } catch (e) { /* not playing yet */ }
       let i = -1;
@@ -55,9 +157,129 @@
       if (!show) i = -1;
       if (i !== last) {
         last = i;
-        box.innerHTML = i < 0 ? '' : `<div class="box"><div class="no">${esc(cues[i][2])}</div>${showRu && cues[i][3] ? `<div class="ru">${esc(cues[i][3])}</div>` : ''}</div>`;
+        const no = i < 0 ? '' : `<div class="no">${wordsHtml(cues[i][2], cues[i][5])}</div>`, ru = i >= 0 && showRu && cues[i][3] ? `<div class="ru">${esc(cues[i][3])}</div>` : '';
+        box.innerHTML = i < 0 ? '' : /^split/.test(pos)
+          ? `<div class="box a">${pos === 'split-no' ? no : ru}</div><div class="box b">${pos === 'split-no' ? ru : no}</div>`.replace(/<div class="box [ab]"><\/div>/g, '')
+          : `<div class="box">${no}${ru}</div>`;
+        words = new Map(); wkey = null; fill = [];
+        box.querySelectorAll('[data-wi]').forEach(e => { const k = +e.dataset.wi; if (!words.has(k)) words.set(k, []); words.get(k).push(e); });
+        fit();
       }
-    }, 200);
+      karFrame(t);
+    }
+    /** 🎤 which word is being said now (the TV's own time − «Сдвиг слов»): the same rule as in the app */
+    function karFrame(t) {
+      const c = last >= 0 ? cues[last] : null, wt = c && Array.isArray(c[4]) && c[4].length > 1 ? c[4] : null;
+      const on = kar.on && !!wt && !!words && words.size > 0;
+      box.classList.toggle('kar', on); box.classList.toggle('wbw', on && kar.mode === 'wbw');
+      if (!on) { if (wkey !== null) { box.querySelectorAll('.kp, .kc, .kf').forEach(e => e.classList.remove('kp', 'kc', 'kf')); wkey = null; fill = []; } return; }
+      const n = wt.length - 1, e = wt[n], x = t - kar.sh, wbw = kar.mode === 'wbw';
+      let k = -1; while (k + 1 < n && wt[k + 1] <= x) k++;
+      if (k === n - 1 && x > e + 0.12) k = n;              // said: every word stays
+      if (wbw && k < 0) k = 0;                              // the first word comes with the line
+      if (wkey !== k + kar.mode) {
+        wkey = k + kar.mode;
+        words.forEach((els, j) => els.forEach(el => { el.classList.toggle('kp', j < k); el.classList.toggle('kc', j === k); el.classList.toggle('kf', j > k); }));
+        fill = !wbw && k >= 0 && k < n ? (words.get(k) || []).filter(el => el.classList.contains('w')) : [];
+      }
+      if (fill.length) { const s = wt[k], f = k + 1 < n ? wt[k + 1] : e, p = Math.max(0, Math.min(1, (x - s) / Math.max(0.05, f - s))); fill.forEach(el => el.style.setProperty('--kp', p.toFixed(3))); }
+    }
+    setInterval(tick, 200);
+    // 🎤 while «Бегущая строка» is on: every frame (a word may last only a fifth of a second)
+    const raf = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : f => setTimeout(f, 40);
+    const loop = () => { if (kar.on) { try { tick(); } catch (e) { /* the next frame */ } } raf(loop); };
+    raf(loop);
+    /** a long line in a column / on the whole picture: smaller letters until it fits its room (bottom and top: as always) */
+    function fit() {
+      box.style.setProperty('--k', '1');
+      if (pos === 'bottom' || pos === 'top' || !box.firstElementChild) return;
+      const H = box.clientHeight, W = box.clientWidth;
+      for (let k = 1; k > 0.45; k -= 0.06) {
+        box.style.setProperty('--k', k.toFixed(2));
+        if ([...box.children].every(b => b.offsetHeight <= H && b.scrollWidth <= b.clientWidth + 1 && b.offsetWidth <= W + 1)) break;
+      }
+    }
+    /** 🌀 «Кто переводит»: the coin + the name in a corner. Comes for a few seconds when the translator changes or starts
+     *  working again, glows while it works, then fades away — the picture belongs to the programme. */
+    const Who = (() => {
+      const el = document.getElementById('trw'), coin = el.querySelector('.tw-coin'), nm = el.querySelector('.tw-name'), sub = el.querySelector('.tw-sub');
+      const SHOW = 9000, AGAIN = 6000, MAX = 20000, REST = 45000; // ms: first time · again · at most at once · not more often
+      const COL = /^#[0-9a-f]{3,8}$/i, BG = /^(#[0-9a-f]{3,8}|linear-gradient\([0-9a-z#%.,\s-]{1,160}\))$/i;
+      // the coin's drawing comes as SVG markup: only plain shapes and their look go through — never scripts, links, events
+      const TAGS = new Set(['g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon', 'text', 'tspan', 'defs', 'lineargradient', 'radialgradient', 'stop']);
+      const ATTRS = new Set(['d', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'dx', 'dy', 'width', 'height', 'points', 'fill', 'fill-rule', 'clip-rule',
+        'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'opacity', 'fill-opacity', 'stroke-opacity', 'transform', 'text-anchor',
+        'dominant-baseline', 'font-size', 'font-weight', 'font-family', 'letter-spacing', 'offset', 'stop-color', 'stop-opacity', 'gradientunits', 'gradienttransform', 'id', 'class', 'style']);
+      const VAL = /^[^<>"'`\\]*$/, URLV = /url\(/i, OKURL = /^url\(#[\w-]+\)$/;
+      const SVGNS = 'http://www.w3.org/2000/svg';
+      function clean(src, dst) {
+        [...src.childNodes].forEach(n => {
+          if (n.nodeType === 3) { dst.appendChild(document.createTextNode(n.nodeValue)); return; }
+          if (n.nodeType !== 1 || !TAGS.has(n.localName.toLowerCase())) return;
+          const e = document.createElementNS(SVGNS, n.localName);
+          [...n.attributes].forEach(a => {
+            const k = a.name.toLowerCase(), v = a.value;
+            if (!ATTRS.has(k) || !VAL.test(v) || v.length > 2000) return;
+            if (URLV.test(v) && !OKURL.test(v.trim())) return;
+            if (k === 'style' && !/^(\s*--[a-z]+\s*:\s*-?[\d.]+\s*;?)+$/i.test(v)) return; // only the ray's number (--i)
+            e.setAttribute(a.name, v);
+          });
+          // Claude's spark: the app's class name → this page's (the same motion)
+          if (e.getAttribute('class')) e.setAttribute('class', e.getAttribute('class').replace(/\baiw-spark/g, 'tw-spark'));
+          dst.appendChild(e); clean(n, e);
+        });
+      }
+      function drawing(markup) {
+        const svg = document.createElementNS(SVGNS, 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true');
+        if (typeof markup === 'string' && markup.length < 20000) {
+          const doc = new DOMParser().parseFromString(`<svg xmlns="${SVGNS}">${markup}</svg>`, 'image/svg+xml');
+          if (doc.documentElement && doc.documentElement.localName === 'svg' && !doc.querySelector('parsererror')) clean(doc.documentElement, svg);
+        }
+        return svg;
+      }
+      let key = '', on = false, shownAt = 0, hideT = 0, pos = 'bottom';
+      const hide = () => { clearTimeout(hideT); hideT = 0; el.classList.remove('show'); };
+      function show(ms, fresh) {
+        if (el.hidden) return;
+        const now = Date.now();
+        if (fresh || !el.classList.contains('show')) shownAt = now;
+        el.classList.add('show');
+        clearTimeout(hideT);
+        // translating: stays while it works (but never longer than MAX); idle: fades after ms
+        const left = Math.max(0, shownAt + MAX - now), wait = on ? left : Math.min(ms, left);
+        hideT = setTimeout(hide, Math.max(1500, wait));
+      }
+      return {
+        set(tr) {
+          if (!tr || typeof tr !== 'object' || typeof tr.k !== 'string') { key = ''; on = false; hide(); setTimeout(() => { if (!key) el.hidden = true; }, 900); return; }
+          const k = tr.k.slice(0, 40), name = String(tr.n || '').trim().slice(0, 40) || 'Переводчик', was = on;
+          on = !!tr.on;
+          const nk = k + '|' + name;
+          if (nk !== key) {
+            key = nk;
+            [...coin.querySelectorAll('svg')].forEach(x => x.remove());
+            coin.appendChild(drawing(tr.svg));
+            coin.style.setProperty('--c', BG.test(String(tr.bg || '')) ? tr.bg : '#5b6bff');
+            const g = Array.isArray(tr.g) ? tr.g : [];
+            ['--g1', '--g2', '--g3'].forEach((v, i) => { if (COL.test(String(g[i] || ''))) el.style.setProperty(v, g[i]); else el.style.removeProperty(v); });
+            nm.textContent = name;
+            el.classList.toggle('tw-claude', k === 'claude' || k === 'anthropic');
+            el.hidden = false;
+            el.classList.toggle('on', on);
+            sub.textContent = on ? 'переводит…' : 'переводит субтитры';
+            requestAnimationFrame(() => show(SHOW, true)); // a new translator: always shown
+            return;
+          }
+          el.classList.toggle('on', on);
+          sub.textContent = on ? 'переводит…' : 'переводит субтитры';
+          if (on && !was) { if (el.classList.contains('show') || Date.now() - shownAt > REST) show(AGAIN); }
+          else if (!on && was && el.classList.contains('show')) show(4000);  // done: calm, then away
+        },
+        /** the lines at the top / in two columns: the badge goes to the bottom corner */
+        place() { pos = box.dataset.pos || 'bottom'; el.classList.toggle('low', pos === 'top' || /^split/.test(pos)); },
+      };
+    })();
     const opts = new cast.framework.CastReceiverOptions();
     opts.customNamespaces = { [NS]: cast.framework.system.MessageType.JSON };
     ctx.start(opts);

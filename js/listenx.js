@@ -11,9 +11,15 @@
  *                           baked into the samples Listen renders itself (the master stays untouched; the part that plays
  *                           is re-made in a few ms) and into clips of our own (cloud voice / downloaded); where the browser
  *                           honours audio.volume (computers, Android) that is used too, at once;
- *  - voice commands         opt-in, Web Speech API (ru-RU): тише, громче, пауза, продолжи, дальше, назад, повтори, стоп,
+ *  - voice commands         opt-in, Web Speech API: тише, громче, пауза, продолжи, дальше, назад, повтори, стоп,
  *                           знаю, не знаю, «таймер на 30 минут»; optional wake word «Норск»; only while the page is visible
- *                           and the 🗣 interpreter does not hold the microphone;
+ *                           and the 🗣 interpreter does not hold the microphone.
+ *                           Language of the commands (one recognizer can listen to only one language):
+ *                             «Язык перевода» uk → uk-UA (тихіше, голосніше, пауза, продовжуй, далі, назад, повтори, стоп,
+ *                             знаю, не знаю, «таймер на 30 хвилин»); ru and both → ru-RU (the app speaks Russian to the user;
+ *                             the Russian recognizer also catches the Ukrainian words that sound alike: пауза, стоп, назад,
+ *                             знаю, «далі» → «дали»…). The owner can override it in «Управление голосом» (prefs.cmdLang).
+ *                             parse() always accepts both vocabularies, so a mixed phrase works in either mode;
  *  - sleep timer            15 / 30 / 60 min / to the end of the deck; fades out over the last 10 s (iPhone: stops at the
  *                           end of the card instead — the page cannot change the volume there smoothly);
  *  - resume                 the place in every deck / text / book is remembered (localStorage) → «▶ Продолжить»;
@@ -24,6 +30,8 @@
  */
 (function () {
   const st = () => Store.settings;
+  /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — on the site its hints are not shown */
+  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
   const KEY = 'nk-listen2', POS = 'nk-listen-pos', DL = 'nk-listen-dl';
   const load = k => { try { return JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch (e) { return {}; } };
   const keep = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* full / private mode */ } };
@@ -95,38 +103,57 @@
   const sleep = { mode: 0, until: 0, wait: null, waitSince: 0, loopWas: null, iv: null, fading: false };
 
   /* ============ voice commands ============ */
-  const WAKE = /(^|\s)(норск\w*|нурск\w*|норс|norsk|норз\w*|нор\s?ск)(\s|$|,)/;
-  const NUM = { 'пять': 5, 'десять': 10, 'пятнадцать': 15, 'двадцать': 20, 'двадцать пять': 25, 'тридцать': 30, 'сорок': 40, 'сорок пять': 45, 'пятьдесят': 50, 'шестьдесят': 60, 'девяносто': 90 };
+  // «Норск» as the Russian (норск) and the Ukrainian (норськ) recognizers write it
+  const WAKE = /(^|\s)(норськ[а-яіїєґ]*|норск[а-яіїєґ]*|нурск[а-яіїєґ]*|норс|norsk|норз[а-яіїєґ]*|нор\s?ск)(\s|$|,)/;
+  // Russian and Ukrainian numbers (apostrophes are dropped before: п'ять → пять, дев'яносто → девяносто)
+  const NUM = { 'пять': 5, 'десять': 10, 'пятнадцать': 15, 'двадцать': 20, 'двадцать пять': 25, 'тридцать': 30, 'сорок': 40, 'сорок пять': 45, 'пятьдесят': 50, 'шестьдесят': 60, 'девяносто': 90,
+    'пятнадцять': 15, 'двадцять': 20, 'двадцять пять': 25, 'тридцять': 30, 'пятдесят': 50, 'шістдесят': 60 };
   function minutesIn(t) {
-    if (/полчаса/.test(t)) return 30;
-    if (/полтора час/.test(t)) return 90;
-    let m = t.match(/(\d{1,3})\s*(час|ч\b)?/);
+    if (/(полчаса|півгодин)/.test(t)) return 30;
+    if (/(полтора час|півтори годин)/.test(t)) return 90;
+    let m = t.match(/(\d{1,3})\s*(час|год|ч(?=\s|$))?/);
     if (m) return +m[1] * (m[2] ? 60 : 1);
-    if (/(^|\s)(два|2) час/.test(t)) return 120;
+    if (/(^|\s)(два|дві|2) (час|годин)/.test(t)) return 120;
     const words = Object.keys(NUM).sort((a, b) => b.length - a.length).find(w => t.includes(w));
     if (words) return NUM[words];
-    if (/(^|\s)час/.test(t)) return 60;
+    if (/(^|\s)(час|годин)/.test(t)) return 60;
     return 0;
   }
+  /** lower case, ё → е, no punctuation and no apostrophes (п’ять → пять), single spaces, a space on both ends */
+  const normCmd = raw => ' ' + String(raw || '').toLowerCase().replace(/ё/g, 'е').replace(/['’ʼ`]/g, '').replace(/[.,!?;:«»"()-]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+  /** the language the commands are listened in: the owner's choice, else «Язык перевода» (uk → Ukrainian; ru / both → Russian) */
+  function autoCmdLang() {
+    let l = 'ru'; try { l = window.Study && Study.trLang ? Study.trLang() : (st().transLang || 'ru'); } catch (e) { /* ru */ }
+    return l === 'uk' ? 'uk' : 'ru';
+  }
+  function cmdLang() {
+    const c = prefs().cmdLang;
+    return c === 'uk' || c === 'ru' ? c : autoCmdLang();
+  }
+  const CMD_WORDS = {
+    ru: ['тише', 'громче', 'пауза', 'продолжи', 'дальше', 'назад', 'повтори', 'стоп', 'знаю', 'не знаю', 'таймер на 30 минут'],
+    uk: ['тихіше', 'голосніше', 'пауза', 'продовжуй', 'далі', 'назад', 'повтори', 'стоп', 'знаю', 'не знаю', 'таймер на 30 хвилин'],
+  };
   /** a heard phrase → a command (the order matters: «не знаю» before «знаю», «стоп пауза» before «стоп», «дальше играй» before «дальше») */
   function parse(raw) {
-    const t = ' ' + String(raw || '').toLowerCase().replace(/ё/g, 'е').replace(/[.,!?;:«»"()-]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
-    if (/(таймер|усни|засыпа|выключись через|выключи через|сон через|сна)/.test(t)) {
-      if (/(выкл|отмен|убери|без таймера)/.test(t) && !/через/.test(t)) return { cmd: 'sleep', arg: 0, label: 'таймер выключен' };
-      if (/до конца/.test(t)) return { cmd: 'sleep', arg: 'end', label: 'таймер до конца колоды' };
+    // Russian and Ukrainian words side by side (the Russian recognizer writes Ukrainian «далі» as «дали», «тихіше» as «тихише»…)
+    const t = normCmd(raw);
+    if (/(таймер|усни|засыпа|засина|засн|выключись через|выключи через|вимкнись через|вимкни через|сон через|сна|сну)/.test(t)) {
+      if (/(выкл|вимк|отмен|скасу|убери|прибери|без таймера)/.test(t) && !/через/.test(t)) return { cmd: 'sleep', arg: 0, label: 'таймер выключен' };
+      if (/(до конца|до кінця)/.test(t)) return { cmd: 'sleep', arg: 'end', label: 'таймер до конца колоды' };
       const m = minutesIn(t); if (m) return { cmd: 'sleep', arg: clamp(m, 1, 240), label: `таймер на ${m} мин` };
     }
     if (/ не ?знаю /.test(t)) return { cmd: 'grade', arg: 1, label: 'не знаю' };
     if (/ знаю /.test(t)) return { cmd: 'grade', arg: 3, label: 'знаю' };
-    if (/ (пауза|паузу|подожди|погоди|замолчи|стоп пауза) /.test(t)) return { cmd: 'pause', label: 'пауза' };
-    if (/(дальше играй|продолж|играй|воспроизв|поехали|включи звук|снять с паузы)/.test(t)) return { cmd: 'resume', label: 'продолжаю' };
-    if (/ (стоп|хватит|выключи|закончи|остановись|останови) /.test(t)) return { cmd: 'stop', label: 'стоп' };
-    if (/ (тише|потише|тихо|убавь|убавить|потише пожалуйста) /.test(t)) return { cmd: 'vol', arg: -0.15, label: 'тише' };
-    if (/ (громче|погромче|прибавь|прибавить) /.test(t)) return { cmd: 'vol', arg: 0.15, label: 'громче' };
-    if (/ (следующ\w*|дальше|вперед|пропусти|пропуск|некст) /.test(t)) return { cmd: 'next', label: 'дальше' };
-    if (/ (предыдущ\w*|назад|вернись|обратно) /.test(t)) return { cmd: 'prev', label: 'назад' };
-    if (/ (повтори|повторить|еще раз|снова) /.test(t)) return { cmd: 'repeat', label: 'повторяю' };
-    if (/ (сначала|с начала|из начала|в начало) /.test(t)) return { cmd: 'restart', label: 'с начала' };
+    if (/ (пауза|паузу|подожди|погоди|замолчи|стоп пауза|зачекай|почекай|замовкни|постав на паузу) /.test(t)) return { cmd: 'pause', label: 'пауза' };
+    if (/(дальше играй|далі грай|дали грай|продолж|продовж|играй|грай|воспроизв|відтвор|поехали|поїхали|включи звук|увімкни звук|снять с паузы|зніми з паузи)/.test(t)) return { cmd: 'resume', label: 'продолжаю' };
+    if (/ (стоп|хватит|досить|вистачить|выключи|вимкни|закончи|заверши|завершуй|остановись|останови|зупинись|зупини) /.test(t)) return { cmd: 'stop', label: 'стоп' };
+    if (/ (тише|потише|тихо|тихіше|тихише|убавь|убавить|зменш[а-яіїєґ]*|потише пожалуйста) /.test(t)) return { cmd: 'vol', arg: -0.15, label: 'тише' };
+    if (/ (громче|погромче|голосніше|голоснише|гучніше|гучнише|прибавь|прибавить|додай|збільш[а-яіїєґ]*) /.test(t)) return { cmd: 'vol', arg: 0.15, label: 'громче' };
+    if (/ (следующ[а-яіїєґ]*|наступн[а-яіїєґ]*|дальше|далі|дали|вперед|уперед|пропусти|пропуск|некст) /.test(t)) return { cmd: 'next', label: 'дальше' };
+    if (/ (предыдущ[а-яіїєґ]*|попередн[а-яіїєґ]*|назад|вернись|повернись|обратно) /.test(t)) return { cmd: 'prev', label: 'назад' };
+    if (/ (повтори|повторить|повторити|еще раз|ще раз|снова|знову) /.test(t)) return { cmd: 'repeat', label: 'повторяю' };
+    if (/ (сначала|с начала|из начала|в начало|спочатку|з початку|на початок) /.test(t)) return { cmd: 'restart', label: 'с начала' };
     return null;
   }
 
@@ -143,7 +170,8 @@
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       let sr;
       try { sr = new SR(); } catch (e) { return; }
-      sr.lang = 'ru-RU'; sr.continuous = true; sr.interimResults = false; sr.maxAlternatives = 3;
+      this.lang = cmdLang();
+      sr.lang = this.lang === 'uk' ? 'uk-UA' : 'ru-RU'; sr.continuous = true; sr.interimResults = false; sr.maxAlternatives = 3;
       sr.onresult = e => {
         for (let i = e.resultIndex || 0; i < e.results.length; i++) {
           const r = e.results[i]; if (!r || r.isFinal === false) continue;
@@ -180,7 +208,7 @@
     wakeOn() { const pr = prefs(); return pr.wake == null ? pr.out !== 'headphones' : !!pr.wake; },
     heard(alts) {
       if (!Listen.p) return;
-      const norm = a => ' ' + String(a).toLowerCase().replace(/ё/g, 'е').replace(/[.,!?;:«»"]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+      const norm = normCmd;
       let best = null, wake = false, first = norm(alts[0] || '');
       for (const a of alts) {
         const t = norm(a), w = WAKE.test(t);
@@ -234,11 +262,11 @@
     ok() { return !!window.caches; },
     index() { return load(DL); },
     any() { return Object.keys(this.index()).length > 0; },
-    cloud(lang) { const eng = st().ttsEngine; return window.Voices && Voices.isCloud(eng) && !(eng === 'piper' && lang !== 'no') ? eng : ''; },
+    cloud(lang) { return window.Voices ? Voices.audioEngine(lang, 'listen') : ''; }, // 📍 the voice of «Слушать»
     /** the voices a clip may have been saved with — the configured cloud voice first, then the free Google voice */
     sigs(lang, rate) {
       const out = [], eng = this.cloud(lang);
-      if (eng) out.push({ sig: `${eng}:${Voices.voice(eng, lang)}`, b: rate.toFixed(2) });
+      if (eng) out.push({ sig: `${eng}:${Voices.voice(eng, lang, 'listen')}`, b: rate.toFixed(2) });
       out.push({ sig: 'google', b: rate < 0.8 ? 'slow' : 'n' });
       return out;
     },
@@ -288,9 +316,10 @@
       const eng = this.cloud(it.lang);
       if (eng && Voices.ready(eng)) {
         try {
-          const u = await Voices.synth(eng, it.text, it.lang, rate);
+          const vk = Voices.voice(eng, it.lang, 'listen');
+          const u = await Voices.synth(eng, it.text, it.lang, rate, vk);
           const blob = await (await fetch(u)).blob();
-          if (blob.size > 200) return { blob, sig: `${eng}:${Voices.voice(eng, it.lang)}`, b: rate.toFixed(2) };
+          if (blob.size > 200) return { blob, sig: `${eng}:${vk}`, b: rate.toFixed(2) };
         } catch (e) { /* the Google voice below */ }
       }
       const parts = [];
@@ -372,7 +401,7 @@
 
   /* ============ ListenX ============ */
   const X = {
-    prefs, setPref, chip, parse, Voice, Dev, cache: Cache, sleep,
+    prefs, setPref, chip, parse, cmdLang, Voice, Dev, cache: Cache, sleep,
     _forceBake: false,
 
     /* ---------- volume ---------- */
@@ -424,8 +453,7 @@
       if (this.volumeWorks()) return true;
       const p = Listen.p; if (!p) return true;
       if (p.rendered) return true;
-      const eng = st().ttsEngine;
-      return !!(window.Voices && Voices.isCloud(eng) && Voices.ready(eng)) || Cache.complete(p.o.deckId);
+      return !!(window.Voices && Voices.audioEngine('no', 'listen')) || Cache.complete(p.o.deckId);
     },
     volumeHtml() {
       return `<div class="lx-vol-wrap"><div class="lx-vol">
@@ -771,7 +799,8 @@
       const m = UI.modal({
         title: `${MIC(22)} Управление голосом`, cls: 'narrow lxv-modal',
         body: sup ? `<p>Скажите команду — плеер послушается. Работает, пока плеер открыт и <b>экран включён</b>.</p>
-            <div class="lxv-cmds">${['тише', 'громче', 'пауза', 'продолжи', 'дальше', 'назад', 'повтори', 'стоп', 'знаю', 'не знаю', 'таймер на 30 минут'].map(w => `<span>«${w}»</span>`).join('')}</div>
+            <div class="lxv-lang"><span class="small">Язык команд:</span><div class="seg" role="group" aria-label="Язык голосовых команд">${[['ru', '🇷🇺 Русский'], ['uk', '🇺🇦 Українська']].map(([v, l]) => `<button type="button" data-lxv-lang="${v}" class="${cmdLang() === v ? 'active' : ''}" aria-pressed="${cmdLang() === v}" title="${v === 'uk' ? 'Говорить команды по-украински: «тихіше», «далі», «стоп»' : 'Говорить команды по-русски: «тише», «дальше», «стоп»'}">${l}</button>`).join('')}</div></div>
+            <div class="lxv-cmds" data-lxv-cmds>${CMD_WORDS[cmdLang()].map(w => `<span>«${w}»</span>`).join('')}</div>
             <label class="lxv-wake">${UI.switchHtml('lx-wake', Voice.wakeOn(), 'Начинать со слова <b>«Норск»</b> — «Норск, тише»')}</label>
             <div class="tiny muted">Со словом «Норск» приложение не путает команды с собственным голосом — советуем, когда звук идёт через динамик.</div>
             <div class="lxv-note">🔒 <span>Речь распознаёт сам браузер: <b>Chrome отправляет звук в Google</b>, <b>Safari — в Apple</b>. Приложение звук не записывает и не хранит.</span></div>
@@ -779,12 +808,22 @@
           : `<p>Этот браузер не умеет распознавать речь. Голосовые команды работают в <b>Chrome</b>, <b>Edge</b> и <b>Safari</b>.</p>`,
         foot: sup ? `<button class="btn ghost" data-lxv-x>${pr.voice ? 'Выключить' : 'Не сейчас'}</button><button class="btn primary" data-lxv-on>${MIC(16)} ${pr.voice ? 'Сохранить' : 'Включить'}</button>` : '<button class="btn" data-lxv-x>Понятно</button>',
       });
+      let lang = cmdLang();
       m.el.addEventListener('click', e => {
+        const lb = e.target.closest('[data-lxv-lang]');
+        if (lb) {
+          lang = lb.dataset.lxvLang;
+          m.$$('[data-lxv-lang]').forEach(b => { const on = b === lb; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+          const box = m.$('[data-lxv-cmds]'); if (box) box.innerHTML = CMD_WORDS[lang].map(w => `<span>«${w}»</span>`).join('');
+          return;
+        }
         if (e.target.closest('[data-lxv-x]')) { if (prefs().voice) { setPref({ voice: false }); chip('🎙 Голосовое управление выключено'); } m.close(); Voice.sync(); return; }
         if (e.target.closest('[data-lxv-on]')) {
           const wake = m.$('[data-key="lx-wake"]').checked;
-          setPref({ voice: true, voiceOk: true, wake: wake === (prefs().out !== 'headphones') ? null : wake });
+          // the language: «auto» (null) while it matches «Язык перевода», so a later change there is followed
+          setPref({ voice: true, voiceOk: true, wake: wake === (prefs().out !== 'headphones') ? null : wake, cmdLang: lang === autoCmdLang() ? null : lang });
           m.close();
+          if (Voice.running && Voice.lang !== lang) Voice.stop(); // listen again in the new language
           Voice.sync();
           chip(Listen.p ? `🎙 Слушаю команды${Voice.wakeOn() ? ' — начинайте со слова «Норск»' : ''}` : '🎙 Включено — заработает, когда начнёте слушать', { ms: 4000 });
         }
@@ -803,8 +842,7 @@
       const d = Store.deck(deckId);
       if (!d) { UI.toast('Сначала выберите колоду', 'warn'); return; }
       const items = Cache.items(deckId);
-      const eng = st().ttsEngine;
-      const voice = window.Voices && Voices.isCloud(eng) ? Voices.ENGINES[eng].name : 'Google (бесплатный)';
+      const voice = window.Voices && Voices.audioEngine('no', 'listen') ? Voices.label('no', '', 'listen') : 'Google (бесплатный)';
       let ctl = null;
       const m = UI.modal({
         title: '⬇ Озвучка колоды — без интернета', cls: 'narrow lxd-modal',
@@ -861,7 +899,7 @@
           ctl = null;
           if (m.el.isConnected) paint();
           if (err.nosource) {
-            if (m.el.isConnected) stEl.innerHTML = `<span class="lxd-bad">Голос не отдал звук для сохранения.</span> Бесплатный голос Google в браузере можно только слушать, а не сохранять. Подключите облачный голос (Настройки → Озвучка: Azure — бесплатно 500 000 символов в месяц) или откройте приложение на Mac с мостом — и скачайте снова.`;
+            if (m.el.isConnected) stEl.innerHTML = `<span class="lxd-bad">Голос не отдал звук для сохранения.</span> Бесплатный голос Google в браузере можно только слушать, а не сохранять. Подключите облачный голос (Настройки → Озвучка: Azure — бесплатно 500 000 символов в месяц)${onMac() ? ' или откройте приложение на Mac с мостом' : ''} — и скачайте снова.`;
           } else UI.toast(err.friendly ? err.message : 'Не удалось сохранить озвучку — проверьте интернет и попробуйте ещё раз', 'warn', 6000);
         }
       });

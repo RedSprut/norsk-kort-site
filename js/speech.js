@@ -5,8 +5,10 @@
  *   Downloaded once with the user's consent, kept in the Cache API ('norsk-kort-models') — afterwards it works
  *   without internet. Fallback: the browser's own speech recognition (webkitSpeechRecognition, nb-NO) — that one may
  *   send audio to Google / Apple.
- * Voice: Piper no_NO-talesyntese-medium (MIT, data CC0) via onnxruntime-web + espeak-ng (piper_phonemize WASM).
- *   Registered as a voice engine in voices.js ('piper'); Norwegian only.
+ * Voice: Piper (MIT) via onnxruntime-web + espeak-ng (piper_phonemize WASM, GPL-3.0 — fetched from the CDN at run time,
+ *   never kept in this repository). Voices: 🇳🇴 talesyntese / nvcc (10 speakers), 🇷🇺 denis / dmitri / irina,
+ *   🇺🇦 tetiana / mykyta / oleksa «high» and ukrainian_tts (3 speakers, letters instead of phonemes) — see PIPER_VOICES.
+ *   Registered as a voice engine in voices.js ('piper'); each voice is its own download, the runtime is shared.
  * Everything heavy is loaded lazily, only when the user starts it.
  */
 (function () {
@@ -29,6 +31,22 @@
   const SMALL_ENC_FILE = SMALL_ENC === 'fp32' ? 'onnx/encoder_model.onnx' : 'onnx/encoder_model_' + SMALL_ENC + '.onnx';
   const ASR_SMALL = 'https://huggingface.co/' + ASR.small.repo + '/resolve/main/';
   const VOICE = 'https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx';
+  // the other Piper voices come from a pinned revision of rhasspy/piper-voices (sizes checked after the download);
+  // talesyntese keeps its old address, so a voice that is already downloaded stays valid
+  const PV = 'https://huggingface.co/rhasspy/piper-voices/resolve/e929968c3761f1c281875787685a745863db838d/';
+  /** key -> [path, .onnx bytes, .json bytes, data licence, speakers (multi-speaker models)] */
+  const PIPER_VOICES = {
+    'no_NO-talesyntese-medium': [null, 63221984, 6256, 'CC0'],
+    'no_NO-nvcc-medium': ['no/no_NO/nvcc/medium/', 76770227, 5397, 'CC0', ['KNN', 'KSV', 'MMN', 'KON', 'MNN', 'MSV', 'MON', 'MNV', 'KMN', 'KNV']],
+    'ru_RU-denis-medium': ['ru/ru_RU/denis/medium/', 63221984, 6196, 'CC0'],
+    'ru_RU-dmitri-medium': ['ru/ru_RU/dmitri/medium/', 63221984, 6197, 'CC0'],
+    'ru_RU-irina-medium': ['ru/ru_RU/irina/medium/', 63201294, 4765, 'неизвестна (данные RHVoice)'],
+    'uk_UA-tetiana-high': ['uk/uk_UA/tetiana/high/', 114204024, 4905, 'Apache-2.0'],
+    'uk_UA-mykyta-high': ['uk/uk_UA/mykyta/high/', 114204024, 4904, 'Apache-2.0'],
+    'uk_UA-oleksa-high': ['uk/uk_UA/oleksa/high/', 114204024, 4904, 'Apache-2.0'],
+    'uk_UA-ukrainian_tts-medium': ['uk/uk_UA/ukrainian_tts/medium/', 76735663, 2002, 'CC0', ['lada', 'mykyta', 'tetiana']],
+  };
+  const PIPER_DEFAULT = 'no_NO-talesyntese-medium';
   const MB = 1048576;
 
   // every file with its (approximate) size — for the consent dialog and the progress bar
@@ -44,7 +62,7 @@
     s6: [ASR_SMALL + SMALL_ENC_FILE, SMALL_ENC === 'fp32' ? 352759106 : 66115340], s7: [ASR_SMALL + 'onnx/decoder_model_merged_q4.onnx', 232996219],
     ortjs: [ORT_BUNDLE, 398191, 'text/javascript'],
     phjs: [PH_JS, 158217, 'text/javascript'], phwasm: [PH_WASM + '.wasm', 635212, 'application/wasm'], phdata: [PH_WASM + '.data', 18077249],
-    voice: [VOICE, 63201294], vjson: [VOICE + '.json', 5463],
+    voice: [VOICE, 63221984], vjson: [VOICE + '.json', 6256],
   };
   const GROUPS = {
     asr: ['tjs', 'ort', 'ortmjs', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7'],
@@ -52,6 +70,18 @@
     piper: ['ortjs', 'ort', 'ortmjs', 'phjs', 'phwasm', 'phdata', 'voice', 'vjson'],
   };
   const GROUP_NAME = { asr: 'модель распознавания речи', asrSmall: 'точную модель распознавания речи', piper: 'офлайн-голос Piper' };
+  const PIPER_RT = ['ortjs', 'ort', 'ortmjs', 'phjs', 'phwasm', 'phdata'];   // shared by every Piper voice (≈40 МБ)
+  /** the download group of a Piper voice ('piper' = talesyntese, as before) and its own two files */
+  const pGroup = key => key === PIPER_DEFAULT ? 'piper' : 'piper:' + key;
+  Object.keys(PIPER_VOICES).forEach(key => {
+    const [path, size, jsize] = PIPER_VOICES[key];
+    if (!path) return;
+    F['pv:' + key] = [PV + path + key + '.onnx', size];
+    F['pj:' + key] = [PV + path + key + '.onnx.json', jsize];
+    GROUPS[pGroup(key)] = PIPER_RT.concat(['pv:' + key, 'pj:' + key]);
+    GROUP_NAME[pGroup(key)] = 'офлайн-голос Piper';
+  });
+  const pFiles = key => key === PIPER_DEFAULT ? ['voice', 'vjson'] : ['pv:' + key, 'pj:' + key];
   const LS_READY = 'nk-speech-ready';     // sync flags for Voices.ready(): {asr:1, piper:1}
   const SR = () => window.SpeechRecognition || window.webkitSpeechRecognition;
   const hasWasm = typeof WebAssembly === 'object';
@@ -110,6 +140,8 @@
           }
         } else { const b = new Uint8Array(await r.arrayBuffer()); chunks.push(b); got = b.length; }
         const blob = new Blob(chunks, { type: type || r.headers.get('content-type') || 'application/octet-stream' });
+        // a voice model must arrive whole (pinned revision + exact size): a cut file would make noise, not speech
+        if (/\.onnx$/.test(url) && size > 1e6 && Math.abs(blob.size - size) > 1024) throw new Error('Файл скачался не полностью — попробуйте ещё раз');
         await c.put(url, new Response(blob, { headers: { 'content-type': blob.type, 'x-size': String(blob.size) } }));
         done += size;
         onProgress && onProgress(done, total, url.split('/').pop());
@@ -131,7 +163,7 @@
       }
       setFlag(group, false);
       if (group === 'asr' || group === 'asrSmall') { if (asrId.startsWith(group === 'asr' ? 'base@' : 'small@')) { asrP = null; asrId = ''; } replan(); }
-      if (group === 'piper') Piper._p = null;
+      if (group === 'piper' || group.startsWith('piper:')) Piper.drop(group === 'piper' ? PIPER_DEFAULT : group.slice(6));
     },
     /** bytes on disk that only this group uses (not the shared ONNX runtime) — what deleting it frees */
     async ownBytes(group) {
@@ -235,7 +267,7 @@
         } catch (e) {
           ctrl = null;
           if (e.name === 'AbortError') return;
-          m.$('[data-dl-txt]').textContent = '⚠️ ' + e.message;
+          m.$('[data-dl-txt]').textContent = '⚠️ ' + U.niceErr(e);
           yes.disabled = false; yes.textContent = '🔁 Попробовать ещё раз'; if (b) b.disabled = false;
         }
       };
@@ -673,7 +705,7 @@
           } catch (e) {
             console.error(e);
             set('idle');
-            status('⚠️ Не удалось распознать: ' + U.esc(e.message || e) + (SR() ? ' · <a href="#" data-sp-usebrowser>через браузер</a>' : ''));
+            status('⚠️ Не удалось распознать: ' + U.esc(U.niceErr(e, '', true)) + (SR() ? ' · <a href="#" data-sp-usebrowser>через браузер</a>' : ''));
             const a = box.querySelector('[data-sp-usebrowser]');
             if (a) a.onclick = ev => { ev.preventDefault(); Store.setSetting('speechAsr', 'browser'); eng = 'browser'; showEng(); startBrowser(); };
           }
@@ -706,7 +738,7 @@
         status('Нажмите, чтобы записать ещё раз');
         o.onText(final.trim(), 'browser');
       };
-      try { sr.start(); downAt = performance.now(); } catch (e) { set('idle'); status('⚠️ ' + U.esc(e.message)); }
+      try { sr.start(); downAt = performance.now(); } catch (e) { set('idle'); status('⚠️ ' + U.esc(U.niceErr(e))); }
     }
     function stop() {
       if (rec && rec.active) rec.stop('user');
@@ -760,8 +792,8 @@
       foot: `<button class="btn" data-sp-again hidden>🔁 Ещё раз</button><button class="btn primary" data-sp-done>Готово</button>`,
       onClose: () => { ctl && ctl.stop(); if (opts.onDone) opts.onDone(last); },
     });
-    m.$('[data-sp-say]').onclick = () => TTS.speak(text, 'no');
-    m.$('[data-sp-slow]').onclick = () => TTS.speak(text, 'no', { rate: 0.55 });
+    m.$('[data-sp-say]').onclick = () => TTS.speak(text, 'no', { place: 'speech' });
+    m.$('[data-sp-slow]').onclick = () => TTS.speak(text, 'no', { rate: 0.55, place: 'speech' });
     m.$('[data-sp-done]').onclick = () => m.close();
     const ctl = recorderUI(m.$('[data-sp-rec-box]'), {
       maxMs: opts.maxMs || 8000,
@@ -780,7 +812,7 @@
       },
     });
     m.$('[data-sp-again]').onclick = () => { m.$('[data-sp-result]').hidden = true; m.$('[data-sp-target]').innerHTML = U.esc(text); ctl.start(); };
-    if (opts.autoplay !== false) setTimeout(() => TTS.speak(text, 'no'), 250);
+    if (opts.autoplay !== false) setTimeout(() => TTS.speak(text, 'no', { place: 'speech' }), 250);
     return m;
   }
 
@@ -820,7 +852,7 @@
       onClose: () => { ctl && ctl.stop(); TTS.stop(); opts.onDone && opts.onDone(results); },
     });
     const box = m.$('[data-dc]'), next = m.$('[data-dc-next]'), skip = m.$('[data-dc-skip]');
-    const play = slow => TTS.speak(items[i].no, 'no', slow ? { rate: 0.55 } : {});
+    const play = slow => TTS.speak(items[i].no, 'no', slow ? { rate: 0.55, place: 'speech' } : { place: 'speech' });
 
     function show() {
       checked = false; ctl && ctl.stop(); ctl = null;
@@ -870,7 +902,7 @@
         ${how === 'say' ? `<div class="small muted">Услышано: «${U.esc(answer || '—')}»</div>` : ''}
         ${foldOnly ? '<div class="small">💡 Проверьте буквы æ, ø, å — на телефоне: удерживайте a / o.</div>' : ''}
         ${how === 'say' && res.score < 100 ? `<ul class="sp-tips">${tips(res, answer).map(t => `<li>${U.esc(t)}</li>`).join('')}</ul>` : ''}`;
-      r.querySelector('[data-dc-say]').onclick = () => TTS.speak(it.no, 'no');
+      r.querySelector('[data-dc-say]').onclick = () => TTS.speak(it.no, 'no', { place: 'speech' });
       const inp = box.querySelector('[data-dc-in]'); if (inp) inp.readOnly = true;
       next.hidden = false; skip.hidden = true;
       next.textContent = i + 1 < items.length ? 'Дальше →' : 'Итоги';
@@ -884,7 +916,7 @@
         <div class="sp-sum">${items.map((it, k) => { const x = results[k]; return `<div class="sp-sum-row ${x ? (x.score >= 90 ? 'ok' : x.score >= 50 ? 'close' : 'bad') : 'skip'}">
           <span class="sp-sum-score">${x ? x.score + '%' : '—'}</span><span class="grow"><b lang="nb">${U.esc(it.no)}</b>${x && x.score < 100 && x.answer ? `<br><span class="small muted">${x.mode === 'say' ? 'услышано' : 'написано'}: ${U.esc(x.answer)}</span>` : ''}</span>
           <button class="icon-btn sm" data-sum-say="${k}" title="Прослушать">🔊</button></div>`; }).join('')}</div>`;
-      box.querySelectorAll('[data-sum-say]').forEach(b => b.onclick = () => TTS.speak(items[+b.dataset.sumSay].no, 'no'));
+      box.querySelectorAll('[data-sum-say]').forEach(b => b.onclick = () => TTS.speak(items[+b.dataset.sumSay].no, 'no', { place: 'speech' }));
       skip.hidden = true; next.hidden = false; next.textContent = opts.items ? '🔁 Ещё раз' : `🔁 Ещё ${items.length}`;
       next.onclick = () => { m.close(); dictation(opts.items ? Object.assign({}, opts, { items: U.shuffle(items) }) : { count: items.length, onDone: opts.onDone }); };
       const f = m.el.querySelector('.modal-foot');
@@ -901,37 +933,69 @@
     return m;
   }
 
-  /* ================= 📴 Piper: offline Norwegian voice ================= */
+  /* ================= 📴 Piper: offline voices (Norwegian, Russian, Ukrainian) ================= */
   const Piper = {
-    _p: null, _q: Promise.resolve(),
+    _rt: null, _m: null, _q: Promise.resolve(), _idle: 0,
+    VOICES: PIPER_VOICES, DEFAULT: PIPER_DEFAULT,
     available() { return hasWasm && hasCaches; },
-    isReady() { return this.available() && !!flags().piper; },
-    async status() { return Models.status('piper'); },
-    async download() { const r = await consent('piper'); return r === true; },
-    async remove() { await Models.remove('piper'); },
-    load() {
-      if (this._p) return this._p;
-      this._p = (async () => {
-        const [ortMod, phMod, cfgBuf, model, phWasm, phData] = await Promise.all([
-          Models.importMod('ortjs'), Models.importMod('phjs'), Models.buf('vjson'), Models.buf('voice'), Models.buf('phwasm'), Models.buf('phdata')]);
+    group: pGroup,
+    /** downloaded? (sync, from the flags kept by Models.status) — no key = the old Norwegian voice */
+    isReady(key) { return this.available() && !!flags()[pGroup(key || PIPER_DEFAULT)]; },
+    async status(key) { return Models.status(pGroup(key || PIPER_DEFAULT)); },
+    /** {total, missing, runtimeMissing} bytes for the consent text: «63 МБ (+40 МБ общий модуль)» */
+    async need(key) {
+      const st = await Models.status(pGroup(key || PIPER_DEFAULT));
+      const own = pFiles(key || PIPER_DEFAULT);
+      const rt = st.missing.filter(k => !own.includes(k)).reduce((n, k) => n + F[k][1], 0);
+      return { total: st.missingBytes, voice: st.missingBytes - rt, runtime: rt, ready: st.ready, bytes: st.bytes };
+    },
+    /** the old one-window download (Speech hub) */
+    async download(key) { const r = await consent(pGroup(key || PIPER_DEFAULT)); return r === true; },
+    /** download without a window: onProgress(doneBytes, totalBytes); signal cancels (finished files stay) */
+    async downloadVoice(key, onProgress, signal) { return Models.download(pGroup(key || PIPER_DEFAULT), onProgress, signal); },
+    async remove(key) { await Models.remove(pGroup(key || PIPER_DEFAULT)); },
+    /** bytes only this voice uses (what deleting it frees) */
+    async ownBytes(key) { return Models.ownBytes(pGroup(key || PIPER_DEFAULT)); },
+    drop(key) {
+      if (this._m && (!key || this._m.key === key)) { const m = this._m; this._m = null; m.p.then(x => { try { x.session.release && x.session.release(); } catch (e) { /* ignore */ } }, () => {}); }
+    },
+    /** the runtime (ONNX + espeak-ng phonemizer): loaded once for all voices */
+    runtime() {
+      if (this._rt) return this._rt;
+      this._rt = (async () => {
+        const [ortMod, phMod, phWasm, phData] = await Promise.all([Models.importMod('ortjs'), Models.importMod('phjs'), Models.buf('phwasm'), Models.buf('phdata')]);
         const ort = ortMod.default && ortMod.default.InferenceSession ? ortMod.default : ortMod;
         await Models.ortWasm(ort.env.wasm);
-        const cfg = JSON.parse(new TextDecoder().decode(cfgBuf));
-        const session = await ort.InferenceSession.create(model, { executionProviders: ['wasm'] });
         let out = '';
         const ph = await phMod.createPiperPhonemize({
           noInitialRun: true, wasmBinary: phWasm, getPreloadedPackage: () => phData,
           print: d => { out = d; }, printErr: () => {}, locateFile: u => u,
         });
-        const phonemize = text => {
+        const phonemize = (text, voice) => {
           out = '';
-          ph.callMain(['-l', cfg.espeak.voice, '--input', JSON.stringify([{ text }]), '--espeak_data', '/espeak-ng-data']);
+          ph.callMain(['-l', voice, '--input', JSON.stringify([{ text }]), '--espeak_data', '/espeak-ng-data']);
           return out ? JSON.parse(out).phonemes || [] : [];
         };
-        return { ort, cfg, session, phonemize };
+        return { ort, phonemize };
       })();
-      this._p.catch(() => { this._p = null; });
-      return this._p;
+      this._rt.catch(() => { this._rt = null; });
+      return this._rt;
+    },
+    /** one voice in memory at a time (phones have little of it); unloaded after 2 minutes without use */
+    load(key) {
+      key = key || PIPER_DEFAULT;
+      if (this._m && this._m.key === key) return this._m.p;
+      this.drop();
+      const [fv, fj] = pFiles(key);
+      const p = (async () => {
+        const [rt, cfgBuf, model] = await Promise.all([this.runtime(), Models.buf(fj), Models.buf(fv)]);
+        const cfg = JSON.parse(new TextDecoder().decode(cfgBuf));
+        const session = await rt.ort.InferenceSession.create(model, { executionProviders: ['wasm'] });
+        return { ort: rt.ort, cfg, session, phonemize: t => rt.phonemize(t, (cfg.espeak && cfg.espeak.voice) || 'nb') };
+      })();
+      this._m = { key, p };
+      p.catch(() => { if (this._m && this._m.p === p) this._m = null; });
+      return p;
     },
     /** phonemes (Piper 1.5 rules: sentences, merged vowel clusters, model's id map) -> id arrays per sentence */
     ids(cfg, phonemes) {
@@ -949,24 +1013,39 @@
         return ids;
       });
     },
-    /** Norwegian text -> WAV Blob (rate: 0.9 = normal, like TTS rates) */
-    synth(text, rate = 0.9) {
+    /** a «text» model (uk_UA-ukrainian_tts): letters instead of phonemes — lower case, й/ї split into letter + mark */
+    textIds(cfg, text) {
+      const map = cfg.phoneme_id_map;
+      const chars = [...String(text).toLowerCase().replace(/[’ʼ`]/g, "'").normalize('NFD')].filter(c => map[c]);
+      return this.ids(Object.assign({}, cfg, { vowel_clusters: [] }), chars);
+    },
+    /** text -> WAV Blob (rate: 0.9 = normal, like TTS rates); o: { voice: model key, speaker: name or number } */
+    synth(text, rate = 0.9, o = {}) {
+      const key = o.voice || PIPER_DEFAULT;
       const job = this._q.then(async () => {
-        const { ort, cfg, session, phonemize } = await this.load();
+        clearTimeout(this._idle);
+        const { ort, cfg, session, phonemize } = await this.load(key);
         const inf = cfg.inference || {};
         const speed = Math.max(0.45, Math.min(2.2, (rate || 0.9) / 0.9));
         const ls = (inf.length_scale || 1) / speed;
+        // the speaker of a multi-speaker model (nvcc: 10, ukrainian_tts: 3) — before, it was always speaker 0
+        let sid = 0;
+        if (cfg.num_speakers > 1) {
+          const m = cfg.speaker_id_map || {};
+          sid = o.speaker != null && m[o.speaker] != null ? m[o.speaker] : Number.isInteger(+o.speaker) ? Math.max(0, Math.min(cfg.num_speakers - 1, +o.speaker)) : (cfg.default_speaker_id || 0);
+        }
         const pcms = [];
         const parts = String(text).replace(/\s+/g, ' ').trim().match(/[^.!?…]+[.!?…]*|[.!?…]+/g) || [];
         for (const part of parts) {
           if (!/\p{L}|\p{N}/u.test(part)) continue;
-          for (const ids of this.ids(cfg, phonemize(part.trim()))) {
+          const list = cfg.phoneme_type === 'text' ? this.textIds(cfg, part.trim()) : this.ids(cfg, phonemize(part.trim()));
+          for (const ids of list) {
             const feeds = {
               input: new ort.Tensor('int64', BigInt64Array.from(ids.map(BigInt)), [1, ids.length]),
               input_lengths: new ort.Tensor('int64', BigInt64Array.from([BigInt(ids.length)]), [1]),
               scales: new ort.Tensor('float32', Float32Array.from([inf.noise_scale ?? 0.667, ls, inf.noise_w ?? 0.8]), [3]),
             };
-            if (cfg.num_speakers > 1) feeds.sid = new ort.Tensor('int64', BigInt64Array.from([0n]), [1]);
+            if (cfg.num_speakers > 1) feeds.sid = new ort.Tensor('int64', BigInt64Array.from([BigInt(sid)]), [1]);
             const r = await session.run(feeds);
             pcms.push(r.output.data);
           }
@@ -978,14 +1057,19 @@
         const w = (o, s) => { for (let k = 0; k < s.length; k++) v.setUint8(o + k, s.charCodeAt(k)); };
         w(0, 'RIFF'); v.setUint32(4, 36 + total * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
         v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, total * 2, true);
-        let o = 44;
+        // some models speak very quietly (nvcc: peak ≈ 0.1): brought up to the loudness of the others
+        let peak = 0;
+        pcms.forEach(p => { for (let j = 0; j < p.length; j++) { const a = p[j] < 0 ? -p[j] : p[j]; if (a > peak) peak = a; } });
+        const gain = peak > 0.01 && peak < 0.5 ? Math.min(8, 0.85 / peak) : 1;
+        let o2 = 44;
         pcms.forEach((p, k) => {
-          for (let j = 0; j < p.length; j++) { const s = Math.max(-1, Math.min(1, p[j])); v.setInt16(o, s < 0 ? s * 32768 : s * 32767, true); o += 2; }
-          if (k < pcms.length - 1) o += gap * 2;
+          for (let j = 0; j < p.length; j++) { const s = Math.max(-1, Math.min(1, p[j] * gain)); v.setInt16(o2, s < 0 ? s * 32768 : s * 32767, true); o2 += 2; }
+          if (k < pcms.length - 1) o2 += gap * 2;
         });
         return new Blob([v.buffer], { type: 'audio/wav' });
       });
       this._q = job.catch(() => {});
+      job.then(() => { clearTimeout(this._idle); this._idle = setTimeout(() => this.drop(), 120000); }, () => {});
       return job;
     },
   };
@@ -1066,7 +1150,7 @@
     try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); est = `Занято браузером: ${fmtMB(e.usage || 0)}${e.quota ? ' из ' + fmtMB(e.quota) : ''}`; } } catch (e) { /* ignore */ }
     const sr = !!SR();
     const asrPref = Store.settings.speechAsr;
-    const piperOn = Store.settings.ttsEngine === 'piper';
+    const piperOn = !!(window.Voices && Voices.current && Voices.current('no') === 'piper:' + PIPER_DEFAULT);
     return `<div class="sp-status">
       <div class="sp-st-row"><div class="grow"><b>🗣 Распознавание речи — ${am.name}</b>
           <div class="small muted">Национальная библиотека Норвегии · Apache-2.0 · работает на устройстве</div>
@@ -1077,7 +1161,7 @@
         </div>
         <div class="col sp-st-btns">${a.ready ? '<button class="btn sm" data-hub="del-asr">🗑 Удалить модель</button>' : hasWasm && hasCaches ? `<button class="btn sm primary" data-hub="dl-asr">⬇ Скачать ≈${fmtMB(a.missingBytes)}</button>` : ''}</div></div>
       <div class="sp-st-row"><div class="grow"><b>📴 Офлайн-голос Piper — norsk «talesyntese»</b>
-          <div class="small muted">MIT · запись CC0 (Språkbanken) · только норвежский</div>
+          <div class="small muted">MIT · запись CC0 (Språkbanken) · русские и украинские офлайн-голоса — в <a href="#" data-voices-open="no">🔊 Голосах</a></div>
           <div class="small">${!hasWasm || !hasCaches ? '⚠️ Недоступно в этом браузере' : p.ready ? `✅ Скачано · ${fmtMB(p.bytes)}${piperOn ? ' · <b>используется для норвежского</b>' : ''}` : `Не скачано · ≈${fmtMB(p.missingBytes)} один раз`}</div></div>
         <div class="col sp-st-btns">${p.ready ? `<button class="btn sm" data-hub="test-piper">▶ Прослушать</button>${piperOn ? '' : '<button class="btn sm primary" data-hub="use-piper">★ Использовать</button>'}<button class="btn sm" data-hub="del-piper">🗑 Удалить</button>` : hasWasm && hasCaches ? `<button class="btn sm" data-hub="dl-piper">⬇ Скачать ≈${fmtMB(p.missingBytes)}</button>` : ''}</div></div>
       ${est ? `<div class="tiny muted">${est}</div>` : ''}
@@ -1135,9 +1219,9 @@
         const g = act === 'del-asr' ? (await asrPlan()).group : 'piper';
         if (!await UI.confirm(`Удалить ${GROUP_NAME[g]} с этого устройства? Понадобится — скачаете снова.`, { ok: 'Удалить', danger: true })) return;
         await Models.remove(g);
-        if (g === 'piper' && Store.settings.ttsEngine === 'piper') Store.setSetting('ttsEngine', 'auto');
+        if (g === 'piper' && window.Voices && Voices.onRemoved) Voices.onRemoved('piper:' + PIPER_DEFAULT);
         UI.toast('Удалено', 'good'); refresh();
-      } else if (act === 'use-piper') { Store.setSetting('ttsEngine', 'piper'); if (window.Voices) Voices.resetWarnings(); UI.toast('Норвежский текст теперь читает Piper', 'good'); refresh(); }
+      } else if (act === 'use-piper') { if (window.Voices && Voices.setPick) Voices.setPick('no', 'piper:' + PIPER_DEFAULT); UI.toast('Норвежский текст теперь читает Piper', 'good'); refresh(); }
       else if (act === 'test-piper') {
         b.disabled = true;
         try { await playBlob(await Piper.synth('Hei! Jeg leser norsk tekst, helt uten internett.', 0.9)); } catch (err) { UI.toast('Piper: ' + err.message, 'bad'); }
@@ -1149,7 +1233,9 @@
   function playBlob(blob) {
     return new Promise((res, rej) => {
       TTS.stop();
-      const a = new Audio(URL.createObjectURL(blob));
+      const url = URL.createObjectURL(blob);
+      // the first phrase loads the model (seconds): an unlocked element still plays after that wait (Safari)
+      const a = window.Voices && Voices.audio ? Voices.audio(url) : new Audio(url);
       TTS._audio = a;
       a.onended = () => { if (TTS._audio === a) TTS._audio = null; URL.revokeObjectURL(a.src); res(); };
       a.onerror = () => rej(new Error('не удалось проиграть звук'));
@@ -1171,7 +1257,7 @@
     `<button class="${cls}" data-speech-pron="${U.esc(text)}"${ru ? ` data-ru="${U.esc(ru)}"` : ''} title="Проверка произношения: скажите вслух — покажу, что прозвучало верно">${label}</button>`;
 
   // refresh the sync «ready» flags (used by Voices.ready) once the page is idle
-  if (hasCaches) setTimeout(() => { Models.status('piper').catch(() => {}); Models.status('asr').catch(() => {}); Models.status('asrSmall').catch(() => {}); }, 1500);
+  if (hasCaches) setTimeout(() => { Object.keys(GROUPS).forEach(g => Models.status(g).catch(() => {})); }, 1500);
 
   const Speech = {
     open, pronounce, dictation, compare, tips, pickItems, btnHtml,
@@ -1186,6 +1272,24 @@
     async asrReady() { try { return hasWasm && hasCaches && (await Models.status((await asrPlan()).group)).ready; } catch (e) { return false; } },
     /** download the recognition model this device uses (base or small) with the consent dialog -> true when ready */
     async ensureModel(opts) { return (await consentAsr(opts)) === true; },
+    /** 🤖 the subtitles' own overlay (no window): download the model this device uses; onProgress(doneBytes, totalBytes) */
+    async downloadAsr(onProgress, signal) {
+      const plan = await asrPlan();
+      await Models.download(plan.group, onProgress, signal);
+      try { Store.setSetting('speechAsr', 'whisper'); } catch (e) { /* no settings yet */ }
+      replan();
+      return true;
+    },
+    /** start the model ahead of the first phrase (the worker starts, the files are read from the cache) */
+    async warmAsr() { await loadAsr(await asrPlan()); return true; },
+    /** «Лёгкое» from now on (the subtitles' offer when the accurate model can't keep up): downloaded if missing —
+     *  until then the accurate one goes on working */
+    async useLight(onProgress, signal) {
+      Store.setSetting('asrQuality', 'fast'); replan();
+      if (!(await Models.status('asr')).ready) await Models.download('asr', onProgress, signal);
+      replan();
+      return true;
+    },
     async status() { const [asr, piper] = await Promise.all([Models.status((await asrPlan()).group), Models.status('piper')]); return { asr, piper, browserSR: !!SR() }; },
     /** which recognition model / device: {key, name, label, device, missingBytes, ready, quality, recommended} */
     async asrInfo() {

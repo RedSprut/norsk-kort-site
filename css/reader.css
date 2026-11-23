@@ -81,14 +81,43 @@
 }
 ::highlight(rd-word) { background-color: color-mix(in srgb, var(--accent2) 38%, transparent); }
 
+/* ---------- 🎤 «бегущая подсветка слов» (js/reader.js karPaint + js/tts.js Karaoke) ----------
+   the word being said: a soft marker in the reader's highlight colour glides behind it (the letters stay on top),
+   the word itself turns dark ink on a light tint at once; the words already said in the sentence are calmer
+   («пройденное»); the words to come stay as they are. Colours follow «Подсветка при чтении» and the skin. */
+.rd-modal, .rd-pop { --rd-say-ink: #17192c; --rd-done: color-mix(in srgb, var(--rd-fg) 64%, var(--rd-bg)); }
+[data-theme="light"] .rd-modal { --rd-done: color-mix(in srgb, var(--rd-fg) 56%, var(--rd-bg)); }
+.rd-modal[data-skin="sepia"] { --rd-say-ink: #2a2016; --rd-done: color-mix(in srgb, var(--rd-fg) 56%, var(--rd-bg)); }
+/* the colours made from «Подсветка при чтении»: worked out on .rd itself, where js/reader.js applyLook sets --rd-hl
+   (declared on .rd-modal they would keep the default amber) */
+.rd-modal .rd { --rd-ul: var(--rd-hl); --rd-say-bg: var(--rd-hl); --rd-say-edge: color-mix(in srgb, var(--rd-hl) 70%, #000); }
+[data-theme="light"] .rd-modal .rd { --rd-ul: color-mix(in srgb, var(--rd-hl) 62%, #000); --rd-say-edge: var(--rd-ul); }
+.rd-modal[data-skin="sepia"] .rd { --rd-ul: color-mix(in srgb, var(--rd-hl) 60%, #3b2f22); --rd-say-edge: var(--rd-ul); }
+.rd-cyr, .rd-lis-now[lang="ru"] { --rd-done: color-mix(in srgb, var(--rd-ru) 60%, var(--rd-bg)); }
+::highlight(rd-say) { background-color: color-mix(in srgb, var(--rd-say-bg) 55%, transparent); color: var(--rd-say-ink); }
+::highlight(rd-done) { color: var(--rd-done); }
+/* browsers without the Highlight API: the same look on short-lived spans (no padding — the lines never move) */
+.rd-w-say { background-color: color-mix(in srgb, var(--rd-say-bg) 55%, transparent); color: var(--rd-say-ink); border-radius: .18em; }
+.rd-w-done { color: var(--rd-done); }
+/* the marker: behind the letters (z-index −1 inside the text's own layer), glides from word to word */
+.rd-flow { position: relative; z-index: 0; }
+.rd-lis { position: relative; z-index: 0; }
+.rd-kmark { position: absolute; left: 0; top: 0; z-index: -1; pointer-events: none; user-select: none; -webkit-user-select: none;
+  border-radius: .3em; background: var(--rd-say-bg);
+  box-shadow: 0 0 0 .1em var(--rd-say-bg), inset 0 -.12em 0 var(--rd-say-edge), 0 .15em .8em -.2em color-mix(in srgb, var(--rd-say-bg) 75%, transparent);
+  transition: transform .2s cubic-bezier(.25, .8, .3, 1), width .2s cubic-bezier(.25, .8, .3, 1), opacity .22s ease; will-change: transform, width; }
+.rd-kmark.off { opacity: 0; }
+.rd-kmark.jump { transition: opacity .18s ease; }
+.rd-kmark.still { transition: none; }
+
 .rd-edge { display: flex; justify-content: center; padding: 10px 0 18px; }
 .rd-edge-btn { white-space: normal; min-height: 44px; }
 .rd-end { text-align: center; font-size: 1.4em; color: var(--rd-muted); padding: 1em 0 0; }
 .rd-tiny { font-size: 12.5px; color: var(--rd-muted, var(--muted)); line-height: 1.45; }
 
 /* side page arrows (wide screens, page mode) */
-.rd-side {
-  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; display: none; align-items: center; justify-content: center;
+.rd-side { /* centred with `translate`, not `transform` — a hover `transform` must never undo the centring */
+  position: absolute; top: 50%; translate: 0 -50%; z-index: 2; display: none; align-items: center; justify-content: center;
   width: 46px; height: 96px; border-radius: 16px; border: 1px solid transparent; background: transparent; color: var(--rd-muted); cursor: pointer;
   transition: background .18s, color .18s, border-color .18s, opacity .18s;
 }
@@ -337,7 +366,7 @@
 }
 
 /* narrow phones: the title gets room — «Содержание» stays in the ⋯ menu */
-@media (max-width: 420px) { .rd-hb[data-a="toc"] { display: none; } .rd-modal .modal-head h2.rd-h2 { font-size: 16px; } }
+@media (max-width: 420px) { .rd-hb[data-a="toc"], .rd-hb[data-a="print"] { display: none; } .rd-modal .modal-head h2.rd-h2 { font-size: 16px; } }
 
 /* =====================================================================
  * 🎧 listening mode («аудиокнига») + 🌙 sleep timer

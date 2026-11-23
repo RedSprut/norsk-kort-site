@@ -1,0 +1,145 @@
+/* =====================================================================
+ * 🎚 PHOTO EDITOR (js/photofx.js) — loaded on first use with the script. The card pictures themselves are drawn with
+ * inline styles (js/study.js PhotoFxCore), so nothing here is needed to SEE the settings — only to edit them.
+ * ===================================================================== */
+.modal.pfx-modal { width: min(1020px, 96vw); }
+.pfx-ed { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr); gap: 20px; align-items: start; --pfx-h: min(52vh, 470px); }
+
+/* ---------- preview ---------- */
+.pfx-prevcol { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; position: sticky; top: 0; z-index: 2; }
+.pfx-frame {
+  --ar: 1.5; position: relative; overflow: hidden; isolation: isolate; container-type: size;
+  aspect-ratio: var(--ar); width: min(100%, calc(var(--pfx-h) * var(--ar))); max-height: var(--pfx-h);
+  border-radius: 16px; background: #0c0e1c; box-shadow: 0 14px 34px -18px rgba(0,0,0,.7);
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; outline: none;
+  transition: aspect-ratio .25s ease;
+}
+.pfx-frame:focus-visible { box-shadow: 0 0 0 3px var(--accent), 0 14px 34px -18px rgba(0,0,0,.7); }
+.pfx-frame.pfx-dragging { cursor: grabbing; }
+.pfx-frame .pfx-r { pointer-events: none; transition: transform .25s ease, width .25s ease, height .25s ease; }
+.pfx-frame.pfx-dragging .pfx-r { transition: none; }
+.pfx-frame .pfx-img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; opacity: 0; transition: opacity .25s; }
+.pfx-frame.ready .pfx-img { opacity: 1; }
+.pfx-frame .pfx-cast { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; }
+.pfx-frame .pfx-vig { position: absolute; inset: 0; pointer-events: none; }
+/* the rule of thirds while moving the frame */
+.pfx-thirds { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background:
+    linear-gradient(90deg, transparent calc(33.33% - .5px), rgba(255,255,255,.55) calc(33.33% - .5px), rgba(255,255,255,.55) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.55) calc(66.66% - .5px), rgba(255,255,255,.55) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+    linear-gradient(180deg, transparent calc(33.33% - .5px), rgba(255,255,255,.55) calc(33.33% - .5px), rgba(255,255,255,.55) calc(33.33% + .5px), transparent calc(33.33% + .5px), transparent calc(66.66% - .5px), rgba(255,255,255,.55) calc(66.66% - .5px), rgba(255,255,255,.55) calc(66.66% + .5px), transparent calc(66.66% + .5px)); }
+.pfx-frame.pfx-dragging .pfx-thirds { opacity: 1; }
+.pfx-frame.pfx-comparing::after { content: "Без настроек цвета"; position: absolute; left: 10px; top: 10px; padding: 6px 10px; border-radius: 99px;
+  font: 700 12px/1 var(--font); color: #fff; background: rgba(10,12,28,.62); pointer-events: none; }
+.pfx-wait { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; }
+.pfx-err { padding: 10px 14px; border-radius: 12px; background: rgba(10,12,28,.7); font-size: 13px; }
+
+.pfx-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.pfx-tool {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 48px; min-height: 48px; padding: 0 12px;
+  border-radius: 99px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text);
+  font: 700 14px/1 var(--font); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s, border-color .15s, transform .12s;
+}
+.pfx-tool:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+.pfx-tool:active { transform: scale(.95); }
+.pfx-tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pfx-tool[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 26%, var(--panel)); }
+.pfx-cmp { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+.pfx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+
+/* ---------- controls ---------- */
+.pfx-ctl { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.pfx-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); }
+.pfx-tabs [role="tab"] {
+  flex: 1 1 0; min-height: 44px; padding: 0 8px; border: 0; border-radius: 10px; background: transparent; color: var(--muted);
+  font: 700 13.5px/1.1 var(--font); cursor: pointer; white-space: nowrap; transition: background .15s, color .15s;
+}
+.pfx-tabs [role="tab"]:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.pfx-tabs [role="tab"].on { color: #fff; background: var(--accent); }
+.pfx-tabs [role="tab"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pfx-pane { display: flex; flex-direction: column; gap: 6px; min-height: 200px; }
+.pfx-note { margin: 4px 2px 0; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.pfx-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.pfx-row .btn { min-height: 44px; }
+
+/* styles with thumbnails */
+.pfx-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.pfx-pre {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 5px 4px 8px; border-radius: 14px;
+  border: 2px solid transparent; background: transparent; color: var(--text); cursor: pointer; font: 600 12.5px/1.2 var(--font);
+  -webkit-tap-highlight-color: transparent; transition: border-color .15s, background .15s, transform .12s;
+}
+.pfx-pre:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.pfx-pre:active { transform: scale(.97); }
+.pfx-pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pfx-pre.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.pfx-thumb { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; isolation: isolate; background: #0c0e1c; }
+.pfx-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; }
+.pfx-thumb i { position: absolute; inset: 0; mix-blend-mode: soft-light; }
+.pfx-thumb i.v { mix-blend-mode: normal; }
+.pfx-pre-n { display: block; max-width: 100%; text-align: center; overflow-wrap: anywhere; }
+
+/* sliders: a value button (tap = back to as it was), the ends in words, a fill from the middle */
+.pfx-sl { padding: 6px 2px 2px; }
+.pfx-sl-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pfx-sl-l { font: 700 14px/1.2 var(--font); color: var(--text); cursor: pointer; padding: 10px 0; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.pfx-sl-l.pfx-flash { color: var(--accent); }
+.pfx-sl-v {
+  min-width: 56px; min-height: 36px; padding: 0 10px; border-radius: 99px; border: 1px solid var(--panel-border); background: var(--panel);
+  color: var(--muted); font: 700 13px/1 var(--font); font-variant-numeric: tabular-nums; cursor: pointer; position: relative;
+}
+.pfx-sl-v::before { content: ""; position: absolute; inset: -4px -2px; } /* a 44 px target */
+.pfx-sl.changed .pfx-sl-v { color: var(--text); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.pfx-sl.changed .pfx-sl-v:hover { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); }
+.pfx-sl-v:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pfx-sl input[type="range"] {
+  --a: 0%; --b: 0%; -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 32px; margin: 2px 0 0; background: transparent; cursor: pointer;
+}
+.pfx-sl input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 99px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--muted) 30%, transparent) var(--a), var(--accent) var(--a), var(--accent) var(--b), color-mix(in srgb, var(--muted) 30%, transparent) var(--b));
+}
+.pfx-sl input[type="range"]::-moz-range-track { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--muted) 30%, transparent); }
+.pfx-sl input[type="range"]::-moz-range-progress { height: 6px; border-radius: 99px; background: var(--accent); }
+.pfx-sl input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; margin-top: -10px; border-radius: 50%; background: #fff; border: 3px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,.35); transition: transform .12s;
+}
+.pfx-sl input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.pfx-sl input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.12); }
+.pfx-sl input[type="range"]:focus { outline: none; }
+.pfx-sl input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent), 0 2px 8px rgba(0,0,0,.35); }
+.pfx-sl input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 45%, transparent); }
+.pfx-sl-ends { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--muted); margin-top: -2px; }
+
+/* footer */
+.pfx-modal .modal-foot { flex-wrap: wrap; gap: 8px; }
+.pfx-modal .modal-foot .btn { min-height: 44px; }
+.pfx-short { display: none; }
+
+/* ---------- 🎚 the round button over the card picture (study card) ---------- */
+.pic-btns.on-img .pic-fx { justify-content: center; font-size: 17px; }
+
+/* ---------- phones: a bottom sheet — the photo stays on top while the controls scroll under it ---------- */
+@media (max-width: 760px) {
+  .modal.pfx-modal { width: 100%; }
+  .pfx-ed { grid-template-columns: 1fr; gap: 10px; --pfx-h: min(30dvh, 280px); }
+  .pfx-prevcol { position: sticky; top: -6px; z-index: 3; padding: 6px 0 8px; gap: 8px; background: var(--panel-solid); }
+  .pfx-tools { gap: 6px; }
+  .pfx-tool { min-height: 44px; min-width: 44px; }
+  .pfx-pane { min-height: 0; }
+  .pfx-presets { gap: 6px; }
+  .pfx-pre { font-size: 11.5px; padding: 4px 2px 6px; }
+  .pfx-tabs [role="tab"] { font-size: 13px; padding: 0 4px; }
+  .pfx-long { display: none; }
+  .pfx-short { display: inline; }
+  .pfx-modal .modal-foot .btn { padding-left: 12px; padding-right: 12px; }
+}
+@media (max-width: 380px) {
+  .pfx-cmp-l { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfx-frame, .pfx-frame .pfx-r, .pfx-frame .pfx-img, .pfx-thirds, .pfx-tool, .pfx-pre, .pfx-tabs [role="tab"],
+  .pfx-sl input[type="range"]::-webkit-slider-thumb { transition: none; }
+  .pfx-tool:active, .pfx-pre:active { transform: none; }
+}

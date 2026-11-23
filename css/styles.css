@@ -78,10 +78,15 @@ a { color: var(--accent2); }
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--panel-border);
 }
-.logo { display: flex; align-items: center; gap: 6px; background: none; border: 0; cursor: pointer; padding: 4px; }
-.logo-flag { font-size: 22px; }
-.logo-arrows { color: var(--muted); font-weight: 700; }
-.logo-text { margin-left: 8px; font-size: 18px; letter-spacing: .3px; }
+.logo { display: flex; align-items: center; gap: 3px; background: none; border: 0; cursor: pointer; padding: 4px; }
+/* 🇳🇴 ⇄ 🇺🇦 🇷🇺: as wide as the old 🇳🇴 ⇄ 🇷🇺 (the top-bar buttons and the 🤖 badge keep their room); 🇺🇦 🇷🇺 sit as a pair */
+.logo-flag { font-size: 20px; }
+.logo-arrows { color: var(--muted); font-weight: 700; font-size: 14px; }
+.logo-arrows ~ .logo-flag + .logo-flag { margin-left: -3px; }
+.logo-text { margin-left: 4px; font-size: 18px; letter-spacing: .3px; }
+/* phones: no arrows (🇳🇴🇺🇦🇷🇺); ≤ 400 px — only 🇳🇴, as before (the buttons need the room) */
+@media (max-width: 720px) { .logo { gap: 2px; } .logo-arrows { display: none; } }
+@media (max-width: 400px) { .logo-arrows ~ .logo-flag { display: none; } }
 .logo-text b { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .nav { display: flex; gap: 6px; margin-left: 12px; }
 .nav-btn {
@@ -120,6 +125,15 @@ a { color: var(--accent2); }
 .aib-off .aib-g { filter: saturate(.7) drop-shadow(0 2px 4px color-mix(in srgb, #7c6cff 30%, transparent)); }
 .aib-off .aib-tip { fill: #ffb23e; animation-duration: 2.4s; }
 .claude-badge.aib-off:hover .aib-g { filter: saturate(1) drop-shadow(0 2px 5px color-mix(in srgb, #7c6cff 50%, transparent)); }
+/* 🤖 v212: the same robot as the AI / neural-network icon everywhere (js/app.js App.robotSvg) — text-sized, tilts its head on hover */
+.nk-bot { display: inline-block; flex: none; vertical-align: -0.2em; overflow: visible; filter: drop-shadow(0 1px 2px color-mix(in srgb, #7c6cff 40%, transparent));
+  transition: transform .35s cubic-bezier(.2, 1.4, .4, 1); }
+.nk-bot-tip { fill: #8ff3ff; }
+.nk-bot-eyes { transform-box: fill-box; transform-origin: center; animation: aibBlink 5.5s ease-in-out infinite; }
+:is(button, a, summary, [role="button"], .btn, .m-row, .sx-row, label):hover > .nk-bot,
+:is(button, a, summary, [role="button"], .btn, .m-row, .sx-row, label):hover > :not(svg) > .nk-bot,
+.nk-bot:hover { transform: rotate(-9deg) scale(1.1); }
+@media (prefers-reduced-motion: reduce) { .nk-bot { transition: none; } .nk-bot-eyes { animation: none; } :is(button, a, summary, [role="button"], .btn, .m-row, .sx-row, label):hover .nk-bot, .nk-bot:hover { transform: none; } }
 /* service logos (js/app.js AIB_LOGO): a glyph on the service's colour; the current one with a green ring */
 .aib-i { position: relative; flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--c, #8b80ff);
   box-shadow: 0 0 0 1.5px var(--panel-solid), 0 0 0 2.5px color-mix(in srgb, var(--text) 12%, transparent); }
@@ -360,7 +374,7 @@ button.chip.active { outline: 2px solid currentColor; }
 .study { max-width: 760px; margin: 0 auto; }
 .study-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .study-top .progress { flex: 1; }
-.counters { display: flex; justify-content: center; gap: 18px; font-weight: 700; margin: 8px 0 18px; font-size: 14px; }
+.counters { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 18px; font-weight: 700; margin: 8px 0 18px; font-size: 14px; }
 .counters .k { color: var(--good); }
 .counters .u { color: var(--bad); }
 .counters .r { color: var(--muted); }
@@ -381,7 +395,8 @@ button.chip.active { outline: 2px solid currentColor; }
   border: 1px solid var(--panel-border); box-shadow: var(--shadow); overflow: hidden;
 }
 .face.front { background: var(--card-front); }
-.face.back { background: var(--card-back); transform: rotateY(180deg); overflow-y: auto; justify-content: flex-start; }
+/* a short back (word + photo) sits in the middle; when it outgrows the card, «safe» keeps it starting at the top so it scrolls (old browsers: top, as before). .face.long stays top-aligned */
+.face.back { background: var(--card-back); transform: rotateY(180deg); overflow-y: auto; justify-content: flex-start; justify-content: safe center; }
 .face .lang-tag { position: absolute; top: 14px; left: 16px; font-size: 13px; color: var(--muted); font-weight: 700; display: flex; gap: 6px; align-items: center; }
 .face .corner { position: absolute; top: 10px; right: 12px; display: flex; gap: 6px; }
 .face .word { font-size: clamp(28px, 6vw, 46px); font-weight: 800; letter-spacing: .2px; word-break: break-word; }
@@ -1358,29 +1373,27 @@ button.chip { transition: transform .15s, box-shadow .2s; }
 @media (hover: none) and (pointer: coarse) { .camera-only { display: inline-flex; } }
 /* ===== 📤 share the app ===== */
 .share-nets { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin: 12px 0; }
-.share-net { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 16px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .15s, box-shadow .2s, border-color .2s; }
-.share-net:hover { transform: translateY(-3px); border-color: #8b80ff; box-shadow: 0 12px 26px -14px #29c7ff; }
-.share-net img { border-radius: 8px; }
-.share-net-ico { font-size: 24px; line-height: 28px; }
-/* sharp brand marks in the brand's colour; on hover the tile takes the brand colour and the mark turns white.
- * Per network (data-slug) the defaults can be changed: --mark (mark at rest), --tint (chip at rest), --ink / --chip (mark / chip on hover), --edge (border) */
-.share-net { position: relative; overflow: hidden; transition: transform .15s, box-shadow .2s, border-color .2s, background .2s, color .2s; }
+.share-net { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; min-height: 44px; padding: 12px 6px 11px; border-radius: 16px;
+  border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer;
+  transition: transform .15s, box-shadow .2s, border-color .2s, background .2s; -webkit-tap-highlight-color: transparent; }
 [data-theme="light"] .share-nets > a.share-net[href] { color: var(--text); } /* not the light theme's link blue */
-.share-net .share-net-ico { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; color: var(--mark, var(--brand, #a5b4fc));
-  background: var(--tint, color-mix(in srgb, var(--brand, #a5b4fc) 14%, transparent)); transition: color .2s, background .2s, transform .2s; }
-.share-net .share-net-ico svg { width: 24px; height: 24px; display: block; }
-.share-net .share-net-ico b { font-size: 18px; }
-.share-net:hover, .share-net:focus-visible { border-color: var(--edge, var(--brand, #8b80ff)); background: color-mix(in srgb, var(--brand, #8b80ff) 22%, var(--panel)); box-shadow: 0 12px 26px -14px var(--edge, var(--brand, #29c7ff)); }
-.share-net:hover .share-net-ico, .share-net:focus-visible .share-net-ico { color: var(--ink, #fff); background: var(--chip, var(--brand, #8b80ff)); transform: scale(1.08) rotate(-4deg); }
+/* the brand mark: its glyph on the brand's own app-icon background (see BRAND in js/shareapp.js), the same in both themes */
+.share-net .share-net-ico { flex: none; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 13px; overflow: hidden; background: var(--chip-bg, #8b80ff);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1), 0 6px 14px -8px rgba(0, 0, 0, .55); transition: transform .2s, box-shadow .2s; }
+.share-net .share-net-ico svg { width: var(--gs, 60%); height: var(--gs, 60%); display: block; overflow: visible; }
+/* black chips (X, Threads, TikTok) get a light rim on the dark theme; the white YouTube chip a soft grey one on the light theme */
+.share-net[data-slug="x"] .share-net-ico, .share-net[data-slug="threads"] .share-net-ico, .share-net[data-slug="tiktok"] .share-net-ico { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 6px 14px -8px rgba(0, 0, 0, .55); }
+[data-theme="light"] .share-net .share-net-ico { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06), 0 5px 12px -7px rgba(20, 24, 60, .45); }
+[data-theme="light"] .share-net[data-slug="youtube"] .share-net-ico, [data-theme="light"] .share-net[data-slug="snapchat"] .share-net-ico { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14), 0 5px 12px -7px rgba(20, 24, 60, .45); }
+.share-net:hover, .share-net:focus-visible { transform: translateY(-3px); border-color: var(--brand, #8b80ff); background: color-mix(in srgb, var(--brand, #8b80ff) 16%, var(--panel));
+  box-shadow: 0 12px 26px -14px var(--brand, #29c7ff); outline: none; }
+.share-net:focus-visible { box-shadow: 0 0 0 2px var(--brand, #8b80ff), 0 12px 26px -14px var(--brand, #29c7ff); }
+.share-net:hover .share-net-ico, .share-net:focus-visible .share-net-ico { transform: scale(1.08) rotate(-4deg); }
 .share-net:active { transform: translateY(-1px) scale(.98); }
 .share-net small { font-size: 10.5px; font-weight: 500; color: var(--muted); margin-top: -3px; }
-/* X, Threads: a black brand — a light mark on the dark theme, a dark one on the light theme; on hover a black chip with the white mark */
-.share-net[data-slug="x"], .share-net[data-slug="threads"] { --chip: #000; }
-[data-theme="light"] .share-net[data-slug="x"], [data-theme="light"] .share-net[data-slug="threads"] { --mark: #111; --edge: #111; --tint: rgba(0, 0, 0, .06); }
-/* Snapchat: a white ghost would vanish on its yellow — the ghost is dark on the yellow chip */
-.share-net[data-slug="snapchat"] { --ink: #111; }
-[data-theme="light"] .share-net[data-slug="snapchat"] { --mark: #111; --tint: #FFFC00; --edge: #d9d300; }
-.share-net[data-copy] { --chip: linear-gradient(135deg, #7c6cff, #29c7ff); }
+/* X, Threads: a black brand — the tile's accent is light on the dark theme and near-black on the light one */
+[data-theme="light"] .share-net[data-slug="x"], [data-theme="light"] .share-net[data-slug="threads"] { --brand: #111; }
+[data-theme="light"] .share-net[data-slug="snapchat"] { --brand: #d9c600; }
 .share-msg { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 8px; }
 .share-msg-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
 .share-msg textarea { resize: vertical; min-height: 64px; font-size: 14px; line-height: 1.4; }
@@ -1520,6 +1533,9 @@ button.chip { transition: transform .15s, box-shadow .2s; }
 .lib-hover-src { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; opacity: .9; }
 .lib-hover-src span { display: inline-flex; align-items: center; gap: 4px; }
 @media (hover: hover) { .lib-btn-wrap:hover .lib-hover, .lib-btn-wrap:focus-within .lib-hover { opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1); } }
+/* near the right edge: anchored to the button's right side instead of centred (js/app.js sets .lib-right) */
+.lib-btn-wrap.lib-right .lib-hover { left: auto; right: 0; transform: translate(0, 6px) scale(.98); transform-origin: top right; }
+@media (hover: hover) { .lib-btn-wrap.lib-right:hover .lib-hover, .lib-btn-wrap.lib-right:focus-within .lib-hover { transform: translate(0, 0) scale(1); } }
 .lib-intro { display: flex; gap: 8px; font-size: 14px; line-height: 1.5; padding: 10px 12px; border-radius: 12px; margin-bottom: 8px;
   background: color-mix(in srgb, #8b5cf6 10%, transparent); border: 1px solid color-mix(in srgb, #8b5cf6 28%, transparent); }
 .lib-group { margin-top: 14px; }
@@ -2027,10 +2043,25 @@ label.radio { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; fon
 .ex-tools .btn.sm { min-height: 30px; padding: 4px 10px; font-size: 12.5px; }
 .ex-mt { margin-top: 6px; }
 [data-theme="light"] .ex-ru-in, [data-theme="light"] .ex-ru, [data-theme="light"] .wbw-ru { color: #1769c2; }
+/* «Дословно: …» — the literal translation (word view), small and muted under the meaning translation */
+.gl-lit { display: block; font-size: .8em; line-height: 1.4; color: var(--muted, #8a94a6); margin: 2px 0 4px; font-style: italic; overflow-wrap: anywhere; }
+.gl-lit .gl-lit-t { font-style: normal; }
+.mv-word ~ .gl-lit { text-align: center; font-size: 14px; margin-top: 6px; max-width: 760px; margin-left: auto; margin-right: auto; }
+.gl-lit .ex-say { font-style: normal; vertical-align: middle; }
+/* 🔄 «Подписать заново» (word view): small, quiet, under the lines; a drawn icon (no emoji) */
+.gl-redo-row { display: flex; justify-content: center; margin: 6px 0 2px; }
+.ex-box .gl-redo-row, .desc .gl-redo-row { justify-content: flex-start; }
+.gl-redo { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 10px; font-size: 13px; color: var(--muted, #8a94a6); }
+.gl-redo:hover { color: var(--text); }
+.gl-redo .ico { flex: none; }
+.gl-redo.busy .ico { animation: spin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .gl-redo.busy .ico { animation: none; } }
 /* «Слово (перевод)»: a tap on a (translation) corrects it; «?» = not found in the sentence translation; ✓ = yours */
 .wbw-ru[data-glfix] { cursor: pointer; border-radius: 4px; }
 .wbw-ru[data-glfix]:hover { background: rgba(79, 179, 255, .14); }
 .wbw-ru.unsure { opacity: .62; font-style: italic; text-decoration: underline dotted rgba(79, 179, 255, .55); text-underline-offset: 3px; }
+/* 🎬 over the video: no dotted lines under words or guesses — they pull the eye from the picture (italic + paler is enough) */
+.wbw-ru.sw-gl.unsure, .ov-no .sw.new { text-decoration: none; }
 .wbw-ru.mine { color: #3ecf8e; }
 [data-theme="light"] .wbw-ru.mine { color: #138a55; }
 .tr-fix { opacity: .55; margin-left: 4px; font-size: 13px; min-width: 26px; min-height: 26px; vertical-align: middle; }
@@ -2130,13 +2161,7 @@ body[data-view="home"] .top-home { color: var(--accent); }
   .hero { grid-template-columns: minmax(0, 1fr); }
   .settings-grid { grid-template-columns: minmax(0, 1fr); }
 }
-/* tablets in portrait: icon-only navigation */
-@media (min-width: 721px) and (max-width: 1100px) {
-  .nav-btn span { display: none; }
-  .nav-btn { padding: 8px 12px; font-size: 18px; }
-  .nav { margin-left: 4px; }
-  .topbar { gap: 10px; }
-}
+/* (the desktop top bar folds its labels by itself — see «top bar v215» at the end) */
 /* phones: extra buttons go into the "⋯" menu */
 @media (max-width: 720px) {
   .share-top, .interp-top, .theme-btn { display: none !important; }
@@ -2332,9 +2357,9 @@ html, body { overflow-x: clip; }
 .cm-ta { resize: vertical; min-height: 0; line-height: 1.35; font-family: inherit; }
 
 /* ===== ↓ «Ваши колоды ниже» — a bubble with a tail pointing down, bottom centre ===== */
-@keyframes shIn { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes shIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes shBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
-.scroll-hint { position: fixed; left: 50%; bottom: max(22px, calc(env(safe-area-inset-bottom) + 14px)); transform: translateX(-50%); z-index: 60;
+.scroll-hint { position: fixed; left: 50%; bottom: max(22px, calc(env(safe-area-inset-bottom) + 14px)); translate: -50% 0; z-index: 60; /* centred with `translate`, never `transform` */
   display: inline-flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px); padding: 10px 16px; border: 0; border-radius: 999px; cursor: pointer;
   color: #fff; font: inherit; font-weight: 700; font-size: 14px; line-height: 1.2; white-space: nowrap;
   background: linear-gradient(135deg, var(--accent), var(--accent2, #3b82f6)); box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .65);
@@ -2343,7 +2368,7 @@ html, body { overflow-x: clip; }
 .scroll-hint::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 14px; height: 14px; margin-left: -7px; border-radius: 3px;
   background: color-mix(in srgb, var(--accent) 50%, var(--accent2, #3b82f6)); transform: rotate(45deg); z-index: -1; }
 .scroll-hint .sh-arrow { flex: none; animation: shBounce 1.4s ease-in-out infinite; }
-.scroll-hint.gone { opacity: 0; transform: translate(-50%, 12px); }
+.scroll-hint.gone { opacity: 0; transform: translateY(12px); }
 @media (hover: hover) { .scroll-hint:hover { filter: brightness(1.08); } }
 @media (max-width: 720px) { .scroll-hint { bottom: calc(env(safe-area-inset-bottom) + 80px); font-size: 13px; padding: 9px 14px; } } /* above the tab bar */
 @media (prefers-reduced-motion: reduce) { .scroll-hint, .scroll-hint .sh-arrow { animation: none; } }
@@ -2559,3 +2584,662 @@ button.chip, a.chip, .seg-mini button, .seg button, .cm-alt, .quiz-opt, .nrk-til
   .lt-both .lt-w { display: none; }
   .session-tools .tr-seg button { padding: 5px 8px; font-size: 12.5px; }
 }
+
+/* ===== ✏️ the editor and 🖼 the picture right on the study card (js/study.js editBtn / picBtn, js/views.js pickCardImage) ===== */
+.face .corner .card-edit { position: relative; margin-right: 2px; color: var(--text); border-color: color-mix(in srgb, var(--accent) 45%, var(--panel-border)); }
+.face .corner .card-edit::after { content: ""; position: absolute; inset: -8px; border-radius: 12px; } /* 44 px to tap (from the padding box), small to look at */
+.face .corner .card-edit:hover, .face .corner .card-edit:focus-visible { background: color-mix(in srgb, var(--accent) 22%, var(--panel)); border-color: var(--accent); }
+.face .corner .card-edit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card-img-wrap { position: relative; display: inline-flex; justify-content: center; max-width: 92%; flex: none; }
+.card-img-wrap .card-img { max-width: 100%; }
+.card-img-wrap.img-broken { min-width: 190px; min-height: 64px; align-items: center; border: 2px dashed var(--panel-border); border-radius: 16px; }
+.pic-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 99px;
+  font: 700 13px/1 var(--font); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .2s, background .2s, transform .15s;
+}
+/* over the picture: dark glass in the corner — always on touch screens, on hover / keyboard focus with a mouse */
+.pic-btn.on-img { position: absolute; right: 6px; bottom: 6px; color: #fff; border: 1px solid rgba(255,255,255,.4); background: rgba(10, 12, 28, .58);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 6px 18px -8px rgba(0,0,0,.7); }
+.pic-btn.on-img:hover, .pic-btn.on-img:focus-visible { background: color-mix(in srgb, var(--accent) 60%, rgba(10,12,28,.7)); }
+.pic-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card-img-wrap.img-broken .pic-btn.on-img { position: static; }
+@media (hover: hover) and (pointer: fine) {
+  .card-img-wrap:not(.img-broken) .pic-btn.on-img { opacity: 0; }
+  .card-img-wrap:hover .pic-btn.on-img, .pic-btn.on-img:focus-visible { opacity: 1; }
+}
+/* no picture yet: a calm dashed «Добавить фото» where the picture would be */
+.pic-btn.pic-add { flex: none; color: var(--muted); border: 1.5px dashed color-mix(in srgb, var(--muted) 55%, transparent); background: transparent; }
+.pic-btn.pic-add:hover, .pic-btn.pic-add:focus-visible { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.study-tools .pin-btn { border-color: color-mix(in srgb, #e60023 45%, var(--panel-border)); }
+/* 🔊 «Голос» at a card editor field (top-right, beside the field's title) and on the deck's launcher */
+.ed-field { position: relative; }
+.ed-voice { position: absolute; top: -4px; right: 0; display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 11px; border-radius: 99px;
+  border: 1px solid var(--panel-border); background: var(--panel); color: var(--muted); font: 700 12.5px/1 var(--font); cursor: pointer; transition: color .2s, border-color .2s, background .2s, transform .15s; }
+.ed-voice::before { content: ''; position: absolute; inset: -7px -2px; } /* a 44 px tap area around the small pill */
+.ed-voice:hover, .ed-voice:focus-visible { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); transform: translateY(-1px); }
+.ed-voice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ed-field > span { padding-right: 96px; }
+.deck-voices { gap: 8px; flex-wrap: wrap; }
+.deck-voice { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 720px) { .deck-voice { flex: 1 1 auto; } } /* a narrow launcher stacks its rows full width: so do these */
+/* 🇳🇴 🇺🇦 🇷🇺 «Норвежский голос / Украинский голос / Русский голос» — Voices.langButtons(place), always in this order */
+.vs-langs { display: flex; flex-wrap: wrap; gap: 6px; }
+.vs-lang { display: inline-flex; flex-wrap: wrap; align-items: center; column-gap: 5px; row-gap: 0; text-align: left; max-width: 100%; }
+.vs-lang > b { font-weight: 600; }
+.vs-lang small { flex-basis: 100%; font-size: 11.5px; color: var(--muted); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
+@media (max-width: 560px) { .vs-lang { flex: 1 1 100%; } }
+/* 📏 the voice limits: the 90 % toast with two buttons and the «limit is over» window (js/voices.js) */
+.vl-toast { flex-wrap: wrap; }
+.vl-toast .vl-btns { display: flex; gap: 6px; margin-left: auto; }
+.vl-list { margin: 6px 0 10px; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.vl-list li { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.vl-modal .modal-foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+@media (prefers-reduced-motion: reduce) { .ed-voice { transition: none; } .ed-voice:hover { transform: none; } }
+/* 📌 «Галерея» + 🖼 «Добавить / Заменить фото» side by side: under the word, or in the picture's corner */
+.pic-btns { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; flex: none; max-width: 100%; }
+.pic-btns.on-img { position: absolute; right: 6px; bottom: 6px; justify-content: flex-end; gap: 6px; max-width: calc(100% - 12px); }
+.pic-btns .pic-btn.on-img { position: static; }
+.card-img-wrap.img-broken .pic-btns.on-img { position: static; max-width: 100%; justify-content: center; padding: 8px; }
+/* on the picture the 🖼 button is a round icon (its words stay in the tooltip / screen reader) — the picture stays visible */
+.pic-btns.on-img [data-act="pic"] { width: 44px; padding: 0; }
+.pic-btns.on-img [data-act="pic"] .pic-l { display: none; }
+/* the Pinterest red pin: the first choice, everywhere a picture can go */
+.pic-btn.pic-pin, .pic-btn.pic-pin.on-img { color: #fff; border: 1px solid #e60023; background: #e60023; box-shadow: 0 6px 16px -8px rgba(230, 0, 35, .8); }
+.pic-btn.pic-pin:hover, .pic-btn.pic-pin:focus-visible { background: #c8001e; border-color: #c8001e; transform: translateY(-1px); }
+.pic-btn.pic-pin:active { transform: none; }
+
+/* the chooser: every source of a picture */
+.modal.pic-modal { width: min(680px, 100%); }
+.pic-cur { position: relative; display: flex; align-items: center; gap: 14px; padding: 10px; margin-bottom: 14px; border: 1px solid var(--panel-border); border-radius: 16px; background: var(--panel); }
+.pic-cur img { width: 96px; height: 72px; object-fit: cover; border-radius: 10px; flex: none; }
+.pic-cur-none { width: 96px; height: 72px; display: grid; place-items: center; font-size: 30px; border: 1.5px dashed var(--panel-border); border-radius: 10px; flex: none; opacity: .7; }
+.pic-cur-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pic-cur-t b { font-size: 17px; overflow-wrap: anywhere; }
+.pic-cur-t a { color: inherit; }
+.pic-spin { position: absolute; right: 14px; top: 50%; margin-top: -10px; }
+.pic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.pic-src {
+  display: flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 12px; text-align: left; cursor: pointer;
+  color: var(--text); background: var(--panel); border: 1px solid var(--panel-border); border-radius: 14px; font: inherit; transition: border-color .2s, background .2s, transform .15s;
+}
+.pic-src:hover, .pic-src:focus-visible { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.pic-src:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pic-src:active { transform: scale(.98); }
+.pic-src:disabled { opacity: .55; cursor: progress; }
+.pic-src-i { font-size: 24px; width: 32px; text-align: center; flex: none; }
+.pic-src-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pic-src-t b { font-size: 14.5px; }
+.pic-src-t small { font-size: 12px; color: var(--muted); line-height: 1.3; }
+.pic-src-pin { border-color: color-mix(in srgb, #e60023 50%, var(--panel-border)); background: color-mix(in srgb, #e60023 7%, var(--panel)); }
+.pic-pin-how { margin: 12px 2px 0; color: var(--muted); line-height: 1.45; }
+.pic-pin-how b { color: var(--text); }
+.pic-foot-row { display: flex; justify-content: flex-end; margin-top: 12px; }
+.pic-foot-row .btn { min-height: 44px; }
+@media (max-width: 420px) {
+  .pic-grid { grid-template-columns: 1fr 1fr; }
+  .pic-src { flex-direction: column; align-items: flex-start; gap: 4px; min-height: 92px; }
+  .pic-src-t small { font-size: 11.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pic-btn, .pic-src { transition: none; }
+  .pic-src:active { transform: none; }
+}
+
+/* ===== 🎨 tool tiles on the card's rails: every translator, dictionary and AI as its own brand tile (js/translators.js toolHtml / BRAND),
+   like the brand chips of the share sheet. Full colour when it works; calmer with a 🔑 corner when it still needs a key.
+   Hover / focus: the tile lifts and tilts with a glow in its brand colour (--glow) and says its name and action.
+   Corner slots: .tr-count (top right) = worked on this card N×; .tool-badge (top left, [data-used]) = reserved for the source number; .tool-key = needs a key. ===== */
+.tool-btn {
+  --glow: #8b80ff; --tilt: -5deg;
+  position: relative; flex: none; width: var(--tb, 44px); height: var(--tb, 44px); padding: 0; margin: 0; border: 0; border-radius: 14px;
+  background: none; color: var(--text); cursor: pointer; display: grid; place-items: center; outline: none;
+  -webkit-tap-highlight-color: transparent; font: inherit;
+}
+[data-side="left"] .tool-btn { --tilt: 5deg; }
+.tool-btn:hover, .tool-btn:focus-visible { z-index: 6; }
+.tool-ico {
+  width: 100%; height: 100%; display: grid; place-items: center; border-radius: inherit;
+  transition: transform .3s cubic-bezier(.2, 1.5, .4, 1), box-shadow .25s, filter .25s, opacity .25s;
+}
+/* the tile: brand background with a soft top light, the glyph centred */
+.tool-btn .tool-chip {
+  position: relative; width: 100%; height: 100%; display: grid; place-items: center; border-radius: inherit; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 52%), var(--chip-bg, #8b80ff);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 6px 14px -8px rgba(0, 0, 0, .65);
+}
+.tool-btn .tool-chip svg { display: block; width: var(--gs, 60%); height: var(--gs, 60%); overflow: visible; border-radius: 0; box-shadow: none; }
+.tool-btn .tool-emoji { font-size: 22px; line-height: 1; }
+/* AI coins (App.aiLogo) become tiles of the same shape */
+.tool-btn .aib-i.tool-chip { background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 52%), var(--c, #8b80ff); }
+.tool-btn .aib-i.tool-chip svg { width: 96%; height: 96%; }
+/* a light sweep across the tile on hover */
+.tool-btn .tool-chip::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, .38) 48%, transparent 64%);
+  transform: translateX(-130%); transition: transform .65s cubic-bezier(.3, .6, .3, 1);
+}
+.tool-btn:hover .tool-chip::after, .tool-btn:focus-visible .tool-chip::after { transform: translateX(130%); }
+/* white tiles (Microsoft, ChatGPT, Ollama) and near-black ones (DeepL, Grok) keep a rim on any background */
+.tool-btn.tone-light .tool-chip { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06), 0 6px 14px -8px rgba(0, 0, 0, .65); }
+[data-theme="dark"] .tool-btn.tone-dark .tool-chip { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .24), 0 6px 14px -8px rgba(0, 0, 0, .65); }
+[data-theme="light"] .tool-btn .tool-chip { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .05), 0 5px 12px -7px rgba(20, 24, 60, .5); }
+[data-theme="light"] .tool-btn.tone-light .tool-chip { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .13), 0 5px 12px -7px rgba(20, 24, 60, .5); }
+/* «＋ подключить нейросеть»: a quiet dashed tile that lights up in the app's colours */
+.tool-btn .tool-chip.ghost { background: color-mix(in srgb, var(--panel-solid) 72%, transparent); color: var(--muted); box-shadow: none;
+  outline: 1.5px dashed color-mix(in srgb, var(--text) 28%, transparent); outline-offset: -1.5px; }
+.tool-btn.add:hover .tool-chip.ghost, .tool-btn.add:focus-visible .tool-chip.ghost { background: linear-gradient(135deg, #7c6cff, #29c7ff); color: #fff; outline-color: transparent; }
+
+/* needs a key: still in colour, a little calmer — and the 🔑 corner */
+.tool-btn.nokey .tool-ico { filter: saturate(.72); opacity: .88; }
+.tool-key {
+  position: absolute; right: -5px; bottom: -5px; z-index: 2; width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; pointer-events: none;
+  background: linear-gradient(160deg, #ffe08a, #f5b431 60%, #e39a16); color: #6b4300;
+  box-shadow: 0 0 0 2px var(--panel-solid), 0 2px 6px -1px rgba(0, 0, 0, .45);
+  transition: transform .3s cubic-bezier(.2, 1.5, .4, 1);
+}
+.tool-key svg { width: 12px; height: 12px; transform: rotate(-40deg); }
+
+/* worked on this card: a ring in its own colour (+ the counter) */
+.tool-btn.on .tool-ico { box-shadow: 0 0 0 2px var(--panel-solid), 0 0 0 3.5px var(--glow), 0 0 18px -3px var(--glow); }
+.tool-btn .tr-count {
+  position: absolute; top: -7px; right: -7px; z-index: 3; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px;
+  background: linear-gradient(135deg, #7c6cff, #29c7ff); color: #fff; font-size: 11px; font-weight: 800; line-height: 15px; text-align: center;
+  border: 2px solid var(--panel-solid); box-shadow: 0 2px 6px rgba(0, 0, 0, .35); transition: transform .3s cubic-bezier(.2, 1.5, .4, 1);
+}
+/* reserved: the «used» number (the source's footnote in the card text) — Translators.markUsed(rail, 'tr:deepl', 1) */
+.tool-badge { display: none; }
+.tool-btn[data-used] .tool-badge {
+  position: absolute; top: -7px; left: -7px; z-index: 3; display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px;
+  background: var(--glow); color: #fff; font-size: 11px; font-weight: 800; line-height: 1; border: 2px solid var(--panel-solid);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .35); transition: transform .3s cubic-bezier(.2, 1.5, .4, 1);
+}
+
+/* hover / focus: lift, tilt, glow in the brand colour */
+.tool-btn:hover .tool-ico, .tool-btn:focus-visible .tool-ico {
+  transform: translateY(-3px) rotate(var(--tilt)) scale(1.08); filter: none; opacity: 1;
+  box-shadow: 0 14px 24px -12px var(--glow), 0 0 0 1.5px color-mix(in srgb, var(--glow) 60%, transparent), 0 0 24px -5px color-mix(in srgb, var(--glow) 80%, transparent);
+}
+.tool-btn:hover > .tool-key, .tool-btn:focus-visible > .tool-key,
+.tool-btn:hover > .tr-count, .tool-btn:focus-visible > .tr-count,
+.tool-btn:hover > .tool-badge, .tool-btn:focus-visible > .tool-badge { transform: translateY(-3px); }
+/* keyboard focus: a soft glowing ring */
+.tool-btn:focus-visible .tool-ico {
+  box-shadow: 0 0 0 2px var(--panel-solid), 0 0 0 4.5px color-mix(in srgb, var(--glow) 80%, transparent), 0 0 26px -3px var(--glow), 0 14px 24px -12px var(--glow);
+}
+/* pressed */
+.tool-btn:active .tool-ico { transform: translateY(-1px) scale(.93); filter: brightness(.94); transition-duration: .08s; }
+.tool-btn:active > .tool-key, .tool-btn:active > .tr-count, .tool-btn:active > .tool-badge { transform: translateY(-1px); transition-duration: .08s; }
+
+/* working (a request on its way) */
+.tool-btn.busy { pointer-events: none; }
+.tool-btn.busy .tool-ico { opacity: .5; filter: saturate(.5); }
+.tool-btn.busy::before { content: ""; position: absolute; z-index: 4; width: 20px; height: 20px; border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, var(--glow) 30%, transparent); border-top-color: var(--glow); animation: spin .8s linear infinite; }
+/* just used: a short burst and a ring in its colour */
+.tool-btn.burst .tool-ico { animation: burst .9s cubic-bezier(.2, 1.4, .4, 1); }
+.tool-btn.burst::after { content: ""; position: absolute; inset: -6px; border-radius: 18px; border: 2px solid var(--glow); opacity: 0; animation: ripplering .9s ease-out; pointer-events: none; }
+
+/* the label: name — action, with the state below */
+.tool-tip {
+  position: absolute; z-index: 20; pointer-events: none; opacity: 0; white-space: nowrap; text-align: left;
+  top: 50%; right: calc(100% + 14px); transform: translate(6px, -50%) scale(.97); transform-origin: right center;
+  transition: opacity .18s, transform .22s cubic-bezier(.2, 1.3, .4, 1);
+  padding: 8px 12px 8px 13px; border-radius: 12px; font-size: 12px; line-height: 1.35; color: var(--muted);
+  background: color-mix(in srgb, var(--panel-solid) 94%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--glow) 38%, var(--panel-border));
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55), 0 0 22px -12px var(--glow), inset 3px 0 0 var(--glow);
+}
+.tool-tip b { display: block; font-size: 13.5px; font-weight: 700; color: var(--text); }
+.tool-tip small { display: block; font-size: 11.5px; margin-top: 1px; }
+.tool-tip .tool-name, .tool-tip .tool-act { display: none; }
+[data-side="left"] .tool-tip { right: auto; left: calc(100% + 14px); transform: translate(-6px, -50%) scale(.97); transform-origin: left center; }
+.tool-btn:hover .tool-tip, .tool-btn:focus-visible .tool-tip { opacity: 1; transform: translate(0, -50%); }
+.tr-rail.horizontal .tool-tip, .tr-rail:not(.vertical) .tool-tip { top: calc(100% + 10px); right: auto; left: 50%; transform: translate(-50%, 4px); transform-origin: top center; }
+.tr-rail.horizontal .tool-btn:hover .tool-tip, .tr-rail:not(.vertical) .tool-btn:hover .tool-tip,
+.tr-rail.horizontal .tool-btn:focus-visible .tool-tip, .tr-rail:not(.vertical) .tool-btn:focus-visible .tool-tip { transform: translate(-50%, 0); }
+@media (hover: none) { .tool-tip { display: none; } }
+
+/* sizes on the card: ≥44 px targets, a little larger when there is room. The column is a grid that flows into a second
+   column (towards the card's middle) when the card is too short for all of them — the tiles never shrink below 44 px. */
+.face .tr-rail.vertical.card-rail {
+  --tb: 46px; display: grid !important; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, var(--tb)); grid-auto-columns: var(--tb);
+  align-content: start; align-items: center; justify-items: center; gap: 8px !important; max-height: calc(100% - 64px);
+}
+.face .tr-rail.vertical.card-rail.front-rail { --tb: 48px; max-height: calc(100% - 72px); }
+.face .card-rail.right { direction: rtl; }
+.face .card-rail.right > * { direction: ltr; }
+.face .tr-rail.vertical.card-rail:has(> :nth-child(9)) { --tb: 44px; gap: 6px !important; }
+/* a long column (11+ sources) starts right under the corner buttons and keeps 4 px between the tiles: one column on a 900 px tall screen */
+.face .tr-rail.vertical.card-rail:not(.front-rail):has(> :nth-child(11)) { top: 44px; gap: 4px !important; padding: 0 !important; max-height: calc(100% - 50px); }
+/* the same on the front when a column may wrap (9+): the edge column starts right under the corner buttons, 4 px apart,
+   so it holds one more tile before the rest flows beside it (js: Translators.fitRails fills it down to the card's bottom) */
+.face .tr-rail.vertical.card-rail.front-rail:has(> :nth-child(9)) { top: 48px !important; gap: 4px !important; padding: 0 !important; max-height: calc(100% - 50px); }
+/* the bottom tile of a column (js: Translators.fitOne) — its label grows upwards from the tile's bottom, not past the card's edge */
+.card-rail .tool-btn.tip-up .tool-tip { top: auto; bottom: -2px; transform: translate(6px, 0) scale(.97); transform-origin: right bottom; }
+.card-rail[data-side="left"] .tool-btn.tip-up .tool-tip { transform: translate(-6px, 0) scale(.97); transform-origin: left bottom; }
+.card-rail .tool-btn.tip-up:hover .tool-tip, .card-rail .tool-btn.tip-up:focus-visible .tool-tip { transform: none; }
+.card-rail .tool-btn { border-radius: 14px; }
+.card-rail:has(> :nth-child(9)) .tool-btn { border-radius: 13px; }
+@media (min-width: 1200px) {
+  .face .tr-rail.vertical.card-rail { --tb: 50px; }
+  .face .tr-rail.vertical.card-rail.front-rail { --tb: 52px; }
+  .face .tr-rail.vertical.card-rail:has(> :nth-child(9)) { --tb: 44px; }
+  .card-rail .tool-btn { border-radius: 15px; }
+  .card-rail:has(> :nth-child(9)) .tool-btn { border-radius: 13px; }
+}
+/* short screens with many sources: room for the second column */
+@media (max-height: 860px) and (min-width: 721px) {
+  .face.back.has-rail:has(.card-rail.right > :nth-child(9)) { padding-right: 124px; }
+  .face.back.has-rail:has(.card-rail.left > :nth-child(9)) { padding-left: 124px; }
+}
+/* «📚 Ещё словари» popover: the same brand tiles */
+.web-ico .tool-chip { position: relative; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 52%), var(--chip-bg, #8b80ff); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 4px 10px -6px rgba(0, 0, 0, .6); }
+.web-ico .tool-chip svg { width: var(--gs, 60%); height: var(--gs, 60%); display: block; overflow: visible; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-ico, .tool-key, .tool-btn .tr-count, .tool-btn[data-used] .tool-badge, .tool-tip { transition: opacity .15s, box-shadow .2s, filter .2s; }
+  .tool-btn:hover .tool-ico, .tool-btn:focus-visible .tool-ico, .tool-btn:active .tool-ico { transform: none; }
+  .tool-btn:hover > *, .tool-btn:focus-visible > *, .tool-btn:active > * { transform: none; }
+  .tool-btn:hover .tool-tip, .tool-btn:focus-visible .tool-tip, .tool-tip { transform: translate(0, -50%); }
+  .tr-rail.horizontal .tool-tip, .tr-rail:not(.vertical) .tool-tip, .tr-rail.horizontal .tool-btn:hover .tool-tip { transform: translate(-50%, 0); }
+  .tool-btn .tool-chip::after { display: none; }
+  .tool-btn.burst .tool-ico, .tool-btn.burst::after { animation: none; }
+}
+
+/* =====================================================================
+ * v210 · fewer buttons (design/declutter.html): home tiles, side menu, deck page, windows of rows
+ * ===================================================================== */
+/* top bar / tab bar: drawn icons (js/app.js NavIcons) — the open section glows in the violet→blue of 🎧 */
+.nav-ico { display: inline-grid; place-items: center; width: 20px; height: 20px; font-style: normal; vertical-align: -4px; margin-right: 6px; }
+.nav-ico .nav-svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.nav-svg .dot { fill: currentColor; stroke: none; }
+.nav-svg .soft { opacity: .5; }
+.nav-btn.active .nav-svg, .tabbar button.active .nav-svg { stroke: url(#nkg-nav); }
+.nav-btn.active .nav-svg .dot, .tabbar button.active .nav-svg .dot { fill: url(#nkg-nav); }
+.nav-btn.active .nav-svg .f, .tabbar button.active .nav-svg .f { fill: url(#nkg-nav); fill-opacity: .32; }
+.nav-btn .nav-emo, .tabbar .nav-emo { display: inline !important; font-size: 1em; }
+.nav-btn { display: inline-flex; align-items: center; min-height: 44px; }
+.tabbar .ti .nav-ico { margin: 0; width: 23px; height: 23px; }
+.tabbar .ti .nav-svg { width: 23px; height: 23px; }
+/* 📊 → the drawn bars everywhere (v219, NavIcons.statsIco in js/app.js): the size of the emoji it replaces (1.15em of the text
+   around it), the colour of the text, bars lightly filled; in a line of text it sits on the middle of the letters */
+.nav-ico.stats-ico { width: auto; height: auto; margin: 0; vertical-align: -.2em; line-height: 1; }
+.nav-ico.stats-ico .nav-svg { width: 1.15em; height: 1.15em; margin: 0; vertical-align: 0; display: block; }
+.stats-ico .nav-svg .f { fill: currentColor; fill-opacity: .28; }
+.lib-intro > .stats-ico { align-self: flex-start; margin-top: .18em; }
+.hd-tab .stats-ico .nav-svg { width: 1em; height: 1em; } /* the mini tab bar of «Как пользоваться»: the captions stay on one line with 📚 and ▶ */
+/* v229 · the UI chrome icons of the same family (NavIcons.icon in js/app.js): the colour of the text, never their own;
+   in a flex button they are centred by the button; in a line of text they sit on the middle of the letters */
+.ui-ico { flex: none; display: inline-block; vertical-align: middle; translate: 0 -.08em; overflow: visible; }
+.btn .ui-ico, button .ui-ico, .ui-t .ui-ico { translate: none; }
+/* a heading / title / button with an icon: icon + words, 8 px apart, centred on one line */
+.ui-t { display: inline-flex; align-items: center; gap: 8px; min-width: 0; vertical-align: middle; }
+.ui-t > span { min-width: 0; }
+/* 🤖 the words of a card are signed in the background: a quiet note at the bottom, never over the card or its buttons */
+.gl-note { position: fixed; left: 50%; bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px)); transform: translateX(-50%); z-index: 2500;
+  display: flex; align-items: center; gap: 8px; max-width: min(700px, calc(100vw - 24px)); padding: 7px 14px; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent); border: 1px solid var(--panel-border); box-shadow: 0 8px 24px -10px rgba(0,0,0,.5);
+  font-size: 13px; color: var(--muted); pointer-events: none; animation: glNoteIn .3s ease-out; transition: opacity .3s; }
+.gl-note.out { opacity: 0; }
+.gl-note-i { flex: none; display: grid; place-items: center; }
+.gl-note-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.m-phone .gl-note, .tabbar ~ .gl-note { bottom: calc(env(safe-area-inset-bottom) + 76px); }
+@keyframes glNoteIn { from { opacity: 0; transform: translate(-50%, 8px); } }
+@keyframes glNoteInM { from { opacity: 0; transform: translateY(8px); } }
+@media (max-width: 600px) { .gl-note { left: 12px; right: 12px; transform: none; max-width: none; border-radius: 16px; animation-name: glNoteInM; } .gl-note-t { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; } }
+/* on the study screen: a small chip in the counters line above the card (never over the card, whatever its style) */
+.gl-note.gl-inline { position: static; transform: none; translate: none; z-index: auto; display: inline-flex; vertical-align: middle; max-width: min(360px, 100%);
+  padding: 3px 10px 3px 4px; gap: 6px; font-size: 12.5px; font-weight: 600; box-shadow: none; background: color-mix(in srgb, var(--panel-solid) 70%, transparent);
+  animation: glNoteFade .3s ease-out; margin: -5px 0; /* as tall as the counters' text: the card below does not move when it comes / goes */ }
+.gl-note.gl-inline .gl-note-i .aib-i { width: 18px; height: 18px; }
+.gl-note.gl-inline .gl-note-t { white-space: nowrap; display: block; -webkit-line-clamp: unset; }
+@media (max-width: 600px) { .gl-note.gl-inline { left: auto; right: auto; border-radius: 999px; max-width: 100%; animation-name: glNoteFade; } }
+@keyframes glNoteFade { from { opacity: 0; } }
+/* the phone (focus mode: no counters line): a small line under the progress bar in the top bar — the bar is a little lower meanwhile */
+html.m-phone .m-prog:has(> .gl-note) { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+html.m-phone .m-prog:has(> .gl-note) > .progress { height: 20px; width: 100%; flex: none; }
+.gl-note.gl-inline.gl-head { margin: 0; padding: 0 4px; gap: 4px; border: 0; background: none; font-size: 11px; line-height: 14px; max-width: 100%; }
+.gl-note.gl-inline.gl-head .gl-note-i .aib-i { width: 13px; height: 13px; }
+.gl-note.gl-inline.gl-head .gl-note-t { overflow: hidden; text-overflow: ellipsis; }
+html.m-immersive .m-prog > .gl-note { display: none; } /* ⤢ the card alone on the screen */
+@media (prefers-reduced-motion: reduce) { .gl-note { animation: none; transition: none; } }
+
+/* side menu: 7 places, the decks, then small help items at the very bottom */
+.sb-item { min-height: 44px; }
+.sb-i { flex: 0 0 22px; width: 22px; height: 22px; display: grid; place-items: center; font-size: 17px; line-height: 1; }
+.sb-i svg { width: 20px; height: 20px; }
+.sb-i .nav-svg { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.sb-i .sx-svg:not(.sx-fill) { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.sb-foot { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 1px; }
+.sb-item.sb-small { font-size: 13px; font-weight: 600; color: var(--muted); min-height: 40px; padding: 6px 12px; }
+.sb-item.sb-small:hover { color: var(--text); }
+.sb-item.sb-small .sb-i { font-size: 15px; }
+.sb-decks { display: flex; flex-direction: column; gap: 1px; }
+
+/* the round play / line icons used in rows and tiles */
+.sx-svg { width: 1em; height: 1em; display: inline-block; vertical-align: -.15em; flex: none; }
+.sx-svg:not(.sx-fill) { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- home: one big «Учить» ---------- */
+.home-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; padding: 20px 22px; border-radius: 24px; color: #fff;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 78%, #000 0%), color-mix(in srgb, var(--accent2) 62%, #1b2040)); border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 24px 50px -28px var(--accent); position: relative; overflow: hidden; isolation: isolate; }
+.home-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(420px 200px at 100% 0%, rgba(255,255,255,.2), transparent 70%); }
+.home-hero.done { background: linear-gradient(120deg, #15803d, #22c55e 55%, #29a3d6); }
+.hh-txt { flex: 1 1 320px; min-width: 0; }
+.home-hero h1 { margin: 0 0 8px; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.2; color: #fff; }
+.hh-bar { height: 8px; max-width: 440px; border-radius: 99px; background: rgba(255,255,255,.22); overflow: hidden; margin-bottom: 10px; }
+.hh-bar i { display: block; height: 100%; min-width: 4px; border-radius: inherit; background: #fff; transition: width .6s ease; }
+.hh-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 14px; color: rgba(255,255,255,.9); }
+.hh-link { min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.14); color: #fff; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; transition: background .15s, border-color .15s; }
+.hh-link:hover { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.6); }
+/* «Статистика»: the same drawn bars as in the top bar, lightly filled */
+.hh-link { display: inline-flex; align-items: center; gap: 6px; }
+.hh-link .nav-ico, .st-h1 .nav-ico { margin: 0; vertical-align: 0; }
+.hh-link .nav-svg .f, .st-h1 .nav-svg .f { fill: currentColor; fill-opacity: .28; }
+.st-h1 { display: flex; align-items: center; gap: 10px; }
+.st-h1 .nav-ico, .st-h1 .nav-ico .nav-svg { width: 1em; height: 1em; }
+.btn.hh-go { --b: #fff; --c: #2a2370; border: 0; min-height: 56px; font-size: 18px; font-weight: 800; padding: 0 26px; border-radius: 16px; box-shadow: 0 12px 30px -12px rgba(0,0,0,.6); flex: none; }
+.btn.hh-go:hover { --b: #f1f0ff; box-shadow: 0 16px 34px -12px rgba(0,0,0,.7); }
+.home-hero.done .btn.hh-go { --c: #14532d; }
+.home-hero + .mt-warn.backlog { margin-top: 12px; }
+
+/* ---------- home: the big section tiles ---------- */
+.mgrid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 14px; }
+.mt { position: relative; display: flex; flex-direction: column; gap: 8px; min-height: 132px; padding: 16px; border-radius: 22px; border: 1px solid rgba(255,255,255,.14); color: #fff;
+  overflow: hidden; isolation: isolate; transition: transform .18s, box-shadow .2s, border-color .2s; }
+.mt::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(260px 160px at 100% 0%, rgba(255,255,255,.18), transparent 70%); pointer-events: none; }
+.mt:hover, .mt:focus-within { transform: translateY(-3px); border-color: rgba(255,255,255,.42); box-shadow: 0 18px 40px -18px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.08); }
+.mt-main { position: absolute; inset: 0; z-index: 0; border: 0; padding: 0; margin: 0; background: transparent; border-radius: inherit; cursor: pointer; }
+.mt-main:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
+.mt > :not(.mt-main) { position: relative; z-index: 1; pointer-events: none; }
+.mt .mchip { pointer-events: auto; }
+.mt h3 { margin: 0; font-size: 19px; line-height: 1.2; color: #fff; }
+.mt p { margin: 0; font-size: 13.5px; color: rgba(255,255,255,.84); line-height: 1.35; }
+.mt .mi { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; background: rgba(255,255,255,.16); font-size: 28px; flex: none; }
+.mt .mi .sx-svg { font-size: 28px; }
+.mt .mi.mi-tg svg { width: 30px; height: 30px; }
+.mt .tops { display: flex; align-items: center; gap: 12px; }
+.mt-deco { position: absolute !important; right: -14px; bottom: -18px; z-index: 0 !important; width: 120px; height: 120px; opacity: .13; color: #fff; }
+.mt-deco svg { width: 100%; height: 100%; }
+.mt-deco .sx-svg { font-size: 120px; stroke-width: 1.4; }
+.mchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.mchip { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 12px; border-radius: 999px; background: rgba(0,0,0,.24); border: 1px solid rgba(255,255,255,.22);
+  font: inherit; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; transition: background .15s, border-color .15s, transform .12s; }
+.mchip:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.6); transform: translateY(-1px); }
+.mchip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.mchip svg { width: 16px; height: 16px; }
+.mt.video { grid-row: span 2; min-height: 290px; justify-content: center; background: linear-gradient(145deg, #2a1650 0%, #5a1d5e 45%, #9b2c3f 100%); }
+.mt.video::before { content: ''; position: absolute; inset: 0; z-index: -1; opacity: .35; pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.05) 46px 48px), radial-gradient(400px 220px at 50% 38%, rgba(255,255,255,.18), transparent 70%); }
+.mt.radio { background: linear-gradient(145deg, #0d3f4f, #12806f); }
+.mt.read { background: linear-gradient(145deg, #4a2c10, #a35d16); }
+.mt.tg { background: linear-gradient(145deg, #0e3d63, #1f86c4); }
+.mt.drill { background: linear-gradient(145deg, #1c3a2c, #2f7a4f); }
+.playbig { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; margin: 6px auto 8px; background: rgba(255,255,255,.95);
+  box-shadow: 0 0 0 10px rgba(255,255,255,.12), 0 0 0 22px rgba(255,255,255,.05), 0 20px 40px -12px rgba(0,0,0,.7); transition: transform .25s cubic-bezier(.3,1.5,.5,1), box-shadow .25s; }
+.playbig svg { width: 40px; height: 40px; margin-left: 6px; }
+.mt.video:hover .playbig, .mt.video:focus-within .playbig { transform: scale(1.07); box-shadow: 0 0 0 12px rgba(255,255,255,.18), 0 0 0 28px rgba(255,255,255,.07), 0 0 50px 4px rgba(124,108,255,.55); }
+.mt.video h3 { font-size: 24px; text-align: center; }
+.mt.video p { text-align: center; max-width: 380px; margin: 0 auto; }
+.mt.video .mchips { justify-content: center; margin-top: 10px; }
+.home-ft { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.home-ft .ft { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 14px; border-radius: 16px; background: var(--panel); border: 1px dashed color-mix(in srgb, var(--text) 22%, transparent);
+  color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; min-width: 0; }
+.home-ft .ft:hover { border-style: solid; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); transform: translateY(-1px); }
+.home-ft .ft .i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--text) 8%, transparent); font-size: 20px; font-weight: 800; flex: none; }
+.home-ft .ft b { display: block; font-size: 15px; }
+.home-ft .ft small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.3; }
+.home-ft .ft-looks .i { background: linear-gradient(135deg, #f59e0b55, #7c6cff55, #29c7ff55); }
+
+/* ---------- home: «Мои колоды» header (search · ➕ Создать карточки · ⋯) ---------- */
+.home-decks-h { flex-wrap: wrap; row-gap: 8px; scroll-margin-top: calc(var(--topbar-h, 70px) + 12px); }
+.home-decks-h h2 { margin: 0; }
+.home-decks-h .home-search { margin: 0; flex: 0 1 260px; min-width: 180px; }
+.home-decks-h .home-search .input { padding: 10px 16px; min-height: 44px; font-size: 14px; }
+.home-decks-h .hd-create, .home-decks-h .hd-more, .home-decks-h .hs-toggle { min-height: 44px; }
+.home-decks-h .icon-btn { width: 44px; height: 44px; font-size: 18px; }
+.hs-toggle { display: none !important; }
+.home-search-res:not(:empty) { margin: 0 0 14px; }
+.home-decks .deck-card { gap: 10px; }
+.dc-info { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.dc-info .deck-card-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dc-info b { font-size: 15px; flex: none; }
+.home-decks .deck-card .actions { display: grid !important; grid-template-columns: minmax(0, 1fr) 56px 44px; align-items: stretch; }
+.home-decks .deck-card .actions [data-act="study"] { grid-column: 1; }
+.home-decks .deck-card .actions [data-act="listen"] { grid-column: 2; }
+.home-decks .deck-card .actions [data-act="deck-menu"] { grid-column: 3; width: 44px; min-height: 44px; height: auto; }
+.deck-card .actions .btn { min-height: 44px; }
+.deck-card .actions .icon-btn { width: 44px; height: 44px; flex: none; font-size: 18px; }
+.deck-card .actions .dc-listen { padding: 0; width: 56px; flex: none !important; }
+.deck-cover-btn { width: 40px !important; height: 40px !important; }
+.deck-cover-title h1 { margin: 0; font-size: clamp(22px, 3vw, 32px); line-height: 1.15; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.deck-cover.big { height: clamp(120px, 15vw, 190px); }
+.deck-cover.big .deck-cover-hint { place-items: start start; padding: 14px 64px 0 16px; font-size: 13px; color: rgba(255,255,255,.7); }
+.deck-cover.big .deck-cover-title { right: 64px; }
+.deck-cover.big .deck-cover-btn { width: 44px !important; height: 44px !important; }
+
+/* ---------- the one-time «Всё на месте» hint ---------- */
+.dc-hint { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px 14px; margin: 14px 0 0; padding: 12px 12px 12px 16px; border-radius: 16px;
+  background: color-mix(in srgb, var(--accent2) 10%, var(--panel)); border: 1px solid color-mix(in srgb, var(--accent2) 40%, transparent); position: relative;
+  animation: dcHintIn .35s ease both; transition: opacity .25s, transform .25s; }
+.dc-hint.gone { opacity: 0; transform: translateY(-4px); }
+.dc-hint-i { font-size: 24px; flex: none; align-self: start; line-height: 1.2; }
+.dc-hint-t { min-width: 0; display: block; }
+.dc-hint-t p { margin: 0; }
+.dc-hint-h { display: block; font-size: 15px; line-height: 1.3; }
+.dc-hint-p { display: block; margin-top: 3px !important; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.dc-hint-p b { font-size: inherit; color: var(--text); }
+.dc-hint-btns { display: flex; align-items: center; gap: 8px; }
+.dc-hint .btn.dc-hint-ok { min-height: 44px; padding: 0 16px; }
+.dc-hint .dc-hint-x { width: 44px; height: 44px; }
+@media (max-width: 640px) { .dc-hint { grid-template-columns: auto minmax(0, 1fr); } .dc-hint-btns { grid-column: 1 / -1; justify-content: flex-end; } }
+@keyframes dcHintIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- deck page: ▶ Начать · one summary line · three buttons ---------- */
+.deck-head { align-items: center; margin-bottom: 12px; }
+.deck-head .dk-about { gap: 6px; min-width: 200px; }
+.deck-head .ring { width: 56px; height: 56px; }
+.deck-head .ring::after { inset: 6px; }
+.deck-head > [data-act="back"] { width: 44px; height: 44px; }
+.dk-launch { display: flex; flex-direction: column; gap: 12px; margin-top: 2px; }
+.dk-go { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.dk-start { min-height: 56px; font-size: 18px; font-weight: 800; padding: 0 26px; border-radius: 16px; box-shadow: 0 12px 28px -14px var(--accent); }
+.dk-sum { flex: 1 1 360px; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 52px; padding: 6px 8px 6px 14px; border-radius: 14px;
+  background: var(--panel); border: 1px solid var(--panel-border); color: var(--text); font: inherit; font-size: 14.5px; text-align: left; cursor: pointer; transition: border-color .15s, background .15s; }
+.dk-sum:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.dk-sum:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.dk-dot { color: var(--muted); }
+.dk-edit { margin-left: auto; display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 22%, transparent); font-weight: 700; color: var(--text); white-space: nowrap; }
+.dk-none { margin: -4px 0 0; }
+.dk-acts { margin: 0; }
+.dk-acts .btn { min-height: 44px; }
+.dk-listbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 20px 0 12px; }
+.dk-listbar .dk-search { flex: 0 1 240px; min-width: 170px; min-height: 40px; }
+.dk-chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.dk-chips .chip { cursor: pointer; min-height: 36px; padding: 0 12px; font: inherit; font-size: 13px; font-weight: 600; color: var(--text); transition: border-color .15s, background .15s; }
+.dk-chips .chip:hover { border-color: var(--accent); }
+.dk-chips .chip.active { border-color: var(--text); background: color-mix(in srgb, var(--text) 10%, transparent); }
+.dk-listbar .btn.sm { min-height: 40px; }
+@media (pointer: coarse) { .dk-chips .chip, .dk-listbar .btn.sm, .dk-listbar .dk-search, .mchip, .hh-link { min-height: 44px; } }
+
+/* ---------- windows of rows (Mobile.sheet everywhere) ---------- */
+.sx-sheet .m-sheet-head h2 { display: flex; align-items: center; gap: 10px; }
+.sx-sheet .m-sheet-head h2 .sx-svg { font-size: 24px; }
+.sx-i { font-size: 19px; }
+.sx-i svg { width: 22px; height: 22px; }
+.sx-row { border: 1px solid transparent; }
+.sx-row:hover { background: color-mix(in srgb, var(--accent) 13%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 42%, transparent); }
+.sx-row:disabled { opacity: .45; cursor: not-allowed; }
+.sx-chev { color: var(--muted); flex: none; }
+.sx-gt { margin-top: 14px; }
+.sx-list.sx-two { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 4px; }
+.sx-cont .sx-row { background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.sx-red { color: color-mix(in srgb, var(--bad) 75%, var(--text)); }
+.sx-red .sx-i { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+.sx-red:hover { background: color-mix(in srgb, var(--bad) 12%, transparent) !important; border-color: color-mix(in srgb, var(--bad) 50%, transparent) !important; }
+.sx-note { display: flex; gap: 10px; align-items: flex-start; margin: 10px 4px 2px; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--accent2) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent2) 32%, transparent); font-size: 13.5px; line-height: 1.4; }
+.sx-note b { color: color-mix(in srgb, var(--accent2) 60%, var(--text)); }
+.sx-more { margin-top: 2px; }
+.sx-more > summary { list-style: none; }
+.sx-more > summary::-webkit-details-marker { display: none; }
+.sx-more > summary .sx-chev { transition: transform .2s; }
+.sx-more[open] > summary .sx-chev { transform: rotate(90deg); }
+.sx-more > .sx-list { padding-left: 22px; }
+/* ⚙ «Настройки занятия» */
+.ss-opt { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--panel-border); }
+.ss-l { color: var(--muted); font-size: 14px; font-weight: 600; }
+.ss-opt .seg { flex-wrap: wrap; max-width: 100%; }
+.ss-opt .seg button { min-height: 40px; }
+.ss-size { gap: 12px; flex-wrap: wrap; }
+.ss-opt .deck-voices { gap: 6px; flex-wrap: wrap; }
+.ss-opt .deck-voice { min-height: 40px; }
+.ss-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px; padding: 14px 2px 2px; }
+@media (pointer: coarse) { .ss-opt .seg button, .ss-opt .deck-voice { min-height: 44px; } }
+
+/* ---------- «➕ Создать карточки» ---------- */
+.create-modal .cr-groups { margin-top: 4px; }
+.create-modal .sx-gt:first-child { margin-top: 12px; }
+.cr-adv { margin-top: 14px; border: 1px dashed color-mix(in srgb, var(--text) 22%, transparent); border-radius: 16px; padding: 4px 6px 6px; }
+.cr-adv > summary { list-style: none; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 10px; cursor: pointer; font-weight: 700; border-radius: 12px; }
+.cr-adv > summary:hover { background: var(--panel); }
+.cr-adv > summary::-webkit-details-marker { display: none; }
+.cr-adv > summary::after { content: '›'; margin-left: auto; transform: rotate(90deg); color: var(--muted); font-size: 20px; transition: transform .2s; }
+.cr-adv[open] > summary::after { transform: rotate(-90deg); }
+.cr-adv > summary small { color: var(--muted); font-weight: 500; }
+.src-more-d { margin-top: 10px; }
+.src-more-d > summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px dashed var(--panel-border); cursor: pointer; font-weight: 700; }
+.src-more-d > summary::-webkit-details-marker { display: none; }
+.src-more-d > summary:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.src-more-d > summary small { color: var(--muted); font-weight: 500; }
+.src-more-d[open] > summary { margin-bottom: 8px; }
+
+/* ---------- smaller screens ---------- */
+@media (max-width: 1100px) {
+  .mgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mt.video { grid-column: 1 / -1; grid-row: auto; min-height: 0; }
+}
+@media (max-width: 720px) {
+  .home-ft { grid-template-columns: 1fr; }
+  .ss-opt { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mt, .mt:hover, .mt:focus-within, .playbig, .mchip, .home-ft .ft, .dc-hint, .dk-sum, .sx-row { transition: none !important; animation: none !important; transform: none !important; }
+  .mt.video:hover .playbig { transform: none; }
+}
+
+/* 📊 the day's goal and the week of the streak moved from home to «Статистика» (v210) */
+.st-week { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); margin: 6px 0 16px; }
+@media (max-width: 900px) { .st-week { grid-template-columns: 1fr; } }
+[data-theme="light"] .sb-item.active { color: var(--text); }
+
+/* 🎓 «Подготовка к экзамену» on home (the window itself: css/examprep.css, loaded on first use) */
+.home-xp { margin-top: 12px; }
+.home-xp-plaque { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 12px 16px; border-radius: 18px; text-align: left; font: inherit; color: var(--text); cursor: pointer;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, var(--panel)), color-mix(in srgb, var(--accent2) 12%, var(--panel))); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); transition: border-color .15s, transform .15s; }
+.home-xp-plaque:hover { border-color: var(--accent); transform: translateY(-1px); }
+.home-xp-plaque:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent); }
+.home-xp-i { font-size: 30px; line-height: 1; flex: none; }
+.home-xp-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.home-xp-t small { color: var(--muted); font-size: 13px; line-height: 1.35; }
+.home-xp-go { color: var(--muted); font-size: 22px; }
+@media (prefers-reduced-motion: reduce) { .home-xp-plaque { transition: none; } .home-xp-plaque:hover { transform: none; } }
+/* 🧭 navigator: an odd last quick path takes the whole row */
+.nv-paths > .nv-path:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* =====================================================================
+ * TOP BAR v215 (desktop, every width from 761 px; phones — html.m-phone — keep their own bar, css/mobile.css)
+ *   logo · [🏠 ⤴ ?] · Колоды Статистика Настройки ······ [🎧 Слушать 🎙 Переводчик 🤖 Нейросеть] · [👤 ☀]
+ *   one height (--tb-h, a 44 px target) and one baseline for every control; the same gap (--tb-g) between the groups;
+ *   the free room sits between the sections and the actions. When the room runs out js/app.js fitBadge folds the labels
+ *   into icons in a fixed order (less air → 🤖 text → 🎧/🎙 captions → 🤖 robot only → «Norsk Kort» → section names → ⤴ ☀ into «⋯»).
+ *   html:not(.m-phone) .topbar … is stronger than the older top-bar rules of css/listen.css and css/help.css.
+ * ===================================================================== */
+.top-actions, .top-user { display: flex; align-items: center; gap: 8px; flex: none; }
+html:not(.m-phone) .topbar { --tb-h: 44px; --tb-g: 16px; gap: var(--tb-g); flex-wrap: nowrap; padding-bottom: 10px; }
+@media (max-width: 1100px) { html:not(.m-phone) .topbar { --tb-g: 12px; } }
+html:not(.m-phone) .topbar.tb-tight { --tb-g: 12px; } /* the first fold: a little less air */
+html:not(.m-phone) .topbar > *, html:not(.m-phone) .topbar-right > *, html:not(.m-phone) .topbar :is(.top-icons, .nav, .top-actions, .top-user) > * { flex-shrink: 0; }
+html:not(.m-phone) .topbar-right { margin-left: auto; gap: var(--tb-g); }
+html:not(.m-phone) .top-user { gap: 6px; }
+/* logo */
+html:not(.m-phone) .topbar .logo { height: var(--tb-h); padding: 0 8px; margin-left: -8px; border-radius: 12px; color: var(--text); transition: background .2s, box-shadow .2s; }
+html:not(.m-phone) .topbar.tb-nologo .logo-text { display: none; }
+@media (hover: hover) { html:not(.m-phone) .topbar .logo:hover { background: var(--panel); box-shadow: 0 0 0 1px var(--panel-border); } }
+html:not(.m-phone) .topbar .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* [🏠 ⤴ ?] — one segmented group: three equal squares on a shared plate */
+.top-icons { position: relative; display: inline-flex; align-items: center; gap: 2px; border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 80%, transparent); box-shadow: inset 0 0 0 1px var(--panel-border); }
+html:not(.m-phone) .top-icons > .icon-btn { position: relative; display: inline-grid !important; place-items: center; width: var(--tb-h); height: var(--tb-h); margin: 0; padding: 0;
+  border: 0; border-radius: 12px; background: transparent; color: var(--text); font-size: 18px; box-shadow: none; transform: none;
+  transition: color .18s, background .18s, box-shadow .18s; }
+html:not(.m-phone) .top-icons > .help-top > span { font-weight: 900; font-size: 19px; line-height: 1; }
+html:not(.m-phone) .top-icons .ico { display: block; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+html:not(.m-phone) .top-icons > .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+html:not(.m-phone) body[data-view="home"] .top-icons > .top-home { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+@media (hover: hover) {
+  html:not(.m-phone) .top-icons > .icon-btn:hover { color: #fff; transform: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2, #3b82f6)); box-shadow: 0 6px 16px -7px var(--accent); }
+  html:not(.m-phone) .top-icons > .icon-btn:hover .ico, html:not(.m-phone) .top-icons > .help-top:hover > span { transform: scale(1.12); }
+  html:not(.m-phone) .top-icons > .help-top:hover > span { transform: rotate(-12deg) scale(1.12); }
+  /* an instant tooltip under each square (the browser's own title shows only after a delay) */
+  html:not(.m-phone) .top-icons > .icon-btn::after, html:not(.m-phone) .topbar.tb-navico .nav-btn::after {
+    content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; z-index: 60; transform: translate(-50%, -4px); white-space: nowrap;
+    font: 600 12.5px/1.2 system-ui, -apple-system, sans-serif; color: #fff; background: rgba(15, 18, 34, .96); border: 1px solid rgba(255, 255, 255, .12);
+    padding: 6px 10px; border-radius: 9px; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .6); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; }
+  html:not(.m-phone) .topbar.tb-navico .nav-btn::after { content: attr(aria-label); }
+  html:not(.m-phone) .top-icons > .icon-btn:is(:hover, :focus-visible)::after, html:not(.m-phone) .topbar.tb-navico .nav-btn:is(:hover, :focus-visible)::after { opacity: 1; transform: translate(-50%, 0); }
+}
+/* sections */
+html:not(.m-phone) .topbar .nav { margin-left: 0; gap: 4px; }
+html:not(.m-phone) .topbar .nav-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; height: var(--tb-h); padding: 0 14px; font-size: 15px; line-height: 1; }
+html:not(.m-phone) .topbar .nav-btn > span { display: inline; }
+html:not(.m-phone) .topbar .nav-btn .nav-ico { margin-right: 8px; vertical-align: 0; }
+html:not(.m-phone) .topbar.tb-tight .nav-btn { padding: 0 11px; }
+html:not(.m-phone) .topbar.tb-navico .nav-btn { width: var(--tb-h); padding: 0; }
+html:not(.m-phone) .topbar.tb-navico .nav-btn > span { display: none; }
+html:not(.m-phone) .topbar.tb-navico .nav-btn .nav-ico { margin: 0; }
+/* 🎧 Слушать · 🎙 Переводчик · 🤖 Нейросеть — pills of one height */
+html:not(.m-phone) .topbar :is(.listen-top, .interp-top) { flex-direction: row; justify-content: center; width: auto; min-width: 0; height: var(--tb-h);
+  padding: 0 17px 0 14px; gap: 8px; border-radius: 999px; font-size: 14px; letter-spacing: 0; }
+html:not(.m-phone) .topbar :is(.listen-top, .interp-top) .lbl-t { display: inline; font-size: inherit; letter-spacing: inherit; }
+html:not(.m-phone) .topbar .listen-top .hp-ico { width: 22px; height: 22px; }
+html:not(.m-phone) .topbar .interp-top .ico { width: 20px; height: 20px; }
+html:not(.m-phone) .topbar.tb-tight :is(.listen-top, .interp-top) { padding: 0 14px 0 12px; }
+html:not(.m-phone) .topbar.tb-ico :is(.listen-top, .interp-top) { width: var(--tb-h); padding: 0; }
+html:not(.m-phone) .topbar.tb-ico :is(.listen-top, .interp-top) .lbl-t { display: none; }
+html:not(.m-phone) .topbar .claude-badge { --aib-h: var(--tb-h); }
+html:not(.m-phone) .topbar .claude-badge[data-fit="s"], html:not(.m-phone) .topbar .claude-badge[data-fit="xs"] { width: var(--tb-h); min-width: var(--tb-h); }
+/* the robot in the AI pill: a little bigger (it still blinks and tilts its head on hover; reduced motion — still) */
+html:not(.m-phone) .topbar .claude-badge .aib-glyph { width: 31px; height: 31px; }
+html:not(.m-phone) .topbar .claude-badge[data-fit="l"] { padding-left: 7px; }
+html:not(.m-phone) .topbar .claude-badge[data-fit="m"] { padding: 0 11px 0 7px; }
+html:not(.m-phone) .topbar .claude-badge[data-fit="s"] .aib-corner { right: -5px; bottom: -4px; }
+/* 👤 ☀ (and «⋯» only when even the icons do not fit) */
+html:not(.m-phone) .topbar .account-top { flex: 0 0 var(--tb-h); width: var(--tb-h); height: var(--tb-h); }
+html:not(.m-phone) .topbar .account-top .avatar { width: 36px !important; height: 36px !important; }
+html:not(.m-phone) .topbar .account-top:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+html:not(.m-phone) .topbar :is(.theme-btn, .more-top) { width: var(--tb-h); height: var(--tb-h); border-radius: 12px; font-size: 20px; }
+html:not(.m-phone) .topbar .theme-btn { display: inline-flex !important; }
+html:not(.m-phone) .topbar .share-top { display: inline-grid !important; }
+html:not(.m-phone) .topbar .help-top { display: inline-grid !important; }
+html:not(.m-phone) .topbar .more-top { display: none; }
+html:not(.m-phone) .topbar.tb-more .more-top { display: inline-grid; place-items: center; }
+html:not(.m-phone) .topbar.tb-more .top-icons > .share-top, html:not(.m-phone) .topbar.tb-more .top-user > .theme-btn { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:not(.m-phone) .top-icons .ico, html:not(.m-phone) .top-icons > .help-top > span { transition: none; transform: none !important; }
+}
+/* v231: a new build arrived while the study screen is open — a small, non-blocking offer at the bottom (never over the card's buttons) */
+.upd-banner { position: fixed; left: 50%; bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px)); transform: translateX(-50%); z-index: 2600;
+  display: flex; align-items: center; gap: 10px; max-width: min(560px, calc(100vw - 24px)); padding: 6px 6px 6px 12px; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-solid) 94%, transparent); border: 1px solid var(--panel-border); box-shadow: 0 8px 24px -10px rgba(0,0,0,.5);
+  font-size: 13px; color: var(--text, inherit); animation: glNoteIn .3s ease-out; }
+.upd-banner .upd-i { flex: none; display: grid; place-items: center; color: var(--accent, currentColor); }
+.upd-banner .upd-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upd-banner .btn { flex: none; }
+.upd-banner .upd-x { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.upd-banner .upd-x:hover { background: color-mix(in srgb, var(--muted) 14%, transparent); }
+html.m-phone .upd-banner, .tabbar ~ .upd-banner { bottom: calc(env(safe-area-inset-bottom) + 76px); }
+@media (max-width: 600px) { .upd-banner { left: 12px; right: 12px; transform: none; max-width: none; border-radius: 16px; animation-name: glNoteInM; } .upd-banner .upd-t { white-space: normal; line-height: 1.3; } }

@@ -13,6 +13,7 @@
  *  - a soft reminder: a dot on the top-bar «?» until the help centre has been opened once (+ one bubble, not on day one).
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const KEY = 'nk-help';
   const state = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } };
   const patch = o => { const s = Object.assign(state(), o); try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* private mode */ } return s; };
@@ -365,10 +366,22 @@
     return true;
   }
 
+  /** 🎤 the example player with «Бегущая строка» on (mode: hl / wbw) and the example playing from its start */
+  const karDemo = mode => async () => {
+    if ((await subsPlayer()) === false) return false;
+    try { if (window.Subs && Subs.karaoke) Subs.karaoke(true, mode); } catch (e) { /* the player is closing */ }
+    const v = document.querySelector('#modal-root .subs-modal [data-media]');
+    // only the short example plays from its start (never someone's own film)
+    const ex = isFinite(v && v.duration) ? v.duration > 0 && v.duration < 5 : /eksempel/i.test((document.querySelector('#modal-root .subs-modal .subs-foot') || {}).textContent || ''); // a recorded example has no length in Chrome
+    if (v && v.paused && ex) { try { v.muted = true; v.currentTime = 0; const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* not loaded yet */ } }
+    await sleep(250);
+    return true;
+  };
+
   /* ---------------- the tours ---------------- */
   const SUBS_STEPS = [
     { go: subsPlayer, target: ['.subs-modal .subs-list .sw', '.subs-modal .subs-now .sw', '.subs-modal .subs-list'], title: `${HAND_I(18)} Нажмите на слово`, text: 'Видео встанет на паузу, появится перевод слова и кнопка «В карточку». Выделите несколько слов — переведётся всё выделенное.' },
-    { target: '.subs-modal [data-trm]', title: '🙈 Перевод: виден, размыт или скрыт', text: '«Виден» — читайте спокойно. «Слово (перевод)» — перевод у каждого слова. «Размыт» и «скрыт» — проверьте себя: поняли без подсказки?' },
+    { target: '.subs-modal [data-trm]', title: '🙈 Перевод: под строкой, по словам, размыт или скрыт', text: '«Под строкой» — перевод всей фразы снизу. «По словам» — перевод у каждого слова. «Размыт» и «Скрыт» — проверьте себя: поняли без подсказки?' },
     { target: '.subs-modal .subs-view [data-k="ovwin"]', title: '💬 Субтитры на видео', text: 'Строка с переводом — прямо на картинке, как в YouTube. Нажмите ещё раз — уберёте.' },
     { target: ['.subs-modal .subs-view .sv-btn', '.subs-modal .sv-btn'], title: 'Aa Вид субтитров', text: 'Крупнее или мельче, другие цвета, размер перевода слов. Настройки работают и на экране, и на телевизоре.' },
     { target: ['.subs-modal .subs-view .tv-btn', '.subs-modal .tv-btn'], title: '📺 На телевизор', text: 'Видео — на большом экране, субтитры с переводом — тоже. Телевизор и компьютер должны быть в одной сети Wi‑Fi.' },
@@ -386,7 +399,7 @@
       { target: '.np-modal [data-np="dark"]', title: '🌑 Тёмный экран', text: 'Чёрный экран, который не реагирует на случайные касания, — телефон можно положить в карман. Звук продолжится.' },
     ] },
     study: { steps: [
-      { go: home, target: ['.tabbar .tab-study', '#view .qa-main[data-act="study-all"]', '#view [data-act="study-all"]'], title: '▶ Начать', text: el => (el.closest('.tabbar') ? 'Кнопка «Учить» внизу экрана — и пойдут карточки на сегодня.' : '«Повторить всё» на главной — и пойдут карточки на сегодня. У каждой колоды есть ещё своя кнопка «▶ Учить».') },
+      { go: home, target: ['.tabbar .tab-study', '#view .home-go', '#view [data-act="study-all"]'], title: '▶ Начать', text: el => (el.closest('.tabbar') ? 'Кнопка «Учить» внизу экрана — и пойдут карточки на сегодня.' : 'Большая кнопка «▶ Учить» на главной — и пойдут карточки на сегодня. У каждой колоды есть ещё своя кнопка «▶ Учить».') },
       { go: studyScreen, target: '.study .flashcard', title: '🃏 Это карточка', text: 'Посмотрите на слово и попробуйте вспомнить перевод. Не спешите.' },
       { target: '.study .answer-row [data-act="flip"]', title: '↻ Перевернуть', text: 'Нажмите на карточку или на эту кнопку — появится ответ. Нажмите «Дальше» — переверну для примера.', act: () => { if (window.Study && Study.flip) Study.flip(true); }, wait: 400 },
       { target: '.study .answer-row [data-g="3"], .study .answer-row.four [data-g="3"]', title: '✓ Знаю', text: 'Вспомнили? Нажмите «Знаю» (или стрелку →). Это слово вернётся нескоро.' },
@@ -403,13 +416,22 @@
     ] },
     subs: { steps: SUBS_STEPS },
     subview: { steps: [SUBS_STEPS[0], SUBS_STEPS[3], SUBS_STEPS[2], SUBS_STEPS[4], SUBS_STEPS[1]].map((s, i) => (i ? Object.assign({}, s, { go: null }) : s)) },
-    video: { from: () => (document.querySelector('#modal-root .subs-modal .subs-wrap') ? 2 : 0), steps: [
+    /* 🎤 «Бегущая строка» (js/subs.js Kar): the switch, the two looks, «⏱ Сдвиг слов», the same choice in «Aa Вид субтитров» */
+    karaoke: { steps: [
+      { go: subsPlayer, target: '.subs-modal .subs-ctrl [data-k="kar"]', title: '🎤 Бегущая строка', text: 'Слово загорается в тот момент, когда его произносят, — вместе с переводом. Нажмите «Дальше» — включу для примера.' },
+      { go: karDemo('hl'), target: ['.subs-modal [data-karmode="hl"]', '.subs-modal [data-karbar]'], title: '✨ Подсветка', text: 'Видна вся строка. Звучащее слово светится, сказанные остаются, следующие — бледнее.' },
+      { go: karDemo('wbw'), target: ['.subs-modal [data-karmode="wbw"]', '.subs-modal [data-karbar]'], title: '👣 Слово за словом', text: 'Слова появляются по одному — как их говорят. Каждое со своим переводом.' },
+      { go: karDemo(), target: ['.subs-modal [data-karbar] .kar-sh', '.subs-modal [data-karbar]'], title: '⏱ Сдвиг слов', text: 'Слова спешат или опаздывают? «−» — раньше, «+» — позже, по 0,1 секунды. Запомнится для этого видео.' },
+      { go: karDemo(), target: ['.subs-modal .subs-view .sv-btn', '.subs-modal .sv-btn', '.subs-modal [data-k="kar"]'], title: 'Aa Выключить или выбрать вид', text: 'Та же кнопка «🎤 Бегущая строка» выключает её. В «Aa Вид субтитров» — выбор вида; работает в любом положении субтитров и на весь экран.' },
+    ] },
+    video: { from: () => (document.querySelector('#modal-root .subs-modal .subs-wrap') ? 3 : 0), steps: [
+      { go: home, target: ['#view .mt.video .mt-main', '.sidebar [data-sb="video"]'], title: '▶ Смотреть видео', text: 'Большая плитка на главной: NRK TV, YouTube и своё видео с субтитрами. Нужное можно нажать сразу — внизу плитки.' },
       { go: home, target: '#view [data-act="nrk"]', title: '📺 NRK TV', text: 'Передачи и сериалы NRK — с норвежскими субтитрами и переводом.' },
       { go: home, target: '#view [data-act="youtube"]', title: '▶ YouTube', text: 'Видео учителей норвежского — так же, с субтитрами и переводом.' },
       ...SUBS_STEPS.map((s, i) => (i === 0 ? Object.assign({}, s, { title: '👀 Так выглядит просмотр', text: 'Это пример. Под видео — норвежские субтитры, под строкой — перевод. Нажмите на любое слово — пауза, перевод и «В карточку».' }) : s)),
     ] },
     radio: { from: () => (document.querySelector('#modal-root .nrkr-modal') ? 1 : 0), steps: [
-      { go: home, target: '#view [data-act="nrkradio"]', title: '📻 NRK Радио и подкасты', text: 'Прямой эфир и подкасты — с субтитрами и переводом. Ещё их можно найти в «🎧 Слушать».' },
+      { go: home, target: ['#view [data-act="nrkradio"]', '.sidebar [data-sb="radio"]'], title: '📻 Радио', text: 'Плитка на главной: прямой эфир NRK и подкасты — с субтитрами и переводом. Ещё их можно найти в «🎧 Слушать».' },
       { go: () => ensure('.nrkr-modal', () => NrkRadio.open()), target: '.nrkr-modal .nrk-search', title: '🔎 Поиск', text: 'Найдите подкаст или программу по названию.' },
       { target: '.nrkr-modal .nrk-quick', title: '⭐ Популярное', text: 'Готовые подборки — одно нажатие.' },
       { target: '.nrkr-modal .nrk-tile', title: '🎙 Выберите станцию или выпуск', text: 'Откроется плеер. Нажмите «Создать субтитры и перевод» — приложение само запишет, что говорят.', timeout: 6000 },
@@ -428,25 +450,25 @@
       { go: home, target: ['#interp-btn', '#more-btn'], title: '🗣 Переводчик', text: el => (el.id === 'more-btn' ? 'На телефоне он в меню ⋯ → «Переводчик в наушниках».' : 'Наденьте наушники и нажмите эту кнопку. Разрешите микрофон — и всё.') },
     ] },
     ai: { steps: [
-      { go: home, target: '#claude-badge', title: '🤖 Нейросеть', text: 'Робот показывает, подключена ли нейросеть: глаза светятся и рядом её значок — работает; робот спит и кнопка жёлтая — ещё не подключена (Gemini и Groq — бесплатно). Наведите мышь — увидите все нейросети приложения; нажмите — выберите или подключите новую.' },
+      { go: home, target: ['#claude-badge', '#more-btn'], title: '🤖 Нейросеть', text: el => el.id === 'more-btn' ? 'На телефоне нейросеть — в меню ⋯, строка «Нейросеть»: там видно, подключена ли она, и можно выбрать или подключить новую (Gemini и Groq — бесплатно).' : 'Робот показывает, подключена ли нейросеть: глаза светятся и рядом её значок — работает; робот спит и кнопка жёлтая — ещё не подключена (Gemini и Groq — бесплатно). Наведите мышь — увидите все нейросети приложения; нажмите — выберите или подключите новую.' },
       { go: () => toView('settings'), target: () => [...document.querySelectorAll('#view .panel h3')].filter(h => /Нейросет/i.test(h.textContent)), title: '🔑 Подключить бесплатно', text: 'Google Gemini или Groq — бесплатно. Получите ключ, вставьте сюда и нажмите «Проверить».' },
     ] },
     create: { from: () => (document.querySelector('#modal-root .create-modal') ? 1 : 0), steps: [
-      { go: home, target: '#view [data-act="create"]', title: '💬 Что вы хотите выучить?', text: 'Одна кнопка для всего: тема, список слов, фото, PDF или книга.' },
+      { go: home, target: '#view .home-decks-h [data-act="create"]', title: '➕ Создать карточки', text: 'Одна кнопка для всего: тема, список слов, фото, файл, готовые колоды. Она рядом с «Мои колоды».' },
       { go: () => ensure('.create-modal', () => Create.open()), target: '.create-modal [data-q]', title: '✍️ Напишите тему или вставьте слова', text: '«У врача», «на складе» — или список «слово – перевод».' },
       { target: () => [...document.querySelectorAll('.create-modal [data-photo], .create-modal [data-file]')].map(i => i.closest('label')), title: '📷 Фото или файл', text: 'Фото страницы учебника, PDF, EPUB, Word — приложение найдёт слова и перевод.' },
       { target: '.create-modal .create-tips', title: '💡 Готовые темы', text: 'Нажмите на тему — и она подставится.' },
-      { target: '.create-modal .tgc-mini', title: `${TG(18)} Норвежские каналы`, text: 'Ещё один источник: посты норвежских каналов в Телеграме.' },
+      { target: '.create-modal .cr-groups', title: '🗂 Все способы — по группам', text: '«Быстро», «Готовые колоды», «Из того, что читаете и смотрите». Особые колоды — в свёрнутом «🧰 Для продвинутых».' },
     ] },
     levels: { from: () => (App.view && App.view.name === 'levels' ? 1 : 0), steps: [
-      { go: home, target: ['#view [data-lv-open]', '#view [data-lv-home]'], title: '🪜 Лестница уровней', text: 'Здесь — колоды по уровням A1 → C2 и ваш прогресс на каждой ступеньке.' },
+      { go: () => ensure('.sx-drills', () => Views.section('drills')), target: ['.sx-drills [data-sx="levels"]', '#view [data-act="sec-drills"]'], title: '🪜 Уровни A1–C2', text: '«🏋️ Упражнения» → «Проверить себя»: колоды по уровням A1 → C2 и ваш прогресс. Ещё они есть в «➕ Создать карточки» → «Готовые колоды».' },
       { go: () => toView('levels'), target: '#view [data-lv-act="placement"]', title: '🎯 Где я сейчас?', text: '30 слов, 3–4 минуты: «знаю / не уверен / не знаю» — и совет, с какого уровня начать.' },
       { go: () => toView('levels'), target: ['#view .lv-row.cur', '#view .lv-ladder'], title: '📶 Ступенька', text: 'Прогресс уровня, «Начать» и «➕ Ещё слова»: карточки готовятся в фоне — перевод, род, формы, пример, картинка.' },
       { go: () => toView('levels'), target: '#view .lv-row[data-l="C1"]', title: '🏔 C1 и C2', text: 'Самые редкие слова того же частотного списка — словарь продвинутого уровня. Дальше — живой язык: новости, NRK, книги.' },
       { go: () => toView('levels'), target: '#view .lv-opts', title: '🎬 Слова уровня в субтитрах', text: 'Включите — и в плеере субтитров подсветятся слова вашего уровня, которых нет в карточках.' },
     ] },
     klokka: { from: () => (document.querySelector('#modal-root .klokka-modal .kl-hub') ? 1 : 0), steps: [
-      { go: home, target: ['.sidebar [data-sb="klokka"]', '#view [data-klokka-open]'], title: '🕐 Время по-норвежски', text: 'Раздел Klokka: урок с часами и игры на очки.' },
+      { go: home, target: ['#view [data-klokka-open]', '#view [data-act="sec-drills"]', '.sidebar [data-sb="drills"]'], title: '🕐 Время по-норвежски', text: 'Klokka — в «🏋️ Упражнениях» (на компьютере ещё и кнопкой на плитке): урок с часами и игры на очки.' },
       { go: () => ensure('.klokka-modal .kl-hub', () => (window.Klokka ? Klokka.open() : null)), target: '.klokka-modal [data-go-lesson]', title: '📖 Как говорят время', text: '7 коротких шагов: целые часы, kvart, halv, 5 минут, på halv / over halv, 24 часа, части дня. У каждой фразы есть звук.' },
       { target: '.klokka-modal .kl-levels', title: '🎚 Уровни', text: 'От целых часов до «ti på halv fire» и «fjorten tretti». Звёзды — за лучший результат.' },
       { target: '.klokka-modal .kl-speed', title: '⚡ На скорость', text: 'Включите — и сколько успеете за 60 секунд. Рекорд сохраняется.' },
@@ -468,7 +490,7 @@
   const TOPICS = [
     { id: 'study', icon: '🃏', hue: 262, title: 'Учить карточки и интервальные повторения', desc: 'Вспомнили — «Знаю», нет — «Не знаю». Когда повторить, приложение решит само.',
       keys: 'учить карточки повторять повторение флеш колода знаю не знаю перевернуть', tour: 'study', at: [0, 1, 2, 3, null],
-      steps: [['▶', 'Нажмите <b>«Учить»</b> внизу экрана (на компьютере — <b>«Повторить всё»</b> на главной) или <b>«▶ Учить»</b> у колоды.'],
+      steps: [['▶', 'Нажмите большую кнопку <b>«▶ Учить»</b> на главной (на телефоне она есть и внизу экрана) или <b>«▶ Учить»</b> у колоды.'],
         ['👀', 'Посмотрите на слово и попробуйте вспомнить перевод.'],
         ['tap', 'Нажмите на карточку — она перевернётся и покажет ответ.'],
         ['✓', '<b>«Знаю»</b> — если вспомнили, <b>«Не знаю»</b> — если нет. На клавиатуре: → и ←.'],
@@ -501,8 +523,8 @@
       limits: 'В шуме микрофон слышит хуже. Перевод делает машина — в важном разговоре переспросите. Если браузер не умеет распознавать речь, понадобится нейросеть — приложение подскажет. Разговор никуда не записывается.',
       open: ['🗣 Включить переводчик', () => Interp.toggle()] },
     { id: 'video', icon: '📺', hue: 350, title: 'Видео NRK и YouTube с субтитрами и переводом', desc: 'Смотрите передачи — нажмите на слово, и оно станет карточкой.',
-      keys: 'видео nrk tv youtube ютуб субтитры передача сериал смотреть фильм', tour: 'video', at: [0, null, 2, 2, 7],
-      steps: [['📺', 'Откройте <b>«NRK TV»</b> или <b>«YouTube»</b> на главной.'], ['🔎', 'Найдите передачу или видео.'],
+      keys: 'видео nrk tv youtube ютуб субтитры передача сериал смотреть фильм', tour: 'video', at: [0, null, 3, 3, 8],
+      steps: [['▶', 'На главной нажмите плитку <b>«Смотреть видео»</b> и выберите <b>NRK TV</b>, <b>YouTube</b> или своё видео.'], ['🔎', 'Найдите передачу или видео.'],
         ['💬', 'Под видео — норвежские субтитры, под строкой — перевод.'], ['tap', 'Нажмите на слово — видео встанет на паузу, появится перевод и «В карточку».'],
         ['➕', 'Строку целиком можно сделать карточкой — с настоящим звуком.']],
       expect: 'Живой норвежский: как говорят на самом деле — и сразу карточки из того, что вы услышали.',
@@ -515,9 +537,17 @@
       expect: 'Удобно глазам: читается и с дивана, и с телефона.',
       limits: 'Телевизор и компьютер должны быть в одной сети Wi‑Fi. Если телевизор не находится, приложение подскажет, что сделать.',
       open: null },
+    { id: 'karaoke', icon: '🎤', hue: 320, title: 'Бегущая строка: слова загораются под голос', desc: 'Слышите слово — и в тот же миг видите его с переводом.',
+      keys: 'бегущая строка караоке слово за словом подсветка синхронно субтитры голос сдвиг слушать читать видео', tour: 'karaoke', at: [0, 1, 2, 3, 4],
+      steps: [['🎤', 'Под видео нажмите <b>«Бегущая строка»</b>.'], ['✨', '<b>«Подсветка»</b> — звучащее слово светится вместе с переводом.'],
+        ['👣', '<b>«Слово за словом»</b> — слова появляются по одному, как их говорят.'], ['⏱', 'Спешат или опаздывают? <b>«Сдвиг слов»</b>: − раньше, + позже.'],
+        ['Aa', 'Выключить — та же кнопка. Вид — в <b>«Aa Вид субтитров»</b>.']],
+      expect: 'Вы слышите и читаете одно и то же слово в один момент: ухо привыкает к быстрой речи, а слово запоминается вместе с голосом.',
+      limits: 'Если время слов есть в субтитрах (автосубтитры YouTube, файлы с караоке-метками) — подсветка точная. Иначе приложение слушает звук и находит паузы, а где звук недоступен (YouTube) — считает по слогам; тогда поправьте «⏱ Сдвиг слов». На телевизор бегущая строка идёт через мост на Mac: строка показывается по словам, звучащее слово — жирным и цветом. Нашу страницу для телевизора с настоящей подсветкой включим, когда её зарегистрируют в Google. Кнопка трансляции в Chrome без моста показывает на телевизоре обычные строки, а повтор экрана и AirPlay экрана — всё как здесь.',
+      open: null },
     { id: 'radio', icon: '📻', hue: 160, title: 'Радио и подкасты', desc: 'Прямой эфир NRK и подкасты — с субтитрами и переводом.',
       keys: 'радио подкаст эфир nrk p1 p2 p3 слушать новости', at: { radio: [0, 3, null, null], radioPlayer: [null, null, 0, 1] }, tour: () => (document.querySelector('#modal-root .subs-modal .subs-radio') ? 'radioPlayer' : 'radio'),
-      steps: [['📻', 'Откройте <b>«NRK Радио»</b> на главной или в «🎧 Слушать».'], ['🎙', 'Выберите станцию или выпуск подкаста.'],
+      steps: [['📻', 'Нажмите плитку <b>«Радио»</b> на главной (или найдите радио в «🎧 Слушать»).'], ['🎙', 'Выберите станцию или выпуск подкаста.'],
         ['🤖', 'Нажмите <b>«Создать субтитры и перевод»</b> — приложение само запишет, что говорят.'], ['tap', 'Нажмите на слово — перевод и карточка.']],
       expect: 'Норвежская речь каждый день — и текст под ней, чтобы понимать.',
       limits: 'Субтитры для радио создаёт ваше устройство. В первый раз оно скачивает около 180 МБ — это несколько минут. В словах бывают ошибки.',
@@ -531,7 +561,7 @@
       open: ['📺 Открыть NRK TV', () => NrkTV.open()] },
     { id: 'telegram', icon: 'tg', hue: 200, title: 'Telegram-каналы', desc: 'Норвежские каналы: слова, фразы и картинки — в карточки.',
       keys: 'telegram телеграм канал группа чат посты norsk норвегия', tour: 'telegram', at: [null, 1, 4, null, null],
-      steps: [['🔎', 'Найдите каналы: в поиске Telegram напишите <b>«norsk»</b> или <b>«Норвегия язык»</b>.'], ['📢', 'Или откройте список <b>«Норвежские каналы»</b> в разделе Telegram.'],
+      steps: [['🔎', 'Найдите каналы: в поиске Telegram напишите <b>«norsk»</b> или <b>«Норвегия язык»</b>.'], ['📢', 'Или нажмите плитку <b>«Telegram»</b> на главной — там список норвежских каналов.'],
         ['🔐', 'Подключите свой Telegram — один раз.'], ['🗂', '<b>«Создать карточки из чата»</b> — приложение соберёт пары «слово — перевод».'],
         ['🛡', 'Каждая пара сверяется с переводчиком — ошибки авторов отсеиваются.']],
       expect: 'Готовые карточки из уроков и словариков, которые пишут преподаватели.',
@@ -545,16 +575,16 @@
       limits: 'Без нейросети работают словари и бесплатные переводчики — смысл они передают, но ошибаются в идиомах. У бесплатных нейросетей есть дневной лимит. Ключ хранится только на этом устройстве, в зашифрованном виде.',
       open: ['⚙️ Открыть настройки', () => UI.goTo('settings')] },
     { id: 'create', icon: '✨', hue: 290, title: 'Карточки из любого источника', desc: 'Тема, список слов, фото страницы, PDF, книга, видео — всё становится карточками.',
-      keys: 'создать карточки колода фото pdf epub файл список слов тема импорт', tour: 'create', at: [0, 1, 2, null],
-      steps: [['💬', 'На главной нажмите <b>«Что вы хотите выучить?»</b>.'], ['✍️', 'Напишите тему («у врача», «на складе») или вставьте список «слово – перевод».'],
+      keys: 'создать карточки колода новая колода фото pdf epub файл список слов тема импорт что выучить готовые колоды', tour: 'create', at: [0, 1, 2, null],
+      steps: [['➕', 'На главной, рядом с «Мои колоды», нажмите <b>«Создать карточки»</b>.'], ['✍️', 'Напишите тему («у врача», «на складе») или вставьте список «слово – перевод».'],
         ['📷', 'Или добавьте фото страницы, PDF, EPUB, Word.'], ['👀', 'Проверьте пары и нажмите <b>«Сохранить»</b>.']],
       expect: 'Своя колода за минуту — из того, что вы учите прямо сейчас.',
       limits: 'Колода по теме — с нейросетью. Список слов, фото и файлы работают и без неё. Плохое фото распознаётся с ошибками — снимайте ровно и при хорошем свете.',
-      open: ['💬 Что вы хотите выучить?', () => Create.open()] },
+      open: ['➕ Создать карточки', () => Create.open()] },
     { id: 'levels', icon: '🪜', hue: 140, title: 'Учить по уровням A1–C2', desc: 'Колоды A1 → C2, «город тем», тест «Где я сейчас?» и прогресс по ступенькам.',
       keys: 'уровни уровень колода a1 a2 b1 b2 c1 c2 cefr лестница тест где я сейчас темы город тем частые слова kelly прогресс пройден',
       tour: 'levels', at: [0, 1, 2, null, null],
-      steps: [['🪜', 'На главной — <b>«Лестница уровней»</b> (в «Учить» или под статистикой).'], ['🎯', 'Пройдите тест <b>«Где я сейчас?»</b> — он подскажет, с какого уровня начать.'],
+      steps: [['🪜', 'Откройте <b>«🏋️ Упражнения» → «Уровни A1–C2»</b> (или <b>«➕ Создать карточки» → «По уровням»</b>).'], ['🎯', 'Пройдите тест <b>«Где я сейчас?»</b> — он подскажет, с какого уровня начать.'],
         ['➕', '<b>«Начать A1»</b> — «Колода A1» создастся, слова добавятся порциями, карточки готовятся в фоне.'],
         ['🏙', 'На странице колоды — <b>«город тем»</b>: плитки «Еда», «Числа и время»… с кольцом прогресса. Нажмите плитку — <b>«▶ Учить»</b> или <b>«🎧 Слушать»</b> только эту тему.'],
         ['🎉', 'Выучено ~80% уровня — поздравление и «Открыть следующий». Уровни не закрыты.']],
@@ -563,7 +593,7 @@
       open: ['🪜 Открыть лестницу', () => Levels.open()] },
     { id: 'klokka', icon: '🕐', hue: 45, title: 'Время по-норвежски', desc: 'Klokka: «halv fire» — это 3:30. Урок с часами и игры на очки.',
       keys: 'время часы klokka который час halv kvart over på половина четверть урок игра', tour: 'klokka', at: [0, 1, 2, 4, 3],
-      steps: [['🕐', 'Откройте <b>«Время по-норвежски»</b>: на главной в «Учить», в «🏋️ Упражнениях» или в боковом меню.'], ['📖', '<b>«Как говорят время»</b> — 7 шагов с часами, цветными зонами и звуком.'],
+      steps: [['🕐', 'Откройте <b>«🏋️ Упражнения» → «Время · Klokka»</b> (на компьютере — ещё и кнопка «🕐 Klokka» на плитке).'], ['📖', '<b>«Как говорят время»</b> — 7 шагов с часами, цветными зонами и звуком.'],
         ['🎚', 'Выберите уровень: от целых часов до «ti på halv fire» и 24 часов.'], ['🎮', 'Игра: тяните стрелки, выбирайте фразу, слушайте или говорите вслух.'],
         ['⚡', '<b>«На скорость»</b> — 60 секунд. Ошибки собираются — <b>«Повторить ошибки»</b>.']],
       expect: 'Вы будете сразу понимать «fem over halv fire» и называть время сами. Главное: halv fire = 3:30 — «половина четвёртого».',
@@ -583,14 +613,25 @@
       expect: 'Все колоды, картинки, прогресс и настройки — на новом устройстве.',
       limits: 'Ключи нейросетей в копию не попадают — их нужно вставить заново. Всё хранится в браузере: если очистить данные сайта, они пропадут. Делайте копию раз в неделю.',
       open: ['⚙️ Открыть настройки', () => UI.goTo('settings')] },
+    { id: 'apptheme', icon: '🎨', hue: 320, title: 'Тема приложения и праздничный наряд', desc: 'Выберите вид приложения — а в праздники оно само наденет праздничный наряд.',
+      keys: 'тема цвет вид оформление примерить примерка посмотреть праздник рождество jul 17 мая пасха хэллоуин снег украшения тёмная светлая контраст',
+      tour: null,
+      steps: [['🎨', 'На главной — плитка <b>«Оформление»</b> (ещё: меню <b>⋯</b> → «🎨 Тема приложения»). Норвежские темы: Викинги, Тролли, Ставкирка, Лофотены…'], ['🎨', 'Нажмите на тему — откроется большой просмотр: карточка, кнопки, украшения. Приложение пока не меняется. Каждая тема есть и светлой, и тёмной.'], ['👀', '<b>«✓ Выбрать эту тему»</b> — сразу насовсем. <b>«👀 Примерить»</b> — походить по приложению в новой теме и потом решить: «Оставить» или «Вернуть как было».'],
+        ['🎄', 'В праздники (Рождество, 17 мая, Пасха, Sankthans, Хэллоуин…) приложение само наденет праздничный наряд, а потом вернёт вашу тему.'], ['❄️', '«Украшения» можно выключить — останутся только цвета.']],
+      expect: 'Приложение выглядит так, как вам приятно, а в праздник — празднично.',
+      limits: 'Если на устройстве включено «Уменьшить движение», украшения стоят на месте.',
+      open: ['🎨 Выбрать тему', () => window.AppThemes && AppThemes.open()] },
   ];
   const topic = id => TOPICS.find(t => t.id === id);
   // «?» of the subtitle player → the video topic (its tour then starts right in the open player)
   const alias = id => (id === 'subs' ? 'video' : topic(id) ? id : null);
-  const ticon = t => (t.icon === 'tg' ? TG(26) : esc(t.icon));
-  const sicon = i => (i === 'tap' || i === '👆' || i === '👉' ? HAND_I(24) : esc(i));
+  const ticon = t => (t.icon === 'tg' ? TG(26) : t.icon === '🤖' ? BOT(30) : esc(t.icon));
+  /** 🤖 in our own titles → the app's brand robot (the tours and coach marks are written as text) */
+  const SIC = () => (window.NavIcons ? NavIcons.statsIco() : '📊'); // 📊 → the drawn «Статистика» bars (js/app.js NavIcons)
+  const botify = h => String(h == null ? '' : h).replace(/🤖/g, () => BOT()).replace(/📊/g, SIC);
+  const sicon = i => (i === 'tap' || i === '👆' || i === '👉' ? HAND_I(24) : i === '🤖' ? BOT(24) : i === '📊' ? SIC() : esc(i));
   /** a gentle CSS animation for the topic's icon in the grid (sound waves, subtitle flicker, a robot that blinks…) */
-  const ANIM = { listen: 'waves', audiocourse: 'waves', radio: 'radio', video: 'tv', subview: 'tv', second: 'tv', ai: 'robot', study: 'flip', interp: 'talk', telegram: 'fly', klokka: 'tick', levels: 'climb', create: 'spark', backup: 'save', fix: 'tilt', library: 'book', reader: 'book', dialogs: 'talk', prove: 'tilt', gramref: 'book', gram: 'book', ordtr: 'tilt' };
+  const ANIM = { listen: 'waves', audiocourse: 'waves', radio: 'radio', video: 'tv', subview: 'tv', karaoke: 'talk', second: 'tv', ai: 'robot', study: 'flip', interp: 'talk', telegram: 'fly', klokka: 'tick', levels: 'climb', create: 'spark', backup: 'save', fix: 'tilt', library: 'book', reader: 'book', dialogs: 'talk', prove: 'tilt', gramref: 'book', gram: 'book', ordtr: 'tilt' };
   const animOf = t => ANIM[t.id] || ({ '🎧': 'waves', '📺': 'tv', '🤖': 'robot', '📻': 'radio', '📖': 'book', '📚': 'book' })[t.icon] || 'bob';
   const tourOf = t => (t && t.tour ? (typeof t.tour === 'function' ? t.tour() : t.tour) : null);
   /** step row k of a topic → the step of its tour that shows it on screen (null: nothing to show) */
@@ -634,6 +675,9 @@
 
   /* ---------------- the help centre window (and the same list + topics inside the welcome) ---------------- */
   const SHOW_BTN = '<button type="button" class="btn primary hc-show" data-hc-tour><span class="hc-play" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><path d="M4.5 2.6v10.8L13.4 8z" fill="currentColor"/></svg></span><span class="hc-show-t"><b>Показать по шагам на экране</b><small>Покажу кнопки по очереди: куда нажать и что произойдёт</small></span></button>';
+  /** a topic without its own tour: «👆 Показать подсказку на экране» — the coach marks of its place (js/coachmarks.js) */
+  const coachOf = t => { try { return t && window.CoachMarks && CoachMarks.placeFor ? CoachMarks.placeFor(t.id) : null; } catch (e) { return null; } };
+  const COACH_BTN = p => `<button type="button" class="btn primary hc-show" data-hc-coach><span class="hc-play hc-hand" aria-hidden="true">${HAND_I(18)}</span><span class="hc-show-t"><b>Показать подсказку на экране</b><small>${esc(p.name)}: где нажать и что произойдёт</small></span></button>`;
   /** o: { welcome } — draws the topic list and the topics into the window m; → { showList, showTopic, drop() } */
   function centre(m, o = {}) {
     const box = m.$('[data-hc]'), foot = m.$('[data-hcfoot]');
@@ -663,18 +707,23 @@
     const showList = () => {
       dropHint(); dropDemo(); cur = null;
       const name = (window.Store && Store.settings && Store.settings.userName || '').trim();
-      head.innerHTML = o.welcome ? '<span class="hc-title">👋 Добро пожаловать в Norsk Kort!</span>' : '<span class="hc-title">❓ Как пользоваться</span>';
+      // the translation language chosen in «Знакомство» (🇺🇦 / 🇷🇺 / both)
+      const tl = window.Store && Store.settings && Store.settings.transLang;
+      const tlTxt = tl === 'uk' ? 'на украинский' : tl === 'both' ? 'на украинский и русский' : 'на русский';
+      head.innerHTML = o.welcome ? '<span class="hc-title">👋 Добро пожаловать в Norsk Kort!</span>' : '<span class="hc-title">❓ Помощь по разделам</span>';
       box.innerHTML = `<div class="hc-hero ${reduce() ? 'still' : ''} ${o.welcome ? 'welcome' : ''}">
           <div class="hc-stage" aria-hidden="true"><span class="hc-ring r1"></span><span class="hc-ring r2"></span>${HERO_SVG}
             <span class="hc-orb o1">🃏</span><span class="hc-orb o2">🎧</span><span class="hc-orb o3">📺</span><span class="hc-orb o4">${TG(20)}</span></div>
           ${o.welcome
-            ? `<div class="hc-hero-txt"><h2>${name ? `Привет, ${esc(name)}! ` : ''}Рады, что вы здесь 💙</h2><p>Norsk Kort помогает учить норвежский: слова — карточками, а ещё видео, радио, книги и Telegram <b>с переводом на русский</b>.</p></div>`
+            ? `<div class="hc-hero-txt"><h2>${name ? `Привет, ${esc(name)}! ` : ''}Рады, что вы здесь 💙</h2><p>Norsk Kort помогает учить норвежский: слова — карточками, а ещё видео, радио, книги и Telegram <b>с переводом ${tlTxt}</b>.</p></div>`
             : '<div class="hc-hero-txt"><h2>Всё просто — покажу</h2><p>Выберите, что хотите сделать. Расскажу в двух словах и <b>покажу прямо на экране</b>.</p></div>'}
         </div>
+        ${window.Showcase && !(o.welcome && Showcase.state().done) ? `<button type="button" class="hc-sc" data-hc-showcase><span class="hc-sc-pics" aria-hidden="true"><img src="icons/preloader/lofoten.webp" alt="" style="--r:-8deg"><img src="icons/preloader/nordlys.webp" alt="" style="--r:3deg"><img src="icons/preloader/hytte.webp" alt="" style="--r:10deg"></span>
+          <span class="hc-sc-txt"><b>✨ Знакомство с приложением</b><small>${Showcase.state().at > 0 && !Showcase.state().done ? 'Вы остановились на середине — можно продолжить с того же места' : 'Одна минута — и вы увидите всё, что умеет Norsk Kort'}</small></span><span class="hc-sc-go" aria-hidden="true">▶</span></button>` : ''}
         ${o.welcome ? '<div class="hc-label hc-wlabel">Как пользоваться — нажмите на тему, расскажу и покажу</div>' : `<label class="hc-search"><span aria-hidden="true">🔎</span><input type="search" data-hcq placeholder="Найти среди тем: слушать, перевод, телевизор…" aria-label="Найти среди тем — список ниже сократится до подходящих" value="${esc(q)}" enterkeyhint="search"><span class="hc-n" data-hcn></span></label>`}
         <div class="hc-grid" data-hcgrid></div>`;
       foot.innerHTML = o.welcome
-        ? `<span class="hc-foot-note">Это окно всегда можно открыть снова: кнопка <span class="help-q demo" aria-hidden="true">?</span> «Как пользоваться».</span>
+        ? `<span class="hc-foot-note">Это окно всегда можно открыть снова: кнопка <span class="help-q demo" aria-hidden="true">?</span> — «Навигатор по приложению» → «Помощь по разделам».</span>
           <button type="button" class="btn ghost hc-wclose" data-hc-wclose>✕ Закрыть</button><button type="button" class="btn primary lg hc-start" data-hc-start>🚀 Начать учиться</button>`
         : `<span class="hc-foot-note">💡 Маленькая кнопка <span class="help-q demo" aria-hidden="true">?</span> в разделах сразу открывает нужную подсказку.</span>
           <button type="button" class="btn ghost" data-hc-reset title="Снова показывать подсказки и приветственные окна">💡 Показать подсказки снова</button>`;
@@ -709,15 +758,18 @@
               }).join('')}</ol>
             </div>
           </div>
-          ${ex ? `<div class="hc-box ${ex.cls || ''}"><b>${ex.title}</b><div>${ex.html}</div>${ex.btn ? `<button type="button" class="btn sm hc-extra" data-hc-extra>${esc(ex.btn[0])}</button>` : ''}</div>` : ''}
+          ${ex ? `<div class="hc-box ${ex.cls || ''}"><b>${botify(ex.title)}</b><div>${ex.html}</div>${ex.btn ? `<button type="button" class="btn sm hc-extra" data-hc-extra>${botify(esc(ex.btn[0]))}</button>` : ''}</div>` : ''}
           <div class="hc-box ok"><b>✨ Что вы получите</b><div>${t.expect}</div></div>
           <div class="hc-box honest"><b>🤝 Честно о границах</b><div>${t.limits}</div></div>
         </div>`;
+      // every topic can be shown on screen: its tour, or (no tour) the coach marks of its place
+      const coach = tid ? null : coachOf(t);
+      const show = tid ? SHOW_BTN : coach ? COACH_BTN(coach) : '';
       foot.innerHTML = o.welcome
-        ? `<button type="button" class="btn ghost" data-hc-back>← Назад к списку</button>${tid ? SHOW_BTN : ''}`
-        : `${t.open ? `<button type="button" class="btn" data-hc-open>${esc(t.open[0])}</button>` : ''}${tid ? SHOW_BTN : ''}`;
+        ? `<button type="button" class="btn ghost" data-hc-back>← Назад к списку</button>${show}`
+        : `${t.open ? `<button type="button" class="btn" data-hc-open>${esc(t.open[0])}</button>` : ''}${show}`;
       m.$('.modal-body').scrollTop = 0;
-      const b = foot.querySelector('[data-hc-tour]') || foot.querySelector('button'); if (b) setTimeout(() => b.focus({ preventScroll: true }), 80);
+      const b = foot.querySelector('[data-hc-tour], [data-hc-coach]') || foot.querySelector('button'); if (b) setTimeout(() => b.focus({ preventScroll: true }), 80);
       cur = t; cur._ex = ex;
       // the animated mini screen: the topic's steps played by our hand (js/helpanim.js)
       const host = box.querySelector('[data-hc-demo]');
@@ -728,7 +780,7 @@
           catch (e) { console.warn('help demo', e); if (!t.art) host.remove(); }
         });
       }
-      firstHint('hintTour', foot.querySelector('[data-hc-tour]'), {});
+      firstHint('hintTour', foot.querySelector('[data-hc-tour], [data-hc-coach]'), {});
     };
     /** a tour from this topic (k — from that step); the welcome closes without asking */
     const startTour = (k, intro) => {
@@ -742,6 +794,7 @@
     m.el.addEventListener('click', e => {
       const c = e.target.closest('[data-hc-topic]'); if (c) { showTopic(topic(c.dataset.hcTopic)); return; }
       if (e.target.closest('[data-hc-back]')) { showList(); return; }
+      if (e.target.closest('[data-hc-showcase]') && window.Showcase) { dropHint(); dropDemo(); if (o.onTour) o.onTour(); m.close(); setTimeout(() => Showcase.open(), 230); return; }
       const s = e.target.closest('[data-hc-q]'); if (s) { q = s.dataset.hcQ; showList(); return; }
       if (e.target.closest('[data-hc-reset]')) { Help.resetHints(); return; }
       const st = e.target.closest('[data-hc-step]'); if (st && cur) { startTour(+st.dataset.hcStep, false); return; }
@@ -752,6 +805,14 @@
         return;
       }
       if (e.target.closest('[data-hc-tour]') && cur) { startTour(0, true); return; }
+      if (e.target.closest('[data-hc-coach]') && cur) {
+        // the welcome closes without asking (like a tour); then the place opens and our hand shows its controls
+        const t = cur; dropHint(); dropDemo();
+        if (o.onTour) o.onTour();
+        m.close();
+        setTimeout(() => { if (Help.replay) Help.replay(t.id); }, 280);
+        return;
+      }
       if (e.target.closest('[data-hc-extra]') && cur && cur._ex && cur._ex.btn) { const f = cur._ex.btn[1]; if (o.onTour) o.onTour(); m.close(); setTimeout(() => { try { f(); } catch (err) { console.warn('help extra', err); } }, 230); return; }
       if (e.target.closest('[data-hc-open]') && cur && cur.open) { const t = cur; m.close(); try { t.open[1](); } catch (err) { console.warn('help open', err); } }
     });
@@ -760,7 +821,7 @@
 
   /* ---------------- 👋 the welcome on the first start ---------------- */
   /** where «Как пользоваться» lives on this screen: the top «?», else ⋯ (phones / narrow tablets), else the sidebar */
-  const helpTarget = () => [document.getElementById('help-btn'), document.getElementById('more-btn'), document.querySelector('.sidebar [data-sb="help"]')].find(b => b && shown(b)) || null;
+  const helpTarget = () => [document.getElementById('help-btn'), document.getElementById('more-btn'), document.querySelector('.sidebar [data-sb="nav"]'), document.querySelector('.sidebar [data-sb="help"]')].find(b => b && shown(b)) || null;
   const rectOf = r => ({ left: Math.round(r.left), top: Math.round(r.top), width: Math.round(r.width), height: Math.round(r.height) });
   /** the window shrinks and flies into the button (scale + translate onto its rect), then closes */
   function flyInto(m, target) {
@@ -801,7 +862,7 @@
     Help._here = hand;
     const tip = document.createElement('div');
     tip.className = 'hc-hint hc-here'; tip.setAttribute('role', 'status');
-    tip.innerHTML = `<span class="hc-hint-txt"><span class="help-q demo" aria-hidden="true">?</span><span><b>Знакомство и подсказки — всегда здесь</b><small>${where === 'more' ? 'Меню ⋯ → «❓ Как пользоваться»' : where === 'top' ? 'Кнопка «?» — «Как пользоваться»' : '«Как пользоваться» в меню слева'}</small></span></span>
+    tip.innerHTML = `<span class="hc-hint-txt"><span class="help-q demo" aria-hidden="true">?</span><span><b>Знакомство и подсказки — всегда здесь</b><small>${where === 'more' ? 'Меню ⋯ → «🧭 Навигатор»' : where === 'top' ? 'Кнопка «?» — «Навигатор по приложению»' : '«🧭 Навигатор по приложению» в меню слева'}</small></span></span>
       <span class="hc-hint-act"><button type="button" class="btn sm primary" data-hch="ok">Понятно</button></span>`;
     document.body.appendChild(tip);
     const place2 = () => {
@@ -891,7 +952,7 @@
         title: '', cls: 'hc-modal hc-welcome', body: '<div data-hc></div>', foot: '<div class="hc-foot" data-hcfoot></div>',
         beforeClose: async () => {
           if (finished) return true;
-          const ok = (await UI.askClose({ title: 'Закрыть знакомство?', line: 'Его всегда можно открыть снова — кнопка «?» «Как пользоваться».',
+          const ok = (await UI.askClose({ title: 'Закрыть знакомство?', line: 'Его всегда можно открыть снова — кнопка «?» → «Навигатор по приложению».',
             actions: [{ label: 'Закрыть', value: 'close', cls: 'primary' }], cancel: 'Остаться' })) === 'close';
           if (ok) finish();
           return false;
@@ -1097,7 +1158,7 @@
     T.root.classList.remove('searching');
     const steps = T.steps, i = T.i;
     const last = !steps.slice(i + 1).length;
-    T.bubble.querySelector('[data-hltitle]').innerHTML = s.title; // titles are ours (no user text)
+    T.bubble.querySelector('[data-hltitle]').innerHTML = botify(s.title); // titles are ours (no user text)
     T.bubble.querySelector('[data-hltext]').innerHTML = typeof s.text === 'function' ? s.text(el) : s.text;
     T.bubble.querySelector('[data-hldots]').innerHTML = steps.map((x, k) => `<i class="${k === i ? 'on' : k < i ? 'done' : ''}"></i>`).join('') + `<span class="hl-n">${i + 1} из ${steps.length}</span>`;
     if (T.onShown && !T.shownOnce) { T.shownOnce = true; try { T.onShown(); } catch (e) { /* ignore */ } }
@@ -1296,8 +1357,9 @@
   /* ---------------- 👆 the main screen's coach marks (the first visit) — an example of Help.coach ---------------- */
   const HOME_COACH = [
     { target: '#listen-btn', title: '🎧 Слушать', text: 'Карточки, книги, новости и радио — в наушниках или вслух. Можно с выключенным экраном.' },
-    { target: ['#view [data-act="create"]'], title: '💬 Свои карточки', text: 'Напишите тему, вставьте список слов или сфотографируйте страницу — получится колода.' },
-    { target: ['.tabbar .tab-study', '#view .qa-main[data-act="study-all"]', '#view [data-act="study-all"]'], title: '▶ Учить', text: 'Карточки на сегодня. Вспомнили — «Знаю», нет — «Не знаю». Когда повторить, приложение решит само.' },
+    { target: ['#view .home-decks-h [data-act="create"]', '#view [data-act="create"]'], title: '➕ Свои карточки', text: 'Напишите тему, вставьте список слов или сфотографируйте страницу — получится колода.' },
+    { target: '#view .mgrid', title: '▶ Видео, радио, книги', text: 'Большие плитки — разделы приложения: смотреть видео, радио, читать, Telegram и упражнения. Любое слово оттуда — сразу в карточку.' },
+    { target: ['.tabbar .tab-study', '#view .home-go', '#view [data-act="study-all"]'], title: '▶ Учить', text: 'Карточки на сегодня. Вспомнили — «Знаю», нет — «Не знаю». Когда повторить, приложение решит само.' },
     { target: () => helpTarget(), title: '❓ Как пользоваться', text: 'Здесь — все подсказки: короткие анимации к каждой теме и «Показать по шагам на экране».' },
   ];
   let hcT = 0;
@@ -1310,7 +1372,13 @@
       const ok = state().welcomed && window.App && App.view && App.view.name === 'home' && !modalOpen() && !T && !Help._here && document.visibilityState === 'visible'
         && !document.querySelector('.dark-screen, .dropdown-menu, .hc-hint, .lt-hint, .tgr-hint, .nk-hint, .nk-here') && !(window.Listen && Listen.p) && !(window.Interp && Interp.on);
       calm = ok ? calm + 1 : 0;
-      if (calm >= 4) { clearInterval(hcT); hcT = 0; Help.coach(HOME_COACH, { id: 'home', once: true }); }
+      if (calm >= 4) {
+        clearInterval(hcT); hcT = 0;
+        // v211: the marks of the new home live in js/coachmarks.js (place 'home'); the old list only as a fallback
+        let list = [];
+        try { list = window.CoachMarks && CoachMarks.stepsFor ? CoachMarks.stepsFor('home') : []; } catch (e) { list = []; }
+        Help.coach(list.length ? list : HOME_COACH, { id: 'home', once: true });
+      }
     }, 700);
   }
 

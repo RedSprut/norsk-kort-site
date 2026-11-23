@@ -89,7 +89,7 @@
       const m = String((e && e.message) || e || '');
       if (/load failed|failed to fetch|networkerror|network error/i.test(m)) return 'нет связи с сайтом словаря (интернет, VPN или блокировщик рекламы). Попробуйте ещё раз';
       if (/json|unexpected token|unexpected end|did not match the expected pattern/i.test(m)) return 'словарь ответил не так, как обычно (возможно, сайт временно недоступен). Попробуйте ещё раз через минуту';
-      return m || 'неизвестная ошибка';
+      return /[а-яё]/i.test(m) ? U.calm(m) : U.niceErr(e, '', true);
     },
     /** "**Hei!**" / "hus – huset" / "å snakke (говорить)" -> "hei" / "hus" / "snakke" (no markdown, punctuation or wildcards) */
     bare(no) {

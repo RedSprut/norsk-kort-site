@@ -242,6 +242,7 @@
         onClose: () => { this.hidePop(); if (this._io) this._io.disconnect(); this._m = null; },
       });
       m.el.addEventListener('click', e => this.onClick(e));
+      if (window.TrBadge) TrBadge.mount(m.$('.modal-head'), { place: 'news' }); // 🌐 who translates now
       m.el.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('nw')) { e.preventDefault(); this.wordPop(e.target); } });
       m.$('.modal-body').addEventListener('scroll', () => this.hidePop(), { passive: true });
       // one player at a time
@@ -267,6 +268,7 @@
         ${u.tab === 'nrk' ? `<label class="nw-check" title="NRK пишет часть новостей на нюношке (ikkje, frå, eg…) — приложение учит букмолу"><input type="checkbox" data-nw-bm ${u.bm ? 'checked' : ''}> Только букмол</label>` : ''}
         <span class="grow"></span>
         <button class="btn sm listen-cta" data-nw="listen-all" title="Заголовки по очереди: по-норвежски, затем перевод — в наушниках или через динамик">🎧 Слушать заголовки</button>
+        ${window.PrintX ? '<button class="btn sm ghost" data-nw="print" aria-haspopup="dialog" title="Распечатать заголовки и анонсы (с переводом, где он уже есть) или сохранить в Word — только для себя">🖨 Печать</button>' : ''}
         <button class="btn sm ghost" data-nw="refresh" title="Загрузить заново (иначе — раз в час)">🔄</button>
         <span class="small muted" data-nw-when></span></div>`;
     },
@@ -282,7 +284,7 @@
       try { r = await feed(f.url, f.alt, tab === 'kt' ? 'Klar Tale' : 'NRK', force); }
       catch (e) {
         if (this._m !== m || this.ui.tab !== tab) return;
-        list.innerHTML = `<div class="nw-empty"><div class="mt-warn"><span>📡</span><span><b>Не удалось загрузить новости</b>: ${U.esc(e.message)}. Проверьте интернет и нажмите «Повторить».</span></div>
+        list.innerHTML = `<div class="nw-empty"><div class="mt-warn"><span>📡</span><span><b>Не удалось загрузить новости</b>: ${U.esc(U.niceErr(e, '', true))}. Проверьте интернет и нажмите «Повторить».</span></div>
           <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" data-nw="refresh">🔄 Повторить</button>
           <a class="btn ghost" href="${tab === 'kt' ? KT.home : 'https://www.nrk.no'}" target="_blank" rel="noopener noreferrer">↗ Открыть сайт</a></div></div>`;
         return;
@@ -341,6 +343,8 @@
         ru = tr.every(x => x) ? `<div class="ex-ru nw-ru">${U.esc(tr.join(' '))}</div>`
           : `<button class="btn sm ghost nw-show-tr" data-nw="tr">🇷🇺 Показать перевод</button>`;
       }
+      // word view: «Дословно: …» under the words, when the neural network made a literal translation that differs
+      if (v === 'word' && Study.litHtml) ru = Study.litHtml(s.map(x => [x]));
       return title + sum + ru;
     },
     pctHtml(it) {
@@ -427,6 +431,18 @@
       if (act === 'tr' && it) this.setView(it, 'asis', b);
       if (act === 'listen' && it) this.listen([it], b);
       if (act === 'listen-all') this.listen(this.visible().slice(0, 25), b, true);
+      if (act === 'print') this.print();
+    },
+    /** 🖨 «Печать и файлы» (js/printx.js): the headlines and summaries shown now (only what the RSS feeds publish),
+     *  sentence by sentence with the translations already made; © Klar Tale / NRK — for personal use only */
+    print() {
+      if (!window.PrintX) return;
+      const a = this.visible().slice(0, MAX_ITEMS), f = this.srcOf(), src = this.ui.tab === 'nrk' ? 'NRK' : 'Klar Tale';
+      const blocks = [];
+      a.forEach(it => { const ss = sentsOf(it), tr = ss.map(x => Study.sentTr(x)); blocks.push(Object.assign({ no: ss.join(' ') }, tr.every(Boolean) ? { ru: tr.join(' ') } : {})); });
+      const name = this.ui.tab === 'nrk' ? `NRK · ${f.name}` : 'Klar Tale';
+      PrintX.text({ title: `Новости: ${name}`, author: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }), blocks,
+        source: { id: `news:${this.ui.tab}:${f.id}`, name: `${src} (RSS)`, kind: 'channel', url: f.home || f.url, protected: true } });
     },
     async translateItem(it, view, btn) {
       const s = sentsOf(it);
@@ -441,6 +457,8 @@
     },
     async setView(it, v, btn) {
       it.view = v;
+      // 🎓 «Учить по книге»: three articles read with a translation — «Сделать колоду из прочитанного?» (js/learnby.js)
+      if (window.LearnBy && LearnBy.offer) LearnBy.offer({ key: 'news', title: 'Новости простым языком', page: it.id, src: 'news', open: () => News.open(), text: () => sentsOf(it).join(' ') });
       this.redrawItem(it);
       const s = sentsOf(it);
       const missing = v === 'word' ? s.some(x => tokens(x).some(tk => tk.core && Study.glossOf(x, tk.ch, tk.k) === undefined))
@@ -506,7 +524,7 @@
         e.stopPropagation();
         const a = b.dataset.np;
         if (a === 'x') this.hidePop();
-        if (a === 'say') { const say = window.TTS && TTS.speak; if (say) TTS.speak(span.textContent, 'no'); }
+        if (a === 'say') { const say = window.TTS && TTS.speak; if (say) TTS.speak(span.textContent, 'no', { place: 'news' }); }
         if (a === 'known') this.toggleKnown(form, cur, draw);
         if (a === 'card') this.makeCard(cur, b);
         if (a === 'more') this.moreCard(cur);
@@ -523,7 +541,7 @@
         let by = [];
         if (!tr) {
           try { const r = await Translators.translateMany([head], 'no', 'ru'); tr = Study.cleanGloss(head, r.out[0]) || String(r.out[0] || '').trim(); by = r.by || []; cur.err = r.error; }
-          catch (e) { tr = ''; cur.err = e.message; }
+          catch (e) { tr = ''; cur.err = U.niceErr(e, '', true); }
         }
         cur.tr = tr || cur.ctx || ''; cur.by = tr ? by : []; cur.head = head;
       })();

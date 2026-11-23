@@ -37,9 +37,14 @@
   const Exams = {
     SECTIONS,
     open() {
-      UI.modal({
-        title: '🎓 Экзамены: Norskprøven, гражданство, обществознание', cls: 'wide exams-modal',
+      const m = UI.modal({
+        title: '🏛 Экзамены: Norskprøven, гражданство, обществознание', cls: 'wide exams-modal',
         body: `<div class="lib-intro">🎓 <span>Официальные пробные задания открываются на сайтах HK-dir и samfunnskunnskap.no — так разрешено их правилами (копировать их в приложение нельзя). Ниже — что в Norsk Kort помогает к каждой части экзамена.</span></div>
+          <div class="ex-own panel" style="padding:12px;margin:10px 0">
+            <div class="ex-own-acts" style="display:flex;flex-wrap:wrap;gap:8px">
+              <button type="button" class="btn primary" data-ex-own="trainer" ${window.ExamTrainer ? '' : 'hidden'}>🧪 Тренировка в формате Norskprøven</button>
+              <button type="button" class="btn" data-ex-own="level" ${window.LevelTest ? '' : 'hidden'}>🎯 Тест уровня A1–B2</button></div>
+            <p class="small muted">Наши собственные задания: чтение, аудирование, письмо и устная часть с таймером и оценкой по каждой части. Это тренировка, а не официальный экзамен.</p></div>
           ${SECTIONS.map(s => `<section class="ex-sec panel">
             <h3>${s.icon} ${U.esc(s.title)}</h3>
             <p class="small muted">${U.esc(s.text)}</p>
@@ -47,6 +52,12 @@
             ${s.app.length ? `<div class="small"><b>В приложении:</b></div><ul class="ex-app">${s.app.map(a => `<li>${U.esc(a)}</li>`).join('')}</ul>` : ''}
           </section>`).join('')}
           <div class="tiny muted">Ссылки ведут на официальные сайты; приложение не связано с HK-dir. Требования к экзаменам меняются — сверяйтесь с сайтом HK-dir и вашей коммуной.</div>`,
+      });
+      // 🧪 our own training / 🎯 level test (js/examtrainer.js, js/leveltest.js — when they are loaded)
+      m.el.addEventListener('click', e => {
+        const b = e.target.closest('[data-ex-own]'); if (!b) return;
+        const go = b.dataset.exOwn === 'trainer' ? window.ExamTrainer : window.LevelTest;
+        if (go && go.open) { m.close(); setTimeout(() => go.open(), 220); }
       });
     },
   };

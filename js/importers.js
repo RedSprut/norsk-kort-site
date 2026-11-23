@@ -570,20 +570,23 @@
       (data.decks || []).forEach(d => {
         const nd = Store.addDeck(d.name, d.description || '');
         // the deck's own cover comes along (not replaced by a random photo)
-        Store.updateDeck(nd.id, { cover: d.cover || '', coverCredit: d.coverCredit || '', coverTried: !!d.cover || !!d.coverTried, coverAuto: !!d.coverAuto });
+        Store.updateDeck(nd.id, { cover: d.cover || '', coverCredit: d.coverCredit || '', coverTried: !!d.cover || !!d.coverTried, coverAuto: !!d.coverAuto,
+          ...(d.lastUsed ? { lastUsed: d.lastUsed } : {}), ...(d.pinned ? { pinned: d.pinned } : {}), ...(d.autoName === true ? { autoName: true } : {}) }); // 🕘 📌 the order of your decks comes along · 🏷 still unnamed by the user
         idMap[d.id] = nd.id;
       });
       let fallbackDeck = null;
       let n = 0;
       (data.cards || []).forEach(c => {
         let deckId = idMap[c.deckId];
-        if (!deckId) { fallbackDeck = fallbackDeck || Store.addDeck('Импорт ' + U.fmtDate(Date.now())); deckId = fallbackDeck.id; }
+        // cards without their deck: a deck named from its cards (🏷 Store.autoNameDeck below), not «Импорт 18 нояб. 2026 г.»
+        if (!deckId) { fallbackDeck = fallbackDeck || Store.addDeck(Store.AUTO_DECK, '', { autoName: true }); deckId = fallbackDeck.id; }
         const copy = JSON.parse(JSON.stringify(c));
         delete copy.id;
         // backups from older versions carry no origin record — keep the card's origin visible
         if (!Array.isArray(copy.history) || !copy.history.length) copy.history = [Prov.entry('import', 'import', null, 'резервная копия / экспорт колоды Norsk Kort')];
         Store.addCard(deckId, copy); n++;
       });
+      if (fallbackDeck) Store.autoNameDeck(fallbackDeck.id);
       return { decks: Object.keys(idMap).length, cards: n };
     },
   };

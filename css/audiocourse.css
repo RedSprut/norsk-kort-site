@@ -125,8 +125,20 @@
 .ac-dev-ic { font-size: 20px; }
 .ac-dev-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .ac-dev-t b { overflow-wrap: anywhere; } .ac-dev-t small { color: var(--muted); font-size: 12px; }
+/* 📺 without the bridge: the ways that send this device's sound (AirPlay, Bluetooth, mirroring) */
+.ac-ways { display: flex; flex-direction: column; gap: 8px; }
+.ac-way { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--panel-border); background: var(--panel); transition: border-color .15s; }
+.ac-way:hover { border-color: color-mix(in srgb, var(--ac2) 55%, var(--panel-border)); }
+.ac-way-ic { font-size: 22px; line-height: 1.2; flex: none; width: 1.4em; text-align: center; }
+.ac-way-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; line-height: 1.4; }
+.ac-way-t small { color: var(--muted); font-size: 13px; }
+.ac-way-t .btn { align-self: flex-start; min-height: 44px; margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; }
+.ac-way-t .btn:hover:not(:disabled) { border-color: var(--ac2); }
+.ac-cast-modal .ac-dev { min-height: 52px; }
+.ac-out .btn { min-height: 44px; }
 
 @media (max-width: 480px) {
+  .ac-way { padding: 10px 12px; } .ac-way-t .btn { align-self: stretch; justify-content: center; }
   .ac-card, .ac-player, .ac-drop { padding: 12px; border-radius: 16px; }
   .ac-b { min-width: 42px; height: 44px; padding: 0 8px; font-size: 14px; }
   .ac-b.main { min-width: 56px; height: 56px; }

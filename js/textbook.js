@@ -49,6 +49,7 @@
   function htmlText(html) {
     const d = new DOMParser().parseFromString(String(html).replace(/<(br|\/p|\/div|\/h[1-6]|\/li|\/tr|\/blockquote|\/section|\/title|\/dd|\/dt)\b[^>]*>/gi, '$&\n'), 'text/html');
     d.querySelectorAll('script,style,noscript,svg').forEach(x => x.remove());
+    if (window.PageText) PageText.stripDom(d.body || d.documentElement); // EPUB page-break markers (<span epub:type="pagebreak">, .pagenum)
     return ((d.body || d.documentElement).textContent || '').replace(/[ \t ]+/g, ' ').replace(/ *\n[ \n]*/g, '\n').trim();
   }
   /** long text → «pages» of about 2000 characters, cut between paragraphs */
@@ -167,6 +168,8 @@
     } else {
       throw new Error(`Формат .${ext} не поддерживается. Подходят: PDF, EPUB, DOCX, ODT, FB2, HTML, TXT, RTF, фото страниц (JPG/PNG), CBZ/ZIP`);
     }
+    // 📄 page breaks («\f»), page numbers («- 6 -», «Side 6 av 40», 1-2-3 runs), separators, words cut at line ends (util.js)
+    if (window.PageText) { try { text = PageText.cleanText(text); } catch (e) { /* as it is */ } }
     if (letters(text) < 20) throw new Error('В файле не нашлось текста');
     const pages = chunk(text);
     const rec = makeRec(t, ext, f.size, { kind: 'text', n: pages.length });
@@ -201,6 +204,9 @@
   async function pdfLines(page) {
     const tc = await page.getTextContent();
     const items = tc.items.filter(it => typeof it.str === 'string').map(it => ({ x: it.transform[4], y: it.transform[5], w: it.width || 0, h: Math.abs(it.transform[3]) || 10, s: it.str, eol: !!it.hasEOL }));
+    // 📄 a page number in the top / bottom margin of the page is not text (util.js PageText)
+    const v = page.view || [0, 0, 0, 0], H = (v[3] || 0) - (v[1] || 0);
+    if (window.PageText && H > 50) for (let k = items.length - 1; k >= 0; k--) { const i = items[k]; if ((i.y > v[3] - H * 0.09 || i.y < v[1] + H * 0.09) && PageText.isPageNum(i.s, true)) items.splice(k, 1); }
     const words = items.filter(i => i.s.trim());
     if (!words.length) return [];
     // fake widths: most neighbours on one line «overlap» → one item = one word
@@ -284,10 +290,48 @@
     saveSoon(rec);
     return t;
   }
+  /** 📄 running headers / footers of a book: short lines at the top / bottom of ≥3 of the pages read so far (util.js PageText) */
+  const HF = new WeakMap(), HFS = new WeakMap();
+  function hfKeys(rec) {
+    if (!rec || !rec.text || rec.kind === 'text' || !window.PageText) return null;
+    const ks = Object.keys(rec.text).filter(k => rec.text[k]);
+    const sample = (HFS.get(rec) || {}).got || {};
+    const all = Object.assign({}, sample, ...ks.map(k => ({ [k]: rec.text[k] })));
+    const n = Object.keys(all).length;
+    if (n < 3) return null;
+    const c = HF.get(rec);
+    if (c && c.n === n) return c.keys;
+    const keys = PageText.repeatKeys(Object.values(all).map(t => String(t).split('\n').map(l => l.trim())));
+    HF.set(rec, { n, keys });
+    return keys;
+  }
+  /** a PDF opened on its first pages: the text layer (no OCR) of up to 8 pages around, once — to know its running headers */
+  async function hfPrime(rec, at) {
+    if (!rec || rec.kind !== 'pdf' || !window.PageText || (rec.n || 0) < 3) return;
+    if (HFS.has(rec)) { await HFS.get(rec).done; return; }
+    const got = {};
+    const done = (async () => {
+      try {
+        const pdf = await pdfDoc(rec);
+        const from = Math.max(1, Math.min((rec.n || 1) - 7, (at || 1) - 3));
+        for (let p = from; p <= Math.min(rec.n, from + 7); p++) { if (rec.text[p] == null) got[p] = (await pdfLines(await pdf.getPage(p))).join('\n'); }
+      } catch (e) { /* headers are found from the pages read */ }
+    })();
+    HFS.set(rec, { got, done });
+    await done;
+  }
+  /** 📄 page numbers («6», «- 6 -», «Side 6 av 40», «[6]»), running headers / footers, «. . .» separators out (util.js PageText) */
+  function pageClean(lines, rec) {
+    if (!window.PageText) return lines;
+    try {
+      if (rec && rec.kind === 'text') return PageText.cleanText(lines.join('\n')).split('\n'); // «pages» of a text file: no page edges
+      return PageText.cleanPages([lines], { keys: hfKeys(rec) || new Set(), pdf: rec && rec.kind === 'pdf' })[0];
+    } catch (e) { return lines; }
+  }
   /** page text → [{k:'h'|'p', t}] (wrapped lines joined, page numbers and running headers dropped) */
-  function paras(text) {
+  function paras(text, rec) {
     // the clean-up rules also for pages read before they existed (their text is kept on the device)
-    const lines = tidyLines(String(text || '').split('\n').map(l => l.trim())).filter(l => !/^\d{1,3}$/.test(l));
+    const lines = tidyLines(pageClean(String(text || '').split('\n').map(l => l.trim()), rec)).filter(l => !/^\d{1,3}$/.test(l));
     const out = [];
     let block = [];
     // wrapped lines of one paragraph are joined; short lines without a full stop are headings (KAPITTEL 1, Hjemme hos meg)
@@ -541,9 +585,9 @@
       tx.addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 90) this.read(rec, rec.last + (dx < 0 ? 1 : -1)); }, { passive: true });
       const log = t => { const el = box.querySelector('[data-text]'); if (el && /spinner/.test(el.innerHTML)) el.innerHTML = `<div class="small muted"><span class="spinner sm"></span> ${U.esc(t)}</div>`; };
       let text;
-      try { text = await pageText(rec, n, log); } catch (e) {
+      try { text = await pageText(rec, n, log); await hfPrime(rec, n); } catch (e) {
         const lost = e.lost || /can not be found|NotFound|NotReadable/i.test(e.message + ' ' + e.name);
-        if (!lost) { tx.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>Страница не прочиталась: ${U.esc(e.message)}</span></div>`; return; }
+        if (!lost) { tx.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>Страница не прочиталась: ${U.esc(U.niceErr(e, '', true))}</span></div>`; return; }
         // the book's file is gone — choose it again; the bookmark, read pages and cards stay
         tx.innerHTML = `<div class="mt-warn tb-lost"><span>📂</span><span><b>Файл книги больше недоступен.</b> Браузер хранил только ссылку на файл «${U.esc(rec.title)}», а его переместили, переименовали или обновили (например, Telegram).
             Выберите этот же файл ещё раз — <b>закладка, прочитанные страницы и карточки сохранятся</b>, и теперь книга будет храниться в приложении целиком.</span></div>
@@ -565,7 +609,7 @@
       }
       if (this._rec !== rec || rec.last !== n) return;
       if (!rec.read.includes(n)) { rec.read.push(n); saveSoon(rec); }
-      this._paras = paras(text);
+      this._paras = paras(text, rec);
       this.drawPage();
       // a list «word – translation» on this page → offer it as cards
       const pr = Telegram.pairs(text).filter(x => x.ru || x.en);
@@ -573,8 +617,37 @@
       // books with pictures: show the page itself when there is almost no text
       if (letters(text) < 40 && rec.kind !== 'text') this.showOrig(true);
       this.translatePage();
+      // 🎓 «Учить по книге»: after three pages — «Сделать колоду из прочитанного?» (js/learnby.js)
+      if (window.LearnBy && LearnBy.offer) LearnBy.offer({ key: 'textbook:' + rec.id, title: rec.title, page: n, src: 'textbook', id: rec.id, open: () => Textbook.open(rec.id), text: () => this._paras.filter(x => x.k !== 'h').map(x => x.t).join(' ') });
     },
     sentences() { return (this._paras || []).flatMap(p => p.k === 'h' ? [p.t] : Study.splitSent(p.t)).filter(isNo); },
+    /** 🎭 who says each paragraph of the page (js/voices.js Voices.dialogRoles: «– …» lines take turns, «Kari: …» by
+     *  name; headings and narration are nobody's) + the speakers in the order of the page */
+    paraRoles() {
+      const ps = this._paras || [];
+      if (this._roles && this._roles.ps === ps) return this._roles;
+      let keys = null;
+      try { keys = window.Voices && Voices.dialogRoles ? Voices.dialogRoles(ps.map(p => (p.k === 'h' ? '# ' : '') + String(p.t || '').replace(/\s*\n\s*/g, ' '))) : null; } catch (e) { keys = null; }
+      const roster = [];
+      (keys || []).forEach(x => { if (x != null && !roster.includes(x)) roster.push(x); });
+      return (this._roles = { ps, keys: keys || [], roster });
+    },
+    /** the text of «🎧 Слушать страницу»: every sentence with its translation under it — a speaker's line (🎭) stays
+     *  whole, so the voice of the speaker reads all of it (and its translation follows it) */
+    listenText(c) {
+      const R = this.paraRoles(), tr = s => c['s:' + s];
+      const out = [];
+      R.ps.forEach((p, i) => {
+        const ss = (p.k === 'h' ? [p.t] : Study.splitSent(p.t)).filter(isNo);
+        if (!ss.length) return;
+        if (R.keys[i] != null && ss.length > 1) {
+          out.push(ss.join(' '));
+          const t = ss.map(tr).filter(Boolean).join(' ');
+          if (t) out.push(t);
+        } else ss.forEach(s => { out.push(s); if (tr(s)) out.push(tr(s)); });
+      });
+      return out.join('\n');
+    },
     drawPage() {
       const m = this._m; const rec = this._rec; if (!m || !rec) return;
       const tx = m.$('[data-text]'); if (!tx) return;
@@ -586,7 +659,7 @@
         if (!isNo(s)) return `<span class="tb-s">${U.esc(s)}</span>`;
         const tr = Study.sentTr(s);
         const ru = tr ? U.esc(tr) : tr === '' ? '—' : '…';
-        if (v === 'word') return `<span class="tb-s"><span class="wbw-line">${Study.glossHtml(s)}</span> ${say(s, 'no')}<span class="ex-ru tb-ru">${ru} ${tr ? say(tr, 'ru') : ''}</span></span>`;
+        if (v === 'word') return `<span class="tb-s"><span class="wbw-line">${Study.glossHtml(s)}</span> ${say(s, 'no')}<span class="ex-ru tb-ru">${ru} ${tr ? say(tr, 'ru') : ''}</span>${Study.litHtml ? Study.litHtml([[s, tr || undefined]], 'span') : ''}</span>`;
         if (v === 'sent') return `<span class="tb-s">${U.esc(s)} <span class="ex-ru-in">(${ru})</span> ${say(s, 'no')}${tr ? say(tr, 'ru') : ''}</span>`;
         return `<span class="tb-s">${U.esc(s)} ${say(s, 'no')}</span>`;
       };
@@ -635,13 +708,26 @@
           const url = URL.createObjectURL(rec.images[rec.last - 1]);
           box.innerHTML = `<img class="tb-canvas" src="${url}" alt="">`;
         }
-      } catch (e) { box.innerHTML = `<div class="small muted">Не получилось показать страницу: ${U.esc(e.message)}</div>`; }
+      } catch (e) { box.innerHTML = `<div class="small muted">Не получилось показать страницу: ${U.esc(U.niceErr(e, '', true))}</div>`; }
     },
     async click(e) {
       const rec = this._rec;
       const vb = e.target.closest('[data-v]');
       if (vb) { Store.setSetting('exView', vb.dataset.v); this._m.$$('.tb-top [data-v]').forEach(b => b.classList.toggle('active', b === vb)); this.drawPage(); this.translatePage(); return; }
-      const sb = e.target.closest('[data-say]'); if (sb) { TTS.speak(sb.dataset.say, sb.dataset.lang || 'no'); return; }
+      const sb = e.target.closest('[data-say]');
+      if (sb) {
+        const lang = sb.dataset.lang || 'no', o = { place: 'reader' };
+        // 🎭 a speaker's sentence: the speaker's own voice, as in «🎧 Слушать страницу»
+        if (lang === 'no' && window.Voices && Voices.speakerOpts) {
+          try {
+            const R = this.paraRoles(), pe = sb.closest('.tb-p, .tb-h'), all = pe ? [...pe.parentNode.querySelectorAll(':scope > .tb-p, :scope > .tb-h')] : [];
+            const who = pe ? R.keys[all.indexOf(pe)] : null;
+            if (who != null && all.length === R.ps.length) Object.assign(o, Voices.speakerOpts('no', who, R.roster.slice(), 'reader'));
+          } catch (x) { /* the usual voice */ }
+        }
+        TTS.speak(sb.dataset.say, lang, o);
+        return;
+      }
       const a = e.target.closest('[data-a]'); if (!a || !rec) return;
       switch (a.dataset.a) {
         case 'shelf': TTS.stop(); this._rec = null; this.shelf(); break;
@@ -663,16 +749,17 @@
           await Study.translateUnits(ss, []);
           a.disabled = false; a.innerHTML = label;
           const c = Study.exCache();
-          Listen.startText(`📘 ${rec.title} · стр. ${rec.last}`, [{ title: `стр. ${rec.last}`, page: rec.last, text: ss.map(s => c['s:' + s] ? `${s}\n${c['s:' + s]}` : s).join('\n') }], { loop: false, totalPages: rec.n });
+          Listen.startText(`📘 ${rec.title} · стр. ${rec.last}`, [{ title: `стр. ${rec.last}`, page: rec.last, text: this.listenText(c) }], { loop: false, totalPages: rec.n });
           break;
         }
         case 'listen-book': {
           Listen.prime();
           a.disabled = true; const label = a.innerHTML;
           const pieces = [];
+          await hfPrime(rec, rec.last);
           for (let p = rec.last; p <= Math.min(rec.n, rec.last + 29); p++) {
             a.innerHTML = `<span class="spinner sm"></span> стр. ${p}…`;
-            try { const t = paras(await pageText(rec, p)).map(x => x.t).join('\n'); if (letters(t) > 3) pieces.push({ title: `стр. ${p}`, page: p, text: t }); } catch (err) { /* skip page */ }
+            try { const t = paras(await pageText(rec, p), rec).map(x => x.t).join('\n'); if (letters(t) > 3) pieces.push({ title: `стр. ${p}`, page: p, text: t }); } catch (err) { /* skip page */ }
           }
           a.disabled = false; a.innerHTML = label;
           if (pieces.length) Listen.startText(`📘 ${rec.title}`, pieces, { loop: false, totalPages: rec.n });
@@ -790,9 +877,10 @@
       try {
         // 1) every word of the pages with the sentence it is in
         const found = new Map();
+        await hfPrime(rec, a);
         for (let p = a; p <= b; p++) {
           log(`читаю стр. ${p}…`);
-          paras(await pageText(rec, p, log)).forEach(pa => (pa.k === 'h' ? [pa.t] : Study.splitSent(pa.t)).filter(isNo).forEach(s => {
+          paras(await pageText(rec, p, log), rec).forEach(pa => (pa.k === 'h' ? [pa.t] : Study.splitSent(pa.t)).filter(isNo).forEach(s => {
             Study.glossToks(s).forEach((w, k) => {
               const bare = w.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
               const low = bare.toLowerCase();
@@ -850,7 +938,7 @@
         // the sentence translations (for the example on the card)
         await Study.translateUnits(list.map(x => x.sent), []);
         this.wordsPick(dm, rec, list, by);
-      } catch (e) { box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>${U.esc(e.message)}</span></div>`; }
+      } catch (e) { box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>${U.esc(U.niceErr(e))}</span></div>`; }
     },
     wordsPick(dm, rec, list, by) {
       const box = dm.$('[data-w]');

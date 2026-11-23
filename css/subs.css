@@ -63,7 +63,20 @@ audio.subs-media { width: 100%; display: block; }
 .subs-line.cur .sl-no { font-weight: 600; }
 .sl-add { flex-shrink: 0; }
 .sl-tr { color: var(--ru); font-weight: 500; }
-.sl-tr.wait { opacity: .55; }
+.sl-tr.wait { opacity: 1; }
+/* 🌐 a line waiting for its translation: a soft shimmering bar instead of «(…)» (js/subs.js trHtml) */
+.sl-shim { display: inline-block; vertical-align: middle; width: min(11em, 70%); height: .62em; border-radius: 99px;
+  background: linear-gradient(90deg, color-mix(in srgb, currentColor 10%, transparent) 0%, color-mix(in srgb, currentColor 26%, transparent) 50%, color-mix(in srgb, currentColor 10%, transparent) 100%);
+  background-size: 220% 100%; animation: sl-shim 1.6s ease-in-out infinite; }
+.ov-ru .sl-shim { width: min(14em, 60%); height: .5em; }
+@keyframes sl-shim { 0% { background-position: 110% 0; } 100% { background-position: -110% 0; } }
+@media (prefers-reduced-motion: reduce) { .sl-shim { animation: none; } }
+/* one calm line under the list: some lines are still without a translation — it will come a little later */
+.subs-trstat { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 2px 0 6px; padding: 7px 10px; border-radius: 10px;
+  font-size: 13px; line-height: 1.4; color: var(--text); background: color-mix(in srgb, #f5a524 8%, var(--panel)); border: 1px solid color-mix(in srgb, #f5a524 24%, var(--panel-border)); }
+.subs-trstat[hidden] { display: none; }
+.subs-trstat .ts-txt { flex: 1 1 220px; min-width: 0; }
+.subs-trstat .linklike { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline dotted; }
 .sl-en { display: block; font-size: 13px; color: var(--muted); font-style: italic; }
 .subs-now .sl-en { font-size: 14px; }
 .subs-foot { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
@@ -103,6 +116,17 @@ audio.subs-media { width: 100%; display: block; }
   .subs-now { min-height: 0; padding: 8px 10px; }
   .subs-now .sn-no { font-size: 17px; }
   .subs-keys { display: none; }
+}
+/* two columns: the list of lines reaches as far down as the video column goes — no empty gap under it
+   (the list itself adds no height: it takes what the row has, never less than before) */
+@media (min-width: 861px) {
+  .subs-wrap { align-items: stretch; }
+  .subs-wrap > .subs-right { display: flex; flex-direction: column; min-height: 0; }
+  .subs-wrap > .subs-right > .subs-list { flex: 1 1 0; height: 0; min-height: min(64vh, 640px); }
+  .subs-wrap > .subs-right > .subs-foot { flex: none; }
+}
+@media (min-width: 861px) and (max-height: 500px) and (orientation: landscape) {
+  .subs-stream .subs-wrap > .subs-right > .subs-list { min-height: 70dvh; }
 }
 @media (max-width: 520px) {
   .subs-modal .modal-body { padding: 6px 12px 14px; }
@@ -164,6 +188,7 @@ audio.subs-media { width: 100%; display: block; }
 .subs-glprog:empty { display: none; }
 .sp-ctx { margin-top: 2px; }
 .sp-ctx.unsure { opacity: .8; }
+.sp-lit { margin-top: 4px; font-style: italic; overflow-wrap: anywhere; }
 .sp-fix { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .sp-fix .btn.sm { min-height: 30px; padding: 4px 9px; font-size: 12.5px; }
 .ov-no .sw-gl { color: #ffd76a; font-size: .62em; }
@@ -240,7 +265,7 @@ body.subs-fullscreen { overflow: hidden; }
 .subs-glass.peek { -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; border-color: rgba(255, 216, 77, .8); }
 .glass-ctl .subs-glass:not(.peek) { opacity: .55; }
 /* the handle at the LEFT of the top edge: the subtitles on the glass are centred and would cover it in the middle */
-.glass-grip { position: absolute; left: 14px; top: -1px; transform: translate(0, -50%); width: 46px; height: 14px; border-radius: 8px; background: rgba(255, 255, 255, .85); box-shadow: 0 1px 4px rgba(0, 0, 0, .4); cursor: ns-resize; }
+.glass-grip { position: absolute; left: 14px; top: -1px; translate: 0 -50%; width: 46px; height: 14px; border-radius: 8px; background: rgba(255, 255, 255, .85); box-shadow: 0 1px 4px rgba(0, 0, 0, .4); cursor: ns-resize; }
 .glass-grip::after { content: ''; position: absolute; left: 13px; right: 13px; top: 6px; height: 2px; border-radius: 2px; background: rgba(0, 0, 0, .35); }
 .glass-grip, .glass-tag { pointer-events: auto; touch-action: none; }
 .glass-tag { cursor: grab; }
@@ -465,7 +490,7 @@ a.nrk-tile-main:hover .nrk-open { filter: brightness(1.15); transform: translate
 @keyframes lbPulse { 0% { box-shadow: 0 0 0 0 rgba(229,17,43,.55); } 70% { box-shadow: 0 0 0 8px rgba(229,17,43,0); } 100% { box-shadow: 0 0 0 0 rgba(229,17,43,0); } }
 @media (prefers-reduced-motion: reduce) { .lb-dot { animation: none; } }
 @media (max-width: 720px) { .subs-radio-art img { width: 72px; height: 72px; } .sr-txt b { font-size: 15px; } }
-@media (pointer: coarse) { .subs-livebar .btn { min-height: 38px; } }
+@media (pointer: coarse) { .subs-livebar .btn { min-height: 44px; } }
 
 /* ---------- 📱 second screen: NRK live TV on the TV (NRK's app) — here its live subtitles with the translation ---------- */
 .nrk-ltile.has-2nd { display: flex; flex-direction: column; gap: 6px; }
@@ -542,3 +567,352 @@ a.nrk-tile-main:hover .nrk-open { filter: brightness(1.15); transform: translate
   background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent); }
 .subs-mhint[hidden] { display: none; }
 .ov-box .sl-tag, .ov-box .sl-tagbtn { font-size: 12px; }
+/* 📺 «Подключиться к телевизору» without the Mac bridge: big, easy targets (≥ 44 px), a hover on every button */
+.tv-modal .tv-wide { display: flex; width: 100%; justify-content: center; align-items: center; margin-top: 8px; text-decoration: none; }
+.tv-modal .btn, .tv-modal .tv-more > summary { min-height: 44px; }
+.tv-modal .tv-more > summary { display: flex; align-items: center; border-radius: 10px; padding: 6px 4px; line-height: 1.35; transition: color .15s, background .15s; }
+.tv-modal .tv-more > summary:hover, .tv-modal .tv-more > summary:focus-visible { color: var(--text); background: color-mix(in srgb, var(--accent) 10%, transparent); outline: none; }
+.tv-modal .tv-cast { min-height: 56px; transition: filter .15s, transform .15s; }
+@media (hover: hover) { .tv-modal .tv-cast:hover:not(:disabled) { filter: brightness(1.08); } .tv-modal .btn:not(.primary):hover:not(:disabled) { border-color: var(--accent); } }
+.tv-modal .tv-cast:active:not(:disabled) { transform: scale(.99); }
+.tv-modal .tv-step .btn { margin-top: 8px; }
+.cast-bar .btn, .cast-bar .seg-mini button { min-height: 44px; }
+.cast-bar .seg-mini button { padding-left: 12px; padding-right: 12px; }
+.cast-bar .btn:hover:not(:disabled) { border-color: var(--accent); }
+@media (max-width: 480px) { .tv-modal .tv-step { padding: 10px; } .cast-bar .cast-row .btn { flex: 1 1 auto; } }
+/* ⛶ full screen everywhere with OUR subtitles: a ⛶ on the video itself (the browser's bare-video ⛶ is hidden in Chrome) */
+.subs-fsbtn { position: absolute; z-index: 5; top: max(8px, env(safe-area-inset-top)); right: 8px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0;
+  border-radius: 12px; border: 1px solid rgba(255, 255, 255, .28); background: rgba(0, 0, 0, .5); color: #fff; font-size: 22px; line-height: 1; cursor: pointer;
+  transition: opacity .2s, background .15s, transform .15s; -webkit-tap-highlight-color: transparent; }
+.subs-fsbtn { opacity: .85; }
+.subs-stage:hover .subs-fsbtn, .subs-fsbtn:focus-visible { opacity: 1; }
+@media (hover: hover) { .subs-playing .subs-stage:not(:hover) .subs-fsbtn:not(:focus-visible) { opacity: 0; } } /* while it plays: only when the mouse is over the video */
+.subs-fsbtn:hover { background: linear-gradient(135deg, var(--accent), var(--accent2, #3b82f6)); border-color: transparent; transform: scale(1.06); }
+.subs-fsbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (hover: none) { .subs-playing .subs-fsbtn { opacity: .6; } }
+.subs-full .subs-fsbtn, .subs-is-audio .subs-fsbtn { display: none; }
+.subs-stage:has(.subs-fsbtn) .subs-ocr-chip { right: 60px; } /* «🔎 Найти слова в кадре» next to the ⛶, not under it */
+/* full screen: our line never under the notch / rounded corners; a bigger line on big screens */
+.subs-full .subs-ov { padding-left: max(4%, env(safe-area-inset-left)); padding-right: max(4%, env(safe-area-inset-right)); }
+@media (min-width: 1600px) { .subs-full .ov-box { max-width: min(1500px, 92%); } }
+/* 🔲 «Подложка» — the dark strip under OUR lines is a choice (off by default): without it the letters get a black outline */
+.subs-modal.sv-nobg .ov-box { background: transparent; }
+.subs-modal.sv-nobg .ov-no, .subs-modal.sv-nobg .ov-ru {
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 3px #000, 0 0 6px rgba(0, 0, 0, .9), 0 2px 10px rgba(0, 0, 0, .8); }
+.bg-btn { transition: background .15s, border-color .15s; }
+.bg-btn:not(.on) { opacity: .8; }
+.bg-btn:hover { opacity: 1; border-color: var(--accent); }
+.bg-btn.on { opacity: 1; background: color-mix(in srgb, var(--accent) 26%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); }
+.subs-ovbar .bg-btn.on { background: rgba(255, 255, 255, .28); }
+.subs-view .btn, .subs-ovbar .btn, .subs-ovbar .media-btn { min-height: 44px; }
+/* full screen: «🔎 Найти слова в кадре» must not cover the bar on top («⤡ Выйти из полного экрана») — it sits at the right edge, mid-height */
+/* centred with `translate`: its entry animation (foIn, fill both) and the hover lift both use `transform` */
+.subs-full .subs-stage .subs-ocr-chip { top: 50%; right: max(12px, env(safe-area-inset-right)); translate: 0 -50%; }
+/* ⊞ «Положение субтитров» (Aa Вид субтитров) — where OUR lines sit on the video; js/subs.js posFit() sets the room
+   (left / top / width / height) and the biggest size that fits it (--fit) for the big / side / split looks.
+   «Внизу» is the look above, untouched. Narrow videos (< 560 px) stack the side looks under the picture («stack-…»). */
+.subs-modal .subs-stage > .subs-ov[data-pos="top"] { bottom: auto; padding-left: 56px; padding-right: 56px; } /* the ⛶ on the video stays free */
+.subs-modal.subs-full .subs-stage > .subs-ov[data-pos="top"] { padding-left: max(4%, env(safe-area-inset-left)); padding-right: max(4%, env(safe-area-inset-right)); }
+.subs-modal .subs-stage > .subs-ov[data-fit] { right: auto; bottom: auto; padding: 0; box-sizing: border-box; }
+.subs-modal .subs-stage > .subs-ov[data-fit] .ov-box { max-width: 100%; box-sizing: border-box; overflow-wrap: break-word; }
+.subs-modal .subs-stage > .subs-ov[data-fit] .ov-no { font-size: var(--fit, 20px); line-height: 1.25; }
+.subs-modal .subs-stage > .subs-ov[data-fit] .ov-ru { font-size: max(11px, calc(var(--fit, 20px) * var(--fit-ru, .74))); line-height: 1.3; }
+/* На весь экран: the biggest letters, in the middle of the picture; without «Подложка» a soft shade keeps them readable */
+.subs-modal .subs-stage > .subs-ov[data-pos="full"] { align-items: center; justify-content: center; border-radius: 18px; }
+.subs-modal .subs-stage > .subs-ov[data-pos="full"] .ov-box { padding: .25em .6em .35em; border-radius: 16px; }
+.subs-modal.sv-nobg .subs-stage > .subs-ov[data-pos="full"] { background: radial-gradient(closest-side, rgba(0, 0, 0, .5), rgba(0, 0, 0, .3) 70%, rgba(0, 0, 0, .12)); }
+/* Справа / Слева: a column at that edge (a soft dark zone without «Подложка») */
+.subs-modal .subs-stage > .subs-ov[data-pos="left"], .subs-modal .subs-stage > .subs-ov[data-pos="right"] { align-items: center; border-radius: 14px; }
+.subs-modal .subs-stage > .subs-ov[data-pos="left"] { justify-content: flex-start; }
+.subs-modal .subs-stage > .subs-ov[data-pos="right"] { justify-content: flex-end; }
+.subs-modal .subs-stage > .subs-ov[data-pos="left"] .ov-box { text-align: left; padding: 8px 12px 10px; }
+.subs-modal .subs-stage > .subs-ov[data-pos="right"] .ov-box { text-align: right; padding: 8px 12px 10px; }
+.subs-modal.sv-nobg .subs-stage > .subs-ov[data-pos="left"] { background: linear-gradient(90deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, .3) 70%, rgba(0, 0, 0, 0)); }
+.subs-modal.sv-nobg .subs-stage > .subs-ov[data-pos="right"] { background: linear-gradient(270deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, .3) 70%, rgba(0, 0, 0, 0)); }
+/* the two halves: the Norwegian line and the translation each in its own column, the middle of the picture free */
+.subs-modal .subs-stage > .subs-ov[data-pos^="split"] .ov-box { display: contents; }
+.subs-modal .subs-stage > .subs-ov[data-pos^="split"] .ov-no, .subs-modal .subs-stage > .subs-ov[data-pos^="split"] .ov-ru {
+  position: absolute; top: 50%; transform: translateY(-50%); max-width: var(--colw, 33%); box-sizing: border-box; margin: 0; padding: 8px 12px 10px;
+  border-radius: 12px; background: rgba(0, 0, 0, var(--sv-bga, .64)); overflow-wrap: break-word; }
+.subs-modal .subs-stage > .subs-ov[data-pos="split-no"] .ov-no, .subs-modal .subs-stage > .subs-ov[data-pos="split-tr"] .ov-ru { left: 0; text-align: left; }
+.subs-modal .subs-stage > .subs-ov[data-pos="split-no"] .ov-ru, .subs-modal .subs-stage > .subs-ov[data-pos="split-tr"] .ov-no { right: 0; text-align: right; }
+.subs-modal .subs-stage > .subs-ov[data-pos^="split"] .ov-ru:empty { display: none; }
+.subs-modal.sv-nobg .subs-stage > .subs-ov[data-pos^="split"] { background: linear-gradient(90deg, rgba(0, 0, 0, .5), rgba(0, 0, 0, .28) var(--colw, 33%), rgba(0, 0, 0, 0) calc(var(--colw, 33%) + 48px),
+  rgba(0, 0, 0, 0) calc(100% - var(--colw, 33%) - 48px), rgba(0, 0, 0, .28) calc(100% - var(--colw, 33%)), rgba(0, 0, 0, .5)); border-radius: 14px; }
+/* narrow video: no room for columns — under the picture (where «Внизу» is), each line at its own side */
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-left"] { justify-content: flex-start; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-right"] { justify-content: flex-end; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-left"] .ov-box { text-align: left; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-right"] .ov-box { text-align: right; }
+.subs-modal .subs-stage > .subs-ov[data-pos^="stack-split"] .ov-box { display: flex; flex-direction: column; gap: 2px; width: 100%; max-width: 100%; box-sizing: border-box; }
+.subs-modal .subs-stage > .subs-ov[data-pos^="stack-split"] .ov-ru { margin-top: 0; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-split-tr"] .ov-box { flex-direction: column-reverse; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-split-no"] .ov-no, .subs-modal .subs-stage > .subs-ov[data-pos="stack-split-tr"] .ov-ru { text-align: left; }
+.subs-modal .subs-stage > .subs-ov[data-pos="stack-split-no"] .ov-ru, .subs-modal .subs-stage > .subs-ov[data-pos="stack-split-tr"] .ov-no { text-align: right; }
+.subs-modal .subs-stage > .subs-ov[data-pos^="stack-split"] .ov-ru:empty { display: none; }
+/* the picker in «Aa Вид субтитров»: a small screen for each place, the label under it */
+.sv-pos-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 0 8px; }
+.sv-pos { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.sv-pos-opt { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; min-width: 0; min-height: 44px; padding: 8px 6px 9px; border-radius: 12px;
+  border: 1.5px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; font-size: 12.5px; line-height: 1.25; text-align: center; cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s, box-shadow .15s; -webkit-tap-highlight-color: transparent; }
+.sv-pos-opt > span { overflow-wrap: anywhere; }
+.sv-pos-ico { width: 100%; max-width: 88px; height: auto; display: block; border-radius: 4px; }
+@media (hover: hover) { .sv-pos-opt:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--panel)); transform: translateY(-1px); } }
+.sv-pos-opt:active { transform: scale(.98); }
+.sv-pos-opt.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--panel)); box-shadow: 0 0 0 1px var(--accent) inset; font-weight: 600; }
+.sv-pos-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sv-pos-note { margin: 6px 0 10px; }
+.sv-modal .sv-reset { min-height: 44px; transition: border-color .15s, background .15s; }
+.sv-modal .sv-reset:hover:not(:disabled) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.sv-modal .sv-reset:disabled { opacity: .45; cursor: default; }
+.sv-modal .modal-foot .grow { flex: 1 1 0; }
+@media (max-width: 480px) { .sv-modal .modal-foot .grow { display: none; } }
+/* «Вверху» in the window: «🔎 Найти слова в кадре» (on a pause) goes down to the player's buttons, off the line */
+.subs-modal:not(.subs-full) .subs-stage:has(> .subs-ov[data-pos="top"]) .subs-ocr-chip { top: auto; bottom: 58px; }
+/* «На весь экран» in the window: the line fills the picture — the 🔎 chip steps aside (the same button is under the video) */
+.subs-modal:not(.subs-full) .subs-stage:has(> .subs-ov[data-pos="full"]) .subs-ocr-chip { display: none; }
+/* ---------- 🎤 «Бегущая строка» (karaoke): js/subs.js Kar — kp: said · kc: being said · kf: still to come ----------
+   Only colour / opacity / background change (never the size), so the fitted places (posFit) and «Подложка» stay as they are.
+   kar-still: reduced motion (or the app's own motion setting) — no fades, no filling bar, just the highlight. */
+.subs-modal.kar-on:not(.kar-still) .ov-no [data-wi], .subs-modal.kar-on:not(.kar-still) .sn-no [data-wi] { transition: opacity .22s ease, background-color .22s ease, box-shadow .22s ease, color .22s ease; }
+.subs-modal.kar-on:not(.kar-wbw) .ov-no .kf, .subs-modal.kar-on:not(.kar-wbw) .sn-no .kf { opacity: .42; }
+.subs-modal.kar-on .ov-no .sw.kc { background-color: rgba(236, 64, 150, .82); box-shadow: 0 0 0 .12em rgba(236, 64, 150, .82), 0 0 .7em rgba(255, 90, 170, .55); border-radius: .22em; }
+.subs-modal.kar-on .ov-no .sw-gl.kc { background-color: rgba(236, 64, 150, .45); box-shadow: 0 0 0 .1em rgba(236, 64, 150, .45); border-radius: .22em; }
+.subs-modal.kar-on .sn-no .sw.kc { background-color: color-mix(in srgb, var(--accent2) 30%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent2) 30%, transparent); border-radius: 5px; }
+.subs-modal.kar-on .sn-no .sw-gl.kc { background-color: color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: 4px; }
+/* a thin line under the word fills while it is said */
+.subs-modal.kar-on:not(.kar-still):not(.kar-wbw) .ov-no .sw.kc { background-image: linear-gradient(var(--sv-ru, #ffd76a), var(--sv-ru, #ffd76a)); background-repeat: no-repeat; background-position: 0 100%; background-size: calc(var(--kp, 0) * 100%) .12em; }
+.subs-modal.kar-on:not(.kar-still):not(.kar-wbw) .sn-no .sw.kc { background-image: linear-gradient(var(--accent2), var(--accent2)); background-repeat: no-repeat; background-position: 0 100%; background-size: calc(var(--kp, 0) * 100%) 2px; }
+/* 👣 word by word: the words to come keep their place (nothing jumps) but are not shown yet */
+.subs-modal.kar-wbw .ov-no .kf, .subs-modal.kar-wbw .sn-no .kf { visibility: hidden; }
+.subs-modal.kar-wbw:not(.kar-still) .ov-no .kc, .subs-modal.kar-wbw:not(.kar-still) .sn-no .kc { animation: kar-pop .32s ease-out both; }
+@keyframes kar-pop { from { opacity: 0; } 35% { opacity: 1; } }
+/* the switch (under the line, in the full-screen bar) and its small bar */
+.subs-modal .kar-btn, .subs-modal .subs-kar .btn, .subs-modal .subs-kar .seg-mini button, .sv-modal .sv-kar .seg-mini button { min-height: 44px; }
+.kar-btn { min-height: 44px; white-space: nowrap; transition: background .15s, border-color .15s, color .15s; }
+.kar-btn:hover { border-color: var(--accent); }
+.kar-btn.on { color: #fff; background: linear-gradient(135deg, #ff6fb5, #7c6cff); border-color: transparent; }
+.kar-btn.on:hover { filter: brightness(1.08); }
+.subs-ovbar .kar-btn-t { display: none; }
+.subs-ovbar .kar-btn { min-width: 44px; }
+.subs-kar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 10px; border-radius: 14px;
+  background: color-mix(in srgb, #ff6fb5 8%, var(--panel)); border: 1px solid color-mix(in srgb, #ff6fb5 30%, var(--panel-border)); }
+.subs-kar[hidden] { display: none; }
+.subs-kar .seg-mini button { min-height: 44px; transition: background .15s, color .15s; }
+.subs-kar .seg-mini button:hover:not(.active) { color: var(--text); background: color-mix(in srgb, var(--accent2) 16%, transparent); }
+.kar-sh { display: inline-flex; align-items: center; gap: 4px; }
+.kar-sh > .small { margin-right: 2px; }
+.kar-sh .btn { min-width: 44px; min-height: 44px; padding: 4px 8px; font-size: 18px; font-weight: 800; line-height: 1; }
+.kar-sh b { min-width: 56px; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
+.kar-src { flex: 1 1 110px; min-width: 0; }
+.kar-src[data-src="exact"] { color: #3ecf8e; }
+.kar-q { min-width: 44px; min-height: 44px; border-radius: 50%; font-weight: 800; font-size: 16px; }
+.kar-q:hover, .kar-sh .btn:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.sv-kar .seg-mini button { min-height: 44px; }
+.sv-kar-note { margin: 2px 0 10px; }
+@media (max-width: 520px) {
+  .subs-kar { gap: 6px; padding: 6px 8px; }
+  .subs-kar .kar-modes { flex: 1 1 100%; }
+  .subs-kar .kar-modes button { flex: 1 1 0; }
+}
+.subs-companion .subs-kar { display: none !important; }
+/* 🎤 «Бегущая строка» and the TV (js/subs.js tvKarNote / the bridge's list of TVs): one calm line */
+.tv-kar-note { margin: 4px 0 10px; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: var(--text);
+  background: color-mix(in srgb, #ec4096 9%, var(--panel)); border: 1px solid color-mix(in srgb, #ec4096 28%, var(--panel-border)); }
+.tv-kar-note.ok { background: color-mix(in srgb, #3ecf8e 10%, var(--panel)); border-color: color-mix(in srgb, #3ecf8e 32%, var(--panel-border)); }
+/* 🎯 «Точная бегущая строка» — announced («скоро»), with what it would download */
+.kar-exact { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.kar-exact:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.kar-soon { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, #f5a524 22%, transparent); color: #c98612; }
+.kar-exact-note { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 9px 12px; border-radius: 12px; line-height: 1.45;
+  background: var(--panel); border: 1px solid var(--panel-border); }
+.kar-exact-note[hidden] { display: none; }
+.kar-exact-note > span { flex: 1 1 260px; min-width: 0; }
+.kar-exact-note .btn { min-height: 44px; }
+/* ▭ «надписи впечатаны в картинку» — a calm note at the top of the picture (over it: nothing under the video moves) */
+.subs-burn { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+  border-radius: 14px; color: #fff; font-size: 14px; line-height: 1.4; background: rgba(18, 20, 28, .78); border: 1px solid rgba(255, 255, 255, .16);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2); box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .8);
+  opacity: 0; transform: translateY(-6px); transition: opacity .25s, transform .25s; }
+.subs-burn.on { opacity: 1; transform: none; }
+.subs-burn .sb-txt { flex: 1 1 240px; min-width: 0; }
+.subs-burn .sb-act { display: flex; gap: 8px; flex-wrap: wrap; }
+.subs-burn .btn { min-height: 44px; }
+.subs-burn .btn:not(.primary) { color: #fff; background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .28); }
+.subs-burn .btn:not(.primary):hover { background: rgba(255, 255, 255, .2); }
+@media (max-width: 520px) {
+  .subs-burn { top: 6px; left: 6px; right: 6px; padding: 8px 10px; font-size: 13px; gap: 6px; }
+  .subs-burn .sb-act { flex: 1 1 100%; }
+  .subs-burn .sb-act .btn { flex: 1 1 0; }
+}
+@media (prefers-reduced-motion: reduce) { .subs-burn { transition: none; } }
+/* ============ 📝 «Надписи в кадре» (Ink in js/subs.js): text burned into the picture, read and translated by itself ============ */
+/* on the video: like our lines, but told apart — a small «📝 В кадре» label, a cool frame, the text in italics */
+.subs-modal .ov-box.ink { background: rgba(12, 20, 38, max(.55, var(--sv-bga, .64))); border: 1px solid rgba(140, 196, 255, .42); }
+.ov-box.ink .ov-no { font-style: italic; }
+.ov-box.ink .ink-tag { margin: 0 2px 0 0; vertical-align: .2em; font-style: normal; font-size: max(10px, .36em); cursor: help; text-shadow: none;
+  color: #cfe6ff; border-color: rgba(140, 196, 255, .55); background: rgba(80, 150, 255, .22); }
+.ov-box.ink.title .ov-no { letter-spacing: .02em; }
+.ov-box.ink .ink-tr { color: var(--sv-ru, #ffd76a); font-style: normal; font-weight: 700; }
+.ov-box.ink .ink-dash { opacity: .75; font-style: normal; }
+.ov-box.ink .ink-kind { font-size: .55em; font-weight: 500; font-style: normal; opacity: .85; white-space: nowrap; }
+/* in the list and under the video */
+.sl-tag.ink-tag { color: var(--accent2, var(--accent)); border-color: color-mix(in srgb, var(--accent2, var(--accent)) 45%, transparent); background: color-mix(in srgb, var(--accent2, var(--accent)) 12%, transparent); }
+.subs-line.ink .sl-no { font-style: italic; }
+.subs-now .sn-ink { margin-bottom: 2px; }
+/* the switch: in the row under the video and in the bar on the video */
+.ink-btn.on { background: color-mix(in srgb, var(--accent) 26%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); }
+.ink-btn:not(.on) { opacity: .8; }
+.ink-btn.off { opacity: .55; }
+.subs-ovbar .ink-btn.on { background: rgba(255, 255, 255, .28); }
+@media (pointer: coarse) { .subs-modal .ink-btn { min-height: 44px; } }
+.sv-modal .sv-ink .seg-mini button { min-height: 44px; }
+.sv-ink-note { margin: 2px 0 10px; }
+/* «Скачать распознавание надписей?» — the calm note on the picture (the same look as «надписи впечатаны»); the progress */
+.subs-full .subs-burn.subs-ink-ask { top: calc(max(8px, env(safe-area-inset-top)) + 58px); }
+.subs-ink-st { position: absolute; z-index: 6; left: 10px; top: 10px; max-width: calc(100% - 20px); padding: 7px 13px; border-radius: 999px; color: #fff; font-size: 13px; line-height: 1.35;
+  background: rgba(18, 20, 28, .78); border: 1px solid rgba(255, 255, 255, .16); pointer-events: none; }
+.subs-full .subs-ink-st { top: calc(max(8px, env(safe-area-inset-top)) + 58px); }
+/* ============ 🌐 «Перевод»: под строкой · по словам · размыт · скрыт — reachable while the video plays ============ */
+/* the row under the video, the «Aa» button on the video (a small window), «Aa Вид субтитров» */
+.subs-ctrl2 [data-trm] button { min-height: 44px; }
+@media (hover: hover) { .subs-ctrl2 [data-trm] button:hover:not(.active) { color: var(--text); background: color-mix(in srgb, var(--accent2) 16%, transparent); } }
+.trc-btn { white-space: nowrap; }
+.trc-btn .trc-t { font-weight: 700; }
+@media (max-width: 560px) { .subs-ovbar .trc-l { display: none; } }
+.subs-trpop { position: absolute; z-index: 9; box-sizing: border-box; padding: 6px; border-radius: 14px; color: #fff;
+  background: rgba(18, 20, 28, .94); border: 1px solid rgba(255, 255, 255, .18); box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .85);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); animation: tp-in .16s ease-out both; }
+@keyframes tp-in { from { opacity: 0; transform: translateY(-4px); } }
+.subs-trpop .tp-head { padding: 4px 8px 6px; font-size: 12px; font-weight: 700; letter-spacing: .02em; opacity: .75; }
+.subs-trpop .tp-list { display: flex; flex-direction: column; gap: 2px; }
+.subs-trpop .tp-opt { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 7px 10px; border: 0; border-radius: 10px;
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background .15s; }
+.subs-trpop .tp-opt:hover { background: rgba(255, 255, 255, .12); }
+.subs-trpop .tp-opt:focus-visible { outline: 2px solid var(--accent2, #29c7ff); outline-offset: -2px; }
+.subs-trpop .tp-opt.on { background: linear-gradient(135deg, rgba(124, 108, 255, .55), rgba(41, 199, 255, .4)); }
+.subs-trpop .tp-ico { flex: 0 0 30px; text-align: center; font-weight: 800; font-size: 14px; opacity: .9; }
+.subs-trpop .tp-txt { display: flex; flex-direction: column; min-width: 0; }
+.subs-trpop .tp-txt b { font-size: 14px; }
+.subs-trpop .tp-txt small { font-size: 11.5px; opacity: .75; line-height: 1.3; }
+@media (prefers-reduced-motion: reduce) { .subs-trpop { animation: none; } }
+/* «Размыт»: hover (mouse) or a tap shows the translation of that line */
+.subs-modal[data-tr="blur"] .sl-tr, .subs-modal[data-tr="blur"] .sl-en { cursor: pointer; }
+.subs-modal[data-tr="blur"] .ov-box:hover .sl-tr, .subs-modal[data-tr="blur"] .ov-box:hover .sl-en,
+.subs-modal[data-tr="blur"] .tr-peek .sl-tr, .subs-modal[data-tr="blur"] .tr-peek .sl-en { filter: none; }
+/* «Aa Вид субтитров»: the four choices at the top; the preview follows */
+.sv-tr-head { margin: 0 0 6px; }
+.sv-tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 420px) { .sv-tr { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sv-tr-opt { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; padding: 8px 6px; border-radius: 12px;
+  border: 1.5px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; font-size: 13px; line-height: 1.2; text-align: center; cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s; -webkit-tap-highlight-color: transparent; }
+.sv-tr-ico { font-weight: 800; font-size: 15px; color: var(--accent2, var(--accent)); }
+@media (hover: hover) { .sv-tr-opt:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--panel)); transform: translateY(-1px); } }
+.sv-tr-opt:active { transform: scale(.98); }
+.sv-tr-opt.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--panel)); box-shadow: 0 0 0 1px var(--accent) inset; font-weight: 700; }
+.sv-tr-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sv-tr-note { margin: 6px 0 10px; }
+.sv-preview.sv-pv-blur .sv-pv-ru { filter: blur(5px); cursor: pointer; transition: filter .2s; }
+.sv-preview.sv-pv-blur:hover .sv-pv-ru, .sv-preview.sv-pv-blur.tr-peek .sv-pv-ru { filter: none; }
+.sv-pv-off { margin-top: 6px; font-size: 12.5px; color: rgba(255, 255, 255, .7); font-style: italic; text-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .sv-tr-opt, .sv-preview.sv-pv-blur .sv-pv-ru { transition: none; } .sv-tr-opt:hover, .sv-tr-opt:active { transform: none; } }
+/* 🎤 «✨ Строка / 👣 По словам» next to «Бегущая строка» */
+.kar-mini button { min-height: 44px; }
+.kar-mini.off button.active { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--panel-border); }
+@media (hover: hover) { .kar-mini button:hover:not(.active) { color: var(--text); background: color-mix(in srgb, #ff6fb5 14%, transparent); } }
+.subs-companion .kar-mini { display: none; }
+/* ============ 🇬🇧 English lines: «EN», translated from English; Norwegian words in them stay tappable ============ */
+.sl-tag.en { color: #4f8cff; border-color: color-mix(in srgb, #4f8cff 45%, transparent); background: color-mix(in srgb, #4f8cff 12%, transparent); letter-spacing: .04em; }
+.ov-box .sl-tag.en { color: #cfe0ff; border-color: rgba(140, 180, 255, .6); background: rgba(80, 130, 255, .25); text-shadow: none; }
+.sw.no-in-en { font-weight: 700; color: var(--learn, var(--accent2)); background: color-mix(in srgb, var(--learn, var(--accent2)) 12%, transparent); padding: 0 2px; }
+.ov-no .sw.no-in-en { color: var(--sv-ru, #ffd76a); background: rgba(255, 215, 106, .16); }
+.subs-modal.kar-on .ov-no .sw-en.kc { background-color: rgba(236, 64, 150, .7); box-shadow: 0 0 0 .12em rgba(236, 64, 150, .7); border-radius: .22em; }
+.subs-modal.kar-on .sn-no .sw-en.kc { background-color: color-mix(in srgb, var(--accent2) 24%, transparent); border-radius: 5px; }
+/* ============ 🎵 songs / speech heard where there are no subtitles ============ */
+.subs-line.song .sl-no { font-style: italic; }
+.ov-box.song .ov-no { font-style: italic; }
+.ov-box.song .sl-tag.song { font-style: normal; color: #ffd9f0; border-color: rgba(255, 140, 200, .55); background: rgba(236, 64, 150, .25); text-shadow: none; white-space: normal; }
+.sl-tag.song-x { white-space: normal; }
+.subs-full .subs-burn.subs-song-ask { top: calc(max(8px, env(safe-area-inset-top)) + 58px); }
+.sv-modal .sv-song .seg-mini button { min-height: 44px; }
+.sv-song-note { margin: 2px 0 10px; }
+/* ============ 🎬 credits: names as written (+ a Russian reading), roles translated ============ */
+.subs-cred { position: absolute; z-index: 3; left: 50%; top: 10px; transform: translateX(-50%); max-width: min(760px, 94%); pointer-events: none; }
+.subs-cred[hidden] { display: none; }
+.subs-full .subs-cred { top: calc(max(8px, env(safe-area-inset-top)) + 64px); }
+.subs-cred .cr-box { padding: 6px 12px 8px; border-radius: 12px; color: #fff; text-align: center; line-height: 1.4; font-size: calc(15px * var(--sv-scale, 1));
+  background: rgba(12, 20, 38, .72); border: 1px solid rgba(140, 196, 255, .42); text-shadow: 0 1px 3px rgba(0, 0, 0, .8); }
+.subs-full .subs-cred .cr-box { font-size: calc(19px * var(--sv-scale, 1)); }
+.subs-cred .cr-tag { font-size: 11px; color: #cfe6ff; border-color: rgba(140, 196, 255, .55); background: rgba(80, 150, 255, .22); text-shadow: none; }
+.subs-cred .cr-line + .cr-line { margin-top: 2px; }
+.subs-cred .cr-role { color: var(--sv-ru, #ffd76a); font-weight: 700; }
+.subs-cred .cr-cyr, .subs-cred .cr-orig { opacity: .8; font-size: .88em; }
+@media (max-width: 520px) { .subs-cred .cr-box { font-size: 13px; padding: 5px 9px 6px; } }
+.subs-credwrap[hidden] { display: none; }
+.subs-credits { margin-top: 10px; padding: 8px 12px 10px; border-radius: 12px; border: 1px solid var(--panel-border); background: var(--panel); }
+.subs-credits > summary { cursor: pointer; font-weight: 700; min-height: 32px; display: flex; align-items: center; gap: 6px; list-style: none; }
+.subs-credits > summary::-webkit-details-marker { display: none; }
+.subs-credits > summary::before { content: '▸'; transition: transform .15s; }
+.subs-credits[open] > summary::before { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .subs-credits > summary::before { transition: none; } }
+.subs-credits .cr-note { margin: 2px 0 6px; }
+.subs-credits .cr-grp + .cr-grp { margin-top: 8px; }
+.subs-credits .cr-gh { font-size: 12.5px; font-weight: 700; color: var(--muted); text-transform: none; }
+.subs-credits ul { margin: 3px 0 0; padding-left: 18px; line-height: 1.5; font-size: 14px; }
+.subs-credits .cr-cyr, .subs-credits .cr-orig { color: var(--muted); }
+/* the full-screen bar is always dark: its buttons keep white text on hover and while their small window is open */
+.subs-ovbar .btn:not(.primary):hover:not(:disabled), .subs-ovbar .btn[aria-expanded="true"] { color: #fff !important; background: rgba(255, 255, 255, .2); }
+/* ⏳ own subtitles in sync: the overlay on the video while the model downloads / starts / the first phrases are
+   recognized, the «Догоняю субтитры…» pill, the light-model offer; the short status line under the video */
+.subs-asrgate { position: absolute; z-index: 7; color: #fff; }
+.subs-asrgate.full { inset: 0; display: grid; place-items: center; padding: 12px; overflow: auto; background: rgba(8, 10, 22, .8); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); container-type: size; }
+.subs-radio:has(> .subs-asrgate.full) { position: relative; min-height: 240px; }
+.ag-card { display: flex; flex-direction: column; align-items: center; gap: 7px; max-width: 470px; text-align: center; }
+.ag-ico { font-size: 30px; line-height: 1; }
+.ag-hg { animation: tv-hg 1.6s ease-in-out infinite; }
+.ag-t { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; }
+.ag-sub { margin: 0; font-size: 13.5px; line-height: 1.4; color: rgba(255, 255, 255, .82); }
+.ag-sub.small { font-size: 12.5px; color: rgba(255, 255, 255, .68); }
+.ag-bar { width: min(320px, 82%); height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .18); overflow: hidden; }
+.ag-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width .35s ease; }
+.ag-steps { list-style: none; margin: 2px 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 12.5px; color: rgba(255, 255, 255, .58); }
+.ag-steps li { display: flex; align-items: center; gap: 5px; }
+.ag-steps li.now { color: #fff; font-weight: 600; }
+.ag-steps li.done { color: #9be7b0; }
+.ag-n { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1px solid currentColor; font-size: 11px; line-height: 1; }
+.ag-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+.subs-asrgate .btn { min-height: 44px; }
+.subs-asrgate .btn:not(.primary) { color: #fff; background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .34); }
+.subs-asrgate .btn:not(.primary):hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, .24); }
+.subs-asrgate .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.subs-asrgate.pill { top: 10px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100% - 20px); }
+.ag-pill { display: flex; align-items: center; gap: 10px; padding: 5px 5px 5px 14px; border-radius: 999px; background: rgba(8, 10, 22, .84); font-size: 14px; box-shadow: 0 4px 18px rgba(0, 0, 0, .35); }
+.ag-pill .btn { border-radius: 999px; }
+.ag-spin { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .3); border-top-color: #fff; animation: spin .8s linear infinite; }
+.ag-offer { max-width: 460px; padding: 10px 12px; border-radius: 14px; font-size: 13.5px; line-height: 1.4; text-align: center; background: rgba(8, 10, 22, .9); }
+.ag-offer p { margin: 0 0 8px; }
+.ag-offer .ag-btns { margin-top: 0; }
+.subs-asrgate.nudge .ag-card, .subs-asrgate.nudge .ag-pill { animation: agNudge .45s ease; }
+@keyframes agNudge { 40% { transform: scale(1.04); } }
+/* a small video (a phone): the essentials only */
+@container (max-height: 330px) { .ag-steps, .ag-card .ag-sub.small, .ag-card .ag-ico { display: none; } .ag-t { font-size: 15.5px; } .ag-card { gap: 5px; } }
+@container (max-height: 190px) { .ag-card .ag-sub:not([data-ag-sub]) { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ag-hg, .ag-spin, .subs-asrgate.nudge .ag-card, .subs-asrgate.nudge .ag-pill { animation: none; } .ag-bar i { transition: none; } }
+.subs-stream-note.asr-compact { align-items: center; background: var(--panel); border-color: var(--panel-border); }
+.subs-stream-note.asr-compact > span:last-child { flex: 1; min-width: 0; }
+.subs-stream-note.asr-compact > span:first-child { align-self: flex-start; margin-top: 11px; }
+.asr-head { display: flex; align-items: center; gap: 8px; }
+.asr-st { flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.4; }
+.asr-st .btn { margin-left: 6px; min-height: 44px; }
+.asr-q { flex: none; width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; font-weight: 700; font-size: 16px; }
+.asr-more { margin-top: 6px; line-height: 1.45; }
+.asr-detail:not(:empty) { margin-bottom: 6px; }
+.asr-compact .subs-asr-row:has(> [data-asr-go][hidden]:only-child) { display: none; }
+.asr-compact .subs-asr-row .btn { min-height: 44px; }
+.asr-offer-box .ag-offer { max-width: none; margin-top: 8px; text-align: left; color: var(--text); background: color-mix(in srgb, #f5a524 12%, var(--panel)); border: 1px solid color-mix(in srgb, #f5a524 42%, var(--panel-border)); }
+.asr-offer-box .ag-offer .ag-btns { justify-content: flex-start; }
+.asr-offer-box .btn { min-height: 44px; }
+.subs-livebar .lb-dl.on { background: color-mix(in srgb, var(--accent) 20%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); }
+.lb-delay { color: var(--accent); }

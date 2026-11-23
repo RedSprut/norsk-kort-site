@@ -3,7 +3,12 @@
  * shows, step by step, the 2–5 controls that are not obvious, with a bubble «what happens if you tap here».
  *  - PLACES: a registry { id, name, ctx: 'view' | 'modal' | 'float', view / modal (where it lives), when (selector(s):
  *    the place is open when one of them is visible there), steps [{ t: selector(s) | fn, h: title, x: text }], topic
- *    (the help-centre topic of the place), open() (how to open it for a replay), tour (a Help tour as the replay fallback) }.
+ *    (the help-centre topic of the place), open() (how to open it for a replay), tour (a Help tour as the replay fallback),
+ *    manual (true: only on request — «👆 Показать подсказку на экране» — never by itself on a first visit) }.
+ *  - Every help-centre topic has a way to be shown on screen: its own tour (js/help.js) or one of these places. A topic
+ *    without a tour gets «👆 Показать подсказку на экране» from the help centre itself (also inside the welcome) —
+ *    CoachMarks.placeFor(topicId) tells it which place; when opening the first place does not work out (e.g. no book on
+ *    the shelf for «Читалка»), the replay shows another place of the same topic that is open now.
  *  - Nothing in the modules is edited: a MutationObserver on the page (windows of UI.modal, #view, the interpreter
  *    panel) + capture listeners on entry buttons ([data-act], [data-sb], [data-…-open]…) schedule a light check; the
  *    place must stay open ~1 s, the person must not be typing / tapping, and nothing else may be on top: no preloader
@@ -47,14 +52,36 @@
 
   /* ---------------- the places ---------------- */
   const PLACES = [
+    /* 🏠 home (v211): «Продолжить», «▶ Учить», the five tiles, «Создать карточки», «Мои колоды», the navigator.
+       Only on request (the navigator's «Экскурсия по экрану», the help centre); the first visit shows the same marks
+       through js/help.js (Help.coach id 'home' — CoachMarks.stepsFor('home')). */
+    { id: 'home', manual: true, name: 'Главная', ctx: 'view', view: 'home', when: '#view .home-hero',
+      open: () => { if (App.view.name !== 'home') App.go('home'); },
+      steps: [
+        { t: '#view [data-cont-card]', h: '▶ Продолжить', x: 'То, что вы не досмотрели, не дочитали или не дослушали. «▶ Продолжить» откроет ровно там, где вы остановились.' },
+        { t: '#view .home-go', h: '▶ Учить', x: 'Карточки на сегодня: повторения и немного новых. Вспомнили — «Знаю», нет — «Не знаю», остальное приложение посчитает само.' },
+        { t: '#view .mgrid .mt.video', h: '▶ Смотреть видео', x: 'YouTube, NRK TV и своё видео — с субтитрами на двух языках. Нажмите на слово: пауза, перевод и «В карточку».' },
+        { t: '#view .mgrid .mt.radio', h: '📻 Радио', x: 'NRK в прямом эфире и подкасты. Субтитров у радио нет — приложение создаст их само и переведёт.' },
+        { t: '#view .mgrid .mt.read', h: '📖 Читать', x: 'Книги, аудиокниги и новости простым языком. Нажмите на слово — перевод, а из него карточка.' },
+        { t: '#view .mgrid .mt.tg', h: '✈️ Telegram', x: 'Норвежские каналы прямо в приложении: посты, видео и аудио — с переводом.' },
+        { t: '#view .mgrid .mt.drill', h: '🏋️ Упражнения', x: 'Грамматика, время по-норвежски, произношение, диалоги по ролям и экзамены.' },
+        { t: ['#view .home-decks-h [data-act="create"]', '#view [data-act="create"]'], h: '➕ Создать карточки', x: 'Напишите тему, вставьте список слов, сфотографируйте страницу или загрузите файл — карточки готовы.' },
+        { t: ['#view #my-decks', '#view .home-decks'], h: '🗂 Мои колоды', x: 'Нажмите на колоду — откроется её страница: учить, слушать, проверить нейросетью, оформить.' },
+        { t: ['#sidebar [data-sb="nav"]', '#help-btn', '#more-btn', '#view .hp-nav'], h: '🧭 Навигатор по приложению',
+          x: () => (narrow() ? 'В «⋯ Меню» — «🧭 Навигатор»: экскурсия по любому экрану, помощь по разделам и быстрые пути «хочу смотреть видео», «хочу читать»…'
+            : 'Экскурсия по любому экрану, помощь по разделам и быстрые пути: «хочу смотреть видео», «хочу читать»… Тот же навигатор — под «?» вверху.') },
+      ] },
     /* 🗂 the deck page */
     { id: 'deck', name: 'Колода', ctx: 'view', view: 'deck', topic: 'study', when: '.launcher [data-act="start"]',
       open: () => { const d = window.Store && Store.decks()[0]; if (d) App.go('deck', { id: d.id }); },
       steps: [
-        { t: '.launcher [data-seg="mode"]', h: '🎛 Как учить', x: '«Карточки» — переворачивать, «Ввод» — вписать слово, «Тест» — выбрать ответ, «На слух» — узнать по звуку. Режим можно менять перед каждым занятием.' },
-        { t: '.launcher [data-seg="filter"]', h: '🧠 Какие карты', x: '«Умное повторение» само берёт то, что пора повторить, и немного новых. Можно выбрать только новые, трудные или выученные.' },
-        { t: '.launcher [data-act="start"]', h: '▶ Учить', x: 'Начинает занятие с выбранными настройками. Выйти можно в любой момент — всё сохраняется.' },
-        { t: ['.deck-head .deck-listen', '.toolbar [data-act="listen"]'], h: '🎧 Слушать колоду', x: 'Вся колода вслух — в наушниках или через динамик: слово, пауза, перевод. Экран можно выключить.' },
+        { t: '.launcher [data-act="start"]', h: '▶ Начать', x: 'Начинает занятие с выбранными настройками. Выйти можно в любой момент — всё сохраняется.' },
+        { t: '.launcher .dk-ai', h: '🤖 Проверить нейросетью', x: 'Нейросеть сверит переводы, род и написание и предложит исправления. Выбрали карточки — проверит только их.' },
+        { t: '.launcher .aic-strip', h: '🤖 Нейросети в приложении', x: 'Нажмите на значок: подключённая нейросеть станет главной, у остальных откроются настройки. Gemini и Groq — бесплатно.' },
+        { t: ['.launcher .dk-sumrow', '.launcher .dk-sum'], h: '✎ Настройки занятия', x: 'Одна строка: как учить, направление, какие карты и сколько. «✎ Изменить» — окно со всеми настройками и голосами.' },
+        { t: '.launcher .dk-acts [data-act="listen"]', h: '🎧 Слушать колоду', x: 'Вся колода вслух — в наушниках или через динамик: слово, пауза, перевод. Экран можно выключить.' },
+        { t: '.launcher .dk-acts [data-act="looks"]', h: '🎨 Оформление', x: 'Вид карточек (Викинги, Тролли, Ставкирка, праздники) и тема всего приложения — в одном окне.' },
+        { t: '.launcher .dk-acts [data-act="deck-more"]', h: '⋯ Ещё', x: 'Импорт и экспорт, «Поделиться», картинки, «Выбрать карточки» и «Удалить колоду» — здесь, по группам.' },
       ] },
     /* 🃏 the study screen */
     { id: 'study', name: 'Учёба', ctx: 'view', view: 'study', topic: 'study', when: '.study .flashcard',
@@ -65,6 +92,9 @@
         { t: '.study .study-top [data-act="hints"]', h: '💡 Подсказки', x: 'Включают и выключают подсказки на лицевой стороне: картинку, часть речи, значки. Без них проверка строже.' },
         { t: ['.study .tools-read .tools-title', '.study .tools-read'], h: '🔊 Озвучка', x: 'Прочитать карточку вслух: всё, только норвежский или только перевод — медленнее или быстрее. «Слушать колоду» — всю подряд.' },
         { t: ['.study .tools-card [data-kind="forms"]', '.study .tools-card .tools-title'], h: '🛠 Карточка и 📚 Формы слова', x: 'Здесь всё для этой карточки: «Формы слова» с переводом каждой, примеры, синонимы, «✏️ Редактировать» и проверка нейросетью.' },
+        // 📱 phones (js/mobile.js): the buttons above live in the ⋯ sheet; the full-screen card
+        { t: '.study .m-study-head .m-more', h: '⋯ Все настройки — здесь', x: 'Озвучка, направление, подсказки, «✏️ Редактировать», формы слова и проверка перевода — всё в этом меню.' },
+        { t: '.study .m-study-head .m-full', h: '⤢ Во весь экран', x: 'Карточка займёт весь экран: нажатие — перевернуть, свайп вправо — «Знаю», влево — «Не знаю».' },
       ] },
     /* 📚 the library */
     { id: 'library', q: true, name: 'Библиотека', ctx: 'modal', modal: '.bs-modal', topic: 'library', when: '.bs-tabs',
@@ -73,10 +103,29 @@
         { t: '.bs-tabs', h: '📑 Разделы', x: '«Читаю сейчас», «Мои книги», «Слушать», «Найти книгу» — все книги и аудио в одном окне.' },
         { t: ['[data-bs="cont"].bs-big', '[data-bs="cont"]'], h: '▶ Продолжить', x: 'Откроет книгу ровно на той странице, где вы остановились.' },
         { t: '[data-bs="add"]', h: '📥 Добавить книгу', x: 'Свой файл: PDF, EPUB, FB2, DOCX или TXT. Книга хранится только на этом устройстве.' },
+        { t: '.bs-modal [data-rd="sample"]', h: '✨ Сказка-пример', x: 'Короткая норвежская сказка с переводом — попробуйте, как работает читалка, ничего не скачивая.' },
         { t: '[data-bs-tab="listen"]', h: '🌙 Слушать и таймер сна', x: 'Книга вслух крупными кнопками. Таймер сна: 10–60 минут или до конца главы — чтение затихнет само, место сохранится.' },
+        { t: '[data-bs-tab="find"]', h: '🔎 Найти книгу', x: 'Бесплатные книги на норвежском и «Загрузить учебник с переводом».' },
+      ] },
+    /* 📚 the shelf «Мои книги» — the reader's topic when there is no book to open yet */
+    { id: 'reader-shelf', manual: true, name: 'Мои книги', ctx: 'modal', modal: '.bs-modal', topic: 'reader', when: '.bs-drop',
+      open: () => Bookshelf.open('mine'),
+      steps: [
+        { t: '.bs-drop', h: '📥 Добавить книгу', x: 'Выберите файл (PDF, EPUB, TXT, Word, FB2) или перетащите его сюда. Книга откроется в читалке и останется только на этом устройстве.' },
+        { t: '.bs-modal .rd-book .rd-cover', h: '📖 Нажмите на обложку', x: 'Книга откроется там, где вы остановились. Нажмите на любое слово — появится перевод.' },
+        { t: '.bs-modal .rd-sample', h: '✨ Сказка-пример', x: 'Нет своей книги? Добавьте короткую сказку с переводом и попробуйте: перевод слова, чтение вслух, таймер сна.' },
+        { t: '[data-bs-tab="listen"]', h: '🎧 Слушать книгу', x: 'Книга вслух: норвежский читает норвежский голос, перевод — русский. Крупные кнопки и 🌙 таймер сна.' },
       ] },
     /* 📖 the reader */
     { id: 'reader', q: true, name: 'Читалка', ctx: 'modal', modal: '.rd-modal', topic: 'reader', when: '.rd-flow .rd-s',
+      // the book read last (or the first on the shelf); no book yet → the shelf «Мои книги» (its own marks: reader-shelf)
+      open: async () => {
+        const all = window.Reader && Reader.list ? await Reader.list() : [];
+        const b = all.filter(x => x.opened).sort((x, y) => y.opened - x.opened)[0] || all[0];
+        if (b && Reader.openBook) return Reader.openBook(b.id, { cont: true });
+        if (window.Bookshelf) return Bookshelf.open('mine');
+        return null;
+      },
       steps: [
         { t: '.rd-flow .rd-s:not(.rd-cyr):not(.rd-tr)', h: '👆 Нажмите на слово', x: 'Появится перевод слова и кнопки «➕ В карточки» и «▶ Читать отсюда». Выделите несколько слов — переведётся фраза.' },
         { t: '[data-a="play"]', h: '▶ Читать вслух', x: 'Норвежский читает норвежский голос, перевод — русский. Предложение подсвечивается, страницы листаются сами.' },
@@ -151,7 +200,7 @@
     { id: 'gramref', q: true, name: 'Справочник грамматики', ctx: 'modal', modal: '.gr-modal', topic: 'gramref', when: '.gr-search',
       open: () => GramRef.open(),
       steps: [
-        { t: '.gr-search', h: '🔍 Поиск', x: 'Ищите по-русски или по-норвежски: «предлоги», «sin», «прошедшее».' },
+        { t: '.gr-search', h: '🔍 Поиск', x: 'Ищите по-русски, по-украински или по-норвежски: «предлоги», «sin», «прошедшее».' },
         { t: '.gr-levels', h: '🎚 Уровень', x: 'Только темы A1, A2 или B1 — или все сразу.' },
         { t: '.gr-item', h: '📗 Тема', x: 'Правило, таблицы, примеры со звуком, типичная ошибка — и кнопки «к тренажёру».' },
       ] },
@@ -160,6 +209,14 @@
         { t: '.gr-tables .gr-say', h: '🔊 Нажмите на форму', x: 'Норвежские формы в таблице читаются вслух.' },
         { t: '[data-gr-train]', h: '🏋️ К тренажёру', x: 'Сразу потренировать эту тему в упражнении.' },
         { t: '.gr-nav', h: '‹ › Соседние темы', x: 'Листайте темы по порядку — или вернитесь к списку.' },
+      ] },
+    /* 🔤 grammar terms (the «Грамматические термины» topic of js/gramterms.js): shown on a reference topic with term headers */
+    { id: 'gram', manual: true, name: 'Грамматические термины', ctx: 'modal', modal: '.gr-modal', topic: 'gram', when: '.gr-topic th .gt',
+      open: () => GramRef.open('subst-bestemt'),
+      steps: [
+        { t: '.gr-topic th .gt', h: '🔤 Подпись: норвежский · русский', x: 'Так подписаны формы — здесь, на карточках и в «Формах слова»: слева норвежское название (как в учебниках и в Ordbøkene), справа — перевод.' },
+        { t: '.gr-topic th .gt-no', h: '💡 Что это значит?', x: 'Наведите на подпись (на телефоне — нажмите) — появится короткое пояснение с примером.' },
+        { t: '.gr-topic .gr-tables .gr-say', h: '🔊 Форма вслух', x: 'Нажмите на норвежскую форму в таблице — она прозвучит. На обороте карточки такие же значки: часть речи и род.' },
       ] },
     /* 📺 NRK TV, YouTube and the subtitle player */
     { id: 'nrk', name: 'NRK TV', ctx: 'modal', modal: '.nrk-modal:not(.nrkr-modal)', topic: 'video', when: '.nrk-search',
@@ -178,8 +235,9 @@
     { id: 'subs', name: 'Субтитры', ctx: 'modal', modal: '.subs-modal', topic: 'video', tour: 'subs', when: ['.subs-list .sw', '.subs-now .sw'],
       steps: [
         { t: ['.subs-now .sw', '.subs-list .sw'], h: '👆 Нажмите на слово', x: 'Видео встанет на паузу, появится перевод и кнопка «В карточку» — слово станет карточкой со звуком из видео.' },
-        { t: '[data-trm]', h: '🙈 Перевод строки', x: '«Виден» — читайте спокойно. «Слово (перевод)» — перевод у каждого слова. «Размыт» и «скрыт» — проверьте себя.' },
+        { t: '[data-trm]', h: '🙈 Перевод строки', x: '«Под строкой» — перевод всей фразы снизу. «По словам» — перевод у каждого слова. «Размыт» и «Скрыт» — проверьте себя.' },
         { t: ['.subs-view .sv-btn', '.sv-btn'], h: 'Aa Вид субтитров', x: 'Размер и цвет текста, строка с переводом прямо на видео, показ на телевизоре.' },
+        { t: '.subs-ctrl [data-k="kar"]', h: '🎤 Бегущая строка', x: 'Слово загорается в тот момент, когда его произносят, — вместе с переводом. Слушаете и читаете одновременно.' },
         { t: '.sl-add', h: '➕ Строка — в карточку', x: 'Целая фраза станет карточкой — с настоящим звуком из видео.' },
       ] },
     /* ✈️ Telegram */
@@ -228,6 +286,15 @@
         { t: panelH3(/Озвучка/), h: '🔊 Голоса', x: 'Норвежский и русский голос, скорость, автоозвучка. Кнопки «Тест» — послушать сразу.' },
         { t: panelH3(/Нейросет/), h: '🤖 Нейросеть', x: 'Бесплатно — Gemini или Groq: вставьте ключ и нажмите «🔌 Проверить». Перевод точнее, проверка карточек, объяснения.' },
         { t: '[data-act="guides-reset"]', h: '💡 Показать подсказки снова', x: 'Все подсказки на экране, приветствие и напоминания покажутся заново.' },
+      ] },
+    /* 🎨 «Тема приложения» (js/apptheme.js) — shown from its help topic only («👆 Показать подсказку на экране») */
+    { id: 'apptheme', manual: true, name: 'Тема приложения', ctx: 'modal', modal: '.at-modal', topic: 'apptheme', when: '.at-grid .at-tile',
+      open: () => window.AppThemes && AppThemes.open(),
+      steps: [
+        { t: '.at-modes', h: '🌙 Светлая или тёмная', x: 'Каждая тема есть и светлой, и тёмной — переключите здесь.' },
+        { t: ['.at-grid .at-tile.on', '.at-grid .at-tile'], h: '🎨 Нажмите на тему', x: 'Покажу, как она выглядит, — приложение пока не меняется. Понравится — «✓ Выбрать» или «👀 Примерить».' },
+        { t: root => $$('.at-grid', root).slice(1, 2), h: '🎄 Праздничный наряд', x: 'В праздники (Рождество, 17 мая, Пасха, Хэллоуин…) приложение само наденет наряд, а потом вернёт вашу тему.' },
+        { t: root => $$('[data-at-opt="deco"]', root).map(i => i.closest('.at-switch')), h: '❄️ Украшения', x: 'Снег, флажки, сердечки. Выключите — останутся только цвета.' },
       ] },
     /* 🎧 listening: the chooser and «Сейчас играет» */
     { id: 'listen', name: 'Что послушать', ctx: 'modal', modal: '.lc-modal', topic: 'listen', when: '.lc-decks',
@@ -328,7 +395,7 @@
       const cur = window.Help && Help.now && Help.now();
       if (cur && !cur.coach) { activeHere(topBd()).forEach(p => { if (!seen(p.id)) markSeen(p.id); }); cand = null; return; }
       if (!calm()) { cand = null; return; }
-      const p = PLACES.find(x => !seen(x.id) && rootOf(x, topBd()));
+      const p = PLACES.find(x => !x.manual && !seen(x.id) && rootOf(x, topBd()));
       if (!p) { cand = null; return; }
       if (cand !== p) { cand = p; candAt = now(); later(1000); return; }
       if (now() - candAt < 900 || now() - lastInput < 700) { later(500); return; }
@@ -369,7 +436,7 @@
     $$('#modal-root .hc-modal:not(.hc-welcome)').forEach(m => {
       const topicEl = m.querySelector('[data-hc] .hc-topic');
       const foot = m.querySelector('[data-hcfoot]');
-      if (!topicEl || !foot || foot.querySelector('[data-cm-replay]')) return;
+      if (!topicEl || !foot || foot.querySelector('[data-cm-replay], [data-hc-coach]')) return; // the centre drew its own
       let tid = topicEl.dataset.hcId;
       if (!tid && window.Help && Help.TOPICS) { const h = topicEl.querySelector('.hc-thead h2'); const t = h && Help.TOPICS.find(x => x.title === h.textContent.trim()); tid = t && t.id; }
       if (!tid) return;
@@ -385,10 +452,12 @@
 
   /* ---------------- replay ---------------- */
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+  /** wait until the place p — or another place of its topic — is open on top; → that place (null: none in ms) */
   async function waitRoot(p, ms) {
     const t0 = now();
-    while (now() - t0 < ms) { if (rootOf(p, topBd())) return true; await sleep(150); }
-    return false;
+    const any = () => (rootOf(p, topBd()) ? p : (p.topic && PLACES.find(x => x !== p && x.topic === p.topic && rootOf(x, topBd()))) || null);
+    while (now() - t0 < ms) { const q = any(); if (q) return q; await sleep(150); }
+    return null;
   }
   /** show the coach marks of a place again (id — a place, or a help topic: its open place) */
   async function replay(id) {
@@ -398,7 +467,7 @@
     if (window.Help && Help.now && Help.now()) Help.end();
     await sleep(60);
     if (!rootOf(p, topBd())) {
-      if (p.open) { try { await p.open(); } catch (e) { console.warn('coachmarks open', e); } await waitRoot(p, 4500); }
+      if (p.open) { try { await p.open(); } catch (e) { console.warn('coachmarks open', e); } p = (await waitRoot(p, 4500)) || p; }
       if (!rootOf(p, topBd())) {
         if (p.tour && window.Help && Help.tour) { Help.tour(p.tour, { intro: false }); return true; }
         try { UI.toast(`Откройте «${p.name}» — подсказка покажется там`, 'warn', 4000); } catch (e) { /* no UI */ }
@@ -418,6 +487,12 @@
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; try { addQ(); addReplay(); } catch (e) { /* ignore */ } });
     });
     mo.observe(document.body, { childList: true, subtree: true });
+    // the page under a coach changed (← back, a link): its marks point at things that are gone — the coach ends
+    new MutationObserver(recs => {
+      if (!recs.some(r => r.oldValue !== document.body.dataset.view)) return;
+      const n = window.Help && Help.now && Help.now();
+      if (n && n.coach) { try { Help.end(); } catch (e) { /* ignore */ } running = null; }
+    }).observe(document.body, { attributes: true, attributeFilter: ['data-view'], attributeOldValue: true });
     // entry buttons: a section is about to open — look a little later (the observer catches it too; this is the quick path)
     document.addEventListener('click', e => {
       const r = e.target.closest && e.target.closest('[data-cm-replay]');
@@ -446,6 +521,14 @@
     running: () => running,
     seen,
     /** show a place's marks again on its next visit (no id — every place) */
+    /** the place a help topic can show on screen right now (open, or one that can be opened / toured) → { id, name } | null */
+    placeFor(tid) {
+      const under = topBd(true);
+      const p = placesOfTopic(tid, under).find(x => rootOf(x, under) || x.open || x.tour);
+      return p ? { id: p.id, name: p.name } : null;
+    },
+    /** Help.coach-ready steps of a place that is open now ([] — not open / nothing visible) */
+    stepsFor(id) { const p = byId(id), root = p && rootOf(p, topBd()); return root ? steps(p, root) : []; },
     reset(id) { if (!window.Help || !Help.coachReset) return; if (id) Help.coachReset(PFX + id); else PLACES.forEach(p => Help.coachReset(PFX + p.id)); },
     check: () => later(0),
   };

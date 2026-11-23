@@ -19,6 +19,7 @@
  */
 (function (root) {
   'use strict';
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const doc = root.document;
 
   /* ======================================================================
@@ -1230,7 +1231,7 @@
       for (const ln of arr(c.lines)) {
         if (tok !== ctx.playTok || !ctx.alive()) break;
         const t0 = Date.now();
-        await TTS.speak(ln.t, 'no', { keep: true, rate });
+        await TTS.speak(ln.t, 'no', { keep: true, rate, place: 'cards' });
         if (Date.now() - t0 < 60 && String(ln.t).length > 10) failed = true;
         if (tok !== ctx.playTok) break;
         await sleep(slow ? 650 : 420);
@@ -1447,7 +1448,7 @@
       <div class="pv-write-bar"><span class="pv-muted" data-wcount>${countLine(words, it)}</span>
         ${best ? `<span class="pv-tag good">Лучшая оценка: ${best.total}/${GRADE_MAX} · ${esc(best.cefr || '')}</span>` : ''}</div>
       <div class="pv-write-btns">
-        <button type="button" class="btn ${ai ? 'ai' : 'primary'}" data-grade="${esc(base)}" ${words < 3 ? 'disabled' : ''}>${ai ? '✨ Оценить текст (нейросеть)' : '📊 Оценить текст'}</button>
+        <button type="button" class="btn ${ai ? 'ai' : 'primary'}" data-grade="${esc(base)}" ${words < 3 ? 'disabled' : ''}>${ai ? '✨ Оценить текст (нейросеть)' : `${window.NavIcons ? NavIcons.statsIco() : '📊'} Оценить текст`}</button>
       </div>
       ${!ai && !g ? '<p class="pv-muted pv-small">Без нейросети оценка примерная: программа проверит длину, порядок слов, артикли и формы глаголов. Для точной проверки подключите нейросеть в Настройках.</p>' : ''}
       <div class="pv-grade-out" data-grade-out>${g ? gradeHtml(it, g, w, stale) : ''}</div>
@@ -1606,7 +1607,7 @@
       : `<span class="pv-tag good">оценка нейросети</span>`;
     const what = spk ? 'ответ' : 'текст';
     return `<section class="pv-grade ${stale ? 'stale' : ''}" aria-label="Оценка: ${what}">
-      ${g.fallback ? `<p class="pv-grade-note" role="status">🤖 Нейросеть сейчас не ответила — показываю примерную оценку. Нажмите «Оценить ${what}» ещё раз чуть позже.</p>` : ''}
+      ${g.fallback ? `<p class="pv-grade-note" role="status">${BOT()} Нейросеть сейчас не ответила — показываю примерную оценку. Нажмите «Оценить ${what}» ещё раз чуть позже.</p>` : ''}
       <p class="pv-grade-stale" role="status">✏️ ${spk ? 'Ответ' : 'Текст'} изменился — нажмите «Оценить ${what}», чтобы оценить новую версию.</p>
       <div class="pv-grade-head">
         <div class="pv-ring big pv-grade-ring ${cls}" style="--p:${pct}"><b>${g.total}</b><small>из ${GRADE_MAX}</small></div>
@@ -1750,7 +1751,7 @@ kind — одно из: "order" (порядок слов), "grammar", "vocab", "
       <div class="pv-write-bar"><span class="pv-muted" data-wcount>${countLine(words, it)}</span>
         ${best ? `<span class="pv-tag good">Лучшая оценка: ${best.total}/${GRADE_MAX} · ${esc(best.cefr || '')}</span>` : ''}</div>
       <div class="pv-write-btns">
-        <button type="button" class="btn ${ai ? 'ai' : 'primary'}" data-grade="${esc(base)}" ${words < 3 ? 'disabled' : ''}>${ai ? '✨ Оценить ответ (нейросеть)' : '📊 Оценить ответ'}</button>
+        <button type="button" class="btn ${ai ? 'ai' : 'primary'}" data-grade="${esc(base)}" ${words < 3 ? 'disabled' : ''}>${ai ? '✨ Оценить ответ (нейросеть)' : `${window.NavIcons ? NavIcons.statsIco() : '📊'} Оценить ответ`}</button>
         ${it.model && !g && !w.model ? `<button type="button" class="btn ghost" data-show-model="${esc(base)}" title="Покажет образец — будет отмечено «с подсказками»">📖 Образец ответа</button>` : ''}
       </div>
       ${it.model && !g && w.model ? speakModelHtml(it, w, true, true) : ''}
@@ -2067,7 +2068,7 @@ kind — одно из: "order" (порядок слов), "grammar", "vocab", "
     const tok = ctx.sayTok = (ctx.sayTok || 0) + 1;
     ctx.saying = key; paintModelBtns(ctx);
     const t0 = Date.now();
-    try { await TTS.speak(it.model, 'no', {}); } catch (e) { /* the button comes back */ }
+    try { await TTS.speak(it.model, 'no', { place: 'cards' }); } catch (e) { /* the button comes back */ }
     if (ctx.sayTok !== tok) return;
     if (Date.now() - t0 < 80) toast('Голос не прозвучал? Проверьте звук — или прочитайте образец глазами', 'warn', 4000);
     ctx.saying = null; paintModelBtns(ctx);
@@ -2206,7 +2207,7 @@ kind — одно из: "order" (порядок слов), "grammar", "vocab".
       if (d.play) { playClip(ctx, d.play, false); return; }
       if (d.playSlow) { playClip(ctx, d.playSlow, true); return; }
       if (d.showText) { run.w['txt.' + d.showText] = true; run.hu[ctx.sec.id] = true; save(); refreshClips(ctx); return; }
-      if (d.sayWord) { try { TTS.speak(d.sayWord, 'no', {}); } catch (err) { toast('Голос сейчас недоступен', 'warn'); } return; }
+      if (d.sayWord) { try { TTS.speak(d.sayWord, 'no', { place: 'cards' }); } catch (err) { toast('Голос сейчас недоступен', 'warn'); } return; }
       if (d.chip != null) {
         const i = +d.chip;
         if (ctx.selSlot) { place(ctx, ctx.selSlot, i); return; }
@@ -2648,7 +2649,8 @@ kind — одно из: "order" (порядок слов), "grammar", "vocab".
   const Prove = {
     open: () => open(),
     openTest: id => open(id),
-    _core: Object.assign(core, { BODY_PTS, pictureHtml }),
+    // aiPrompt / aiSpeakPrompt: reused by 🧪 «Тренировка в формате Norskprøven» (js/examtrainer.js) — the same grading
+    _core: Object.assign(core, { BODY_PTS, pictureHtml, aiPrompt, aiSpeakPrompt }),
     _state: st,
     _reset() { S = null; DATA = null; },
     _load: load,

@@ -27,7 +27,7 @@
   const WORD_RE = /^[a-zæøåéèêóòôüäöà-]+$/i;
   const hash = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
   const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('сервер не ответил вовремя')), ms))]);
-  const netMsg = e => /failed to fetch|networkerror|load failed|abort|network/i.test((e && e.message) || '') ? 'нет связи с интернетом' : ((e && e.message) || 'неизвестная ошибка');
+  const netMsg = e => U.niceErr(e, '', true);
   const offline = () => navigator.onLine === false;
   const SPK = (s = 18) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
 
@@ -881,7 +881,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         <div class="dr-fb-act"><button class="media-btn sm" data-say title="Прослушать" aria-label="Прослушать по-норвежски">${SPK(17)}</button>
           ${CardMaker.btn(it.kind === 'cloze' ? '➕ Создать карточки' : '➕ Создать карточку', 'btn sm', 'data-mk')}
           <span class="grow"></span><button class="btn primary" data-next>Дальше →</button></div></div>`;
-      if (Store.settings.autoSpeak !== false && it.say) { try { TTS.speak(it.say, 'no'); } catch (e) { /* no voice */ } }
+      if (Store.settings.autoSpeak !== false && it.say) { try { TTS.speak(it.say, 'no', { place: 'cards' }); } catch (e) { /* no voice */ } }
       setTimeout(() => { const n = ctx.body.querySelector('[data-next]'); if (n) try { n.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 30);
       const fb = ctx.body.querySelector('[data-fb]');
       if (fb && fb.scrollIntoView) setTimeout(() => { try { fb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { /* ignore */ } }, 60);
@@ -910,7 +910,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         if (t.hasAttribute('data-dr-back')) { ctx.go('hub'); return; }
         if (t.hasAttribute('data-again')) { again(); return; }
         if (t.hasAttribute('data-wrong')) { runSession(ctx, kind, wrong.map(r => Object.assign({}, r.it, { retry: false })), again); return; }
-        if (t.dataset.sayI != null) { const r = S.results[+t.dataset.sayI]; if (r) TTS.speak(r.it.say, 'no'); return; }
+        if (t.dataset.sayI != null) { const r = S.results[+t.dataset.sayI]; if (r) TTS.speak(r.it.say, 'no', { place: 'cards' }); return; }
         if (t.dataset.mkI != null) { const r = S.results[+t.dataset.mkI]; if (r) makeCard(r.it, ctx, t); }
       };
     };
@@ -940,7 +940,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         if (inp && c) { const n = Math.min(c.length - 1, Math.max(1, inp.dataset.hints ? +inp.dataset.hints + 1 : 1)); inp.dataset.hints = n; inp.value = c.slice(0, n); inp.focus(); }
         return;
       }
-      if (t.hasAttribute('data-say')) { TTS.speak(S.cur.say, 'no'); return; }
+      if (t.hasAttribute('data-say')) { TTS.speak(S.cur.say, 'no', { place: 'cards' }); return; }
       if (t.hasAttribute('data-mk')) { makeCard(S.cur, ctx, t); return; }
       if (t.hasAttribute('data-lit')) {
         // the person's translation is «по смыслу» (often a saying) — the word-for-word one next to it, on request
@@ -956,7 +956,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
             ? `<span class="muted">дословно:</span> <span class="ru-text">${esc(it.lit.ru)}</span> <span class="tg-who mt" title="Машинный перевод — слово в слово, неточный">⚠️ ${esc(Translators.provNames(it.lit.by))}</span>
                <div class="tiny muted">Вверху — перевод человека (${it.data.src === 'tatoeba' ? 'Tatoeba' : 'источник'}) по смыслу: поговорки так и переводят. Дословный помогает понять каждое слово.</div>`
             : '<span class="muted">Дословный перевод не пришёл — проверьте интернет</span>';
-        } catch (err) { out.innerHTML = `<span class="muted">Дословный перевод не пришёл: ${esc(err.message)}</span>`; }
+        } catch (err) { out.innerHTML = `<span class="muted">Дословный перевод не пришёл: ${esc(U.niceErr(err, '', true))}</span>`; }
         t.disabled = false;
         return;
       }
@@ -1036,7 +1036,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         runSession(ctx, 'cloze', items, () => ctx.go('cloze', { source: src, n, autostart: true }));
       } catch (err) {
         if (!ctx.alive()) return;
-        ctx.body.innerHTML = emptyHtml(err.message, `<button class="btn" data-back-setup>← Выбрать другой источник</button>`);
+        ctx.body.innerHTML = emptyHtml(U.niceErr(err), `<button class="btn" data-back-setup>← Выбрать другой источник</button>`);
         ctx.body.onclick = e => { if (e.target.closest('[data-dr-back]')) ctx.go('hub'); if (e.target.closest('[data-back-setup]')) ctx.go('cloze', { source: src, n }); };
       }
     };
@@ -1076,7 +1076,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         runSession(ctx, 'forms', r.items, () => ctx.go('forms', { src, n, types: [...types], autostart: true }));
       } catch (err) {
         if (!ctx.alive()) return;
-        ctx.body.innerHTML = emptyHtml(err.message, `<button class="btn" data-back-setup>← Изменить выбор</button>`);
+        ctx.body.innerHTML = emptyHtml(U.niceErr(err), `<button class="btn" data-back-setup>← Изменить выбор</button>`);
         ctx.body.onclick = e => { if (e.target.closest('[data-dr-back]')) ctx.go('hub'); if (e.target.closest('[data-back-setup]')) ctx.go('forms', { src, n, types: [...types] }); };
       }
     };
@@ -1295,7 +1295,7 @@ burde|bør|burde|burdet|следовало бы|modal`;
         prog().last.kLevels = [...levels]; Store.save(); draw(); return;
       }
       if (t.closest('[data-seg="n"]')) { n = +t.dataset.v; prog().last.kN = n; Store.save(); draw(); return; }
-      if (t.dataset.sayW) { TTS.speak(t.dataset.sayW, 'no'); return; }
+      if (t.dataset.sayW) { TTS.speak(t.dataset.sayW, 'no', { place: 'cards' }); return; }
       if (t.dataset.skip) { const d = prog(); const w = low(t.dataset.skip); if (!d.kellySkip.includes(w)) d.kellySkip.push(w); Store.save(); draw(); return; }
       if (t.hasAttribute('data-unskip')) { prog().kellySkip = []; Store.save(); draw(); return; }
       if (t.hasAttribute('data-add')) {

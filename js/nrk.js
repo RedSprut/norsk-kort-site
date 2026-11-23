@@ -15,6 +15,7 @@
  * (Subs.openStream({ companion: true }) — only the playlists' text and the subtitle pieces are read, never the picture).
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const esc = s => U.esc(s == null ? '' : String(s));
   const TV = 'https://tv.nrk.no';
   const link = id => `${TV}/se?v=${encodeURIComponent(id)}`;
@@ -277,7 +278,7 @@
           fresh: async () => { const r2 = this.liveState(await api('playback/manifest/channel/' + id)); return r2.ok ? r2.url : ''; },
           subName: vtt ? 'субтитры NRK (прямой эфир)' : 'субтитры, созданные приложением (распознавание речи)',
           note: vtt ? 'Это <b>прямой эфир</b>: субтитры NRK приходят вместе с эфиром — строки появляются в списке по мере показа и сразу переводятся. Можно поставить на паузу и вернуться назад (до нескольких часов) — кнопка «⏭ К прямому эфиру» вернёт в эфир.'
-            : `<b>У этого эфира нет субтитров — приложение создаст их само.</b> Оно слушает звук эфира и распознаёт речь (модель NB-Whisper Национальной библиотеки Норвегии, прямо на этом устройстве — звук никуда не отправляется), а потом переводит строки. Строки появляются через несколько секунд после того, как прозвучали; помечены 🤖 — в словах возможны ошибки.`,
+            : `<b>У этого эфира нет субтитров — приложение создаст их само.</b> Оно слушает звук эфира и распознаёт речь (модель NB-Whisper Национальной библиотеки Норвегии, прямо на этом устройстве — звук никуда не отправляется), а потом переводит строки. Строки появляются через несколько секунд после того, как прозвучали; помечены ${BOT()} — в словах возможны ошибки.`,
         });
       } catch (err) {
         if (busy) busy.close();
@@ -338,7 +339,7 @@
           const box = this.body().querySelector('[data-neps]');
           box.innerHTML = '<div class="nrk-empty"><span class="spinner sm"></span></div>';
           try { box.innerHTML = this.episodesHtml(findEpisodes(await api(`tv/catalog/series/${slug}/seasons/${sel.value}`)), name); }
-          catch (err) { box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>${esc(err.message)}</span></div>`; }
+          catch (err) { box.innerHTML = `<div class="mt-warn"><span>⚠️</span><span>${esc(U.niceErr(err))}</span></div>`; }
         };
       } catch (err) { this.fail(err); }
     },
@@ -396,7 +397,7 @@
           st.outerHTML = `<span class="nrk-block"><span>${r.icon}</span><b>${esc(r.label)}</b><small>${esc(r.why)}</small></span>`;
         } else if (r.chip) st.innerHTML = `<span class="nrk-chip" title="${esc(r.why || '')}">${esc(r.chip)}</span>`;
         else st.innerHTML = r.subs ? '<span class="nrk-chip ok" title="У передачи есть норвежские субтитры NRK">💬 субтитры</span>'
-          : '<span class="nrk-chip asr" title="Субтитров нет — приложение само распознает речь и переведёт">🤖 субтитры создаст приложение</span>';
+          : `<span class="nrk-chip asr" title="Субтитров нет — приложение само распознает речь и переведёт">${BOT()} субтитры создаст приложение</span>`;
       };
       const next = () => {
         while (P.running < 3 && P.queue.length) {
@@ -455,12 +456,12 @@
         const minutes = dm ? (+dm[1] || 0) * 60 + (+dm[2] || 0) + (+dm[3] || 0) / 60 : 0;
         const sparse = cues.length > 0 && minutes > 3 && cues.length / minutes < 1.5;
         if (sparse) note = `<b>У этой передачи NRK субтитры только к отдельным фразам (${cues.length} на ${Math.round(minutes)} мин) — остальную речь приложение распознает само.</b>
-          Строки NRK останутся, распознанные встанут между ними (значок 🤖, в словах возможны ошибки — карточки из них получат пометку «проверить»).`;
+          Строки NRK останутся, распознанные встанут между ними (значок ${BOT()}, в словах возможны ошибки — карточки из них получат пометку «проверить»).`;
         const autoAsr = !cues.length || sparse;
         if (!cues.length) note = `<b>У этой передачи NRK нет субтитров — приложение создаст их само.</b> Оно слушает звук передачи и распознаёт речь
           (модель NB-Whisper Национальной библиотеки Норвегии, прямо на этом устройстве — звук никуда не отправляется), а потом переводит строки.
-          Такие строки помечены 🤖: в словах возможны ошибки, а карточки из них получат пометку «проверить».
-          Если в самом видео видны норвежские субтитры — они впечатаны в картинку (так бывает в детских передачах NRK): прочитать их приложение не может, а строки 🤖 делятся на фразы по-своему.${note ? ' ' + note : ''}`;
+          Такие строки помечены ${BOT()}: в словах возможны ошибки, а карточки из них получат пометку «проверить».
+          Если в самом видео видны норвежские субтитры — они впечатаны в картинку (так бывает в детских передачах NRK): прочитать их приложение не может, а строки ${BOT()} делятся на фразы по-своему.${note ? ' ' + note : ''}`;
         if (!title) { try { const md = await api('playback/metadata/program/' + id); title = ((md.preplay || {}).titles || {}).subtitle || ((md.preplay || {}).titles || {}).title || id; series = series || ((md.preplay || {}).titles || {}).title || ''; } catch (e) { title = id; } }
         if (busy) busy.close();
         Subs.openStream({

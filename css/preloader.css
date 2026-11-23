@@ -100,6 +100,7 @@
 .nkp-brand > div { position: absolute; left: 0; top: 0; transform: translateX(-50%); white-space: nowrap; }
 .nkp-flags { font-size: var(--bf, 22px); letter-spacing: .1em; }
 .nkp-flags span { display: inline-block; margin: 0 .12em; color: #9aa1c7; }
+.nkp-flags i { font-style: normal; margin-left: .18em; }
 .nkp-title { margin-top: .12em; font-size: calc(var(--bf, 22px) * 2.05); font-weight: 800; letter-spacing: .01em; line-height: 1.05; color: #fff; }
 .nkp-title b { background: linear-gradient(90deg, #8f80ff, #29c7ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .nkp-tag { margin-top: .5em; font-size: calc(var(--bf, 22px) * .74); font-weight: 500; color: #b9bfe6; }
@@ -113,3 +114,27 @@
 @media (prefers-reduced-motion: reduce) {
   .nkp-aur, .nkp-stars, .nkp-bar::after { animation: none !important; }
 }
+
+/* ---------- 🎄 holiday touch (data-season is set from js/apptheme.js): the aurora takes the season's colours,
+   a thin ribbon at the top. Gradients only — nothing else changes. ---------- */
+.nkp[data-season]::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; z-index: 40; pointer-events: none; }
+.nkp[data-season="jul"]::before { background: repeating-linear-gradient(90deg, #e3173a 0 22px, #f2c14e 22px 30px, #1f9a5a 30px 52px, #f2c14e 52px 60px); }
+.nkp[data-season="jul"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(227, 23, 58, .26), rgba(227, 23, 58, 0) 70%); }
+.nkp[data-season="jul"] .nkp-aur.a2 { background: radial-gradient(closest-side, rgba(31, 154, 90, .24), rgba(31, 154, 90, 0) 70%); }
+.nkp[data-season="lucia"]::before { background: linear-gradient(90deg, rgba(255, 201, 77, 0), #ffc94d 30%, #ffe9a8 50%, #ffc94d 70%, rgba(255, 201, 77, 0)); }
+.nkp[data-season="lucia"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(255, 201, 77, .26), rgba(255, 201, 77, 0) 70%); }
+.nkp[data-season="nyttar"]::before { background: linear-gradient(90deg, #7962cc, #f0c04a, #7fdcff, #f0c04a, #7962cc); }
+.nkp[data-season="nyttar"] .nkp-aur.a2 { background: radial-gradient(closest-side, rgba(240, 192, 74, .22), rgba(240, 192, 74, 0) 70%); }
+.nkp[data-season="mai17"]::before { background: linear-gradient(180deg, #ba0c2f 0 33%, #ffffff 33% 66%, #00205b 66%); }
+.nkp[data-season="mai17"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(228, 15, 58, .28), rgba(228, 15, 58, 0) 70%); }
+.nkp[data-season="mai17"] .nkp-aur.a2 { background: radial-gradient(closest-side, rgba(40, 90, 230, .26), rgba(40, 90, 230, 0) 70%); }
+.nkp[data-season="samefolket"]::before { background: linear-gradient(90deg, #c8102e 0 25%, #0035ad 25% 50%, #ffce00 50% 75%, #007229 75%); }
+.nkp[data-season="valentin"]::before { background: linear-gradient(90deg, #ff9ec0, #dd1b68, #ff9ec0); }
+.nkp[data-season="valentin"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(255, 79, 134, .28), rgba(255, 79, 134, 0) 70%); }
+.nkp[data-season="fastelavn"]::before { background: linear-gradient(90deg, #ff6fb5, #ffd23f, #5fd38a, #6fd3ff, #b38bff); }
+.nkp[data-season="paske"]::before { background: linear-gradient(90deg, #ffd23f, #9be08a, #ffb3c7, #ffd23f); }
+.nkp[data-season="paske"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(255, 210, 63, .24), rgba(255, 210, 63, 0) 70%); }
+.nkp[data-season="sankthans"]::before { background: linear-gradient(90deg, rgba(255, 122, 47, 0), #ff7a2f, #ffb347, #ff7a2f, rgba(255, 122, 47, 0)); }
+.nkp[data-season="sankthans"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(255, 122, 47, .28), rgba(255, 122, 47, 0) 70%); }
+.nkp[data-season="halloween"]::before { background: repeating-linear-gradient(90deg, #ff7a1a 0 26px, #6b3fa0 26px 52px); }
+.nkp[data-season="halloween"] .nkp-aur.a1 { background: radial-gradient(closest-side, rgba(255, 122, 26, .26), rgba(255, 122, 26, 0) 70%); }

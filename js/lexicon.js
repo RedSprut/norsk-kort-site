@@ -32,10 +32,18 @@
     det: 'det', preposition: 'prep', preposisjon: 'prep', prep: 'prep', conjunction: 'konj', konjunksjon: 'konj', konj: 'konj',
     subjunksjon: 'sbu', sbu: 'sbu', interjection: 'interj', interjeksjon: 'interj', interj: 'interj', subst: 'subst' };
 
+  // a request that never answers must not hold the word view (Study._exBusy) for ever: 20 s, then it fails and is
+  // asked again next time (loadForms/loadParadigms forget a failed promise) — v231
   let loader = async name => {
-    const res = await fetch(BASE + name);
-    if (!res.ok) throw new Error('Lexicon: ' + name + ' HTTP ' + res.status);
-    return res.json();
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const tm = ctl ? setTimeout(() => ctl.abort(), 20000) : 0;
+    try {
+      const res = await fetch(BASE + name, ctl ? { signal: ctl.signal } : undefined);
+      if (!res.ok) throw new Error('Lexicon: ' + name + ' HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      throw ctl && ctl.signal.aborted ? new Error('Lexicon: ' + name + ' — no answer in 20 s') : e;
+    } finally { clearTimeout(tm); }
   };
 
   // ---- forms index ----

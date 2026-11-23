@@ -1,0 +1,610 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "note": "Собственные задания Norsk Kort. Ориентир по уровням — шкала CEFR; это не официальный тест.",
+ "items": [
+  {
+   "id": "lt-a1-01",
+   "level": "A1",
+   "kind": "vocab",
+   "q_ru": "Выберите перевод: «врач»",
+   "q_uk": "Оберіть переклад: «лікар»",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "en lærer",
+    "en kokk",
+    "en sjåfør",
+    "en lege"
+   ],
+   "answer": 3,
+   "why_ru": "en lege — врач. en lærer — учитель, en kokk — повар, en sjåfør — водитель.",
+   "why_uk": "en lege — лікар. en lærer — учитель, en kokk — кухар, en sjåfør — водій."
+  },
+  {
+   "id": "lt-a1-02",
+   "level": "A1",
+   "kind": "vocab",
+   "q_ru": "Как по-норвежски «дешёвый»?",
+   "q_uk": "Як норвезькою «дешевий»?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "dyr",
+    "gammel",
+    "billig",
+    "liten"
+   ],
+   "answer": 2,
+   "why_ru": "billig — дешёвый. dyr — дорогой, gammel — старый, liten — маленький.",
+   "why_uk": "billig — дешевий. dyr — дорогий, gammel — старий, liten — маленький."
+  },
+  {
+   "id": "lt-a1-03",
+   "level": "A1",
+   "kind": "grammar",
+   "q_ru": "Вставьте правильную форму глагола.",
+   "q_uk": "Вставте правильну форму дієслова.",
+   "no": "Jeg ___ fra Ukraina.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "kommer",
+    "komme",
+    "å komme",
+    "kommet"
+   ],
+   "answer": 0,
+   "why_ru": "В настоящем времени норвежский глагол получает -r и не меняется по лицам: jeg kommer, du kommer, vi kommer.",
+   "why_uk": "У теперішньому часі норвезьке дієслово має закінчення -r і не змінюється за особами: jeg kommer, du kommer, vi kommer."
+  },
+  {
+   "id": "lt-a1-04",
+   "level": "A1",
+   "kind": "grammar",
+   "q_ru": "Выберите артикль.",
+   "q_uk": "Оберіть артикль.",
+   "no": "Vi bor i ___ hus.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "en",
+    "ei",
+    "et",
+    "de"
+   ],
+   "answer": 2,
+   "why_ru": "hus — среднего рода, поэтому et hus. Род нужно учить вместе со словом: он часто не совпадает с русским.",
+   "why_uk": "hus — середнього роду, тому et hus. Рід слова треба вчити разом зі словом: він часто не збігається з українським."
+  },
+  {
+   "id": "lt-a1-05",
+   "level": "A1",
+   "kind": "grammar",
+   "q_ru": "Какое предложение построено правильно?",
+   "q_uk": "Яке речення побудоване правильно?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "I dag jeg jobber.",
+    "I dag jobber jeg.",
+    "Jeg i dag jobber.",
+    "Jobber i dag jeg."
+   ],
+   "answer": 1,
+   "why_ru": "Глагол в норвежском всегда на втором месте. Если предложение начинается с «I dag», подлежащее уходит после глагола: I dag jobber jeg.",
+   "why_uk": "Дієслово в норвезькій завжди стоїть на другому місці. Якщо речення починається з «I dag», підмет стає після дієслова: I dag jobber jeg."
+  },
+  {
+   "id": "lt-a1-06",
+   "level": "A1",
+   "kind": "reading",
+   "q_ru": "Прочитайте сообщение и ответьте на вопрос.",
+   "q_uk": "Прочитайте повідомлення і дайте відповідь на запитання.",
+   "no": "Hvorfor kommer ikke Olga på kurset?",
+   "text": "Hei, Anna! Jeg er syk i dag og kan ikke komme på kurset. Hilsen Olga",
+   "audio": "",
+   "options": [
+    "Hun er på jobb.",
+    "Hun er syk.",
+    "Hun er på ferie."
+   ],
+   "answer": 1,
+   "why_ru": "В сообщении: «Jeg er syk i dag» — «Я сегодня болею».",
+   "why_uk": "У повідомленні: «Jeg er syk i dag» — «Я сьогодні хворію»."
+  },
+  {
+   "id": "lt-a1-07",
+   "level": "A1",
+   "kind": "reading",
+   "q_ru": "Прочитайте объявление и ответьте на вопрос.",
+   "q_uk": "Прочитайте оголошення і дайте відповідь на запитання.",
+   "no": "Når er butikken stengt?",
+   "text": "Butikken er åpen fra mandag til fredag klokka 9–20 og på lørdager klokka 9–18. På søndager er den stengt.",
+   "audio": "",
+   "options": [
+    "på lørdager",
+    "på fredager",
+    "på søndager"
+   ],
+   "answer": 2,
+   "why_ru": "«På søndager er den stengt» — в воскресенье магазин закрыт. stengt — закрыт, åpen — открыт.",
+   "why_uk": "«På søndager er den stengt» — у неділю магазин зачинений. stengt — зачинений, åpen — відчинений."
+  },
+  {
+   "id": "lt-a1-08",
+   "level": "A1",
+   "kind": "listening",
+   "q_ru": "Послушайте и ответьте на вопрос.",
+   "q_uk": "Послухайте і дайте відповідь на запитання.",
+   "no": "Hvor bor Martin?",
+   "text": "",
+   "audio": "Hei! Jeg heter Martin. Jeg bor i Bergen, og jeg har to barn.",
+   "options": [
+    "i Oslo",
+    "i Tromsø",
+    "i Stavanger",
+    "i Bergen"
+   ],
+   "answer": 3,
+   "why_ru": "Мартин говорит: «Jeg bor i Bergen» — «Я живу в Бергене».",
+   "why_uk": "Мартін каже: «Jeg bor i Bergen» — «Я живу в Бергені»."
+  },
+  {
+   "id": "lt-a2-01",
+   "level": "A2",
+   "kind": "vocab",
+   "q_ru": "Как сказать «записаться на приём к врачу»?",
+   "q_uk": "Як сказати «записатися на прийом до лікаря»?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "bestille time hos legen",
+    "holde time hos legen",
+    "ta fri hos legen",
+    "sette tid hos legen"
+   ],
+   "answer": 0,
+   "why_ru": "Устойчивое выражение: bestille time — записаться на приём. «ta fri» значит «взять выходной».",
+   "why_uk": "Сталий вислів: bestille time — записатися на прийом. «ta fri» означає «взяти вихідний»."
+  },
+  {
+   "id": "lt-a2-02",
+   "level": "A2",
+   "kind": "vocab",
+   "q_ru": "Выберите слово, которое подходит по смыслу.",
+   "q_uk": "Оберіть слово, яке підходить за змістом.",
+   "no": "Jeg må ___ huset før gjestene kommer.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "bygge",
+    "selge",
+    "vaske",
+    "flytte"
+   ],
+   "answer": 2,
+   "why_ru": "«Мне нужно убрать (вымыть) дом до прихода гостей» — vaske. Строить, продавать или переносить дом перед гостями — бессмыслица.",
+   "why_uk": "«Мені треба прибрати (вимити) будинок до приходу гостей» — vaske. Будувати, продавати чи переносити будинок перед гостями — безглуздя."
+  },
+  {
+   "id": "lt-a2-03",
+   "level": "A2",
+   "kind": "grammar",
+   "q_ru": "Вставьте глагол в прошедшем времени.",
+   "q_uk": "Вставте дієслово в минулому часі.",
+   "no": "I går ___ jeg til legen.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "gikk",
+    "går",
+    "gått",
+    "gå"
+   ],
+   "answer": 0,
+   "why_ru": "«I går» (вчера) требует прошедшего времени. Глагол gå неправильный: går — gikk — har gått.",
+   "why_uk": "«I går» (учора) вимагає минулого часу. Дієслово gå неправильне: går — gikk — har gått."
+  },
+  {
+   "id": "lt-a2-04",
+   "level": "A2",
+   "kind": "grammar",
+   "q_ru": "Где стоит «ikke» в придаточном предложении?",
+   "q_uk": "Де стоїть «ikke» у підрядному реченні?",
+   "no": "Jeg blir hjemme fordi jeg ___ .",
+   "text": "",
+   "audio": "",
+   "options": [
+    "ikke er frisk",
+    "er ikke frisk",
+    "frisk ikke er",
+    "er frisk ikke"
+   ],
+   "answer": 0,
+   "why_ru": "После fordi, at, når, hvis начинается придаточное: там «ikke» стоит перед глаголом — fordi jeg ikke er frisk.",
+   "why_uk": "Після fordi, at, når, hvis починається підрядне речення: там «ikke» стоїть перед дієсловом — fordi jeg ikke er frisk."
+  },
+  {
+   "id": "lt-a2-05",
+   "level": "A2",
+   "kind": "grammar",
+   "q_ru": "Выберите правильную форму прилагательного.",
+   "q_uk": "Оберіть правильну форму прикметника.",
+   "no": "Vi har et ___ hus.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "stor",
+    "store",
+    "stort",
+    "storer"
+   ],
+   "answer": 2,
+   "why_ru": "С существительным среднего рода (et hus) прилагательное получает -t: et stort hus. Во множественном числе — store hus.",
+   "why_uk": "З іменником середнього роду (et hus) прикметник отримує -t: et stort hus. У множині — store hus."
+  },
+  {
+   "id": "lt-a2-06",
+   "level": "A2",
+   "kind": "reading",
+   "q_ru": "Прочитайте объявление в подъезде и ответьте на вопрос.",
+   "q_uk": "Прочитайте оголошення в під'їзді і дайте відповідь на запитання.",
+   "no": "Hva skal du gjøre hvis du er på jobb torsdag formiddag?",
+   "text": "Til alle beboere: Torsdag 14. mars kommer rørleggeren. Han må inn i alle leilighetene mellom klokka 8 og 12. Hvis du ikke er hjemme, kan du legge igjen nøkkelen hos vaktmesteren i første etasje.",
+   "audio": "",
+   "options": [
+    "Ringe rørleggeren.",
+    "Gi nøkkelen til vaktmesteren.",
+    "Være hjemme klokka 12."
+   ],
+   "answer": 1,
+   "why_ru": "«Hvis du ikke er hjemme, kan du legge igjen nøkkelen hos vaktmesteren» — если вас не будет дома, оставьте ключ у дворника (vaktmester).",
+   "why_uk": "«Hvis du ikke er hjemme, kan du legge igjen nøkkelen hos vaktmesteren» — якщо вас не буде вдома, залиште ключ у двірника (vaktmester)."
+  },
+  {
+   "id": "lt-a2-07",
+   "level": "A2",
+   "kind": "reading",
+   "q_ru": "Прочитайте приглашение и ответьте на вопрос.",
+   "q_uk": "Прочитайте запрошення і дайте відповідь на запитання.",
+   "no": "Hva ønsker Mia seg?",
+   "text": "Kjære Lena! Neste lørdag har Mia bursdag og fyller fem år. Vi feirer hjemme hos oss fra klokka 15 til 17. Mia ønsker seg bøker, men vær så snill: ingen dyre gaver! Hilsen Kari",
+   "audio": "",
+   "options": [
+    "leker",
+    "dyre gaver",
+    "bøker"
+   ],
+   "answer": 2,
+   "why_ru": "«Mia ønsker seg bøker» — Мия хочет в подарок книги. Дорогие подарки как раз просят не дарить.",
+   "why_uk": "«Mia ønsker seg bøker» — Мія хоче в подарунок книжки. Дорогих подарунків якраз просять не дарувати."
+  },
+  {
+   "id": "lt-a2-08",
+   "level": "A2",
+   "kind": "listening",
+   "q_ru": "Послушайте объявление на вокзале и ответьте на вопрос.",
+   "q_uk": "Послухайте оголошення на вокзалі і дайте відповідь на запитання.",
+   "no": "Når går toget?",
+   "text": "",
+   "audio": "Toget til Lillehammer er dessverre forsinket. Det går fra spor tre klokka halv elleve i stedet for klokka ti.",
+   "options": [
+    "klokka ti",
+    "klokka halv elleve",
+    "klokka elleve",
+    "klokka halv ti"
+   ],
+   "answer": 1,
+   "why_ru": "Поезд задерживается и отправляется в «halv elleve» — в половине одиннадцатого (10:30), а не в десять. «Halv elleve» устроено так же, как русское «половина одиннадцатого».",
+   "why_uk": "Потяг запізнюється і відправляється о «halv elleve» — о пів на одинадцяту (10:30), а не о десятій. «halv elleve» рахується так само, як українською: пів на одинадцяту."
+  },
+  {
+   "id": "lt-b1-01",
+   "level": "B1",
+   "kind": "vocab",
+   "q_ru": "Выберите слово, которое подходит по смыслу.",
+   "q_uk": "Оберіть слово, яке підходить за змістом.",
+   "no": "Etter tre måneder i den nye jobben fikk jeg fast ___.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "stue",
+    "stand",
+    "stilling",
+    "stol"
+   ],
+   "answer": 2,
+   "why_ru": "fast stilling — постоянная должность (бессрочный трудовой договор). Противоположность — midlertidig stilling, временная работа.",
+   "why_uk": "fast stilling — постійна посада (безстроковий трудовий договір). Протилежне — midlertidig stilling, тимчасова робота."
+  },
+  {
+   "id": "lt-b1-02",
+   "level": "B1",
+   "kind": "vocab",
+   "q_ru": "Как сказать «подать заявление на пособие»?",
+   "q_uk": "Як сказати «подати заяву на допомогу»?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "spørre etter stønad",
+    "søke om stønad",
+    "be på stønad",
+    "sende til stønad"
+   ],
+   "answer": 1,
+   "why_ru": "Заявление подают с глаголом søke om: søke om stønad. А о работе говорят søke på jobb / søke en jobb. Запомните: søke om + то, что хотят получить (stønad, permisjon, oppholdstillatelse).",
+   "why_uk": "Заяву подають з дієсловом søke om: søke om stønad. Але про роботу кажуть søke på jobb / søke en jobb. Запам'ятайте: søke om + те, що хочуть отримати (stønad, permisjon, oppholdstillatelse)."
+  },
+  {
+   "id": "lt-b1-03",
+   "level": "B1",
+   "kind": "grammar",
+   "q_ru": "Закончите предложение правильно.",
+   "q_uk": "Закінчіть речення правильно.",
+   "no": "Når jeg kommer hjem, ___ .",
+   "text": "",
+   "audio": "",
+   "options": [
+    "jeg lager middag",
+    "lager jeg middag",
+    "jeg middag lager",
+    "lager middag jeg"
+   ],
+   "answer": 1,
+   "why_ru": "Придаточное в начале занимает первое место, поэтому дальше сразу глагол, потом подлежащее: …, lager jeg middag.",
+   "why_uk": "Підрядне речення на початку займає перше місце, тому далі одразу дієслово, потім підмет: …, lager jeg middag."
+  },
+  {
+   "id": "lt-b1-04",
+   "level": "B1",
+   "kind": "grammar",
+   "q_ru": "Вставьте нужное слово.",
+   "q_uk": "Вставте потрібне слово.",
+   "no": "Kvinnen ___ jeg snakket med, er sjefen min.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "som",
+    "hvem",
+    "hva",
+    "hvilken"
+   ],
+   "answer": 0,
+   "why_ru": "Относительное «который/которая» по-норвежски — som. Hvem, hva, hvilken — только вопросительные слова.",
+   "why_uk": "Відносне «який/яка» норвезькою — som. Hvem, hva, hvilken — лише питальні слова."
+  },
+  {
+   "id": "lt-b1-05",
+   "level": "B1",
+   "kind": "grammar",
+   "q_ru": "Пер навещает СВОЮ маму. Выберите слово.",
+   "q_uk": "Пер провідує СВОЮ маму. Оберіть слово.",
+   "no": "Per besøker ___ mor hver søndag.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "sin",
+    "hans",
+    "sitt",
+    "hennes"
+   ],
+   "answer": 0,
+   "why_ru": "Если «свой» относится к подлежащему (Per), нужно sin/si/sitt/sine. «hans mor» значило бы маму другого мужчины. sitt — для слов среднего рода.",
+   "why_uk": "Якщо «свій» стосується підмета (Per), потрібно sin/si/sitt/sine. «hans mor» означало б маму іншого чоловіка. sitt — для слів середнього роду."
+  },
+  {
+   "id": "lt-b1-06",
+   "level": "B1",
+   "kind": "reading",
+   "q_ru": "Прочитайте текст и ответьте на вопрос.",
+   "q_uk": "Прочитайте текст і дайте відповідь на запитання.",
+   "no": "Hva kan skje hvis du sender meldekortet for sent?",
+   "text": "Hvis du er arbeidssøker og får dagpenger, må du sende meldekort til NAV hver fjortende dag. På meldekortet svarer du blant annet på om du har jobbet, vært syk eller gått på kurs. Sender du meldekortet for sent, kan du få pengene senere enn vanlig.",
+   "audio": "",
+   "options": [
+    "Du kan få pengene senere.",
+    "Du må gå på kurs.",
+    "Du mister retten til å søke jobb."
+   ],
+   "answer": 0,
+   "why_ru": "Последнее предложение: «Sender du meldekortet for sent, kan du få pengene senere enn vanlig» — деньги могут прийти позже обычного.",
+   "why_uk": "Останнє речення: «Sender du meldekortet for sent, kan du få pengene senere enn vanlig» — гроші можуть надійти пізніше, ніж зазвичай."
+  },
+  {
+   "id": "lt-b1-07",
+   "level": "B1",
+   "kind": "reading",
+   "q_ru": "Прочитайте текст. В чём его главная мысль?",
+   "q_uk": "Прочитайте текст. У чому його головна думка?",
+   "no": "Hva er hovedpoenget i teksten?",
+   "text": "Mange tror at nordmenn er kalde og lukkede. Det stemmer ofte ikke – de trenger bare litt mer tid. På jobben kan det gå flere måneder før kollegene inviterer deg hjem. Et godt tips er å bli med i en frivillig organisasjon eller et idrettslag. Der blir man kjent mye fortere.",
+   "audio": "",
+   "options": [
+    "Nordmenn liker ikke utlendinger.",
+    "Man bør bare bli kjent med kollegene.",
+    "Det er dyrt å bli med i et idrettslag.",
+    "Det tar tid å bli kjent med nordmenn, men noen steder går det fortere."
+   ],
+   "answer": 3,
+   "why_ru": "Текст говорит, что норвежцам нужно больше времени, и советует, где познакомиться быстрее (волонтёрская организация, спортивный клуб). Остальное в тексте не сказано.",
+   "why_uk": "У тексті сказано, що норвежцям потрібно більше часу, і є порада, де познайомитися швидше (волонтерська організація, спортивний клуб). Решти в тексті немає."
+  },
+  {
+   "id": "lt-b1-08",
+   "level": "B1",
+   "kind": "listening",
+   "q_ru": "Послушайте сообщение на автоответчике и ответьте на вопрос.",
+   "q_uk": "Послухайте повідомлення на автовідповідачі і дайте відповідь на запитання.",
+   "no": "Hvorfor må timen flyttes?",
+   "text": "",
+   "audio": "Hei, det er Siri fra legekontoret. Timen din på torsdag må dessverre flyttes, fordi legen er på kurs. Vi kan tilby deg fredag klokka ni eller mandag klokka to. Ring oss tilbake i dag hvis det passer.",
+   "options": [
+    "Legen er syk.",
+    "Kontoret er stengt på torsdag.",
+    "Pasienten ba om det.",
+    "Legen er på kurs."
+   ],
+   "answer": 3,
+   "why_ru": "«…må dessverre flyttes, fordi legen er på kurs» — приём переносят, потому что врач на курсах.",
+   "why_uk": "«…må dessverre flyttes, fordi legen er på kurs» — прийом переносять, бо лікар на курсах."
+  },
+  {
+   "id": "lt-b2-01",
+   "level": "B2",
+   "kind": "vocab",
+   "q_ru": "Выберите правильное сочетание.",
+   "q_uk": "Оберіть правильне сполучення.",
+   "no": "Regjeringen har ___ et nytt forslag om skatt.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "lagt ned",
+    "gitt ut",
+    "lagt fram",
+    "satt opp"
+   ],
+   "answer": 2,
+   "why_ru": "legge fram et forslag — внести (представить) предложение. legge ned — закрыть (предприятие), gi ut — издать (книгу), sette opp — составить (план), поставить.",
+   "why_uk": "legge fram et forslag — внести (представити) пропозицію. legge ned — закрити (підприємство), gi ut — видати (книжку), sette opp — скласти (план), поставити."
+  },
+  {
+   "id": "lt-b2-02",
+   "level": "B2",
+   "kind": "vocab",
+   "q_ru": "Какое слово ближе всего по значению к «likevel»?",
+   "q_uk": "Яке слово найближче за значенням до «likevel»?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "derfor",
+    "allikevel",
+    "dessuten",
+    "nemlig"
+   ],
+   "answer": 1,
+   "why_ru": "likevel и allikevel — «всё равно, тем не менее». derfor — поэтому, dessuten — кроме того, nemlig — ведь, дело в том, что.",
+   "why_uk": "likevel і allikevel — «все одно, проте». derfor — тому, dessuten — крім того, nemlig — адже, річ у тім, що."
+  },
+  {
+   "id": "lt-b2-03",
+   "level": "B2",
+   "kind": "grammar",
+   "q_ru": "Вставьте глагол в форме пассива.",
+   "q_uk": "Вставте дієслово у формі пасиву.",
+   "no": "Søknaden må ___ innen 1. mai.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "sende",
+    "sendes",
+    "sendt",
+    "sender"
+   ],
+   "answer": 1,
+   "why_ru": "После модального глагола пассив образуют формой на -s: må sendes — «должно быть отправлено». Так часто пишут в официальных письмах.",
+   "why_uk": "Після модального дієслова пасив утворюють формою на -s: må sendes — «має бути надіслано». Так часто пишуть в офіційних листах."
+  },
+  {
+   "id": "lt-b2-04",
+   "level": "B2",
+   "kind": "grammar",
+   "q_ru": "Han sa: «Jeg kommer ikke i morgen.» Как правильно передать это в косвенной речи?",
+   "q_uk": "Han sa: «Jeg kommer ikke i morgen.» Як правильно передати це в непрямій мові?",
+   "no": "",
+   "text": "",
+   "audio": "",
+   "options": [
+    "Han sa at han kom ikke dagen etter.",
+    "Han sa at jeg ikke kommer i morgen.",
+    "Han sa at ikke han kom dagen etter.",
+    "Han sa at han ikke kom dagen etter."
+   ],
+   "answer": 3,
+   "why_ru": "В косвенной речи «jeg» становится «han», время сдвигается в прошлое (kom), «i morgen» → «dagen etter», а «ikke» в придаточном стоит перед глаголом.",
+   "why_uk": "У непрямій мові «jeg» стає «han», час зсувається в минуле (kom), «i morgen» → «dagen etter», а «ikke» в підрядному реченні стоїть перед дієсловом."
+  },
+  {
+   "id": "lt-b2-05",
+   "level": "B2",
+   "kind": "grammar",
+   "q_ru": "Выберите союз, который подходит по смыслу.",
+   "q_uk": "Оберіть сполучник, який підходить за змістом.",
+   "no": "___ han hadde jobbet i Norge i ti år, snakket han nesten ikke norsk.",
+   "text": "",
+   "audio": "",
+   "options": [
+    "Fordi",
+    "Derfor",
+    "Dessuten",
+    "Selv om"
+   ],
+   "answer": 3,
+   "why_ru": "Selv om — «хотя, несмотря на то что»: проработал в Норвегии десять лет, а почти не говорил по-норвежски. Derfor и dessuten не вводят придаточное предложение.",
+   "why_uk": "Selv om — «хоча, попри те що»: пропрацював у Норвегії десять років, а майже не розмовляв норвезькою. Derfor і dessuten не вводять підрядне речення."
+  },
+  {
+   "id": "lt-b2-06",
+   "level": "B2",
+   "kind": "reading",
+   "q_ru": "Прочитайте текст и ответьте на вопрос.",
+   "q_uk": "Прочитайте текст і дайте відповідь на запитання.",
+   "no": "Hva mener kritikerne?",
+   "text": "Flere kommuner vurderer å innføre gratis kollektivtransport. Tilhengerne mener at flere da vil la bilen stå, og at luften i byene blir renere. Kritikerne peker derimot på at billettprisen sjelden er hovedgrunnen til at folk kjører bil. For mange er det viktigere at bussen går ofte og kommer når den skal. Pengene bør derfor heller brukes på flere avganger, mener de.",
+   "audio": "",
+   "options": [
+    "At billettene er altfor dyre i dag.",
+    "At gratis buss vil gi renere luft.",
+    "At pengene gjør mer nytte som flere og mer punktlige avganger.",
+    "At bilkjøring bør forbys i byene."
+   ],
+   "answer": 2,
+   "why_ru": "Слово «derimot» (напротив) показывает позицию критиков: важнее, чтобы автобусы ходили часто и вовремя, поэтому деньги лучше потратить на дополнительные рейсы. Чистый воздух — довод сторонников.",
+   "why_uk": "Слово «derimot» (натомість) показує позицію критиків: важливіше, щоб автобуси ходили часто і вчасно, тому гроші краще витратити на додаткові рейси. Чисте повітря — аргумент прихильників."
+  },
+  {
+   "id": "lt-b2-07",
+   "level": "B2",
+   "kind": "reading",
+   "q_ru": "Прочитайте письмо работодателя. Что в нём главное?",
+   "q_uk": "Прочитайте лист роботодавця. Що в ньому головне?",
+   "no": "Hva er det viktigste budskapet i e-posten?",
+   "text": "Takk for søknaden din på stillingen som prosjektleder. Vi fikk inn svært mange gode søknader, og konkurransen var hard. Vi har valgt å gå videre med kandidater som har noe mer erfaring med ledelse. Hvis du samtykker, beholder vi gjerne søknaden din i seks måneder i tilfelle nye stillinger blir ledige.",
+   "audio": "",
+   "options": [
+    "Søkeren blir kalt inn til intervju.",
+    "Søkeren må sende søknaden på nytt om seks måneder.",
+    "Søkeren har for lite utdanning.",
+    "Søkeren har fått avslag denne gangen."
+   ],
+   "answer": 3,
+   "why_ru": "Об отказе сказано вежливо, без самого слова «отказ»: «Vi har valgt å gå videre med kandidater som har noe mer erfaring med ledelse» — «мы решили продолжить отбор с кандидатами, у которых больше опыта руководства». Значит, на этот раз — отказ.",
+   "why_uk": "Про відмову сказано ввічливо, без самого слова «відмова»: «Vi har valgt å gå videre med kandidater som har noe mer erfaring med ledelse» — «ми вирішили продовжити відбір із кандидатами, які мають більше досвіду керівництва». Отже, цього разу — відмова."
+  },
+  {
+   "id": "lt-b2-08",
+   "level": "B2",
+   "kind": "listening",
+   "q_ru": "Послушайте отрывок из новостей и ответьте на вопрос.",
+   "q_uk": "Послухайте уривок із новин і дайте відповідь на запитання.",
+   "no": "Hvorfor ble prosjektet billigere enn planlagt?",
+   "text": "",
+   "audio": "Selv om prosjektet ble forsinket med nesten et halvt år, endte det med å koste mindre enn budsjettert. Det skyldtes først og fremst at kommunen fikk bedre priser på materialer enn ventet.",
+   "options": [
+    "Materialene kostet mindre enn ventet.",
+    "Det ble ferdig før tiden.",
+    "Kommunen fikk ekstra penger fra staten.",
+    "Det ble brukt færre arbeidere."
+   ],
+   "answer": 0,
+   "why_ru": "«Det skyldtes først og fremst at kommunen fikk bedre priser på materialer» — причина в том, что коммуна купила материалы дешевле. Проект, наоборот, задержался почти на полгода.",
+   "why_uk": "«Det skyldtes først og fremst at kommunen fikk bedre priser på materialer» — причина в тому, що комуна купила матеріали дешевше. Проєкт, навпаки, затримався майже на пів року."
+  }
+ ]
+}

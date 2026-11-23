@@ -16,6 +16,7 @@
  * Nothing is thrown away silently: rejected lines are listed with the reason.
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const CYR = /[а-яё]/i;
   const RU_STOP = new Set(('и в во не ни на с со что как а но да нет по к ко у же ли бы то это этот эта эти тот та те мы вы ты я он она оно они его ее её их им ей ему мне меня тебя тебе нас вас ' +
     'от за из о об до для так там тут вот уже еще ещё очень был была было были быть есть будет все всё всех весь вся сам сама свой своя свои мой моя мои твой ' +
@@ -158,8 +159,8 @@
     /** small badge for a row */
     badge(r) {
       if (r.st === 'ok') return `<span class="pg-b ok" title="${U.esc(r.why || '')}">✓ перевод подтверждён</span>`;
-      if (r.st === 'ai') return `<span class="pg-b ok" title="Проверила нейросеть">🤖 проверено</span>`;
-      if (r.st === 'aifix') return `<span class="pg-b ai" title="Нейросеть исправила перевод автора">🤖 исправлено</span>`;
+      if (r.st === 'ai') return `<span class="pg-b ok" title="Проверила нейросеть">${BOT()} проверено</span>`;
+      if (r.st === 'aifix') return `<span class="pg-b ai" title="Нейросеть исправила перевод автора">${BOT()} исправлено</span>`;
       if (r.st === 'unsure') return `<span class="pg-b unsure" title="${U.esc(r.why || '')}">? проверьте</span>`;
       if (r.st === 'bad') return `<span class="pg-b bad" title="${U.esc(r.why || '')}">✗ ${U.esc(r.why || 'не перевод')}</span>`;
       return '<span class="pg-b"><span class="spinner sm"></span> проверяю…</span>';

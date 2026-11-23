@@ -609,7 +609,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
         <div class="lv-pl-word" lang="nb">${esc(shown(x))} <button class="media-btn sm" data-say title="Произнести" aria-label="Произнести">🔊</button></div>
         <div class="lv-pl-btns"><button class="btn lv-a-know" data-a="know">✅ Знаю</button><button class="btn lv-a-unsure" data-a="unsure">🤔 Не уверен</button><button class="btn lv-a-no" data-a="no">❌ Не знаю</button></div>
         <div class="tiny muted">Клавиши: 1 — знаю · 2 — не уверен · 3 — не знаю</div></div>`;
-      box.querySelector('[data-say]').onclick = () => { try { TTS.speak(x.w, 'no'); } catch (e) { /* no voice */ } };
+      box.querySelector('[data-say]').onclick = () => { try { TTS.speak(x.w, 'no', { place: 'cards' }); } catch (e) { /* no voice */ } };
       box.querySelectorAll('[data-a]').forEach(b => { b.onclick = () => answer(b.dataset.a); });
     };
     const answer = a => {
@@ -845,7 +845,7 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
       const stats = cityStats(L, deck, sc), cards = stats.cards;
       const now = Date.now();
       const due = cards.filter(c => Store.isDue(c, null, now)).length, fresh = cards.filter(isNewCard).length;
-      launcher.insertAdjacentHTML('beforebegin', `<div class="panel lv-deck" data-lv-deck>
+      launcher.insertAdjacentHTML('afterend', `<div class="panel lv-deck" data-lv-deck>
         <div class="lv-deck-top">${badge(L)}<b>${deckName(L)} · ${NAMES[L].toLowerCase()}</b>${bar(p.pct)}<b class="lv-pct">${Math.round(p.pct * 100)}%</b><span class="small muted">выучено ${p.learned} из ${p.total} слов уровня</span>
           <span class="grow"></span><button class="btn sm" data-lv-d="add">➕ Ещё слова</button><button class="btn sm ghost" data-lv-d="ladder">🪜 Все уровни</button></div>
         ${jobHtml(L)}
@@ -991,6 +991,16 @@ ${JSON.stringify(items.map(x => ({ no: x.w, pos: x.pos, en: x.en })))}`,
   const Levels = {
     LEVELS, DATA, TOPICS: ALL_T, ATTR, PASS,
     open() { if (window.App) App.go('levels'); },
+    /** 🎯 «Тест уровня» (js/leveltest.js) or any other placement: the level to work on now (A1…C2) + what the test said.
+     *  o = { level: the measured level ('' = below A1), by: { A1: share right … }, src } → true when set */
+    setLevel(L, o = {}) {
+      if (!DATA.includes(L)) return false;
+      const s = st();
+      s.current = L;
+      s.placement = { t: Date.now(), level: LEVELS.includes(o.level) ? o.level : '', start: L, by: o.by && typeof o.by === 'object' ? o.by : {}, src: String(o.src || '').slice(0, 20) };
+      Store.save();
+      return true;
+    },
     load, placement, startLevel, addDialog, enqueue, progress: L => progress(L), currentLevel: () => currentLevel(), checkCelebrate,
     /** subtitle player API */
     subsOn: () => !!st().subsHL, hit, subsBar, setSubs,

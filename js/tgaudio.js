@@ -33,6 +33,8 @@
   const HP = (s, on) => (window.Listen && Listen.HEADPHONES ? Listen.HEADPHONES(s, on) : '🎧');
   const friendly = msg => Object.assign(new Error(msg), { friendly: true });
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+  // the site (no bridge there): never «запустите мост» to a visitor
+  const NOBR = () => (window.Telegram && Telegram.home && !Telegram.home() ? 'Эта запись сейчас недоступна здесь — откройте канал в Телеграме' : 'Мост на Mac не отвечает — запустите его и попробуйте снова');
   const OLD = 'Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 …/bridge/server.py)';
 
   const streamUrl = (chat, msg) => `/api/tg/stream?chat=${enc(chat)}&msg=${enc(msg)}`;
@@ -44,7 +46,7 @@
 
   async function api(action, params = {}, signal) {
     let r;
-    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params), { signal }); } catch (e) { if (e && e.name === 'AbortError') throw e; throw friendly('Мост на Mac не отвечает — запустите его и попробуйте снова'); }
+    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params), { signal }); } catch (e) { if (e && e.name === 'AbortError') throw e; throw friendly(NOBR()); }
     const ct = r.headers.get('Content-Type') || '';
     if (!/json/.test(ct)) throw friendly(OLD);
     const j = await r.json().catch(() => ({}));
@@ -152,7 +154,7 @@
           throw friendly(`Не хватает места на устройстве: нужно ${mb(size)}, свободно ~${mb(Math.max(0, est.quota - est.usage))}. Удалите что-нибудь из «Мои аудио».`);
         }
         let res;
-        try { res = await fetch(url, { signal: ctrl.signal }); } catch (e) { if (e.name === 'AbortError') throw e; throw friendly('Мост на Mac не отвечает — запустите его и попробуйте снова'); }
+        try { res = await fetch(url, { signal: ctrl.signal }); } catch (e) { if (e.name === 'AbortError') throw e; throw friendly(NOBR()); }
         if (!res.ok || !res.body) throw friendly('Telegram не отдал этот файл — попробуйте ещё раз');
         const total = +res.headers.get('Content-Length') || size;
         d.total = total;
@@ -239,6 +241,19 @@
     async gate(el) {
       const up = window.AI && AI.bridge && AI.bridge.up;
       const n = Saved.list().length;
+      if (!up && !(window.Telegram && Telegram.home ? Telegram.home() : true)) {
+        // the site: no bridge, no account — what plays here: the saved audio above and the posts of the channels
+        el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Аудио из норвежских каналов</b>
+          <p>${n ? '<b>Сохранённые аудио</b> (выше) играют прямо здесь — даже без интернета. ' : ''}Новые записи слушайте в постах: «📢 Норвежские каналы» → «📖 Читать здесь» — аудио и видео играют прямо в посте, без входа в Телеграм.</p>
+          <button type="button" class="btn primary tgv-tochan" data-tga-chan>📢 Норвежские каналы</button></div>`;
+        el.querySelector('[data-tga-chan]').onclick = () => {
+          const tab = el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]');
+          if (tab) { tab.click(); return; }
+          const mm = el.closest('.modal-backdrop'); if (mm && mm._m) mm._m.close();
+          if (window.Telegram) Telegram.open(null, 'channels');
+        };
+        return false;
+      }
       if (!up) {
         el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Аудио из каналов открываются через приложение на Mac</b>
           <p>Telegram показывает файлы каналов только вашему аккаунту. Его читает «мост» — маленькая программа на вашем Mac: запустите её и откройте приложение по адресу <b>http://localhost:8787</b>.</p>

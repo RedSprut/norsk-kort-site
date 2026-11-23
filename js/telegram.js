@@ -6,6 +6,7 @@
  * Translations written by teachers in the channels are human translations — no machine-translation warning.
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const TG_SVG = (s = 18) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#29a9eb"/><path d="M5.4 11.6 17 7.1c.6-.2 1 .1.9.9l-2 9.3c-.1.6-.6.8-1.1.5l-3-2.2-1.4 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5.1c.2-.2 0-.4-.4-.2l-6.9 4.4-3-.9c-.6-.2-.6-.6.1-.9z" fill="#fff"/></svg>`;
   // public channels about Norwegian (checked 2026-11); the user can add more in the window
   const CHANNELS = [
@@ -19,6 +20,11 @@
   ];
   const enc = encodeURIComponent;
   const st = () => Store.settings;
+  /** the owner's own machine (localhost, *.localhost, the app opened as a file): only there the Mac bridge is mentioned.
+   *  On the site (GitHub Pages) visitors never see «запустите мост» — they get what works without it. */
+  const home = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$|\.localhost$/i.test(location.hostname);
+  /** «📢 Норвежские каналы» of the Telegram window (js/tgchan.js), from another tab */
+  const toChannels = el => { const t = el && el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]'); if (t) t.click(); else Telegram.open(null, 'channels'); };
   const myChannels = () => {
     const extra = (st().tgExtra || []).map(u => [u, '@' + u, '➕']);
     const off = new Set(st().tgOff || []);
@@ -40,6 +46,8 @@
   const mediaUrl = (chat, msg, extra = '') => `/api/tg/media?chat=${enc(chat)}&msg=${enc(msg)}${extra}`;
 
   /* ---------------- public channel web preview -> posts ---------------- */
+  /** 🏷 the title a nameless deck may take: a chat's name; for own photos / texts / books only the name inside «…» (not «мой текст», «3 фото») */
+  const nameHint = p => (p.src === 'local' ? ((/«(.+)»/.exec(p.chatTitle || '') || [])[1] || '') : p.chatTitle || '');
   function textOf(el) {
     if (!el) return '';
     const c = el.cloneNode(true);
@@ -133,11 +141,11 @@
 
   /* ---------------- UI ---------------- */
   const Telegram = {
-    TG_SVG, CHANNELS, parsePreview, pairs,
+    TG_SVG, CHANNELS, parsePreview, pairs, home,
     status: null,
     async accStatus() {
       if (!AI.bridge.up) return (this.status = { bridge: false });
-      try { this.status = Object.assign({ bridge: true }, await acc('status')); } catch (e) { this.status = { bridge: true, error: e.message }; }
+      try { this.status = Object.assign({ bridge: true }, await acc('status')); } catch (e) { this.status = { bridge: true, error: U.niceErr(e) }; }
       return this.status;
     },
 
@@ -145,6 +153,7 @@
       this._deckId = opts.deckId || null; // «Новая колода» -> Telegram: cards go into that deck
       const q0 = card ? Ordbok.bare(card.no) : '';
       const m = UI.modal({ title: `${TG_SVG(24)} Telegram${q0 ? `: «${U.esc(q0)}»` : ''}`, cls: 'wide tg-modal', body: '<div data-tg></div>', onClose: () => { this._deckId = null; if (opts.onClose) setTimeout(opts.onClose, 300); } });
+      if (window.TrBadge) TrBadge.mount(m.$('.modal-head'), { place: 'telegram' }); // 🌐 who translates now
       const box = m.$('[data-tg]');
       await this.accStatus();
       const s = this.status;
@@ -152,17 +161,48 @@
       if (this.tab_channels) tabs.unshift(['channels', '📢 Норвежские каналы']); // js/tgchan.js — works without the bridge too
       if (this.tab_authors) tabs.splice(2, 0, ['authors', '🎬 Видео авторов']); // js/tgvideo.js — an author's videos: watch with subtitles / listen
       if (this.tab_audio) { const ai = tabs.findIndex(t => t[0] === 'authors'); tabs.splice(ai >= 0 ? ai + 1 : 2, 0, ['audio', '🎵 Аудио']); } // js/tgaudio.js — audio files and voice notes; «Мои аудио» play offline
+      // the site without the bridge: only what works there — the channels (read through Telegram's own widget), the search
+      // links, and «Мои аудио» if something was saved on this device
+      const site = !s.bridge && !home();
+      if (site) {
+        const saved = !!(window.TgAudio && TgAudio.saved && TgAudio.saved.list().length);
+        for (let i = tabs.length - 1; i >= 0; i--) if (!['channels', 'search'].concat(saved ? ['audio'] : []).includes(tabs[i][0])) tabs.splice(i, 1);
+      }
       const shell = cur => `<div class="tg-tabs">${tabs.map(([k, l]) => `<button class="chip ${k === cur ? 'active' : ''}" data-tgtab="${k}">${l}</button>`).join('')}
-          <span class="grow"></span><span class="small muted">${s.bridge ? (s.authorized ? `✓ аккаунт: ${U.esc(s.me || 'подключён')}` : 'публичные каналы') : '⚠️ мост не запущен'}</span></div><div data-tgbody></div>`;
+          <span class="grow"></span><span class="small muted">${s.bridge ? (s.authorized ? `✓ аккаунт: ${U.esc(s.me || 'подключён')}` : 'публичные каналы') : site ? '🙌 без входа в Телеграм' : '⚠️ мост не запущен'}</span></div><div data-tgbody></div>`;
       const go = t => { box.innerHTML = shell(t); this['tab_' + t](box.querySelector('[data-tgbody]'), card, m); };
       box.addEventListener('click', e => { const t = e.target.closest('[data-tgtab]'); if (t) go(t.dataset.tgtab); });
-      go(!s.bridge && tab !== 'channels' && tab !== 'audio' ? 'setup' : tab); // 🎵 saved audio plays without the bridge
+      const ok = tabs.some(t => t[0] === tab) ? tab : tabs[0][0];
+      // 🎵 saved audio plays without the bridge; on the site a word from a card opens the search links, the rest — the channels
+      go(s.bridge ? ok : site ? (tab === 'search' && card ? 'search' : ok === 'audio' ? 'audio' : (tabs.find(t => t[0] === 'channels') || tabs[0])[0]) : tab !== 'channels' && tab !== 'audio' ? 'setup' : tab);
     },
 
     noBridge(el, q) {
+      if (!home()) { this.siteSearch(el, q); return; }
       el.innerHTML = `<div class="mt-warn">⚠️ <span><b>Нужен мост на Mac.</b> Telegram не даёт сайтам читать каналы напрямую, поэтому окно работает через мост: в Терминале
         <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> и откройте приложение по адресу http://localhost:8787.</span></div>
         ${q ? `<div class="small muted" style="margin:8px 0 4px">Пока можно открыть поиск в самих каналах (откроется сайт Telegram):</div><div class="yt-links">${myChannels().map(([u, n, f]) => `<a class="chip" target="_blank" rel="noopener" href="https://t.me/s/${enc(u)}?q=${enc(q)}">${f} ${U.esc(n)} ↗</a>`).join('')}</div>` : ''}`;
+    },
+
+    /** the site (no bridge): the word is searched by Telegram itself — one link per channel; reading — in «Норвежские каналы» */
+    siteSearch(el, q) {
+      const list = myChannels();
+      el.innerHTML = `<div class="tg-site">
+          <p class="tg-site-lead">🔎 Напишите норвежское слово — Телеграм покажет посты с ним в каждом канале (откроется сайт Телеграма, входить не нужно).</p>
+          <form class="row tg-site-form" data-tgsq autocomplete="off" style="gap:8px"><input class="input grow" data-tgq value="${U.esc(q || '')}" placeholder="слово или выражение, например: snakke" lang="nb" aria-label="Слово для поиска" spellcheck="false"><button type="submit" class="btn primary">🔎 Показать каналы</button></form>
+          <div class="tg-site-links" data-tglinks></div>
+          <div class="tg-site-alt"><span aria-hidden="true">📖</span><span>Хотите просто читать посты и брать из них слова в карточки? Откройте <b>«📢 Норвежские каналы»</b> и нажмите «Читать здесь».</span>
+            <button type="button" class="btn" data-tgtochan>📢 Норвежские каналы</button></div>
+        </div>`;
+      const draw = () => {
+        const w = el.querySelector('[data-tgq]').value.trim();
+        el.querySelector('[data-tglinks]').innerHTML = w
+          ? `<div class="small muted" style="margin:4px 0">Посты со словом «${U.esc(w)}» — нажмите на канал:</div><div class="yt-links">${list.map(([u, n, f]) => `<a class="chip tg-site-link" target="_blank" rel="noopener noreferrer" href="https://t.me/s/${enc(u)}?q=${enc(w)}">${f} ${U.esc(n)} ↗</a>`).join('')}</div>`
+          : '';
+      };
+      el.querySelector('[data-tgsq]').addEventListener('submit', e => { e.preventDefault(); draw(); });
+      el.querySelector('[data-tgtochan]').onclick = () => toChannels(el);
+      draw();
     },
 
     /* ---- 🔎 search by the card's word: videos / texts / pictures / files, the user picks what to open ---- */
@@ -304,7 +344,7 @@
         if (!r.ru) return '<span class="tg-who none">нет перевода</span>';
         if (r.by && r.ru === r.ruAuto) {
           const ai = r.by.includes('ai');
-          return `<span class="tg-who ${ai ? 'ai' : 'mt'}" title="${ai ? 'Перевела нейросеть — по смыслу, но тоже может ошибаться' : 'Машинный перевод — неточный, перепроверьте'}">${ai ? '🤖' : '⚠️'} ${U.esc(Translators.provNames(r.by))}${ai ? '' : ' · неточно'}</span>`;
+          return `<span class="tg-who ${ai ? 'ai' : 'mt'}" title="${ai ? 'Перевела нейросеть — по смыслу, но тоже может ошибаться' : 'Машинный перевод — неточный, перепроверьте'}">${ai ? BOT() : '⚠️'} ${U.esc(Translators.provNames(r.by))}${ai ? '' : ' · неточно'}</span>`;
         }
         if (r.src && r.ru === r.ruSrc) {
           // 🛡 the source's translation is compared with a machine one (PairGuard): the neighbour line may not be a translation at all
@@ -357,7 +397,7 @@
           </div>
           ${Library.deckPicker((card && card.deckId) || opts.deckId || (parent ? this._deckId : null),(p.chatTitle || 'Telegram').slice(0, 40))}
           ${pics.length ? UI.switchHtml('tg-img', !opts.autoOcr, local ? 'Само фото — на первую карточку' : 'Картинку из поста — на карточку') : ''}
-          <div class="row" style="gap:8px;margin-top:8px"><button class="btn primary" data-save ${busy ? 'disabled' : ''}>➕ Сохранить</button><span class="small muted">${local ? `Источник сохранится: ${U.esc(p.chatTitle || '')} · у каждой карточки — кто переводил` : `Источник сохранится: ${TG_SVG(14)} ${U.esc(p.chatTitle || 'Telegram')} · ссылка на пост`}</span></div>`;
+          <div class="row" style="gap:8px;margin-top:8px"><button class="btn primary" data-save ${busy ? 'disabled' : ''}>➕ Сохранить</button><span class="small muted">${local ? `Источник сохранится: ${U.esc(p.chatTitle || '')} · у каждой карточки — кто переводил` : `Источник сохранится: ${TG_SVG(14)} ${U.esc(p.chatTitle || 'Telegram')}${p.protected && p.ch ? ` · из канала @${U.esc(p.ch)} (личное обучение)` : ''} · ссылка на пост`}</span></div>`;
       };
       // redraw without losing what the user already chose below the list (mode, deck, keyword, picture switch)
       const redraw = () => {
@@ -377,7 +417,7 @@
         if (!need.length || busyNow) return;
         busyNow = true; redraw();
         let res;
-        try { res = await Translators.translateMany(need.map(r => r.no), 'no', lang); } catch (err) { res = { out: [], by: [], missing: need.length, error: err.message }; }
+        try { res = await Translators.translateMany(need.map(r => r.no), 'no', lang); } catch (err) { res = { out: [], by: [], missing: need.length, error: U.niceErr(err) }; }
         need.forEach((r, i) => {
           const t = String(res.out[i] || '').trim(); if (!t) return;
           const c = Translators._trCache && Translators._trCache.get(`no|${lang}|${r.no.replace(/\s*\n\s*/g, ' ').trim()}`);
@@ -430,8 +470,10 @@
       if (!list.length) { UI.toast('Нет ни одной строки', 'warn'); return; }
       const mode = (box.querySelector('input[name="tgmode"]:checked') || {}).value || 'each';
       const local = p.src === 'local'; // a photo / file of your own (window «Что вы хотите выучить?»)
-      const src = local ? `Источник: ${p.chatTitle || 'моё фото'}` : `Источник: Telegram · ${p.chatTitle || ''} · ${p.link}`;
-      const prov = note => local ? Prov.entry('import', 'create', null, `${p.chatTitle || 'фото'}${note ? ' · ' + note : ''}`) : Prov.entry('tr:telegram', 'create', null, `${p.chatTitle || 'Telegram'} · ${p.link}${note ? ' · ' + note : ''}`);
+      // a protected channel (the author forbade copying): read in the app for personal study — the source says so
+      const own = !local && p.protected && p.ch ? ` · из канала @${p.ch} (личное обучение)` : '';
+      const src = local ? `Источник: ${p.chatTitle || 'моё фото'}` : `Источник: Telegram · ${p.chatTitle || ''}${own} · ${p.link}`;
+      const prov = note => local ? Prov.entry('import', 'create', null, `${p.chatTitle || 'фото'}${note ? ' · ' + note : ''}`) : Prov.entry('tr:telegram', 'create', null, `${p.chatTitle || 'Telegram'}${own} · ${p.link}${note ? ' · ' + note : ''}`);
       let image = '';
       const imgOn = box.querySelector('[data-key="tg-img"]');
       if (pics.length && imgOn && imgOn.checked && mode !== 'into') {
@@ -449,7 +491,7 @@
       if (mode === 'into' && card) {
         const fresh = Store.card(card.id);
         const examples = (fresh.examples || []).concat(list.map(r => ({ label: 'Telegram', no: r.no, ru: r.ru, note: p.chatTitle || '' })));
-        Store.updateCard(card.id, { examples, history: Prov.add(fresh, Prov.entry('tr:telegram', 'examples', { examples: { old: Prov.listText(fresh.examples, true), new: Prov.listText(examples, true) } }, `${p.chatTitle} · ${p.link}`)) });
+        Store.updateCard(card.id, { examples, history: Prov.add(fresh, Prov.entry('tr:telegram', 'examples', { examples: { old: Prov.listText(fresh.examples, true), new: Prov.listText(examples, true) } }, `${p.chatTitle}${own} · ${p.link}`)) });
         UI.toast(`Добавлено в карточку: ${list.length} ✓`, 'good');
         m.close();
         if (window.Study && Study.current && Study.current()) { Study.renderCard(false); Study.flip(true); }
@@ -466,6 +508,7 @@
           tags: [local ? 'моё' : 'telegram'], history: [prov(`${list.length} фраз`), ...list.flatMap(trHist).filter((h, i, a) => a.findIndex(x => x.by === h.by) === i)],
           mtWarn: Translators.mtFlag([...new Set(list.flatMap(trBy))]),
         });
+        Store.autoNameDeck(deck.id, nameHint(p));
         UI.toast('Карточка создана ✓', 'good');
       } else {
         // 🛡 the source's translation that the check did not confirm (the user kept it): marked «проверить»
@@ -479,6 +522,7 @@
           mtWarn: Translators.mtFlag(trBy(r)),
         }));
         const mt = list.filter(r => Translators.mtFlag(trBy(r))).length;
+        Store.autoNameDeck(deck.id, nameHint(p)); // 🏷 a deck without a name: the chat / book / photo title or its first card
         UI.toast(`Создано ${U.cards(list.length)} в «${deck.name}» ✓${mt ? ` · ⚠️ ${mt} — машинный перевод, перепроверьте` : ''}`, 'good', mt ? 6000 : 3500);
       }
       await Store.saveNow();
@@ -489,7 +533,7 @@
 
     /* ---- 🗂 whole chat / forum topic («Словарный запас») -> all pairs -> deck ---- */
     async tab_vocab(el, card) {
-      if (!AI.bridge.up) { this.noBridge(el); return; }
+      if (!AI.bridge.up) { if (home()) this.noBridge(el); else this.siteAlt(el, 'vocab'); return; }
       const s = this.status;
       el.innerHTML = `<div class="small">Соберу все пары «норвежский — перевод» из канала или темы группы (например, «Норвежский? Легко!» → «Словарный запас») — и ссылки на Google-документы со списками слов.</div>
         <div class="field-row">
@@ -508,7 +552,7 @@
         try {
           const ds = (await acc('dialogs')).dialogs;
           el.querySelector('[data-acc]').innerHTML = ds.map(d => `<option value="acc:${d.id}" data-forum="${d.forum ? 1 : 0}">${d.match ? '⭐ ' : ''}${d.forum ? '🗂 ' : d.group ? '👥 ' : '📢 '}${U.esc(d.name)}</option>`).join('');
-        } catch (e) { el.querySelector('[data-acc]').innerHTML = `<option disabled>${U.esc(e.message)}</option>`; }
+        } catch (e) { el.querySelector('[data-acc]').innerHTML = `<option disabled>${U.esc(U.niceErr(e))}</option>`; }
       }
       el.querySelector('[data-src]').onchange = async ev => {
         const opt = ev.target.selectedOptions[0];
@@ -518,7 +562,7 @@
           const sel = el.querySelector('[data-topic]');
           sel.innerHTML = '<option>загружаю темы…</option>';
           try { sel.innerHTML = '<option value="">Все темы</option>' + (await acc('topics', { chat: ev.target.value.slice(4) })).topics.map(t => `<option value="${t.id}">${U.esc(t.title)}</option>`).join(''); }
-          catch (e) { sel.innerHTML = `<option value="">${U.esc(e.message)}</option>`; }
+          catch (e) { sel.innerHTML = `<option value="">${U.esc(U.niceErr(e))}</option>`; }
         }
       };
       el.querySelector('[data-collect]').onclick = async () => {
@@ -610,7 +654,7 @@
         <div class="pg-tools">
           <button class="btn sm" data-pgsel="ok">☑ Только подтверждённые</button>
           <button class="btn sm ghost" data-pgsel="none">Снять всё</button>
-          ${AI.available() ? `<button class="btn sm ai" data-pgai title="Нейросеть проверит пары «? проверьте» и исправит неверный перевод">🤖 Проверить сомнительные (${U.esc(AI.name())})</button>` : '<span class="small muted">🤖 С нейросетью сомнительные пары можно проверить автоматически — подключите её в Настройках.</span>'}
+          ${AI.available() ? `<button class="btn sm ai" data-pgai title="Нейросеть проверит пары «? проверьте» и исправит неверный перевод">${BOT()} Проверить сомнительные (${U.esc(AI.name())})</button>` : `<span class="small muted">${BOT()} С нейросетью сомнительные пары можно проверить автоматически — подключите её в Настройках.</span>`}
         </div>
         <div class="tg-pairs pg-list" data-list>${rows.map(row).join('')}</div>
         <details class="pg-rej" ${rows.length ? '' : 'open'}><summary>✗ Отброшено — не перевод или мусор (<span data-rejn>${rej.length}</span>)</summary>
@@ -681,7 +725,7 @@
             syncMk();
             UI.toast(`🤖 Проверено: верно ${okN}, исправлено ${fixN}${list.length - okN - fixN ? `, без ответа ${list.length - okN - fixN}` : ''}`, 'good', 5000);
           } catch (err) { UI.toast('Нейросеть: ' + err.message, 'bad', 6000); }
-          ai.disabled = false; ai.innerHTML = `🤖 Проверить сомнительные (${U.esc(AI.name())})`;
+          ai.disabled = false; ai.innerHTML = `${BOT()} Проверить сомнительные (${U.esc(AI.name())})`;
         }
       });
       out.querySelector('[data-mk]').onclick = async () => {
@@ -706,6 +750,7 @@
             tags: unchecked ? ['telegram', 'проверить'] : ['telegram'], history: h, mtWarn,
           });
         });
+        Store.autoNameDeck(deck.id, title); // 🏷 a deck without a name: the chat's title
         await Store.saveNow();
         const unc = list.filter(r => (r.st === 'unsure' || r.st === 'bad') && !r.byMe && !r.useMt).length;
         UI.toast(`Создано ${U.cards(list.length)} в «${deck.name}» ✓${unc ? ` · ${unc} с пометкой «проверить»` : ''}`, unc ? 'warn' : 'good', 6000);
@@ -715,7 +760,7 @@
 
     /* ---- 📎 books (PDF) and audio (MP3) of a chat — account only ---- */
     async tab_files(el) {
-      if (!AI.bridge.up) { this.noBridge(el); return; }
+      if (!AI.bridge.up) { if (home()) this.noBridge(el); else this.siteAlt(el, 'files'); return; }
       if (!this.status.authorized) {
         el.innerHTML = `<div class="mt-warn">ℹ️ <span>Файлы (книги PDF, аудио MP3, голосовые) Telegram отдаёт только вашему аккаунту — веб-версия каналов их не показывает. Подключите аккаунт во вкладке «⚙️ Каналы и аккаунт» (один раз, 2 минуты).</span></div>`;
         return;
@@ -740,7 +785,7 @@
               ${isAudio ? `<audio controls preload="none" src="${url}"></audio>` : ''}
               <div class="row" style="gap:6px">${isPdf ? `<button class="btn sm primary" data-read="${url}">📖 Читать здесь</button><button class="btn sm listen-btn" data-tlisten="${url}" data-name="${U.esc(x.name || 'Книга')}">${Listen.HEADPHONES(16, true)} Слушать вслух</button>` : ''}${isVideo ? `<button class="btn sm primary" data-play="${url}">▶ Смотреть</button>` : ''}<a class="btn sm" href="${url}&dl=1">⬇ Скачать</a></div></div>`;
           }).join('') : '<div class="small muted">Файлов такого типа нет.</div>';
-        } catch (e) { list.innerHTML = `<div class="mt-warn">⚠️ <span>${U.esc(e.message)}</span></div>`; }
+        } catch (e) { list.innerHTML = `<div class="mt-warn">⚠️ <span>${U.esc(U.niceErr(e))}</span></div>`; }
       };
       el.addEventListener('click', e => {
         const r = e.target.closest('[data-read]');
@@ -770,9 +815,21 @@
       });
     },
 
+    /** the site (no bridge): what to do instead — kind, friendly, no technical words */
+    siteAlt(el, what) {
+      const t = {
+        vocab: ['🗂 Слова из канала — в карточки', 'Откройте канал в «📢 Норвежские каналы» → «📖 Читать здесь». Под каждым постом есть кнопка «➕ В карточки»: скопируйте слова из поста — приложение сделает карточки и проверит перевод.'],
+        files: ['📎 Книги и аудио из каналов', 'Файлы каналов Телеграм отдаёт только своему приложению. Откройте канал в Телеграме — там книги и аудио можно скачать, а потом добавить в приложение через «Что вы хотите выучить?».'],
+        setup: ['📢 Каналы без входа', 'Открытые норвежские каналы читаются прямо здесь, без входа в Телеграм. Свой канал можно добавить во вкладке «📢 Норвежские каналы».'],
+      }[what] || ['📢 Норвежские каналы', 'Открытые каналы читаются прямо здесь, без входа в Телеграм.'];
+      el.innerHTML = `<div class="tgv-gate">${TG_SVG(40)}<b>${t[0]}</b><p>${t[1]}</p><button type="button" class="btn primary" data-tgtochan>📢 Норвежские каналы</button></div>`;
+      el.querySelector('[data-tgtochan]').onclick = () => toChannels(el);
+    },
+
     /* ---- ⚙️ channels on/off, add your own, account login guide ---- */
     tab_setup(el) {
       const s = this.status;
+      if (!s.bridge && !home()) { this.siteAlt(el, 'setup'); return; }
       const off = new Set(st().tgOff || []);
       el.innerHTML = `
         ${s.bridge ? '' : `<div class="mt-warn">⚠️ <span><b>Мост на Mac не запущен.</b> В Терминале: <code style="user-select:all">python3 "/Users/sprut/Norsk - Russisk/bridge/server.py"</code> — и откройте http://localhost:8787. На iPhone через GitHub Pages окно Telegram работает только как ссылки.</span></div>`}
@@ -840,7 +897,7 @@
     const steps = [['keys', '1 · Ключи'], ['login', '2 · Вход'], ['done', '3 · Готово']];
     // a new step starts at the top (on a phone the «Save» button sits far down — the next step would open mid-way)
     const drawSteps = () => { const sc = m.$('.modal-body'); if (sc) sc.scrollTop = 0; m.$('[data-steps]').innerHTML = steps.map(([k, t]) => `<span class="tgl-step ${k === step ? 'on' : steps.findIndex(x => x[0] === step) > steps.findIndex(x => x[0] === k) ? 'ok' : ''}">${t}</span>`).join(''); };
-    const err = (e) => { const x = box.querySelector('[data-err]'); if (x) x.innerHTML = `⚠️ ${U.esc(e.message || e)}`; };
+    const err = (e) => { const x = box.querySelector('[data-err]'); if (x) x.innerHTML = `⚠️ ${U.esc(U.niceErr(e))}`; };
     const busy = (b, on, txt) => { if (!b) return; b.disabled = on; if (on) { b.dataset.l = b.innerHTML; b.innerHTML = `<span class="spinner sm"></span> ${txt || ''}`; } else if (b.dataset.l) b.innerHTML = b.dataset.l; };
 
     const showInstall = () => {
@@ -959,6 +1016,15 @@
     box.innerHTML = '<div class="tgl-card"><span class="spinner sm"></span> Проверяю…</div>';
     const s = await Telegram.accStatus();
     if (closed) return;
+    if (!s.bridge && !home()) {
+      // the site: nothing to connect — open channels are read without logging in
+      m.$('[data-steps]').innerHTML = ''; const safe = m.$('.tgl-safe'); if (safe) safe.remove();
+      box.innerHTML = `<div class="tgl-card tgl-done"><div class="tgl-big">🙌</div><b>Входить в Телеграм не нужно</b>
+        <p class="small">Открытые норвежские каналы читаются прямо здесь — без входа и без регистрации. Свежие посты, картинки и видео — во вкладке «📢 Норвежские каналы».</p>
+        <button class="btn primary" data-tgsite>📢 Норвежские каналы</button></div>`;
+      box.querySelector('[data-tgsite]').onclick = () => { m.close(); Telegram.open(null, 'channels'); };
+      return;
+    }
     if (!s.bridge) { box.innerHTML = '<div class="tgl-card">⚠️ Подключение работает через мост на Mac — запустите его и откройте приложение через него (http://localhost:8787).</div>'; return; }
     if (s.authorized) showDone(s.me);
     else if (s.installed === false) showInstall();

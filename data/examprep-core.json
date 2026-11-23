@@ -1,0 +1,1863 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "attribution": "Подготовка к экзамену — собственный материал Norsk Kort: каркасы ответов, связки, образцы, грамматика, ситуации для писем и маршруты написаны заново. Факты о формате Norskprøven — по открытым страницам HK-dir (prove.hkdir.no), своими словами. Это не официальные задания.",
+ "tasks": [
+  {
+   "id": "presentere",
+   "icon": "🙋",
+   "kind": "oral",
+   "no": "Presentere seg selv",
+   "ru": "Рассказ о себе",
+   "uk": "Розповідь про себе",
+   "levels": "A1–A2",
+   "time": "1–2 минуты",
+   "words": 0,
+   "what": "Первое задание устной части на уровне A1–A2: вы коротко рассказываете о себе. Говорите простыми полными предложениями — лучше пять понятных фраз, чем одна длинная с ошибками.",
+   "steps": [
+    {
+     "ru": "Кто я",
+     "hint": "имя, возраст, откуда",
+     "starters": [
+      "Jeg heter …",
+      "Jeg er … år gammel.",
+      "Jeg kommer fra …"
+     ]
+    },
+    {
+     "ru": "Где и с кем живу",
+     "hint": "город, семья, сколько лет в Норвегии",
+     "starters": [
+      "Nå bor jeg i …",
+      "Jeg bor sammen med …",
+      "Jeg har bodd i Norge i … år."
+     ]
+    },
+    {
+     "ru": "Работа или учёба",
+     "hint": "что делаете сейчас и что делали раньше",
+     "starters": [
+      "Jeg jobber som …",
+      "Akkurat nå går jeg på norskkurs.",
+      "Før jobbet jeg som …"
+     ]
+    },
+    {
+     "ru": "Свободное время",
+     "hint": "одно-два занятия и пример",
+     "starters": [
+      "I fritiden liker jeg å …",
+      "Om helgene pleier jeg å …"
+     ]
+    },
+    {
+     "ru": "Планы — и конец",
+     "hint": "чего хотите, коротко",
+     "starters": [
+      "I framtiden vil jeg …",
+      "Jeg håper å …"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "og",
+     "ru": "и"
+    },
+    {
+     "no": "men",
+     "ru": "но"
+    },
+    {
+     "no": "fordi",
+     "ru": "потому что"
+    },
+    {
+     "no": "også",
+     "ru": "тоже, также"
+    },
+    {
+     "no": "før",
+     "ru": "раньше"
+    },
+    {
+     "no": "nå",
+     "ru": "сейчас"
+    },
+    {
+     "no": "i tillegg",
+     "ru": "кроме того"
+    },
+    {
+     "no": "derfor",
+     "ru": "поэтому"
+    }
+   ],
+   "checklist": [
+    "Назвали имя, страну и город",
+    "Сказали, с кем живёте",
+    "Рассказали о работе или учёбе — сейчас и раньше",
+    "Есть хотя бы одно «потому что» (fordi)",
+    "Есть прошедшее время (jobbet, har bodd)",
+    "Хотя бы одно предложение начинается не с «Jeg» — и глагол стоит вторым"
+   ],
+   "model": {
+    "level": "A2",
+    "no": "Jeg heter Olena, og jeg er trettifire år gammel. Jeg kommer fra Kharkiv i Ukraina, men nå bor jeg i Drammen sammen med mannen min og datteren vår. Vi har bodd i Norge i to år. I Ukraina jobbet jeg som regnskapsfører. Nå går jeg på norskkurs fem dager i uka, og to ettermiddager i uka jobber jeg i en butikk. I fritiden liker jeg å gå tur i skogen og lage mat. Om helgene pleier vi å besøke venner. I framtiden vil jeg jobbe med regnskap igjen, og derfor lærer jeg norsk hver dag.",
+    "ru": "Меня зовут Олена, мне тридцать четыре года. Я из Харькова, но сейчас живу в Драммене с мужем и дочкой. Мы живём в Норвегии два года. В Украине я работала бухгалтером. Сейчас пять дней в неделю хожу на курсы норвежского, а два вечера в неделю работаю в магазине. В свободное время люблю гулять в лесу и готовить. По выходным мы обычно ходим в гости к друзьям. В будущем хочу снова работать бухгалтером, поэтому учу норвежский каждый день."
+   },
+   "prompts": [
+    {
+     "no": "Fortell litt om deg selv.",
+     "ru": "Расскажите немного о себе."
+    },
+    {
+     "no": "Hvem bor du sammen med?",
+     "ru": "С кем вы живёте?"
+    },
+    {
+     "no": "Hva gjør du i fritiden?",
+     "ru": "Что вы делаете в свободное время?"
+    }
+   ],
+   "grammar": [
+    "v2",
+    "preteritum",
+    "modal",
+    "konnektorer"
+   ]
+  },
+  {
+   "id": "bilde",
+   "icon": "🖼",
+   "kind": "oral",
+   "no": "Beskrive et bilde",
+   "ru": "Описание картинки",
+   "uk": "Опис картинки",
+   "levels": "A1–B1",
+   "time": "2–3 минуты (устно) · 50–100 слов (письменно)",
+   "words": 60,
+   "what": "Описание картинки есть и в устной части (A1–A2), и в письменной (A1–A2 и A2–B1). Идите по картинке как камера: сначала общий план, потом люди и детали, в конце — ваша догадка и связь с вашей жизнью.",
+   "steps": [
+    {
+     "ru": "Общий план",
+     "hint": "где это и что происходит в целом",
+     "starters": [
+      "På bildet ser jeg …",
+      "Bildet viser …",
+      "Det ser ut som om det er …"
+     ]
+    },
+    {
+     "ru": "Люди и действия",
+     "hint": "кто где находится и что делает",
+     "starters": [
+      "Til venstre står …",
+      "I midten sitter …",
+      "Til høyre ser vi …"
+     ]
+    },
+    {
+     "ru": "Детали",
+     "hint": "погода, время года, одежда, предметы",
+     "starters": [
+      "Det ser ut til å være vinter.",
+      "Hun har på seg …",
+      "På bordet ligger …"
+     ]
+    },
+    {
+     "ru": "Догадка",
+     "hint": "что чувствуют люди, что будет дальше",
+     "starters": [
+      "Kanskje …",
+      "Jeg tror at de …",
+      "De ser glade ut."
+     ]
+    },
+    {
+     "ru": "Связь с собой",
+     "hint": "одна фраза о вашем опыте",
+     "starters": [
+      "Bildet minner meg om …",
+      "Selv liker jeg også å …"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "til venstre",
+     "ru": "слева"
+    },
+    {
+     "no": "til høyre",
+     "ru": "справа"
+    },
+    {
+     "no": "i midten",
+     "ru": "в центре"
+    },
+    {
+     "no": "foran",
+     "ru": "перед"
+    },
+    {
+     "no": "bak",
+     "ru": "за, позади"
+    },
+    {
+     "no": "ved siden av",
+     "ru": "рядом с"
+    },
+    {
+     "no": "i bakgrunnen",
+     "ru": "на заднем плане"
+    },
+    {
+     "no": "kanskje",
+     "ru": "может быть"
+    }
+   ],
+   "checklist": [
+    "Начали с общего плана (På bildet ser jeg …)",
+    "Сказали, где кто находится (til venstre, i midten …)",
+    "Описали действия людей в настоящем времени",
+    "Есть хотя бы одна догадка (kanskje, jeg tror)",
+    "После «Til venstre / I midten» глагол стоит сразу (Til venstre står …)",
+    "Закончили фразой о себе"
+   ],
+   "model": {
+    "level": "A2",
+    "no": "På bildet ser jeg en familie som spiser frokost på kjøkkenet. I midten sitter en mann og en kvinne ved bordet. Til venstre sitter en liten gutt som drikker melk. Ved siden av ham ligger en katt på en stol. Gjennom vinduet ser vi snø, så det er nok vinter. Alle ser glade og avslappede ut. Kanskje det er lørdag, fordi ingen har dårlig tid. Bildet minner meg om helgene hjemme hos oss.",
+    "ru": "На картинке семья завтракает на кухне. В центре за столом сидят мужчина и женщина. Слева сидит маленький мальчик и пьёт молоко. Рядом с ним на стуле лежит кот. В окне виден снег — наверное, зима. Все выглядят довольными и спокойными. Может быть, сегодня суббота, потому что никто не торопится. Картинка напоминает мне выходные у нас дома."
+   },
+   "scenes": [
+    {
+     "ru": "Кухня зимним утром: семья завтракает, мальчик пьёт молоко, на стуле спит кот, за окном снег.",
+     "uk": "Кухня зимового ранку: родина снідає, хлопчик п’є молоко, на стільці спить кіт, за вікном сніг."
+    },
+    {
+     "ru": "Остановка автобуса под дождём: женщина с коляской, подросток в наушниках, пожилой мужчина с зонтом смотрит на часы.",
+     "uk": "Зупинка автобуса під дощем: жінка з візочком, підліток у навушниках, літній чоловік із парасолькою дивиться на годинник."
+    },
+    {
+     "ru": "Парк летом: двое детей играют в мяч, на скамейке читает девушка, мужчина гуляет с собакой.",
+     "uk": "Парк улітку: двоє дітей грають у м’яч, на лавці читає дівчина, чоловік вигулює собаку."
+    },
+    {
+     "ru": "Магазин: очередь у кассы, у мужчины полная корзина, кассирша улыбается, ребёнок просит конфету.",
+     "uk": "Магазин: черга біля каси, у чоловіка повний кошик, касирка усміхається, дитина просить цукерку."
+    },
+    {
+     "ru": "Приёмная врача: несколько человек ждут, кто-то смотрит в телефон, медсестра зовёт пациента.",
+     "uk": "Приймальня лікаря: кілька людей чекають, хтось дивиться в телефон, медсестра кличе пацієнта."
+    }
+   ],
+   "grammar": [
+    "v2",
+    "sted",
+    "presens",
+    "konnektorer"
+   ]
+  },
+  {
+   "id": "samtale",
+   "icon": "💬",
+   "kind": "oral",
+   "no": "Samtale med en annen kandidat",
+   "ru": "Разговор в паре",
+   "uk": "Розмова в парі",
+   "levels": "A1–B2",
+   "time": "2–3 минуты (A1–A2) · 5–7 минут (A2–B2)",
+   "words": 0,
+   "what": "Устный экзамен сдают вдвоём, и одно задание — разговор с другим кандидатом. Оценивают не только ваши фразы, но и то, как вы слушаете: задаёте вопросы, реагируете, соглашаетесь или спорите. Не говорите монологом — передавайте слово.",
+   "steps": [
+    {
+     "ru": "Начать и пригласить",
+     "hint": "задайте тему и спросите мнение",
+     "starters": [
+      "Hva synes du om …?",
+      "Skal vi begynne med …?"
+     ]
+    },
+    {
+     "ru": "Своё мнение с причиной",
+     "hint": "коротко: мнение + fordi",
+     "starters": [
+      "Jeg synes at … fordi …",
+      "For meg er det viktig at …"
+     ]
+    },
+    {
+     "ru": "Отреагировать на партнёра",
+     "hint": "согласитесь, возразите или уточните",
+     "starters": [
+      "Det er et godt poeng.",
+      "Enig, men …",
+      "Hva mener du med det?"
+     ]
+    },
+    {
+     "ru": "Спросить о его опыте",
+     "hint": "вопрос, на который нельзя ответить «да/нет»",
+     "starters": [
+      "Hvordan er det i ditt land?",
+      "Har du erfaring med …?"
+     ]
+    },
+    {
+     "ru": "Договориться или подвести итог",
+     "hint": "общий вывод",
+     "starters": [
+      "Så vi er enige om at …",
+      "Kanskje vi kan si at …"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "men",
+     "ru": "но"
+    },
+    {
+     "no": "derfor",
+     "ru": "поэтому"
+    },
+    {
+     "no": "likevel",
+     "ru": "всё же"
+    },
+    {
+     "no": "dessuten",
+     "ru": "к тому же"
+    },
+    {
+     "no": "for eksempel",
+     "ru": "например"
+    },
+    {
+     "no": "på den ene siden",
+     "ru": "с одной стороны"
+    },
+    {
+     "no": "på den andre siden",
+     "ru": "с другой стороны"
+    }
+   ],
+   "checklist": [
+    "Хотя бы два вопроса партнёру",
+    "Хотя бы одна реакция на его слова (Det er et godt poeng, Enig, men …)",
+    "Своё мнение с причиной (fordi)",
+    "Пример из жизни",
+    "Общий итог в конце"
+   ],
+   "model": {
+    "level": "A2–B1",
+    "no": "A: Hva synes du — er det bedre å bo i byen eller på landet?\nB: Jeg synes det er bedre å bo i byen, fordi det er lettere å finne jobb der. Hva mener du?\nA: Det er et godt poeng. Men på landet er det roligere, og boligene er billigere.\nB: Det er sant. Har du bodd på landet selv?\nA: Ja, i to år. Jeg likte naturen, men bussen gikk bare to ganger om dagen.\nB: Det høres vanskelig ut hvis man ikke har bil.\nA: Akkurat. Derfor bor jeg i byen nå.\nB: Så vi er enige om at byen er praktisk, men at landet har mer natur og ro?\nA: Ja, det kan vi si.",
+    "ru": "А: Как ты думаешь, где лучше жить — в городе или в деревне?\nБ: По-моему, в городе: там легче найти работу. А ты как считаешь?\nА: Верно. Но в деревне спокойнее, и жильё дешевле.\nБ: Это правда. А ты сам жил в деревне?\nА: Да, два года. Мне нравилась природа, но автобус ходил всего два раза в день.\nБ: Без машины, наверное, тяжело.\nА: Вот именно. Поэтому сейчас я живу в городе.\nБ: Значит, сойдёмся на том, что город удобнее, а в деревне больше природы и тишины?\nА: Да, так и скажем."
+   },
+   "prompts": [
+    {
+     "no": "Er det bedre å bo i byen eller på landet?",
+     "ru": "Где лучше жить — в городе или в деревне?"
+    },
+    {
+     "no": "Hva er viktig når man velger jobb?",
+     "ru": "Что важно при выборе работы?"
+    },
+    {
+     "no": "Hvordan kan man lære norsk raskere?",
+     "ru": "Как быстрее выучить норвежский?"
+    }
+   ],
+   "grammar": [
+    "sporsmal",
+    "v2",
+    "mening",
+    "grad"
+   ]
+  },
+  {
+   "id": "mening",
+   "icon": "🗣",
+   "kind": "oral",
+   "no": "Mening og utdypende svar",
+   "ru": "Мнение и развёрнутый ответ",
+   "uk": "Думка й розгорнута відповідь",
+   "levels": "A2–B2",
+   "time": "2–3 минуты · на B1–B2 ещё 2–3 минуты вопросов",
+   "words": 0,
+   "what": "Вас просят рассказать о повседневной теме, высказать мнение или ответить на утверждение. Главное — не только «да/нет», а мнение, две причины, пример и вывод. На B1–B2 после ответа экзаменатор задаёт уточняющие вопросы.",
+   "steps": [
+    {
+     "ru": "Позиция",
+     "hint": "одной фразой: что вы думаете",
+     "starters": [
+      "Etter min mening …",
+      "Jeg mener at …"
+     ]
+    },
+    {
+     "ru": "Причина 1 и пример",
+     "hint": "почему + случай из жизни",
+     "starters": [
+      "For det første …",
+      "For eksempel …"
+     ]
+    },
+    {
+     "ru": "Причина 2",
+     "hint": "ещё один довод",
+     "starters": [
+      "For det andre …",
+      "Dessuten …"
+     ]
+    },
+    {
+     "ru": "Другая сторона",
+     "hint": "покажите, что видите и минусы",
+     "starters": [
+      "Noen mener at …, men …",
+      "Det er riktig at …, likevel …"
+     ]
+    },
+    {
+     "ru": "Вывод",
+     "hint": "вернитесь к позиции",
+     "starters": [
+      "Derfor mener jeg at …",
+      "Alt i alt …"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "for det første",
+     "ru": "во-первых"
+    },
+    {
+     "no": "for det andre",
+     "ru": "во-вторых"
+    },
+    {
+     "no": "dessuten",
+     "ru": "к тому же"
+    },
+    {
+     "no": "likevel",
+     "ru": "тем не менее"
+    },
+    {
+     "no": "derfor",
+     "ru": "поэтому"
+    },
+    {
+     "no": "selv om",
+     "ru": "хотя"
+    },
+    {
+     "no": "alt i alt",
+     "ru": "в целом"
+    }
+   ],
+   "checklist": [
+    "Позиция в первой фразе",
+    "Две причины",
+    "Пример из жизни",
+    "Хотя бы одно «другое мнение» (noen mener …, men …)",
+    "После derfor, for det første, likevel — глагол сразу",
+    "Вывод в конце"
+   ],
+   "model": {
+    "level": "B1",
+    "no": "Etter min mening bør barn få mobiltelefon, men ikke før de er ti eller elleve år. For det første er det tryggere for familien. Hvis barnet går alene til skolen eller på trening, kan det ringe til foreldrene. For det andre bruker mange skoler digitale verktøy, så barna må lære å bruke teknologi. Noen mener at barn blir avhengige av skjermen, og det er riktig at mange sitter for mye med telefonen. Likevel tror jeg at det er foreldrene som må lage gode regler, for eksempel ingen mobil ved middagsbordet. Alt i alt mener jeg at mobilen er nyttig hvis familien bruker den med fornuft.",
+    "ru": "По-моему, детям стоит давать мобильный телефон, но не раньше десяти-одиннадцати лет. Во-первых, так спокойнее для семьи: если ребёнок сам ходит в школу или на тренировку, он может позвонить родителям. Во-вторых, во многих школах пользуются цифровыми инструментами, так что детям нужно учиться обращаться с техникой. Некоторые считают, что дети становятся зависимыми от экрана, и правда, многие слишком много сидят в телефоне. Но я думаю, что правила должны устанавливать родители — например, никаких телефонов за ужином. В целом мобильный полезен, если семья пользуется им с умом."
+   },
+   "prompts": [
+    {
+     "no": "Bør barn ha mobiltelefon?",
+     "ru": "Нужен ли детям мобильный телефон?"
+    },
+    {
+     "no": "Er det viktig å kunne norsk for å få jobb i Norge?",
+     "ru": "Важно ли знать норвежский, чтобы найти работу в Норвегии?"
+    },
+    {
+     "no": "«Alle burde jobbe fire dager i uka.» Hva mener du?",
+     "ru": "«Всем стоит работать четыре дня в неделю». Что вы думаете?"
+    }
+   ],
+   "grammar": [
+    "mening",
+    "konnektorer",
+    "leddsetning",
+    "det-er-aa",
+    "kondisjonal"
+   ]
+  },
+  {
+   "id": "epost",
+   "icon": "✉️",
+   "kind": "written",
+   "no": "E-post med begrunnelse (klage)",
+   "ru": "Письмо с обоснованием (жалоба)",
+   "uk": "Лист з обґрунтуванням (скарга)",
+   "levels": "A2–B2",
+   "time": "часть письменного экзамена",
+   "words": 80,
+   "what": "На уровнях A2–B1 и B1–B2 одно из письменных заданий — письмо, где нужно высказать мнение и обосновать его, обычно по поводу жалобы. Рекомендуемый объём — от 80 слов. Оценивают, ответили ли вы на задание и как написали; дежурные фразы вроде «Med vennlig hilsen» сами по себе баллов не дают, но и не мешают.",
+   "steps": [
+    {
+     "ru": "Тема и обращение",
+     "hint": "кому и о чём",
+     "starters": [
+      "Emne: Klage på …",
+      "Hei!",
+      "Til kundeservice"
+     ]
+    },
+    {
+     "ru": "Зачем пишу",
+     "hint": "одной фразой",
+     "starters": [
+      "Jeg skriver fordi …",
+      "Jeg tar kontakt angående …"
+     ]
+    },
+    {
+     "ru": "Что случилось",
+     "hint": "когда, где, что именно",
+     "starters": [
+      "Den … bestilte jeg …",
+      "Dessverre …"
+     ]
+    },
+    {
+     "ru": "Почему это проблема",
+     "hint": "мнение + обоснование",
+     "starters": [
+      "Dette er ikke greit, fordi …",
+      "Jeg synes det er urimelig at …"
+     ]
+    },
+    {
+     "ru": "Чего я хочу",
+     "hint": "конкретная просьба",
+     "starters": [
+      "Jeg ber om at …",
+      "Jeg forventer å få …",
+      "Kan dere …?"
+     ]
+    },
+    {
+     "ru": "Завершение",
+     "hint": "срок ответа и подпись",
+     "starters": [
+      "Jeg håper på svar innen …",
+      "Med vennlig hilsen"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "dessverre",
+     "ru": "к сожалению"
+    },
+    {
+     "no": "fordi",
+     "ru": "потому что"
+    },
+    {
+     "no": "derfor",
+     "ru": "поэтому"
+    },
+    {
+     "no": "i tillegg",
+     "ru": "кроме того"
+    },
+    {
+     "no": "allerede",
+     "ru": "уже"
+    },
+    {
+     "no": "fortsatt",
+     "ru": "всё ещё"
+    },
+    {
+     "no": "innen",
+     "ru": "до (срока)"
+    }
+   ],
+   "checklist": [
+    "Есть тема письма (Emne)",
+    "Сказано, зачем вы пишете",
+    "Есть дата или подробность: что, где, когда",
+    "Мнение с обоснованием (fordi …)",
+    "Конкретная просьба (Jeg ber om at …)",
+    "Вежливое завершение и подпись",
+    "Не меньше 80 слов"
+   ],
+   "model": {
+    "level": "B1",
+    "no": "Emne: Klage på forsinket levering\n\nHei!\n\nJeg skriver fordi jeg ikke har fått pakken som jeg bestilte i nettbutikken deres. Den 2. oktober bestilte og betalte jeg en vinterjakke til sønnen min. På nettsiden stod det at pakken skulle komme innen fem dager, men nå har det gått tre uker. Jeg har sendt to e-poster til kundeservice uten å få svar.\n\nDette er et stort problem for oss, fordi det har blitt kaldt, og sønnen min trenger jakka til skolen. Jeg synes også det er dårlig service at ingen svarer.\n\nJeg ber om at dere sender jakka med ekspresslevering, eller at jeg får pengene tilbake. Jeg håper på svar innen fredag.\n\nMed vennlig hilsen\nIrina Petrenko",
+    "ru": "Тема: жалоба на задержку доставки\n\nЗдравствуйте!\n\nПишу, потому что так и не получила посылку, которую заказала в вашем интернет-магазине. Второго октября я заказала и оплатила зимнюю куртку для сына. На сайте было написано, что посылка придёт за пять дней, но прошло уже три недели. Я отправила в службу поддержки два письма и не получила ответа.\n\nДля нас это серьёзная проблема: стало холодно, а сыну куртка нужна для школы. И мне кажется, это плохой сервис, когда никто не отвечает.\n\nПрошу отправить куртку экспресс-доставкой или вернуть деньги. Надеюсь на ответ до пятницы.\n\nС уважением,\nИрина Петренко"
+   },
+   "grammar": [
+    "leddsetning",
+    "preteritum",
+    "hoflighet",
+    "konnektorer"
+   ]
+  },
+  {
+   "id": "argument",
+   "icon": "📝",
+   "kind": "written",
+   "no": "Argumenterende tekst",
+   "ru": "Аргументативный текст",
+   "uk": "Аргументативний текст",
+   "levels": "B1–B2",
+   "time": "часть письменного экзамена B1–B2 (на весь экзамен — 2 часа)",
+   "words": 250,
+   "what": "На уровне B1–B2 нужно выбрать одну из двух тем и аргументировать точку зрения — примерно 250–350 слов. Держитесь одной стороны; контраргумент можно упомянуть, чтобы потом его опровергнуть. Каждый абзац — одна мысль.",
+   "steps": [
+    {
+     "ru": "Введение",
+     "hint": "тема + ваша позиция",
+     "starters": [
+      "I dag diskuterer mange om …",
+      "I denne teksten vil jeg argumentere for at …"
+     ]
+    },
+    {
+     "ru": "Аргумент 1 + пример",
+     "hint": "самый сильный довод",
+     "starters": [
+      "For det første …",
+      "Et eksempel på dette er …"
+     ]
+    },
+    {
+     "ru": "Аргумент 2 + пример",
+     "hint": "ещё один довод",
+     "starters": [
+      "For det andre …",
+      "I tillegg …"
+     ]
+    },
+    {
+     "ru": "Контраргумент и ответ",
+     "hint": "что скажут противники — и почему вы с ними не согласны",
+     "starters": [
+      "Motstandere vil kanskje si at …",
+      "Likevel må vi huske at …"
+     ]
+    },
+    {
+     "ru": "Заключение",
+     "hint": "коротко повторите позицию",
+     "starters": [
+      "Til slutt vil jeg understreke at …",
+      "Derfor mener jeg at …"
+     ]
+    }
+   ],
+   "connectors": [
+    {
+     "no": "for det første",
+     "ru": "во-первых"
+    },
+    {
+     "no": "dessuten",
+     "ru": "кроме того"
+    },
+    {
+     "no": "i tillegg",
+     "ru": "вдобавок"
+    },
+    {
+     "no": "på den annen side",
+     "ru": "с другой стороны"
+    },
+    {
+     "no": "likevel",
+     "ru": "тем не менее"
+    },
+    {
+     "no": "derfor",
+     "ru": "поэтому"
+    },
+    {
+     "no": "ettersom",
+     "ru": "поскольку"
+    },
+    {
+     "no": "selv om",
+     "ru": "хотя"
+    },
+    {
+     "no": "til tross for",
+     "ru": "несмотря на"
+    },
+    {
+     "no": "med andre ord",
+     "ru": "иначе говоря"
+    },
+    {
+     "no": "kort sagt",
+     "ru": "короче говоря"
+    }
+   ],
+   "checklist": [
+    "Заголовок и введение с позицией",
+    "Два аргумента, у каждого — пример",
+    "Контраргумент и ответ на него",
+    "Заключение повторяет позицию",
+    "Абзацы: одна мысль — один абзац",
+    "Связки и инверсия после них (Derfor mener jeg …)",
+    "Примерно 250–350 слов"
+   ],
+   "model": {
+    "level": "B2",
+    "no": "Gratis kollektivtransport for alle?\n\nI mange norske byer er det kø og dårlig luft om morgenen. Derfor diskuterer politikerne om buss, trikk og t-bane burde være gratis. I denne teksten vil jeg argumentere for at kollektivtransport i byene bør være gratis.\n\nFor det første ville gratis billetter få flere til å la bilen stå hjemme. Så lenge en månedsbillett koster nesten like mye som bensin og parkering, velger mange bilen. Hvis bussen var gratis, ville valget bli lettere. Færre biler betyr mindre kø, mindre støy og renere luft.\n\nFor det andre handler dette om rettferdighet. Familier med dårlig råd bruker en stor del av budsjettet på transport. En student eller en pensjonist som må reise til skole, jobb eller lege, ville spare flere hundre kroner i måneden. Dermed får alle bedre muligheter til å delta i samfunnet.\n\nMotstandere vil kanskje si at gratis transport blir for dyrt for kommunen, og at bussene blir overfylte. Det er et viktig argument. Likevel må vi huske at bilkøer, ulykker og sykdom på grunn av forurensning også koster samfunnet mye penger. I tillegg kan kommunen bruke pengene fra bomringen til flere avganger.\n\nTil slutt vil jeg understreke at gratis kollektivtransport ikke løser alle problemer alene. Men det er et konkret tiltak som gjør byen grønnere og hverdagen enklere for mange. Derfor mener jeg at politikerne bør prøve det, i hvert fall i de største byene.",
+    "ru": "Бесплатный общественный транспорт для всех?\n\nВо многих норвежских городах по утрам пробки и грязный воздух. Поэтому политики обсуждают, не сделать ли автобусы, трамваи и метро бесплатными. В этом тексте я буду доказывать, что городской общественный транспорт должен быть бесплатным.\n\nВо-первых, бесплатный проезд заставит больше людей оставлять машину дома. Пока месячный проездной стоит почти столько же, сколько бензин и парковка, многие выбирают машину. Если бы автобус был бесплатным, выбор стал бы проще. Меньше машин — меньше пробок, шума и чище воздух.\n\nВо-вторых, это вопрос справедливости. Семьи с небольшим доходом тратят на дорогу большую часть бюджета. Студент или пенсионер, которому нужно ездить на учёбу, работу или к врачу, экономил бы несколько сотен крон в месяц. Так у всех будет больше возможностей участвовать в жизни общества.\n\nПротивники, вероятно, скажут, что бесплатный транспорт обойдётся коммуне слишком дорого, а автобусы будут переполнены. Это серьёзный довод. И всё же пробки, аварии и болезни из-за загрязнения тоже дорого обходятся обществу. Кроме того, коммуна может пустить деньги от платных въездов на дополнительные рейсы.\n\nНапоследок подчеркну: бесплатный транспорт сам по себе не решит всех проблем. Но это конкретная мера, которая делает город зеленее, а жизнь многих людей проще. Поэтому я считаю, что политикам стоит попробовать — хотя бы в самых больших городах."
+   },
+   "prompts": [
+    {
+     "no": "Bør kollektivtransport i byene være gratis?",
+     "ru": "Должен ли городской транспорт быть бесплатным?"
+    },
+    {
+     "no": "Bør skolen forby mobiltelefoner i timene?",
+     "ru": "Стоит ли школе запретить телефоны на уроках?"
+    },
+    {
+     "no": "Er det bedre å jobbe hjemmefra enn på kontoret?",
+     "ru": "Лучше ли работать из дома, чем в офисе?"
+    }
+   ],
+   "grammar": [
+    "konnektorer",
+    "leddsetning",
+    "kondisjonal",
+    "det-er-aa",
+    "grad"
+   ]
+  }
+ ],
+ "grammar": [
+  {
+   "id": "v2",
+   "icon": "2️⃣",
+   "ru": "Глагол на втором месте (V2)",
+   "lvl": "A1",
+   "ref": [
+    "setn-v2"
+   ],
+   "text": "В русском и украинском порядок слов свободный: «Я сегодня работаю», «Сегодня я работаю», «Работаю я сегодня». В норвежском в обычном предложении спрягаемый глагол всегда стоит на втором месте. Первым может быть подлежащее, время, место — что угодно, но глагол второй.",
+   "ex": [
+    {
+     "no": "Jeg jobber i en butikk.",
+     "ru": "Я работаю в магазине."
+    },
+    {
+     "no": "I dag jobber jeg hjemme.",
+     "ru": "Сегодня я работаю из дома."
+    },
+    {
+     "no": "Nå bor vi i Bergen.",
+     "ru": "Сейчас мы живём в Бергене."
+    }
+   ]
+  },
+  {
+   "id": "inversjon",
+   "icon": "🔄",
+   "ru": "Инверсия: «I dag jobber jeg»",
+   "lvl": "A1",
+   "ref": [
+    "setn-inversjon"
+   ],
+   "text": "Если предложение начинается не с подлежащего (I fritiden, Om helgene, Til venstre, Derfor), глагол и подлежащее меняются местами. Типичная ошибка русскоязычных: «I fritiden jeg liker…». Правильно: «I fritiden liker jeg…». Начинать не с «Jeg» — хороший приём: речь звучит разнообразнее.",
+   "ex": [
+    {
+     "no": "I fritiden liker jeg å lese.",
+     "ru": "В свободное время я люблю читать."
+    },
+    {
+     "no": "Til venstre står en kvinne.",
+     "ru": "Слева стоит женщина."
+    },
+    {
+     "no": "Derfor lærer jeg norsk.",
+     "ru": "Поэтому я учу норвежский."
+    }
+   ]
+  },
+  {
+   "id": "leddsetning",
+   "icon": "🧩",
+   "ru": "Придаточное: ikke перед глаголом",
+   "lvl": "A2",
+   "ref": [
+    "setn-leddsetning",
+    "konj-fordi"
+   ],
+   "text": "После fordi, at, hvis, når, som, om, selv om начинается придаточное. В нём порядок «прямой» и без инверсии, а ikke (и другие наречия вроде alltid, ofte) встают перед глаголом. По-русски «потому что я не получил» — и по-норвежски так же: fordi jeg ikke har fått. А вот в главном предложении наоборот: Jeg har ikke fått.",
+   "ex": [
+    {
+     "no": "Jeg skriver fordi jeg ikke har fått pakken.",
+     "ru": "Пишу, потому что не получил посылку."
+    },
+    {
+     "no": "Hun sier at hun alltid tar bussen.",
+     "ru": "Она говорит, что всегда ездит на автобусе."
+    },
+    {
+     "no": "Hvis bussen ikke kommer, går jeg.",
+     "ru": "Если автобус не придёт, пойду пешком."
+    }
+   ]
+  },
+  {
+   "id": "modal",
+   "icon": "🎛",
+   "ru": "Модальные глаголы: vil, kan, må, skal, bør",
+   "lvl": "A1",
+   "ref": [
+    "verb-modal"
+   ],
+   "text": "После модальных глаголов инфинитив идёт без å: «Jeg vil jobbe», а не «Jeg vil å jobbe». Это как в русском: «хочу работать» — без частицы. bør — «стоит, следует»: удобно для советов и мнений. må ikke — «нельзя», а «не обязательно» — trenger ikke.",
+   "ex": [
+    {
+     "no": "Jeg vil jobbe som sykepleier.",
+     "ru": "Я хочу работать медсестрой."
+    },
+    {
+     "no": "Man bør lære språket.",
+     "ru": "Стоит выучить язык."
+    },
+    {
+     "no": "Du trenger ikke å komme.",
+     "ru": "Тебе не обязательно приходить."
+    }
+   ]
+  },
+  {
+   "id": "preteritum",
+   "icon": "🕰",
+   "ru": "Прошедшее: jobbet или har jobbet?",
+   "lvl": "A2",
+   "ref": [
+    "verb-preteritum",
+    "verb-pret-perf"
+   ],
+   "text": "В русском одно прошедшее время, в норвежском два. Preteritum (jobbet, bodde, kom) — когда понятно, когда это было: i fjor, for to år siden, da jeg var barn. Perfektum (har jobbet, har bodd) — опыт или то, что длится до сих пор: Jeg har bodd i Norge i tre år (и живу сейчас). Ошибка «Jeg har kommet til Norge i 2022» — с годом нужен preteritum: Jeg kom til Norge i 2022.",
+   "ex": [
+    {
+     "no": "Jeg kom til Norge i 2022.",
+     "ru": "Я приехал в Норвегию в 2022 году."
+    },
+    {
+     "no": "Jeg har bodd her i tre år.",
+     "ru": "Я живу здесь три года."
+    },
+    {
+     "no": "Før jobbet jeg som lærer.",
+     "ru": "Раньше я работал учителем."
+    }
+   ]
+  },
+  {
+   "id": "presens",
+   "icon": "🎬",
+   "ru": "Что происходит сейчас: står og venter",
+   "lvl": "A1",
+   "ref": [
+    "verb-presens"
+   ],
+   "text": "В норвежском нет отдельной формы «сейчас происходит» — хватает простого настоящего: Han leser. Чтобы подчеркнуть процесс, норвежцы говорят «står og venter» (стоит и ждёт), «sitter og leser», «holder på med å …». Для описания картинки это очень удобно.",
+   "ex": [
+    {
+     "no": "En mann står og venter på bussen.",
+     "ru": "Мужчина стоит и ждёт автобус."
+    },
+    {
+     "no": "Barna sitter og spiser.",
+     "ru": "Дети сидят и едят."
+    },
+    {
+     "no": "Hun holder på med å lage mat.",
+     "ru": "Она как раз готовит еду."
+    }
+   ]
+  },
+  {
+   "id": "sted",
+   "icon": "📍",
+   "ru": "Где на картинке: foran, bak, ved siden av",
+   "lvl": "A1",
+   "ref": [
+    "prep-plassering",
+    "prep-i-paa-sted"
+   ],
+   "text": "Для описания картинки хватает десятка предлогов: til venstre (слева), til høyre (справа), i midten (в центре), foran (перед), bak (за), ved siden av (рядом с), mellom (между), over / under (над / под), i bakgrunnen (на заднем плане). После них в начале предложения — инверсия: Ved siden av ham ligger en katt.",
+   "ex": [
+    {
+     "no": "Ved siden av ham ligger en katt.",
+     "ru": "Рядом с ним лежит кот."
+    },
+    {
+     "no": "I bakgrunnen ser vi fjell.",
+     "ru": "На заднем плане видны горы."
+    },
+    {
+     "no": "Bilen står foran huset.",
+     "ru": "Машина стоит перед домом."
+    }
+   ]
+  },
+  {
+   "id": "sporsmal",
+   "icon": "❓",
+   "ru": "Вопросы партнёру",
+   "lvl": "A1",
+   "ref": [
+    "setn-sporsmal",
+    "pron-sporreord"
+   ],
+   "text": "Вопрос без вопросительного слова начинается с глагола: Har du barn? С вопросительным словом — слово, потом глагол: Hva synes du? Hvor lenge har du bodd her? В разговоре в паре полезны открытые вопросы (hva, hvordan, hvorfor) — на них нельзя ответить одним «ja».",
+   "ex": [
+    {
+     "no": "Hva synes du om det?",
+     "ru": "Что ты об этом думаешь?"
+    },
+    {
+     "no": "Hvordan er det i ditt land?",
+     "ru": "А как в твоей стране?"
+    },
+    {
+     "no": "Har du erfaring med det?",
+     "ru": "У тебя есть такой опыт?"
+    }
+   ]
+  },
+  {
+   "id": "mening",
+   "icon": "💭",
+   "ru": "synes, tror, mener — три «думаю»",
+   "lvl": "A2",
+   "ref": [
+    "verb-synes-tror"
+   ],
+   "text": "По-русски мы говорим «думаю» почти всегда. В норвежском: synes — оценка по личному опыту (Jeg synes maten er god), tror — предположение, когда не знаешь точно (Jeg tror det blir regn), mener — обдуманная позиция, особенно в споре (Jeg mener at skolen bør …). На экзамене mener звучит солиднее в «мнениях», а synes — в рассказе о себе.",
+   "ex": [
+    {
+     "no": "Jeg synes norsk er vanskelig.",
+     "ru": "Мне кажется, норвежский трудный."
+    },
+    {
+     "no": "Jeg tror bussen er forsinket.",
+     "ru": "Думаю, автобус опаздывает."
+    },
+    {
+     "no": "Jeg mener at alle bør lære språket.",
+     "ru": "Я считаю, что всем стоит выучить язык."
+    }
+   ]
+  },
+  {
+   "id": "grad",
+   "icon": "📈",
+   "ru": "Сравнение: bedre, mer praktisk, best",
+   "lvl": "A2",
+   "ref": [
+    "adj-grad",
+    "adj-grad-uregel"
+   ],
+   "text": "Короткие прилагательные получают -ere / -est (billig — billigere — billigst), длинные — mer / mest (mer praktisk). Неправильные надо выучить: god — bedre — best, stor — større — størst, mange — flere — flest. «Чем» — enn: Byen er dyrere enn landet.",
+   "ex": [
+    {
+     "no": "Det er billigere å bo på landet.",
+     "ru": "Жить в деревне дешевле."
+    },
+    {
+     "no": "Bussen er mer praktisk enn bilen.",
+     "ru": "Автобус удобнее машины."
+    },
+    {
+     "no": "Det beste er å snakke mye.",
+     "ru": "Лучше всего — много говорить."
+    }
+   ]
+  },
+  {
+   "id": "konnektorer",
+   "icon": "🔗",
+   "ru": "Связки: derfor, fordi, men, likevel",
+   "lvl": "A2",
+   "ref": [
+    "konj-derfor",
+    "konj-fordi",
+    "konj-og-men"
+   ],
+   "text": "Связки делают из списка фраз рассказ. Важно знать, что после них с порядком слов: og, men, for — ничего не меняется. derfor, likevel, dessuten, for eksempel — это наречия: после них глагол сразу (Derfor bor jeg her). fordi, selv om, når — союзы придаточного: ikke перед глаголом (fordi jeg ikke har bil).",
+   "ex": [
+    {
+     "no": "Jeg har ikke bil, derfor tar jeg bussen.",
+     "ru": "У меня нет машины, поэтому я езжу на автобусе."
+    },
+    {
+     "no": "Det regnet, men vi gikk likevel tur.",
+     "ru": "Шёл дождь, но мы всё-таки пошли гулять."
+    },
+    {
+     "no": "Selv om det er dyrt, liker jeg å bo her.",
+     "ru": "Хотя здесь дорого, мне нравится тут жить."
+    }
+   ]
+  },
+  {
+   "id": "det-er-aa",
+   "icon": "✨",
+   "ru": "Det er viktig å … — оценка одной фразой",
+   "lvl": "A2",
+   "ref": [
+    "setn-det-er-aa"
+   ],
+   "text": "Конструкция «Det er + прилагательное + å + инфинитив» — готовая рамка для мнения: Det er viktig å …, Det er vanskelig å …, Det er lurt å … По-русски так же: «Важно …», «Трудно …» — только по-норвежски нужен det er и å.",
+   "ex": [
+    {
+     "no": "Det er viktig å ha venner.",
+     "ru": "Важно иметь друзей."
+    },
+    {
+     "no": "Det er vanskelig å finne bolig i Oslo.",
+     "ru": "В Осло трудно найти жильё."
+    },
+    {
+     "no": "Det er lurt å spare litt hver måned.",
+     "ru": "Разумно каждый месяц немного откладывать."
+    }
+   ]
+  },
+  {
+   "id": "kondisjonal",
+   "icon": "🌀",
+   "ru": "Если бы: hvis … ville …",
+   "lvl": "B1",
+   "ref": [
+    "verb-kondisjonal",
+    "konj-hvis"
+   ],
+   "text": "Нереальное условие: hvis + прошедшее, а в главной части ville + инфинитив. «Если бы автобус был бесплатным, я бы ездил на нём» — Hvis bussen var gratis, ville jeg ta den (в разговорной речи часто: ville jeg tatt den). Для вежливых просьб: Kunne du …? Jeg ville gjerne …",
+   "ex": [
+    {
+     "no": "Hvis bussen var gratis, ville flere ta den.",
+     "ru": "Если бы автобус был бесплатным, на нём ездило бы больше людей."
+    },
+    {
+     "no": "Kunne dere sende varen på nytt?",
+     "ru": "Не могли бы вы отправить товар заново?"
+    },
+    {
+     "no": "Jeg ville gjerne snakke med sjefen.",
+     "ru": "Я хотел бы поговорить с начальником."
+    }
+   ]
+  },
+  {
+   "id": "hoflighet",
+   "icon": "🎩",
+   "ru": "Вежливая просьба в письме",
+   "lvl": "A2",
+   "ref": [
+    "verb-modal",
+    "verb-kondisjonal"
+   ],
+   "text": "Норвежская вежливость — без «нижайше прошу». Хватает Kan dere …? / Kunne dere …? / Jeg ber om at … / Jeg ønsker å få … В конце — Med vennlig hilsen (с уважением). Обращение «Hei» нормально даже для фирмы; «Kjære …» — скорее в личном письме.",
+   "ex": [
+    {
+     "no": "Kan dere ringe meg i morgen?",
+     "ru": "Можете позвонить мне завтра?"
+    },
+    {
+     "no": "Jeg ber om at dere refunderer beløpet.",
+     "ru": "Прошу вернуть сумму."
+    },
+    {
+     "no": "Jeg ønsker å få svar innen en uke.",
+     "ru": "Хотелось бы получить ответ в течение недели."
+    }
+   ]
+  }
+ ],
+ "complaints": [
+  {
+   "id": "levering",
+   "icon": "📦",
+   "ru": "Посылка не пришла",
+   "uk": "Посилка не прийшла",
+   "to": "Nettbutikken",
+   "subject": "Pakke som ikke har kommet",
+   "about": "en pakke som ikke har kommet",
+   "happened": "Den 3. mars bestilte og betalte jeg en kaffetrakter i nettbutikken deres. Pakken skulle komme innen en uke, men nå har det gått nesten en måned.",
+   "problem": "Jeg har kontaktet kundeservice to ganger uten å få svar, og jeg har betalt for en vare jeg ikke har fått.",
+   "want": "at dere sender varen så fort som mulig, eller at jeg får pengene tilbake"
+  },
+  {
+   "id": "nabo",
+   "icon": "🔊",
+   "ru": "Шумные соседи",
+   "uk": "Галасливі сусіди",
+   "to": "Naboen i 3. etasje",
+   "subject": "Støy om natta",
+   "about": "støy fra leiligheten deres",
+   "happened": "De siste tre ukene har det vært høy musikk og fester i leiligheten deres nesten hver fredag og lørdag, ofte til klokka tre om natta.",
+   "problem": "Jeg har to små barn som våkner av støyen, og jeg må stå opp tidlig for å gå på jobb. Ifølge husordensreglene skal det være ro etter klokka 23.",
+   "want": "at dere holder lavere volum etter klokka 23, og at dere sier fra til naboene hvis dere skal ha fest"
+  },
+  {
+   "id": "utleier",
+   "icon": "🏠",
+   "ru": "Сломалась стиральная машина в съёмной квартире",
+   "uk": "Зламалася пральна машина в орендованій квартирі",
+   "to": "Utleier",
+   "subject": "Ødelagt vaskemaskin",
+   "about": "vaskemaskinen i leiligheten",
+   "happened": "Vaskemaskinen i leiligheten har vært ødelagt i over to uker. Jeg sa fra til deg på telefon den 10. januar, men ingen har kommet for å reparere den.",
+   "problem": "Vaskemaskinen er en del av leiekontrakten, og nå må jeg betale for å vaske klær på et vaskeri.",
+   "want": "at du sender en reparatør i løpet av denne uka, eller at husleien blir redusert til maskinen er i orden"
+  },
+  {
+   "id": "bank",
+   "icon": "🏦",
+   "ru": "Банк дважды списал деньги",
+   "uk": "Банк двічі списав гроші",
+   "to": "Banken",
+   "subject": "Beløp trukket to ganger",
+   "about": "et beløp som er trukket to ganger",
+   "happened": "Den 14. februar betalte jeg 1 250 kroner med kortet mitt i en sportsbutikk. Da jeg sjekket kontoen, så jeg at beløpet var trukket to ganger.",
+   "problem": "Nå mangler jeg penger til regningene denne måneden, og jeg har ikke fått noen forklaring i nettbanken.",
+   "want": "at dere undersøker saken og betaler tilbake beløpet som ble trukket for mye"
+  },
+  {
+   "id": "mobil",
+   "icon": "📱",
+   "ru": "Слишком большой счёт за телефон",
+   "uk": "Завеликий рахунок за телефон",
+   "to": "Mobiloperatøren",
+   "subject": "For høy regning",
+   "about": "regningen for oktober",
+   "happened": "Jeg har et abonnement som koster 299 kroner i måneden. Men regningen for oktober var på 1 140 kroner, fordi dere har lagt til «datatrafikk i utlandet».",
+   "problem": "Jeg har ikke vært i utlandet i oktober, så regningen må være feil.",
+   "want": "at dere retter regningen og sender meg en ny faktura"
+  },
+  {
+   "id": "trening",
+   "icon": "🏋️",
+   "ru": "Спортзал не принимает отказ от абонемента",
+   "uk": "Спортзал не приймає скасування абонемента",
+   "to": "Treningssenteret",
+   "subject": "Oppsigelse av medlemskap",
+   "about": "at dere fortsatt trekker penger etter at jeg sa opp medlemskapet",
+   "happened": "Jeg sa opp medlemskapet mitt i resepsjonen den 1. september. Likevel har dere trukket 549 kroner fra kontoen min både i oktober og i november.",
+   "problem": "Jeg fikk beskjed om at oppsigelsestiden var én måned, og jeg har ikke trent hos dere siden august.",
+   "want": "at dere bekrefter oppsigelsen skriftlig og betaler tilbake 1 098 kroner"
+  },
+  {
+   "id": "restaurant",
+   "icon": "🍽",
+   "ru": "Холодная еда в ресторане",
+   "uk": "Холодна їжа в ресторані",
+   "to": "Restauranten",
+   "subject": "Dårlig opplevelse på restauranten",
+   "about": "maten og servicen hos dere på fredag",
+   "happened": "Fredag kveld spiste jeg middag hos dere sammen med familien min. Vi ventet over en time på maten, og da den kom, var den kald.",
+   "problem": "Vi sa fra til servitøren, men hun bare trakk på skuldrene. Vi betalte full pris for en middag vi ikke var fornøyde med.",
+   "want": "at dere gir oss delvis refusjon eller et gavekort"
+  },
+  {
+   "id": "bagasje",
+   "icon": "🧳",
+   "ru": "Потерялся багаж",
+   "uk": "Загубився багаж",
+   "to": "Flyselskapet",
+   "subject": "Forsinket bagasje",
+   "about": "forsinket bagasje",
+   "happened": "Den 20. juli fløy jeg fra Gdańsk til Bergen med dere. Kofferten min kom ikke fram, og jeg fikk den først fem dager senere.",
+   "problem": "I disse dagene måtte jeg kjøpe klær og toalettsaker for 1 800 kroner. Jeg har kvitteringene.",
+   "want": "at dere dekker utgiftene mine, og jeg legger ved kopi av kvitteringene"
+  },
+  {
+   "id": "vare",
+   "icon": "👟",
+   "ru": "Прислали не тот размер",
+   "uk": "Надіслали не той розмір",
+   "to": "Nettbutikken",
+   "subject": "Feil størrelse",
+   "about": "en vare i feil størrelse",
+   "happened": "Jeg bestilte et par joggesko i størrelse 42, men fikk størrelse 38. Jeg har allerede prøvd å returnere dem, men dere krever at jeg betaler for frakten.",
+   "problem": "Det var dere som gjorde feilen, så jeg mener at jeg ikke skal betale for returen.",
+   "want": "at dere sender meg en gratis returlapp og riktig størrelse"
+  },
+  {
+   "id": "handverker",
+   "icon": "🔧",
+   "ru": "Мастер не закончил ремонт",
+   "uk": "Майстер не закінчив ремонт",
+   "to": "Firmaet",
+   "subject": "Arbeid som ikke er ferdig",
+   "about": "oppussingen av badet vårt",
+   "happened": "Dere skulle pusse opp badet vårt i løpet av tre uker, og vi har betalt halvparten på forhånd. Nå har det gått seks uker, og arbeidet er fortsatt ikke ferdig.",
+   "problem": "Familien vår har ikke dusj hjemme, og ingen av håndverkerne har vært her den siste uka.",
+   "want": "at dere gir oss en skriftlig plan for når arbeidet blir ferdig"
+  },
+  {
+   "id": "konsert",
+   "icon": "🎫",
+   "ru": "Концерт отменили, деньги не вернули",
+   "uk": "Концерт скасували, гроші не повернули",
+   "to": "Billettselskapet",
+   "subject": "Avlyst konsert",
+   "about": "at jeg ikke har fått refusjon for en avlyst konsert",
+   "happened": "Jeg kjøpte to billetter til konserten i Stavanger den 5. mai. Konserten ble avlyst, men jeg har fortsatt ikke fått pengene tilbake.",
+   "problem": "Det har gått to måneder, og på nettsiden står det bare at saken «er under behandling».",
+   "want": "at dere refunderer 1 300 kroner innen to uker"
+  },
+  {
+   "id": "buss",
+   "icon": "🚌",
+   "ru": "Автобус постоянно опаздывает",
+   "uk": "Автобус постійно запізнюється",
+   "to": "Busselskapet",
+   "subject": "Forsinkede busser",
+   "about": "forsinkelser på buss 23",
+   "happened": "Jeg tar buss 23 til jobb hver morgen klokka 7.10. De siste to månedene har bussen vært forsinket nesten hver dag, og to ganger kjørte den forbi holdeplassen.",
+   "problem": "Jeg har kommet for sent på jobb flere ganger, og sjefen min er ikke fornøyd.",
+   "want": "at dere setter inn flere busser om morgenen, eller at dere i alle fall informerer om forsinkelser i appen"
+  },
+  {
+   "id": "borettslag",
+   "icon": "🧹",
+   "ru": "В подъезде не убирают",
+   "uk": "У під’їзді не прибирають",
+   "to": "Styret i borettslaget",
+   "subject": "Trappevask",
+   "about": "trappevasken i oppgang B",
+   "happened": "Vi betaler for trappevask hver uke, men den siste måneden har trappene i oppgang B ikke blitt vasket.",
+   "problem": "Det er skittent og glatt, og en eldre beboer holdt på å falle forrige uke.",
+   "want": "at styret tar kontakt med rengjøringsfirmaet og sørger for at trappene blir vasket"
+  },
+  {
+   "id": "tannlege",
+   "icon": "🦷",
+   "ru": "Счёт у стоматолога выше, чем договаривались",
+   "uk": "Рахунок у стоматолога вищий, ніж домовлялися",
+   "to": "Tannklinikken",
+   "subject": "Regning høyere enn avtalt",
+   "about": "regningen jeg fikk etter behandlingen",
+   "happened": "Før behandlingen fikk jeg et prisoverslag på 2 400 kroner. Regningen jeg fikk etterpå, var på 3 900 kroner.",
+   "problem": "Ingen sa noe om at prisen kunne bli høyere, og jeg ble ikke spurt om ekstra behandling.",
+   "want": "at dere forklarer forskjellen og sender en ny regning i tråd med prisoverslaget"
+  },
+  {
+   "id": "internett",
+   "icon": "🌐",
+   "ru": "Две недели нет интернета",
+   "uk": "Два тижні немає інтернету",
+   "to": "Internettleverandøren",
+   "subject": "Internett virker ikke",
+   "about": "at internett ikke har virket på flere uker",
+   "happened": "Siden 1. desember har internett hjemme hos oss ikke fungert. Jeg har ringt kundeservice tre ganger, og hver gang har dere lovet en tekniker som ikke har kommet.",
+   "problem": "Jeg jobber hjemmefra to dager i uka, og barna trenger internett til leksene.",
+   "want": "at en tekniker kommer innen fredag, og at jeg ikke betaler for desember"
+  },
+  {
+   "id": "parkering",
+   "icon": "🅿️",
+   "ru": "Несправедливый штраф за парковку",
+   "uk": "Несправедливий штраф за паркування",
+   "to": "Parkeringsselskapet",
+   "subject": "Urettferdig parkeringsgebyr",
+   "about": "et parkeringsgebyr jeg har fått",
+   "happened": "Den 8. april fikk jeg et gebyr på 600 kroner på parkeringsplassen ved kjøpesenteret. Jeg hadde betalt i appen, men appen registrerte feil bilnummer.",
+   "problem": "Jeg har kvittering som viser at jeg betalte for riktig tid, så gebyret er ikke rettferdig.",
+   "want": "at dere sletter gebyret, og jeg legger ved skjermbilde av betalingen"
+  }
+ ],
+ "letter": {
+  "frame": "Emne: Klage – {subject}\n\nHei!\n\nJeg skriver for å klage på {about}. {happened}\n\nDette er ikke greit for meg. {problem} Jeg synes derfor at saken må løses raskt.\n\nJeg ber om {want}. Jeg håper på svar innen en uke.\n\nMed vennlig hilsen\n{name}",
+  "parts": [
+   {
+    "id": "subject",
+    "ru": "Тема письма",
+    "re": "^\\s*(emne|tema|sak|ang\\.?|angående)\\b"
+   },
+   {
+    "id": "greet",
+    "ru": "Обращение",
+    "re": "\\b(hei|hallo|god dag|kjære|til)\\b"
+   },
+   {
+    "id": "why",
+    "ru": "Зачем пишете",
+    "re": "\\b(jeg skriver|jeg tar kontakt|jeg vil klage|jeg ønsker å klage|jeg henvender meg)"
+   },
+   {
+    "id": "what",
+    "ru": "Что случилось: дата, сумма или подробность",
+    "re": "(\\d|\\b(i går|forrige|mandag|tirsdag|onsdag|torsdag|fredag|lørdag|søndag|januar|februar|mars|april|mai|juni|juli|august|september|oktober|november|desember)\\b)"
+   },
+   {
+    "id": "reason",
+    "ru": "Почему это проблема (fordi …)",
+    "re": "\\b(fordi|derfor|siden|ettersom|på grunn av)\\b"
+   },
+   {
+    "id": "want",
+    "ru": "Конкретная просьба",
+    "re": "\\b(ber om|ønsker|forventer|krever|vil gjerne|kan dere|kunne dere|håper at)\\b"
+   },
+   {
+    "id": "end",
+    "ru": "Завершение и подпись",
+    "re": "\\b(hilsen|vennlig|mvh)\\b"
+   }
+  ],
+  "minutes": 25,
+  "words": 80
+ },
+ "guide": {
+  "facts": [
+   {
+    "icon": "🧩",
+    "ru": "Четыре части: чтение, аудирование, письмо и устная часть. Можно сдавать все сразу или только нужные — и пересдавать части отдельно."
+   },
+   {
+    "icon": "💻",
+    "ru": "Чтение, аудирование и письмо — на компьютере центра, обычно в один день. Устная часть — отдельно."
+   },
+   {
+    "icon": "🎚",
+    "ru": "Чтение и аудирование частично адаптивные: сначала две короткие пробные части (около 7 вопросов каждая), потом основная — 15–25 вопросов лёгкого, среднего или трудного уровня в зависимости от результата. Проверяет компьютер."
+   },
+   {
+    "icon": "✍️",
+    "ru": "Письмо: уровень выбираете при записи. A1–A2 и A2–B1 — по 90 минут и три задания, B1–B2 — 120 минут и два задания (письмо с обоснованием мнения и аргументативный текст на 250–350 слов). Ответить нужно на все задания. Каждый текст независимо оценивают двое проверяющих."
+   },
+   {
+    "icon": "🗣",
+    "ru": "Устная часть: около 20–25 минут, обычно вдвоём с другим кандидатом. Один экзаменатор задаёт вопросы, второй (sensor) выставляет оценку. На A1–A2 четыре задания (о себе, картинка, разговор в паре, рассказ на тему), на A2–B1 и B1–B2 — по три."
+   },
+   {
+    "icon": "📏",
+    "ru": "В устной части смотрят, понятно ли вы отвечаете на вопрос, и на язык: беглость, произношение, словарный запас, грамматику. Знание темы не оценивается — только язык. Если проверяющий решит, что вы можете больше, вам могут задать вопрос уровнем выше."
+   },
+   {
+    "icon": "📬",
+    "ru": "Результаты по всем частям приходят одновременно — обычно примерно через три недели. Обжаловать можно только письменную часть."
+   }
+  ],
+  "bring": [
+   "Действующий документ с фото. Подходят: паспорт; норвежские водительские права (оригинал — цифровые не принимают); норвежская банковская карта с фото; ID-карта страны ЕЭЗ; проездной документ беженца или паспорт иностранца; карта вида на жительство; удостоверение просителя убежища с подписью и местом рождения.",
+   "Номер документа должен совпадать с тем, что вы указали при записи.",
+   "Письмо или сообщение от вашего центра (там время и адрес) — прочитайте его заранее."
+  ],
+  "rules": [
+   "Телефон, умные часы и очки, заметки и словари — нельзя. На компьютере — только программа экзамена.",
+   "Вставлять текст в письменную часть нельзя: это автоматически считается списыванием.",
+   "Выученные наизусть чужие тексты использовать нельзя — это тоже нарушение. Поэтому в Norsk Kort мы учим «каркас» ответа и связки, а сам ответ вы каждый раз строите заново.",
+   "Нарушение: могут удалить с экзамена, сертификат не выдадут, пересдать можно будет только через год."
+  ],
+  "day": [
+   "Приходите заранее: регистрация, подпись в списке кандидатов, проверка документа.",
+   "Место за компьютером вам укажут. В зале несколько кандидатов и наблюдатели.",
+   "На устной части вы с партнёром и двумя проверяющими. Можно переспросить, если не поняли вопрос: «Unnskyld, kan du gjenta?» — это нормально.",
+   "Если что-то непонятно о перерывах, еде или раннем уходе — спросите свой центр заранее: правила задаёт он."
+  ],
+  "calm": [
+   "Ошибки делают все. Оценивают, понимают ли вас, — а не идеальность.",
+   "Не знаете слова — опишите его другими словами: «en ting man bruker til å …» (штука, которой …).",
+   "Медленная речь с паузами лучше быстрой с длинными «эээ». Пауза в 2 секунды — нормально.",
+   "Перед устной частью проговорите вслух 2–3 фразы о себе — разогрейте голос.",
+   "Если сбились — скажите «Jeg begynner på nytt» и спокойно начните фразу заново."
+  ],
+  "links": [
+   {
+    "ru": "Запись на Norskprøven (HK-dir)",
+    "url": "https://prove.hkdir.no/en/norwegian-language-test-a1-b2/register-for-the-test-norwegian-a1-b2"
+   },
+   {
+    "ru": "Когда ближайший экзамен",
+    "url": "https://prove.hkdir.no/en/norwegian-language-test-a1-b2/when-is-the-test-norwegian-language-A1-B2"
+   },
+   {
+    "ru": "Что происходит в день экзамена",
+    "url": "https://prove.hkdir.no/en/norwegian-language-test-a1-b2/on-the-day-of-the-test-norwegian-a1-b2"
+   },
+   {
+    "ru": "Официальные пробные задания",
+    "url": "https://prove.hkdir.no/en/norwegian-language-test-a1-b2/practice-for-test-norwegian-language-a1-b2"
+   },
+   {
+    "ru": "Об устной части (по-норвежски)",
+    "url": "https://prove.hkdir.no/norskprove-a1-b2/les-om-proven-norsk-A1-B2/om-muntlig-prove"
+   },
+   {
+    "ru": "О письменной части (по-норвежски)",
+    "url": "https://prove.hkdir.no/norskprove-a1-b2/les-om-proven-norsk-A1-B2/om-skriveproven"
+   },
+   {
+    "ru": "Особые условия (дополнительное время и др.)",
+    "url": "https://prove.hkdir.no/en/norwegian-language-test-a1-b2/ask-for-special-adaptations-norwegian-language-a1-b2"
+   },
+   {
+    "ru": "Частые вопросы",
+    "url": "https://prove.hkdir.no/en/frequently-asked-questions-about-the-norwegian-language-test-a1-b2"
+   }
+  ],
+  "source": "Факты о формате — по открытым страницам HK-dir (prove.hkdir.no), пересказаны своими словами; проверено 21.11.2026. Правила могут меняться — перед экзаменом сверьтесь с сайтом и письмом центра."
+ },
+ "mock": {
+  "criteria": [
+   {
+    "id": "task",
+    "ru": "Ответ на вопрос",
+    "hint": "понятно ли вы отвечаете на то, что спросили"
+   },
+   {
+    "id": "flow",
+    "ru": "Беглость",
+    "hint": "говорите ли связно, без долгих пауз"
+   },
+   {
+    "id": "vocab",
+    "ru": "Словарный запас",
+    "hint": "хватает ли слов, есть ли разнообразие"
+   },
+   {
+    "id": "grammar",
+    "ru": "Грамматика",
+    "hint": "порядок слов, формы глаголов, род"
+   },
+   {
+    "id": "pron",
+    "ru": "Произношение",
+    "hint": "понятно ли звучит (оценить можно только голосом)"
+   }
+  ],
+  "levels": {
+   "a1a2": {
+    "ru": "A1–A2",
+    "parts": [
+     {
+      "task": "presentere",
+      "min": 2,
+      "q": "Kan du fortelle litt om deg selv?",
+      "ru": "Расскажите немного о себе.",
+      "follow": [
+       "Hvor lenge har du bodd i Norge?",
+       "Hva liker du å gjøre i fritiden?"
+      ]
+     },
+     {
+      "task": "bilde",
+      "min": 3,
+      "q": "Se på bildet og fortell hva du ser.",
+      "ru": "Посмотрите на картинку и расскажите, что вы видите.",
+      "scene": true,
+      "follow": [
+       "Hva tror du de skal gjøre etterpå?"
+      ]
+     },
+     {
+      "task": "samtale",
+      "min": 3,
+      "q": "Snakk sammen: Hva liker dere å gjøre i helgene?",
+      "ru": "Поговорите вдвоём: что вы любите делать по выходным?",
+      "partner": [
+       "Jeg liker å gå på tur. Hva med deg?",
+       "Så hyggelig! Går du alene eller sammen med noen?",
+       "Jeg også. Kanskje vi kan gå sammen en gang?"
+      ]
+     },
+     {
+      "task": "mening",
+      "min": 3,
+      "topic": true,
+      "q": "",
+      "ru": ""
+     }
+    ]
+   },
+   "a2b1": {
+    "ru": "A2–B1",
+    "parts": [
+     {
+      "task": "mening",
+      "min": 3,
+      "topic": true,
+      "q": "",
+      "ru": ""
+     },
+     {
+      "task": "samtale",
+      "min": 6,
+      "q": "Snakk sammen: Hva er viktigst når man skal finne en ny bolig?",
+      "ru": "Поговорите вдвоём: что важнее всего, когда ищешь новое жильё?",
+      "partner": [
+       "Jeg synes prisen er viktigst. Hva tenker du?",
+       "Det er et godt poeng. Men hva med beliggenheten — er det viktig for deg?",
+       "Har du flyttet mange ganger i Norge?",
+       "Så vi er enige om at både pris og beliggenhet betyr mye?"
+      ]
+     },
+     {
+      "task": "mening",
+      "min": 3,
+      "q": "Er det bedre å jobbe hjemmefra eller på kontoret? Begrunn svaret ditt.",
+      "ru": "Что лучше — работать из дома или в офисе? Обоснуйте ответ.",
+      "follow": [
+       "Hva er den største ulempen med å jobbe hjemmefra?"
+      ]
+     }
+    ]
+   },
+   "b1b2": {
+    "ru": "B1–B2",
+    "parts": [
+     {
+      "task": "mening",
+      "min": 3,
+      "q": "Bør butikker være åpne på søndager? Hva mener du?",
+      "ru": "Должны ли магазины работать по воскресеньям? Что вы думаете?"
+     },
+     {
+      "task": "samtale",
+      "min": 6,
+      "q": "Diskuter: Bør det være forbudt å bruke mobil i skoletiden?",
+      "ru": "Обсудите: стоит ли запретить телефоны в школе?",
+      "partner": [
+       "Jeg mener at mobilforbud er en god idé, fordi elevene blir mindre forstyrret. Er du enig?",
+       "Men hva med elever som trenger mobilen for å kontakte foreldrene?",
+       "Det er et godt poeng. Tror du forbudet faktisk virker i praksis?",
+       "Kan vi bli enige om et kompromiss?"
+      ]
+     },
+     {
+      "task": "mening",
+      "min": 5,
+      "q": "Påstand: «Det er umulig å bli godt integrert uten å snakke norsk.» Hva mener du?",
+      "ru": "Утверждение: «Без норвежского языка невозможно по-настоящему влиться в общество». Что вы думаете?",
+      "follow": [
+       "Hvilken rolle spiller arbeidsplassen?",
+       "Hva kan kommunen gjøre bedre?"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "tracks": [
+  {
+   "id": "np-a1a2",
+   "icon": "🌱",
+   "ru": "Norskprøven A1–A2",
+   "sub": "устная часть и письмо для начинающих",
+   "weeks": 6,
+   "level": "a1a2",
+   "topics": [
+    "familie",
+    "bolig",
+    "mat",
+    "fritid",
+    "helse",
+    "jobb"
+   ],
+   "tasks": [
+    "presentere",
+    "bilde",
+    "presentere",
+    "bilde",
+    "samtale",
+    "samtale"
+   ],
+   "gram": [
+    "v2",
+    "inversjon",
+    "presens",
+    "sted",
+    "modal",
+    "preteritum"
+   ],
+   "listen": [
+    "legetime",
+    "butikk",
+    "vakt",
+    "legetime",
+    "butikk",
+    "vakt"
+   ],
+   "phr": [
+    "start",
+    "time",
+    "example",
+    "opinion",
+    "agree",
+    "repeat"
+   ],
+   "pattern": [
+    [
+     "phr:{P}",
+     "topic:{T}",
+     "build:{B}",
+     "app:study"
+    ],
+    [
+     "gram:{G}",
+     "listen:{L}",
+     "app:dialogs"
+    ],
+    [
+     "phraseday",
+     "build:{B}",
+     "app:speech",
+     "app:news"
+    ]
+   ],
+   "final": [
+    "mock:a1a2",
+    "guide",
+    "breath"
+   ]
+  },
+  {
+   "id": "np-a2b1",
+   "icon": "🌿",
+   "ru": "Norskprøven A2–B1",
+   "sub": "мнение, разговор в паре, письмо-жалоба",
+   "weeks": 8,
+   "level": "a2b1",
+   "topics": [
+    "jobb",
+    "bolig",
+    "helse",
+    "transport",
+    "skole",
+    "miljo",
+    "sosiale",
+    "fritid"
+   ],
+   "tasks": [
+    "mening",
+    "samtale",
+    "epost",
+    "mening",
+    "samtale",
+    "epost",
+    "mening",
+    "samtale"
+   ],
+   "gram": [
+    "inversjon",
+    "leddsetning",
+    "preteritum",
+    "mening",
+    "konnektorer",
+    "grad",
+    "det-er-aa",
+    "hoflighet"
+   ],
+   "listen": [
+    "vakt",
+    "visning",
+    "foreldremote",
+    "norskkurs",
+    "legetime",
+    "visning",
+    "foreldremote",
+    "norskkurs"
+   ],
+   "phr": [
+    "opinion",
+    "proscons",
+    "example",
+    "agree",
+    "sum",
+    "time",
+    "repeat",
+    "start"
+   ],
+   "pattern": [
+    [
+     "phr:{P}",
+     "topic:{T}",
+     "build:{B}",
+     "app:study"
+    ],
+    [
+     "gram:{G}",
+     "listen:{L}",
+     "complaint"
+    ],
+    [
+     "phraseday",
+     "build:{B}",
+     "app:nrk",
+     "app:drills"
+    ]
+   ],
+   "final": [
+    "mock:a2b1",
+    "guide",
+    "breath"
+   ]
+  },
+  {
+   "id": "skriftlig-b1b2",
+   "icon": "✍️",
+   "ru": "Skriftlig B1–B2",
+   "sub": "письмо с обоснованием и аргументативный текст",
+   "weeks": 7,
+   "level": "b1b2",
+   "topics": [
+    "miljo",
+    "skole",
+    "jobb",
+    "sosiale",
+    "transport",
+    "helse",
+    "bolig"
+   ],
+   "tasks": [
+    "epost",
+    "argument",
+    "epost",
+    "argument",
+    "epost",
+    "argument",
+    "argument"
+   ],
+   "gram": [
+    "konnektorer",
+    "leddsetning",
+    "kondisjonal",
+    "det-er-aa",
+    "mening",
+    "grad",
+    "hoflighet"
+   ],
+   "listen": [
+    "norskkurs",
+    "foreldremote",
+    "visning",
+    "vakt",
+    "norskkurs",
+    "foreldremote",
+    "visning"
+   ],
+   "phr": [
+    "opinion",
+    "proscons",
+    "sum",
+    "example",
+    "agree",
+    "opinion",
+    "sum"
+   ],
+   "pattern": [
+    [
+     "topic:{T}",
+     "build:{B}",
+     "gram:{G}"
+    ],
+    [
+     "complaint",
+     "app:news",
+     "app:drills"
+    ],
+    [
+     "phr:{P}",
+     "build:{B}",
+     "app:reader"
+    ]
+   ],
+   "final": [
+    "build:argument",
+    "complaint",
+    "guide"
+   ]
+  },
+  {
+   "id": "lytte-a2",
+   "icon": "🎧",
+   "ru": "Слушаю норвежский A2",
+   "sub": "диалоги, радио и повтор за голосом",
+   "weeks": 6,
+   "level": "a1a2",
+   "topics": [
+    "mat",
+    "transport",
+    "helse",
+    "fritid",
+    "jobb",
+    "familie"
+   ],
+   "tasks": [
+    "samtale",
+    "presentere",
+    "samtale",
+    "bilde",
+    "samtale",
+    "mening"
+   ],
+   "gram": [
+    "sporsmal",
+    "v2",
+    "presens",
+    "preteritum",
+    "modal",
+    "konnektorer"
+   ],
+   "listen": [
+    "butikk",
+    "legetime",
+    "vakt",
+    "visning",
+    "norskkurs",
+    "foreldremote"
+   ],
+   "phr": [
+    "repeat",
+    "time",
+    "agree",
+    "start",
+    "example",
+    "sum"
+   ],
+   "pattern": [
+    [
+     "listen:{L}",
+     "phr:{P}",
+     "app:study"
+    ],
+    [
+     "app:radio",
+     "topic:{T}",
+     "app:speech"
+    ],
+    [
+     "app:dialogs",
+     "gram:{G}",
+     "phraseday"
+    ]
+   ],
+   "final": [
+    "mock:a1a2",
+    "guide",
+    "breath"
+   ]
+  }
+ ]
+}

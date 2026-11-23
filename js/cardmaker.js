@@ -24,6 +24,7 @@
  * option.by: [] with a ru = the translation came with the source (written by a person); ['google'] = machine…
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const esc = s => U.esc(s == null ? '' : String(s));
   const MACHINE = ['google', 'mozhi', 'mymemory', 'microsoft', 'deepl'];
   const first = s => String(s || '').split('\n')[0];
@@ -35,7 +36,7 @@
     if (by && by.length) {
       const ai = by.includes('ai');
       const machine = by.some(b => MACHINE.includes(b));
-      if (ai || machine) return `<span class="tg-who ${ai ? 'ai' : 'mt'}" title="${ai ? 'Перевела нейросеть — по смыслу, но тоже может ошибаться' : 'Машинный перевод — неточный, перепроверьте'}">${ai ? '🤖' : '⚠️'} ${esc(Translators.provNames(by))}${ai ? '' : ' · неточно'}</span>`;
+      if (ai || machine) return `<span class="tg-who ${ai ? 'ai' : 'mt'}" title="${ai ? 'Перевела нейросеть — по смыслу, но тоже может ошибаться' : 'Машинный перевод — неточный, перепроверьте'}">${ai ? BOT() : '⚠️'} ${esc(Translators.provNames(by))}${ai ? '' : ' · неточно'}</span>`;
       return `<span class="tg-who src">✓ ${esc(Translators.provNames(by))}</span>`;
     }
     return `<span class="tg-who src" title="Перевод был в самом источнике — его написал человек">✓ ${esc(srcName || 'из источника')}</span>`;
@@ -56,7 +57,7 @@
           const got = String(r.out[0] || '').trim();
           o.ru = (window.Study && Study.cleanGloss && !/\s/.test(w) ? Study.cleanGloss(w, got) : '') || got;
           o.by = r.by || []; if (!o.ru) o.err = r.error || 'переводчики не ответили';
-        } catch (e) { o.err = e.message; }
+        } catch (e) { o.err = U.niceErr(e); }
       })());
     } else if (o.kind === 'sent' && String(o.ru || '').trim() && !(o.by || []).length && !o.alt && !o.me) {
       // «по смыслу» from a person (Tatoeba, a textbook…) — the literal variant next to it

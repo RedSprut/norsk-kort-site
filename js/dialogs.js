@@ -177,16 +177,59 @@
   /* ---------------- voice ---------------- */
   const SRC = () => root.SpeechRecognition || root.webkitSpeechRecognition;
   const hasGum = () => !!(root.navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  /* 🎤 «бегущая строка»: the word being said lights up in the line (js/tts.js word timing + Karaoke painter);
+     opts.el = the element that shows exactly this text (the bubble's line, the sample, the summary) — any element whose
+     text is the phrase being said, a translation line too; nothing to show → the line highlight only */
+  let KAR = null, karTok = 0;
+  function kar() {
+    if (KAR || !root.TTS || !TTS.Karaoke) return KAR;
+    try { KAR = new TTS.Karaoke({ name: 'dlg', cls: 'dlg-kmark', host: el => el.closest('.dlg-bubble, .dlg-sum-line') || el.parentElement }); } catch (e) { KAR = null; }
+    return KAR;
+  }
+  function karClear() { if (KAR) try { KAR.clear(); } catch (e) { /* ignore */ } }
   async function say(text, opts = {}) {
     if (!root.TTS || !TTS.speak) { await sleep(Math.min(5000, 700 + String(text).split(/\s+/).length * 380)); return; }
     let rate;
     try { rate = prefs().slow ? Math.max(0.45, (TTS.currentRate ? TTS.currentRate() : 0.9) * 0.72) : undefined; } catch (e) { rate = undefined; }
-    const o = rate ? { rate } : {};
+    const o = rate ? { rate, place: 'dialogs' } : { place: 'dialogs' };
     if (opts.keep) o.keep = true;
+    // 🎭 every speaker with a voice of their own (🔊 Голоса → «Разные голоса в диалогах»); the order of the speakers
+    // is the dialogue's own, so a line said alone has the same voice as in the whole dialogue
+    if (opts.d && opts.who != null && root.Voices && Voices.speakerOpts) {
+      try { Object.assign(o, Voices.speakerOpts('no', opts.who, rosterOf(opts.d).slice(), 'dialogs')); } catch (e) { /* the usual voice */ }
+    }
+    const tok = ++karTok, el = opts.el, K = el && el.textContent === String(text) && TTS.wordsOf ? kar() : null;
+    karClear();
+    if (K) {
+      o.onWord = (i, a, b, info) => {
+        if (tok !== karTok) return;
+        if (!el.isConnected) { karClear(); return; }
+        try { K.show([{ el, cur: info && info.done ? null : [a, b], done: info && info.done ? b : a }]); } catch (e) { karClear(); }
+      };
+    }
     // a safety net: a voice that never says «done» must not stop the dialogue
     await Promise.race([Promise.resolve().then(() => TTS.speak(text, 'no', o)).catch(() => {}), sleep(5000 + String(text).length * 140)]);
+    if (tok === karTok) { karTok++; karClear(); } // also when the safety net won: a late word must not light up again
   }
-  const ttsStop = () => { try { if (root.TTS && TTS.stop) TTS.stop(); } catch (e) { /* ignore */ } };
+  /** 🔊 the dialogues' own voice (🔊 Голоса → «Где какой голос») */
+  const voiceBtn = () => root.Voices && Voices.openChooser
+    ? `<div class="dlg-voices"><span class="small muted">🔊 Голоса для диалогов:</span>${Voices.langButtons('dialogs')}</div>` : '';
+  /** 🎭 «Разные голоса»: each speaker has a voice of their own (the same setting as in 🔊 Голоса) */
+  const rolesOn = () => !(root.Voices && Voices.rolesOn) || Voices.rolesOn();
+  const rolesBtn = () => root.Voices && Voices.setRolesOn
+    ? `<button type="button" class="btn" data-roles aria-pressed="${rolesOn()}" title="У каждого собеседника свой голос">🎭 Разные голоса${rolesOn() ? ' ✓' : ''}</button>` : '';
+  /** the line's speaker → say()'s options */
+  const lineOpts = (d, i, o) => Object.assign({ d, who: d && d.lines[i] ? d.lines[i].who : null }, o || {});
+  /** the speakers in the order they first speak (the first one has the usual voice), then any silent ones */
+  const rosterOf = d => {
+    if (d._roster) return d._roster;
+    const r = [];
+    d.lines.concat(d.speakers.map(s => ({ who: s.id }))).forEach(l => { if (!r.includes(l.who)) r.push(l.who); });
+    return (d._roster = r);
+  };
+  /** the element that shows line i's Norwegian text right now (for the 🎤 word highlight) */
+  const noEl = (ctx, i) => ctx.body && ctx.body.querySelector(`.dlg-line[data-line="${i}"] .dlg-no`);
+  const ttsStop = () => { karTok++; karClear(); try { if (root.TTS && TTS.stop) TTS.stop(); } catch (e) { /* ignore */ } };
 
   /* ======================= the window ======================= */
   let CUR = null;
@@ -203,6 +246,7 @@
       onMount: m => { ctx.body = m.el.querySelector('[data-dlg]'); },
     });
     ctx.m.el.addEventListener('click', e => onClick(ctx, e));
+    if (window.TrBadge) TrBadge.mount(ctx.m.$('.modal-head'), { place: 'dialogs' }); // 🌐 who translates now
     ctx.m.el.addEventListener('keydown', e => onKey(ctx, e));
         renderList(ctx);
     return ctx;
@@ -313,6 +357,9 @@
       <div class="dlg-tools">
         <button type="button" class="btn primary" data-playall title="Прочитать весь диалог вслух по очереди">▶ Слушать весь диалог</button>
         <button type="button" class="btn" data-slow aria-pressed="${!!p.slow}" title="Говорить медленнее">🐢 Медленнее${p.slow ? ' ✓' : ''}</button>
+        ${rolesBtn()}
+        ${voiceBtn()}
+        ${window.PrintX ? '<button type="button" class="btn" data-dprint aria-haspopup="dialog" title="Распечатать диалог (перевод под репликой или рядом, можно скрыть реплики одной роли) или сохранить в Word">🖨 Печать</button>' : ''}
         ${trSeg()}
       </div>
       <p class="dlg-muted dlg-small">Нажмите на любую реплику, чтобы послушать только её.</p>
@@ -337,7 +384,7 @@
     for (let i = from; i < d.lines.length; i++) {
       if (g !== ctx.gen || !alive(ctx)) return;
       highlight(ctx, i);
-      await say(d.lines[i].no, { keep: i > from });
+      await say(d.lines[i].no, lineOpts(d, i, { keep: i > from, el: noEl(ctx, i) }));
       if (g !== ctx.gen) return;
       await sleep(350);
     }
@@ -349,7 +396,7 @@
     const d = ctx.dlg, g = ++ctx.gen; ttsStop();
     ctx.playing = false; setPlayAll(ctx, false);
     highlight(ctx, i);
-    await say(d.lines[i].no);
+    await say(d.lines[i].no, lineOpts(d, i, { el: noEl(ctx, i) }));
     if (g === ctx.gen && alive(ctx)) highlight(ctx, null);
   }
 
@@ -375,6 +422,8 @@
         <p class="dlg-muted dlg-small">Приложение произнесёт реплики собеседника. Вы отвечаете 🎙 голосом или ⌨️ текстом; «💡 Подсказка» открывает реплику шаг за шагом.</p>
         <div class="dlg-foot-acts">
           <button type="button" class="btn" data-listen="${esc(d.key)}" title="Сначала послушать весь диалог">🎧 Сначала послушать</button>
+          ${rolesBtn()}
+          ${voiceBtn()}
           <button type="button" class="btn primary dlg-big" data-start title="Начать диалог">▶ Начать</button>
         </div>
       </div>`, '[data-start]');
@@ -495,7 +544,7 @@
       if (ctx.i >= d.lines.length) { finish(ctx); return; }
       if (myTurn(ctx)) { ctx.hint = 0; ctx.fb = null; ctx.draft = ''; ctx.micNote = ''; paintTurn(ctx, '[data-dlg-input]'); live(ctx, 'Ваша реплика'); return; }
       paintTurn(ctx);
-      await say(d.lines[ctx.i].no);
+      await say(d.lines[ctx.i].no, lineOpts(d, ctx.i, { el: ctx.body.querySelector('[data-turn] .dlg-other .dlg-no') }));
       if (g !== ctx.gen || !alive(ctx)) return;
       await sleep(450);
       if (g !== ctx.gen || !alive(ctx)) return;
@@ -718,9 +767,17 @@
     if (ds.listen) { const d = findDlg(ctx, ds.listen); if (!d) return; if (ctx.view === 'play' && !(await confirmLeavePlay(ctx))) return; saveRun(ctx); renderListen(ctx, d); return; }
     if (ds.setup) { const d = findDlg(ctx, ds.setup); if (d) renderSetup(ctx, d); return; }
     if (ds.playall != null) { if (ctx.playing) { ctx.gen++; ttsStop(); ctx.playing = false; setPlayAll(ctx, false); highlight(ctx, null); } else playAll(ctx); return; }
+    if (ds.roles != null) {
+      const on = !rolesOn();
+      Voices.setRolesOn(on);
+      ctx.body.querySelectorAll('[data-roles]').forEach(x => { x.setAttribute('aria-pressed', String(on)); x.textContent = '🎭 Разные голоса' + (on ? ' ✓' : ''); });
+      toast(on ? '🎭 У каждого собеседника свой голос' : 'Все реплики читает один голос', 'good', 2200);
+      return;
+    }
+    if (ds.dprint != null) { if (window.PrintX && ctx.dlg) { ctx.gen++; ttsStop(); ctx.playing = false; setPlayAll(ctx, false); highlight(ctx, null); PrintX.dialogue(ctx.dlg); } return; }
     if (ds.slow != null) { const p = prefs(); p.slow = !p.slow; savePrefs(); b.setAttribute('aria-pressed', String(p.slow)); b.textContent = '🐢 Медленнее' + (p.slow ? ' ✓' : ''); return; }
-    if (ds.say != null) { if (ctx.view === 'listen') sayOne(ctx, +ds.say); else { ttsStop(); say(ctx.dlg.lines[+ds.say].no); } return; }
-    if (ds.sayAny != null) { ttsStop(); say(ctx.dlg.lines[+ds.sayAny].no); return; }
+    if (ds.say != null) { if (ctx.view === 'listen') sayOne(ctx, +ds.say); else { ttsStop(); say(ctx.dlg.lines[+ds.say].no, lineOpts(ctx.dlg, +ds.say, { el: b.querySelector('.dlg-no') })); } return; }
+    if (ds.sayAny != null) { ttsStop(); say(ctx.dlg.lines[+ds.sayAny].no, lineOpts(ctx.dlg, +ds.sayAny, { el: b.querySelector('[lang="nb"]') })); return; }
     if (ds.role) { ctx.role = ds.role; ctx.body.querySelectorAll('[data-role]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.role === ds.role))); return; }
     if (ds.mode) { prefs().mode = ds.mode; savePrefs(); ctx.body.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === ds.mode))); return; }
     if (ds.start != null) { startPlay(ctx, ctx.dlg, ctx.role); return; }
@@ -736,11 +793,11 @@
       const inp = ctx.body.querySelector('[data-dlg-input]'); if (inp) ctx.draft = inp.value;
       ctx.hint = Math.min(2, Math.max(LEVEL[prefs().mode], ctx.hint) + 1);
       paintTurn(ctx, '[data-dlg-input]');
-      if (ctx.hint >= 2 && l) { ttsStop(); say(l.no); }
+      if (ctx.hint >= 2 && l) { ttsStop(); say(l.no, lineOpts(ctx.dlg, ctx.i, { el: ctx.body.querySelector('[data-turn] .dlg-cue') })); }
       live(ctx, ctx.hint >= 2 ? 'Подсказка: вся реплика' : 'Подсказка: реплика с пропусками');
       return;
     }
-    if (ds.model != null) { if (l) { micAbort(ctx); ttsStop(); say(l.no); } return; }
+    if (ds.model != null) { if (l) { micAbort(ctx); ttsStop(); say(l.no, lineOpts(ctx.dlg, ctx.i, { el: ctx.body.querySelector('[data-turn] .dlg-cue') })); } return; }
     if (ds.skip != null) { ctx.res[ctx.i] = { pct: 0, said: '', skip: true }; next(ctx); return; }
     if (ds.retryLine != null) { ctx.fb = null; ctx.draft = ''; paintTurn(ctx, '[data-dlg-input]'); return; }
     if (ds.next != null) { next(ctx); return; }
@@ -781,5 +838,18 @@
     }, true);
   }
 
-  root.Dialogs = { open, _core: { compare, words, numWords, gapsHtml, norm, load } };
+  /** 📍 home «▶ Продолжить» (js/continue.js): open the window right at a run «<dialog key>|<role>» — its own
+   *  Resume.ask answers by itself (Resume.prefer); a dialog that is gone → just the list */
+  async function resumeRun(id) {
+    const [key, role] = String(id || '').split('|');
+    const ctx = open(); if (!ctx) return false;
+    const t0 = Date.now();
+    while (!ctx.lib && alive(ctx) && Date.now() - t0 < 15000) await new Promise(r => setTimeout(r, 120));
+    const d = alive(ctx) ? findDlg(ctx, key) : null;
+    if (!d) return false;
+    startPlay(ctx, d, role || (d.speakers[0] || {}).id);
+    return true;
+  }
+
+  root.Dialogs = { open, resumeRun, _core: { compare, words, numWords, gapsHtml, norm, load } };
 })(typeof window !== 'undefined' ? window : globalThis);

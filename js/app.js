@@ -8,8 +8,19 @@
   }).join('')}" stroke="#fff" stroke-width="${w}" stroke-linecap="round"/>`;
   const AIB_W = 'fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"';
   const AIB_LOGO = {
-    claude: ['#d97757', aibRays(10, [7.4, 6.2, 7, 5.8, 7.2], 2)],
-    openai: ['#10a37f', `<g ${AIB_W} stroke-width="1.55"><ellipse cx="12" cy="12" rx="6.6" ry="3.1"/><ellipse cx="12" cy="12" rx="6.6" ry="3.1" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="6.6" ry="3.1" transform="rotate(-60 12 12)"/></g>`],
+    // Claude: the real filled spark (path: Simple Icons «claude», CC0), a little smaller in the coin and slightly thickened for small sizes
+    claude: ['#d97757', '<path transform="translate(12 12) scale(.68) translate(-12 -12)" fill="#fff" stroke="#fff" stroke-width=".4" stroke-linejoin="round" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/>'],
+    // ChatGPT: the black «knot» on white (own drawing — six strands along a hexagon, woven by a white halo; the same as design/logo-variants.html)
+    openai: ['#fff', (() => {
+      const R = 4.3, ext = 3, back = 0.7, P = k => { const a = (-90 + 60 * k) * Math.PI / 180; return [12 + R * Math.cos(a), 12 + R * Math.sin(a)]; };
+      let o = '';
+      for (let k = 0; k < 6; k++) {
+        const [ax, ay] = P(k), [bx, by] = P(k + 1), dx = (bx - ax) / R, dy = (by - ay) / R;
+        const d = `M${(ax - dx * back).toFixed(2)} ${(ay - dy * back).toFixed(2)}L${(bx + dx * ext).toFixed(2)} ${(by + dy * ext).toFixed(2)}`;
+        o += `<path d="${d}" stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="${d}" stroke="#0b0b0f" stroke-width="2.2" stroke-linecap="round" fill="none"/>`;
+      }
+      return o;
+    })()],
     gemini: ['linear-gradient(135deg, #4b8dff, #8e6cf0 60%, #c86fd6)', '<path d="M12 3.6c.55 4.5 3.9 7.85 8.4 8.4-4.5.55-7.85 3.9-8.4 8.4-.55-4.5-3.9-7.85-8.4-8.4 4.5-.55 7.85-3.9 8.4-8.4z" fill="#fff"/>'],
     deepseek: ['#4d6bfe', '<path d="M3.9 13.1c0-3.3 3.1-5.5 6.9-5.5 2.6 0 4.7 1.1 5.8 2.9.7-1.4 2-2.4 3.6-2.7-.5 1.5-.5 2.9.2 4.1-1.1.3-2.1.1-3-.4-.6 3.3-3.6 5.6-7.5 5.6-3.5 0-6-1.6-6-4z" fill="#fff"/><circle cx="8.3" cy="11.7" r="1" fill="#4d6bfe"/><path d="M6.6 14.6c1.6.9 3.8 1.1 5.6.4" stroke="#4d6bfe" stroke-width="1" stroke-linecap="round" fill="none"/>'],
     groq: ['#f55036', `<g ${AIB_W} stroke-width="2.2"><circle cx="12" cy="10.4" r="3.7"/><path d="M15.7 10.4v4.1a3.7 3.7 0 0 1-6.6 2.3"/></g>`],
@@ -47,7 +58,101 @@
       : `<path class="aib-zz" d="M8.2 14.2q1.35 1.15 2.7 0M13.1 14.2q1.35 1.15 2.7 0" stroke="#a9b2ec" stroke-width="1.3" stroke-linecap="round" fill="none"/>`)
     + `</svg>`;
 
+  /** 🤖 v212: ONE brand robot for every AI / neural-network icon in the app — the top-bar mascot (aibBot) drawn small, with the
+   *  shared gradients of index.html (#nkr-head / #nkr-eye / #nkr-visor), so a hundred of them on a screen stay light.
+   *  size: px (default 1.15em — the size of the text around it); it tilts its head when its button is hovered (css/styles.css .nk-bot) */
+  const robotSvg = (size, o = {}) => {
+    const sz = size ? `width="${+size}" height="${+size}"` : 'width="1.15em" height="1.15em"';
+    const on = o.on !== false;
+    return `<svg class="nk-bot${o.cls ? ' ' + o.cls : ''}" ${sz} viewBox="0 0 24 24" aria-hidden="true" focusable="false">`
+      + `<path d="M12 6.4V4.3" stroke="url(#nkr-head)" stroke-width="1.7" stroke-linecap="round"/>`
+      + `<circle class="nk-bot-tip" cx="12" cy="3.1" r="1.9"/>`
+      + `<rect x="1.3" y="11.4" width="3" height="5.4" rx="1.5" fill="url(#nkr-head)"/><rect x="19.7" y="11.4" width="3" height="5.4" rx="1.5" fill="url(#nkr-head)"/>`
+      + `<rect x="3.1" y="5.9" width="17.8" height="16.2" rx="6.8" fill="url(#nkr-head)"/>`
+      + `<path d="M6.3 9.1c1.1-1.3 2.8-1.95 4.7-1.95" stroke="#fff" stroke-opacity=".6" stroke-width="1.25" stroke-linecap="round" fill="none"/>`
+      + `<rect x="5.3" y="9.9" width="13.4" height="9.3" rx="4.65" fill="url(#nkr-visor)"/>`
+      + (on
+        ? `<g class="nk-bot-eyes"><ellipse cx="9.55" cy="14" rx="1.5" ry="1.95" fill="url(#nkr-eye)"/><ellipse cx="14.45" cy="14" rx="1.5" ry="1.95" fill="url(#nkr-eye)"/></g>`
+          + `<path d="M10.8 17q1.2.75 2.4 0" stroke="#7fe9ff" stroke-width=".9" stroke-linecap="round" fill="none"/>`
+        : `<path d="M8.2 14.2q1.35 1.15 2.7 0M13.1 14.2q1.35 1.15 2.7 0" stroke="#a9b2ec" stroke-width="1.3" stroke-linecap="round" fill="none"/>`)
+      + `</svg>`;
+  };
+
+  /* 🧭 the top-bar / tab-bar icons (design/declutter.html, section 2): drawn in the style of 🎧 and 🎙 — a thin line,
+     round ends, the colour of the text; the open section gets the violet→blue of the headphones (gradient #nkg-nav, index.html).
+     The owner has not picked yet: every variant from the mock is here — to swap one, change a letter in NAV_PICK.
+     ('e' = keep the emoji) */
+  const NAV_SVG = {
+    stats: {
+      a: '<rect class="f" x="3.5" y="12" width="4" height="8.5" rx="1.4"/><rect class="f" x="10" y="7.5" width="4" height="13" rx="1.4"/><rect class="f" x="16.5" y="3.5" width="4" height="17" rx="1.4"/>', // А. Столбики
+      b: '<path d="M3.5 3.8v14.7c0 1.1.9 2 2 2h15"/><path d="M7.5 15.2l3.7-4.1 3 2.7 4.3-4.9"/><circle class="dot" cx="19.3" cy="8" r="2"/>', // Б. Линия роста
+      c: '<circle class="soft" cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="8.6" stroke-dasharray="38 60" transform="rotate(-90 12 12)"/><path d="M8.4 13.8l2.3-2.3 1.9 1.7 2.9-3.3"/>', // В. Кольцо знания
+    },
+    decks: {
+      a: '<rect class="f" x="3.5" y="7" width="13" height="13.5" rx="2.4"/><path d="M7.5 3.5h10.2c1.6 0 2.8 1.2 2.8 2.8v10.2"/>', // А. Стопка карточек
+      b: '<rect class="soft" x="3.8" y="5.6" width="10.5" height="14" rx="2.2" transform="rotate(-12 9 12.6)"/><rect class="f" x="9.4" y="4.4" width="10.5" height="14" rx="2.2" transform="rotate(9 14.6 11.4)"/>', // Б. Веер
+    },
+    settings: {
+      a: '<circle cx="12" cy="12" r="8.1" stroke-width="3.2" stroke-dasharray="3.2 3.16" stroke-linecap="butt"/><circle class="f" cx="12" cy="12" r="5.9"/><circle cx="12" cy="12" r="2.2"/>', // А. Шестерёнка
+      b: '<path d="M4 7h8.5M16.5 7H20M4 12h2.5M10.5 12H20M4 17h10.5M18.5 17H20"/><circle class="f" cx="14.5" cy="7" r="2"/><circle class="f" cx="8.5" cy="12" r="2"/><circle class="f" cx="16.5" cy="17" r="2"/>', // Б. Ползунки
+    },
+  };
+  /* v229: the same family for the UI chrome — «О приложении», «Мой кабинет» (sync), the sign-in sheet, the first-sync choice.
+     24×24, a 1.9 line in the colour of the text, round ends; `f` = a part lightly filled, `dot` = a solid dot. No colours of
+     their own: white on accent buttons, muted where the text is muted. Optically centred in the 24 box (4…20). */
+  const UI_ICO = {
+    info: '<circle class="f" cx="12" cy="12" r="8.6"/><path d="M12 11.2v5"/><circle class="dot" cx="12" cy="7.9" r="1.2"/>',
+    copy: '<rect class="f" x="9" y="9" width="11" height="11" rx="2.3"/><path d="M15 6.4v-.1C15 5 14 4 12.7 4H6.3C5 4 4 5 4 6.3v6.4C4 14 5 15 6.3 15h.1"/>',
+    refresh: '<path d="M19.6 12a7.6 7.6 0 1 1-7.6-7.6c2.13 0 4.16.84 5.69 2.31L19.6 8.6"/><path d="M19.6 3.8v4.8h-4.8"/>',
+    report: '<path class="f" d="M6.2 4.2h11.6c1.2 0 2.2 1 2.2 2.2v8.4c0 1.2-1 2.2-2.2 2.2h-5.6l-4.1 3.1c-.45.34-1.1.02-1.1-.54V17h-.8C5 17 4 16 4 14.8V6.4c0-1.2 1-2.2 2.2-2.2z"/><path d="M12 7.4v3.6"/><circle class="dot" cx="12" cy="13.9" r="1.15"/>',
+    sparkle: '<path class="f" d="M12 3.6c.7 4.9 3.5 7.7 8.4 8.4-4.9.7-7.7 3.5-8.4 8.4-.7-4.9-3.5-7.7-8.4-8.4 4.9-.7 7.7-3.5 8.4-8.4z"/>',
+    licence: '<path d="M11.4 20.2H7.2c-1.2 0-2.2-1-2.2-2.2V6c0-1.2 1-2.2 2.2-2.2h9.4c1.2 0 2.2 1 2.2 2.2v4.1"/><path d="M8.4 8h6.8M8.4 11.3h3.6"/><circle class="f" cx="16" cy="14.6" r="3.1"/><path d="M14.3 17.2l-.7 3.4 2.4-1.2 2.4 1.2-.7-3.4"/>',
+    cloud: '<path class="f" d="M7.2 19h10a4.3 4.3 0 0 0 .62-8.56A6 6 0 0 0 6.5 9.7 4.7 4.7 0 0 0 7.2 19z"/>',
+    'cloud-check': '<path class="f" d="M7.2 19h10a4.3 4.3 0 0 0 .62-8.56A6 6 0 0 0 6.5 9.7 4.7 4.7 0 0 0 7.2 19z"/><path d="M9.4 14.2l1.9 1.9 3.6-3.7"/>',
+    'cloud-off': '<path class="f" d="M7.2 19h10a4.3 4.3 0 0 0 .62-8.56A6 6 0 0 0 6.5 9.7 4.7 4.7 0 0 0 7.2 19z"/><path d="M4 4.2l16 16"/>',
+    lock: '<rect class="f" x="5" y="10.3" width="14" height="9.9" rx="2.4"/><path d="M8.3 10.3V7.6a3.7 3.7 0 0 1 7.4 0v2.7"/><circle class="dot" cx="12" cy="15.2" r="1.2"/>',
+    check: '<path d="M5 12.6l4.4 4.4L19 7.4"/>',
+    sync: '<path d="M4.4 12A7.6 7.6 0 0 1 12 4.4a8.23 8.23 0 0 1 5.69 2.31L19.6 8.6"/><path d="M19.6 3.8v4.8h-4.8"/><path d="M19.6 12a7.6 7.6 0 0 1-7.6 7.6 8.23 8.23 0 0 1-5.69-2.31L4.4 15.4"/><path d="M9.2 15.4H4.4v4.8"/>',
+    signout: '<path d="M10.4 4.4H7.1c-1.2 0-2.2 1-2.2 2.2v10.8c0 1.2 1 2.2 2.2 2.2h3.3"/><path d="M15.3 7.9l4.1 4.1-4.1 4.1"/><path d="M19.2 12H10"/>',
+    trash: '<path class="f" d="M6.4 7.2l.86 11.1c.09 1.07.98 1.9 2.05 1.9h5.38c1.07 0 1.96-.83 2.05-1.9l.86-11.1z"/><path d="M4.6 7.2h14.8"/><path d="M9.4 7.2V5.6c0-.88.72-1.6 1.6-1.6h2c.88 0 1.6.72 1.6 1.6v1.6"/><path d="M10.4 11v5.2M13.6 11v5.2"/>',
+    download: '<path d="M12 4v10.4"/><path d="M7.8 10.4 12 14.6l4.2-4.2"/><path d="M4.5 15.6v1.7c0 1.5 1.2 2.7 2.7 2.7h9.6c1.5 0 2.7-1.2 2.7-2.7v-1.7"/>',
+    upload: '<path d="M12 14.6V4.2"/><path d="M7.8 8.4 12 4.2l4.2 4.2"/><path d="M4.5 15.6v1.7c0 1.5 1.2 2.7 2.7 2.7h9.6c1.5 0 2.7-1.2 2.7-2.7v-1.7"/>',
+    alert: '<path class="f" d="M10.27 5 3.6 16.6c-.77 1.33.19 3 1.73 3h13.34c1.54 0 2.5-1.67 1.73-3L13.73 5c-.77-1.33-2.69-1.33-3.46 0z"/><path d="M12 9.6v3.9"/><circle class="dot" cx="12" cy="16.4" r="1.15"/>',
+    close: '<path d="M6.6 6.6l10.8 10.8M17.4 6.6 6.6 17.4"/>',
+    mail: '<rect class="f" x="3.6" y="5.6" width="16.8" height="12.8" rx="2.5"/><path d="m4.6 7.6 7.4 5.3 7.4-5.3"/>',
+  };
+  // the fill / dot are written into the markup, so an icon looks the same wherever it lands (no CSS needed)
+  const uiPaint = s => s.replace(/class="f"/g, 'class="f" fill="currentColor" fill-opacity=".22"').replace(/class="dot"/g, 'class="dot" fill="currentColor" stroke="none"');
+  const NAV_PICK = { stats: 'a', decks: 'a', settings: 'a' };
+  const NAV_EMO = { stats: '📊', decks: '📚', settings: '⚙️' };
+  const NavIcons = {
+    SVG: NAV_SVG, PICK: NAV_PICK,
+    html(name, v) {
+      v = v || NAV_PICK[name];
+      if (v === 'e' || !NAV_SVG[name] || !NAV_SVG[name][v]) return `<span class="nav-emo">${NAV_EMO[name] || ''}</span>`;
+      return `<svg class="ico nav-svg" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${NAV_SVG[name][v]}</svg>`;
+    },
+    /** 📊 → the drawn «Статистика» bars of the top bar (v219: the 📊 emoji is gone from the app). Sized like the emoji it
+     *  replaces (1.15em — follows the font-size of the text around it), the colour of the text, lightly filled bars (css .stats-ico) */
+    statsIco(cls) { return `<i class="nav-ico stats-ico${cls ? ' ' + cls : ''}" aria-hidden="true">${NavIcons.html('stats')}</i>`; },
+    /** static (our own, trusted) HTML: every 📊 → statsIco(). Never for user text or for TTS — speak the original string */
+    swap(html) { return String(html == null ? '' : html).replace(/📊/g, () => NavIcons.statsIco()); },
+    /** a drawn UI icon of the same family (UI_ICO above): NavIcons.icon('copy') → <svg class="ico ui-ico ui-ico-copy">.
+     *  size in px (default 18; CSS may set 1em etc.); the colour is the text's (currentColor). Unknown name → '' */
+    icon(name, size, cls) {
+      const p = UI_ICO[name]; if (!p) return '';
+      const s = size || 18;
+      return `<svg class="ico ui-ico ui-ico-${name}${cls ? ' ' + cls : ''}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${uiPaint(p)}</svg>`;
+    },
+    ICONS: Object.keys(UI_ICO),
+    /** every <i data-nav-ico="stats|decks|settings"> (top bar, tab bar) */
+    paint(root) { (root || document).querySelectorAll('[data-nav-ico]').forEach(el => { el.innerHTML = NavIcons.html(el.dataset.navIco); }); },
+  };
+  window.NavIcons = NavIcons;
+
   const App = {
+    /** 🤖 the same crisp logos / robot for other windows (js/aihub.js «Центр нейросети») */
+    aiLogo: aibLogo, aiBot: aibBot, robotSvg,
     view: { name: 'home', params: {} },
     prev: null,
     _pickDeck: null,
@@ -61,7 +166,7 @@
       const p = new URLSearchParams(location.search);
       if (!p.has('share-target')) return;
       const title = (p.get('title') || '').trim(), text = (p.get('text') || '').trim(), url = (p.get('url') || '').trim();
-      history.replaceState(null, '', location.pathname); // a reload does not open it again
+      history.replaceState(history.state, '', location.pathname + location.hash); // a reload does not open it again (the screen's history entry stays)
       const body = [title, text, url && !text.includes(url) ? url : ''].filter(Boolean).join('\n\n');
       if (!/\p{L}{2}/u.test(body)) { UI.toast('Получена пустая ссылка — откройте её и поделитесь текстом', 'warn'); return; }
       const name = (title || text.split(/\s+/).slice(0, 6).join(' ') || 'Текст').replace(/[\\/:*?"<>|]+/g, ' ').slice(0, 80);
@@ -83,6 +188,8 @@
         if (n) Store.save();
       } catch (e) { /* ignore */ }
       this.applyTheme();
+      NavIcons.paint();
+      try { if (window.AppThemes) AppThemes.apply('app'); } catch (e) { console.warn('apptheme', e); } // 🎨 theme / holiday dress-up (js/apptheme.js) — now that Store.settings (artMotion) is loaded
       TTS.init();
       await AI.detectBridge();
       if (!Store.decks().length && !Store.state.sampleAdded) {
@@ -98,8 +205,13 @@
       // 🧠 personalise FSRS in the background when there are enough answers (checks only; runs rarely, in a Web Worker)
       try { FSRSOpt.schedule(10000); } catch (e) { console.warn('fsrs-opt', e); }
       if (!Store.settings.userName && !Store.state.askedName) {
+        // ✨ the first start: «Знакомство» (js/showcase.js) — its last scene asks the name itself
+        let n = '', seen = false;
+        if (window.Showcase && Showcase.shouldAuto()) {
+          try { const r = await Showcase.open({ askName: true }); n = (r && r.name) || ''; seen = !!(r && r.finished); } catch (e) { console.warn('showcase', e); }
+        }
         Store.state.askedName = true; Store.save();
-        const n = await UI.prompt('👋 Как вас зовут?', '', 'Alex');
+        if (!n && !seen) n = await UI.prompt('👋 Как вас зовут?', '', 'Alex');
         if (n) { Store.setSetting('userName', n); this.updateBadge(); this.render(); Account.paintTop(); }
       }
     },
@@ -125,9 +237,21 @@
       this.go(name, params);
     },
     go(name, params = {}) {
-      if (this.view.name === 'study' && name !== 'study') { Study.end(); TTS.stop(); }
+      // 👀 the AI is checking this deck before the person's eyes (js/aihub.js): leaving asks first
+      if (window.AIHub && AIHub.leaving && AIHub.leaving(name, params)) return;
+      if (this.view.name === 'study' && name !== 'study') {
+        Study.end(); TTS.stop();
+        // a new build arrived during the session (setupPWA): it is applied now that the card screen is left
+        if (this._updPending && !this._reloaded) { this._reloaded = true; location.reload(); return; }
+      }
       if (name !== 'deck' || (params.id !== this.view.params.id)) { Views.sel.clear(); Views.selecting = false; Views.deckFilter = 'all'; Views.deckSearch = ''; Views.deckLimit = 120; }
       if (this.view.name !== 'study') this.prev = this.view;
+      // 🕘 decks in work go up in the deck lists: the opened deck; a card session of one deck (and each answer in it — Store.logReview)
+      try {
+        if (name === 'deck' && params.id) Store.touchDeck(params.id);
+        if (name === 'study') Store.studyDeck(window.Study && Study.session ? Study.session.deckId || null : null);
+        else if (this.view.name === 'study') Store.studyDeck(undefined);
+      } catch (e) { /* ordering only */ }
       this.view = { name, params };
       this.render(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,20 +268,22 @@
           const v = a.dataset.sb;
           if (v === 'deck-del') { e.stopPropagation(); Views.deleteDeck(a.dataset.id); return; }
           if (v === 'deck') this.goAsk('deck', { id: a.dataset.id });
+          // v210: the side menu = the sections of home; the former items still open the same places (old links, tours)
+          else if (['video', 'read', 'drills', 'radio', 'telegram', 'decks', 'looks'].includes(v)) Views.section(v);
           else if (v === 'create') Create.open();
           else if (v === 'library') Library.open();
           else if (v === 'bookshelf') { if (Views.openLibrary) Views.openLibrary(); else Books.open(); }
           else if (v === 'books') Books.open();
           else if (v === 'textbook') Textbook.open();
           else if (v === 'youtube') YouTube.open();
-          else if (v === 'telegram') Telegram.open(null, 'vocab');
           else if (v === 'nrk') NrkTV.open();
           else if (v === 'nrkradio') NrkRadio.open();
           else if (v === 'exams') Exams.open();
           else if (v === 'news') News.open();
           else if (v === 'subs') Subs.open();
-          else if (v === 'drills') Drills.open();
+          else if (v === 'nav' && window.AppNav) AppNav.open();
           else if (v === 'help') Help.open();
+          else if (v === 'showcase' && window.Showcase) Showcase.open();
           else if (v === 'speech') Speech.open();
           else if (v === 'new') Views.deckEditor(null, d => this.go('deck', { id: d.id }));
           else this.goAsk(v);
@@ -167,13 +293,30 @@
       const tb = document.querySelector('.topbar');
       if (tb) document.documentElement.style.setProperty('--topbar-h', Math.round(tb.getBoundingClientRect().bottom) + 'px');
       const v = this.view;
-      const item = (key, icon, label, active) => `<button class="sb-item ${active ? 'active' : ''}" data-sb="${key}">${icon}<span>${label}</span></button>`;
-      sb.innerHTML = `${item('home', '🏠', 'Главная', v.name === 'home')}${item('create', '💬', 'Что выучить?')}${item('library', '🃏', 'Выражения')}${item('bookshelf', '📚', 'Библиотека')}${item('drills', '🏋️', 'Упражнения')}${item('klokka', '🕐', 'Время · Klokka')}${item('speech', '🗣', 'Произношение')}${item('news', '📰', 'Новости')}${item('subs', '🎬', 'Субтитры')}${item('youtube', YouTube.YT_SVG(20), 'YouTube')}${item('nrk', '📺', 'NRK TV')}${item('nrkradio', '📻', 'NRK Радио')}${item('telegram', Telegram.TG_SVG(20), 'Telegram')}${item('exams', '🎓', 'Экзамены')}
-        ${item('stats', '📊', 'Статистика', v.name === 'stats')}${item('settings', '⚙️', 'Настройки', v.name === 'settings')}${window.Help ? item('help', '<span class="sb-help" aria-hidden="true">?</span>', 'Как пользоваться') : ''}
-        <div class="sb-title">Все колоды <button class="sb-add" data-sb="new" title="Новая колода">＋</button></div>
-        <div class="sb-decks">${Store.decks().map(d => `<div class="sb-row"><button class="sb-item sb-deck ${v.name === 'deck' && v.params.id === d.id ? 'active' : ''}" data-sb="deck" data-id="${d.id}">
-          ${d.cover ? `<i class="sb-thumb" style="background-image:url('${U.esc(d.cover)}')"></i>` : '<i class="sb-thumb">🗂</i>'}<span>${U.esc(d.name)}</span></button>
-          <button class="sb-del" data-sb="deck-del" data-id="${d.id}" title="Удалить колоду «${U.esc(d.name)}» (с подтверждением)" aria-label="Удалить колоду">${UI.TRASH_SVG(15)}</button></div>`).join('')}</div>`;
+      const item = (key, icon, label, active, cls = '') => `<button class="sb-item ${cls} ${active ? 'active' : ''}" data-sb="${key}"${active ? ' aria-current="page"' : ''}><span class="sb-i" aria-hidden="true">${icon}</span><span>${label}</span></button>`;
+      const S = Views.SEC_SVG || {};
+      // v210 (design/declutter.html): the main places only — Статистика and Настройки are in the top bar (and the profile)
+      // v211: «🧭 Навигатор» (tour of this screen + help + quick paths + «Знакомство») right under «Главная»; «🎨 Оформление» beside «Упражнения»
+      sb.innerHTML = `${item('home', '🏠', 'Главная', v.name === 'home')}${window.AppNav ? item('nav', '🧭', 'Навигатор по приложению', false, 'sb-nav') : ''}${item('decks', NavIcons.html('decks'), 'Колоды', false, 'sb-decks-i')}${Views.progress ? item('progress', '📈', 'Мой прогресс', v.name === 'progress') : ''}
+        ${item('video', S.video ? S.video() : '▶️', 'Смотреть видео')}${Views.learn ? item('learn', '🎓', 'Учить по материалам', v.name === 'learn', 'sb-learn') : ''}${item('radio', '📻', 'Радио')}${item('read', '📖', 'Читать')}
+        ${item('telegram', Telegram.TG_SVG(20), 'Telegram')}${item('drills', '🏋️', 'Упражнения')}${window.AppThemes || window.ArtCards ? item('looks', '🎨', 'Оформление') : ''}
+        <div class="sb-title">Мои колоды <button class="sb-add" data-sb="new" title="Новая колода" aria-label="Новая колода">＋</button></div>
+        <div class="sb-decks">${this.sidebarDecks(sb).map(d => `<div class="sb-row"><button class="sb-item sb-deck ${v.name === 'deck' && v.params.id === d.id ? 'active' : ''}" data-sb="deck" data-id="${d.id}">
+          ${d.cover ? `<i class="sb-thumb" style="background-image:url('${U.esc(d.cover)}')"></i>` : '<i class="sb-thumb">🗂</i>'}<span>${d.pinned ? '<span class="sb-pin" title="Закреплена наверху" aria-label="Закреплена наверху">📌</span> ' : ''}${U.esc(d.name)}</span></button></div>`).join('')}</div>
+`;
+    },
+    /** 🕘 «Мои колоды» in the sidebar: decks in work first (Store.decksByUse). Nothing moves under the mouse: while the
+     * pointer is over the sidebar (or a deck row has focus) the order stays as it was — the new one comes with the next screen. */
+    sidebarDecks(sb) {
+      const order = Store.decksByUse ? Store.decksByUse() : Store.decks();
+      let list = order;
+      const still = this._sbOrder && sb && (sb.matches(':hover') || sb.contains(document.activeElement));
+      if (still) {
+        const was = new Map(this._sbOrder.map((id, i) => [id, i]));
+        list = order.slice().sort((a, b) => (was.has(a.id) ? was.get(a.id) : 1e9) - (was.has(b.id) ? was.get(b.id) : 1e9));
+      }
+      this._sbOrder = list.map(d => d.id);
+      return list;
     },
     back() {
       const p = this.prev && this.prev.name !== 'study' ? this.prev : { name: 'home', params: {} };
@@ -190,6 +333,8 @@
         if (v.name === 'study') Study.render(root);
         else if (Views[v.name]) Views[v.name](root, v.params);
         else Views.home(root);
+        try { if (window.AppThemes) AppThemes.afterRender(v.name, root); } catch (e) { console.warn('apptheme', e); } // 🎨 «Тема приложения» block in Settings → Внешний вид
+        try { if (Views.mountFoot) Views.mountFoot(root, v.name); } catch (e) { console.warn('footer', e); } // 🦶 the same footer under every screen
         TTS.emit();
         this.renderSidebar();
         // every deck without a picture gets a Norwegian photo — wherever it was created (library, Telegram, import…)
@@ -209,8 +354,11 @@
           });
         } catch (e) { /* offline */ }
       } catch (e) {
-        console.error(e);
-        root.innerHTML = `<div class="panel empty"><div class="big">😵</div><p>Ошибка интерфейса: ${U.esc(e.message)}</p><button class="btn" onclick="App.go('home')">На главную</button></div>`;
+        console.warn('render', v.name, e); // the technical detail: console only
+        root.innerHTML = `<div class="panel empty app-oops" role="alert"><div class="big">😵</div>
+          <p><b>Этот экран не открылся.</b><br>${v.name === 'home' ? 'Попробуйте обновить страницу — ваши карточки и колоды на месте.' : 'Ваши карточки и колоды на месте — вернитесь на главную и попробуйте ещё раз.'}</p>
+          <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" data-action="nav" data-view="home">🏠 На главную</button>
+          <button class="btn" type="button" onclick="location.reload()">🔄 Обновить страницу</button></div></div>`;
       }
     },
 
@@ -224,7 +372,8 @@
       document.querySelector('meta[name="theme-color"]').content = dark ? '#0f1222' : '#f3f4fb';
     },
     /** 🤖 «Нейросети» in the top bar: the robot mascot (aibBot) + the logo and name of the current AI (or «Подключить ИИ»);
-     *  hover / keyboard focus fans out every service the app supports; a tap opens the AI menu (data-action="ai-menu").
+     *  hover / keyboard focus fans out every service the app supports; a tap / click opens the chooser of all of them
+     *  (data-action="ai-menu" → js/aichooser.js: a dropdown, a bottom sheet on phones).
      *  Its size is picked to fit the free room in the bar (data-fit: l → m → s → xs) — it never pushes the other buttons. */
     updateBadge() {
       const b = document.getElementById('claude-badge');
@@ -252,6 +401,8 @@
           ` data-n="${U.esc(P[k].name)}${k === cur ? ' — сейчас' : conf(k) ? ' — подключена' : ''}"`).replace('style="', `style="--i:${i};`)).join('')}</span>`
         + `<span class="aib-fan-f">${on ? `Сейчас работает <b>${U.esc(label(cur))}</b> · нажмите, чтобы сменить` : 'Ни одна не подключена · нажмите — <b>Gemini и Groq бесплатно</b>'}</span></span>`;
       b.setAttribute('aria-label', on ? `Нейросети: подключено — ${P[cur].short}` : 'Нейросети: не подключено — нажмите, чтобы подключить');
+      // 🤖 Центр нейросети (js/aihub.js): opens itself once right after the first AI is connected; resumes an unfinished check
+      if (window.AIHub && AIHub.onBadge) { try { AIHub.onBadge(on); } catch (e) { console.warn('aihub', e); } }
       b.title = on ? `🤖 Нейросеть: ${P[cur].name}${cur === 'claude' ? ' (ваша подписка через Claude Code)' : ''} — проверяет карточки и переводит. Нажмите, чтобы сменить`
         : '🤖 Нейросеть не подключена — нажмите, чтобы выбрать (Gemini и Groq — бесплатно)';
       this.fitBadge();
@@ -261,25 +412,29 @@
         const again = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => this.fitBadge()); };
         this._badgeRO = new ResizeObserver(again);
         const tb = b.closest('.topbar');
-        if (tb) [tb, ...tb.children, ...b.parentElement.children].forEach(el => { if (el !== b && el !== b.parentElement) this._badgeRO.observe(el); });
+        if (tb) [tb, ...tb.querySelectorAll('.logo, .top-icons, .nav, .top-actions > :not(#claude-badge), .top-user > *')].forEach(el => this._badgeRO.observe(el));
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(again);
       }
     },
-    /** the biggest look of the AI button that fits the free room in the top bar */
+    /** the top bar never wraps: when the room runs out the labels fold into icons, always in the same order —
+     *  a little less air → 🤖 the AI button's text → «Слушать» / «Переводчик» captions → 🤖 just the robot → the «Norsk Kort» text → the section
+     *  names (last) → ⤴ share and the theme move into «⋯». Phones (html.m-phone) have their own bar: nothing to do there. */
     fitBadge() {
-      const b = document.getElementById('claude-badge'), right = b && b.parentElement, tb = b && b.closest('.topbar');
-      if (!tb || !b.offsetParent) return;
-      const cs = getComputedStyle(tb), gap = parseFloat(cs.columnGap) || 0;
-      const edge = tb.getBoundingClientRect().right - parseFloat(cs.paddingRight);
-      b.dataset.fit = 'xs';
-      const w0 = b.offsetWidth, r = right.getBoundingClientRect();
-      const leftEnd = Math.max(tb.getBoundingClientRect().left, ...[...tb.children].filter(e => e !== right && e.offsetParent).map(e => e.getBoundingClientRect().right));
-      const room = (r.right > edge + .5 ? edge - r.right : r.left - leftEnd - gap) - 2; // < 0: the bar is already too full
-      for (const t of ['l', 'm', 's']) {
-        b.dataset.fit = t;
-        if (b.offsetWidth - w0 <= room) return;
-      }
-      b.dataset.fit = 'xs';
+      const b = document.getElementById('claude-badge'), tb = b && b.closest('.topbar');
+      if (!tb) return;
+      const FOLD = ['tb-tight', 'tb-ico', 'tb-nologo', 'tb-navico', 'tb-more'];
+      tb.classList.remove(...FOLD);
+      b.dataset.fit = 'l';
+      if (!b.offsetParent || document.documentElement.classList.contains('m-phone')) return;
+      const cs = getComputedStyle(tb), edge = tb.getBoundingClientRect().right - parseFloat(cs.paddingRight);
+      const user = tb.querySelector('.top-user'), nav = tb.querySelector('.nav'), act = tb.querySelector('.top-actions');
+      const gap = parseFloat(getComputedStyle(tb.querySelector('.topbar-right')).columnGap) || 0;
+      // too full: the last group sticks out, or the actions come closer to the sections than one group gap
+      const full = () => (user && user.getBoundingClientRect().right > edge + .5)
+        || (nav && act && nav.offsetParent && act.getBoundingClientRect().left - nav.getBoundingClientRect().right < gap - .5);
+      const steps = [() => tb.classList.add('tb-tight'), () => { b.dataset.fit = 'm'; }, () => tb.classList.add('tb-ico'), () => { b.dataset.fit = 's'; },
+        () => tb.classList.add('tb-nologo'), () => tb.classList.add('tb-navico'), () => tb.classList.add('tb-more')];
+      for (const step of steps) { if (!full()) return; step(); }
     },
 
     /** offline cache (service worker) + ask the browser to keep our data (Safari wipes idle sites after 7 days) */
@@ -289,13 +444,36 @@
         const hadController = !!navigator.serviceWorker.controller;
         // GitHub Pages caches every file for 10 min — bypass the HTTP cache for sw.js so updates arrive at once
         navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' }).catch(e => console.warn('SW', e));
-        let reloaded = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!hadController || reloaded || this.view.name === 'study') return; // never interrupt a study session
-          reloaded = true; location.reload();
+          if (!hadController || this._reloaded) return;
+          // never interrupt a study session — but never stay silently on the old build either (v231: a tab left on the
+          // study screen kept pre-v226 code for days): a small offer «Готово обновление — обновить сейчас?»; leaving the
+          // study screen applies it (App.go)
+          if (this.view.name === 'study') { this._updPending = true; this.updateBanner(); return; }
+          this.applyUpdate();
         });
       }
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    },
+
+    /** reload into the new build (once) */
+    applyUpdate() {
+      if (this._reloaded) return;
+      this._reloaded = true;
+      try { if (this.view.name === 'study' && window.Study) Study.end(); } catch (e) { /* the session is saved as it goes */ }
+      location.reload();
+    },
+    /** the small non-blocking offer while the study screen is open: «Обновить» now, × later (then: when leaving the screen) */
+    updateBanner() {
+      if (document.querySelector('.upd-banner')) return;
+      const el = document.createElement('div');
+      el.className = 'upd-banner'; el.setAttribute('role', 'status');
+      el.innerHTML = `<span class="upd-i">${NavIcons.icon('refresh', 18)}</span><span class="upd-t">Готово обновление — обновить сейчас?</span>
+        <button type="button" class="btn sm primary" data-upd-go>Обновить</button>
+        <button type="button" class="upd-x" data-upd-x title="Позже — обновится, когда вы выйдете из карточек" aria-label="Позже">${NavIcons.icon('close', 16)}</button>`;
+      el.querySelector('[data-upd-go]').onclick = () => this.applyUpdate();
+      el.querySelector('[data-upd-x]').onclick = () => el.remove();
+      document.body.appendChild(el);
     },
 
     pickFiles(deckId) {
@@ -307,7 +485,7 @@
 
     addSampleDeck() {
       const sd = window.SAMPLE_DECK;
-      const d = Store.addDeck(sd.name, sd.description);
+      const d = Store.addDeck(sd.name, sd.description, { sample: true });
       sd.cards.forEach(([no, ru, en, description, example, exampleRu]) => {
         Store.addCard(d.id, { no, ru, en, description, example, exampleRu, wordClass: (description.match(/^(substantiv|verb|adjektiv|adverb|interjeksjon)/) || [])[1] || '',
           history: [{ t: Date.now(), by: 'import', a: 'import', n: 'стартовая колода Norsk Kort' }] });
@@ -327,12 +505,20 @@
         }
         if (a.dataset.action === 'ai-menu') {
           e.stopPropagation();
+          // 🤖 every AI the app supports: a dropdown under the button / a bottom sheet on phones (js/aichooser.js)
+          if (window.AIChooser) { AIChooser.open(a); return; }
           const items = Object.entries(AI.PROVIDERS).filter(([id]) => AI.configured(id)).map(([id, p]) => ({
             label: `${AI.current() === id ? '★ ' : ''}${p.name}`,
             html: `${aibLogo(id, ' aib-m')} ${U.esc(p.name)}${AI.current() === id ? ' <b style="color:var(--good)">✓</b>' : ''}`, // the same logos as on the 🤖 button
             action: () => { Store.setSetting('aiProvider', id); this.updateBadge(); this.render(); UI.toast('Теперь карточки проверяет: ' + p.name, 'good'); },
           }));
           items.push({ label: '⚙️ Подключить другие нейросети…', action: () => this.go('settings') });
+          // 🤖 «Что умеет нейросеть» — the AI hub (js/aihub.js) first: what to do after connecting; a running check right under it
+          if (window.AIHub) {
+            const st = AIHub.state();
+            if (st.run) items.unshift({ html: `<span class="aih-menu-run">${st.live ? '⏳' : '⏸'} Проверка нейросетью: ${st.total ? Math.round(st.done / st.total * 100) : 0}% — открыть</span>`, action: () => AIHub.showRun() });
+            items.unshift({ html: `<span class="aih-menu-hub">${robotSvg()} <b>Что умеет нейросеть</b> <small>Центр нейросети</small></span>`, action: () => AIHub.open() });
+          }
           UI.menu(a, items);
         }
         if (a.dataset.action === 'more-menu') {
@@ -344,8 +530,10 @@
             ...(window.Views && Views.openLibrary ? [{ label: '📚 Библиотека — читать и слушать', action: () => Views.openLibrary() }] : []),
             { label: '🗣 Переводчик в наушниках', action: () => Interp.toggle() },
             { label: '🔗 Поделиться приложением', action: () => ShareApp.open() },
-            ...(window.Help ? [{ label: '❓ Как пользоваться — подсказки', action: () => Help.open() }] : []),
-            { label: '🤖 Нейросеть: ' + (AI.available() ? AI.PROVIDERS[AI.current()].name : 'не подключена'), action: () => this.go('settings') },
+            ...(window.AppNav ? [{ label: '🧭 Навигатор по приложению', action: () => AppNav.open() }] : window.Help ? [{ label: '❓ Как пользоваться — подсказки', action: () => Help.open() }] : []),
+            ...(window.AppThemes ? [{ label: '🎨 Оформление', action: () => Views.looksSheet(App.view.name === 'deck' ? App.view.params.id : null) }] : []),
+            ...(window.About ? [{ label: 'ℹ️ О приложении', action: () => About.open() }] : []),
+            { html: `${robotSvg()} Нейросеть: ${AI.available() ? U.esc(AI.PROVIDERS[AI.current()].name) : 'не подключена'}`, action: () => (window.AIChooser ? AIChooser.open(a) : this.go('settings')) },
             { label: dark ? '🌞 Светлая тема' : '🌙 Тёмная тема', action: () => { Store.setSetting('theme', dark ? 'light' : 'dark'); this.applyTheme(); if (this.view.name === 'settings') this.render(); } },
           ]);
         }
@@ -370,6 +558,12 @@
         if (files.length) Views.importFiles(files, this._pickDeck || (this.view.name === 'deck' ? this.view.params.id : null));
       });
       document.addEventListener('keydown', e => Study.onKey(e));
+      // 📚 library hover card: a button near the right edge opens it to the left, so it is never cut off
+      document.addEventListener('pointerover', e => {
+        const w = e.target.closest && e.target.closest('.lib-btn-wrap'); if (!w) return;
+        const r = w.getBoundingClientRect(), half = Math.min(360, innerWidth * 0.86) / 2;
+        w.classList.toggle('lib-right', r.left + r.width / 2 + half > innerWidth - 8);
+      });
       // provenance badges (✍️ 📥 DeepL Claude…) — open the card's history; capture phase so the card itself doesn't open/flip
       document.addEventListener('click', e => {
         const b = e.target.closest('[data-prov]');
@@ -440,7 +634,9 @@
 
   window.App = App;
   window.addEventListener('DOMContentLoaded', () => App.init().catch(e => {
-    console.error(e);
-    document.getElementById('view').innerHTML = `<div class="panel empty"><div class="big">😵</div><p>Не удалось запустить: ${U.esc(e.message)}</p></div>`;
+    console.warn('start', e); // the technical detail: console only
+    document.getElementById('view').innerHTML = `<div class="panel empty app-oops" role="alert"><div class="big">😵</div>
+      <p><b>Приложение не запустилось.</b><br>Обновите страницу — ваши карточки и колоды на месте.</p>
+      <button class="btn primary" type="button" onclick="location.reload()">🔄 Обновить страницу</button></div>`;
   }));
 })();

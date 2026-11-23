@@ -1,0 +1,4476 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "group": "life",
+ "attribution": "Собственный материал Norsk Kort: слова, примеры и переводы написаны для приложения; написание и род сверены с ordbokene.no",
+ "decks": [
+  {
+   "id": "life-jobb-helse",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "jobb",
+   "name": "Работа: здравоохранение и уход",
+   "nameUk": "Робота: охорона здоров'я і догляд",
+   "nameNo": "Jobb: helse og omsorg",
+   "icon": "🩺",
+   "level": "A2",
+   "tags": [
+    "jobb",
+    "helse",
+    "omsorg"
+   ],
+   "description": "Для тех, кто работает или хочет работать в доме престарелых, в службе помощи на дому или помощником по уходу: смены, уход, лекарства и фразы для разговора с пациентом.",
+   "cards": [
+    {
+     "key": "life:helse:sykehjem",
+     "no": "et sykehjem",
+     "ru": "дом престарелых",
+     "uk": "будинок для літніх людей",
+     "wordClass": "substantiv",
+     "example": "Hun jobber på et sykehjem i nærheten.",
+     "exampleRu": "Она работает в доме престарелых недалеко отсюда.",
+     "exampleUk": "Вона працює в будинку для літніх людей неподалік.",
+     "description": "💡 Дословно «дом для больных», но это учреждение для пожилых людей, которым нужен постоянный уход."
+    },
+    {
+     "key": "life:helse:beboer",
+     "no": "en beboer",
+     "ru": "житель; проживающий (в доме престарелых)",
+     "uk": "мешканець",
+     "wordClass": "substantiv",
+     "example": "Beboerne spiser middag klokka fire.",
+     "exampleRu": "Проживающие обедают в четыре.",
+     "exampleUk": "Мешканці обідають о четвертій."
+    },
+    {
+     "key": "life:helse:pasient",
+     "no": "en pasient",
+     "ru": "пациент",
+     "uk": "пацієнт",
+     "wordClass": "substantiv",
+     "example": "Pasienten trenger hjelp til å stå opp.",
+     "exampleRu": "Пациенту нужна помощь, чтобы встать.",
+     "exampleUk": "Пацієнтові потрібна допомога, щоб підвестися."
+    },
+    {
+     "key": "life:helse:pleieassistent",
+     "no": "en pleieassistent",
+     "ru": "помощник по уходу; санитар",
+     "uk": "помічник із догляду",
+     "wordClass": "substantiv",
+     "example": "Jeg er pleieassistent på en demensavdeling.",
+     "exampleRu": "Я работаю помощником по уходу в отделении для людей с деменцией.",
+     "exampleUk": "Я працюю помічником із догляду у відділенні для людей із деменцією.",
+     "description": "💡 Работа без специального образования; часто первая работа в уходе."
+    },
+    {
+     "key": "life:helse:helsefagarbeider",
+     "no": "en helsefagarbeider",
+     "ru": "специалист по уходу (со средним проф. образованием)",
+     "uk": "фахівець із догляду (із середньою фаховою освітою)",
+     "wordClass": "substantiv",
+     "example": "Hun utdanner seg til helsefagarbeider.",
+     "exampleRu": "Она учится на специалиста по уходу.",
+     "exampleUk": "Вона навчається на фахівця з догляду.",
+     "description": "💡 Не путайте с sykepleier — это медсестра с высшим образованием."
+    },
+    {
+     "key": "life:helse:sykepleier",
+     "no": "en sykepleier",
+     "ru": "медсестра; медбрат",
+     "uk": "медсестра; медбрат",
+     "wordClass": "substantiv",
+     "example": "Sykepleieren deler ut medisiner om morgenen.",
+     "exampleRu": "Утром медсестра раздаёт лекарства.",
+     "exampleUk": "Уранці медсестра роздає ліки."
+    },
+    {
+     "key": "life:helse:vakt",
+     "no": "en vakt",
+     "ru": "смена; дежурство",
+     "uk": "зміна; чергування",
+     "wordClass": "substantiv",
+     "example": "Jeg har lang vakt i morgen.",
+     "exampleRu": "Завтра у меня длинная смена.",
+     "exampleUk": "Завтра в мене довга зміна.",
+     "description": "💡 vakt — ещё и «охранник». В больнице и доме престарелых так называют смену."
+    },
+    {
+     "key": "life:helse:nattevakt",
+     "no": "en nattevakt",
+     "ru": "ночная смена; ночной дежурный",
+     "uk": "нічна зміна; нічний черговий",
+     "wordClass": "substantiv",
+     "example": "Han jobber nattevakt to ganger i uka.",
+     "exampleRu": "Он работает в ночную смену два раза в неделю.",
+     "exampleUk": "Він працює в нічну зміну двічі на тиждень."
+    },
+    {
+     "key": "life:helse:turnus",
+     "no": "en turnus",
+     "ru": "сменный график",
+     "uk": "змінний графік",
+     "wordClass": "substantiv",
+     "example": "Vi jobber i turnus, også i helgene.",
+     "exampleRu": "Мы работаем по сменному графику, в том числе по выходным.",
+     "exampleUk": "Ми працюємо за змінним графіком, зокрема й у вихідні."
+    },
+    {
+     "key": "life:helse:rapport",
+     "no": "en rapport",
+     "ru": "передача смены; отчёт",
+     "uk": "передача зміни; звіт",
+     "wordClass": "substantiv",
+     "example": "Vi har rapport klokka tre, når kveldsvakten kommer.",
+     "exampleRu": "В три у нас передача смены — приходит вечерняя смена.",
+     "exampleUk": "О третій у нас передача зміни — приходить вечірня зміна.",
+     "description": "💡 rapport на работе в уходе — устный рассказ о пациентах для следующей смены."
+    },
+    {
+     "key": "life:helse:medisin",
+     "no": "en medisin",
+     "ru": "лекарство",
+     "uk": "ліки",
+     "wordClass": "substantiv",
+     "example": "Har du gitt fru Hansen medisinen hennes?",
+     "exampleRu": "Ты дала фру Хансен лекарство?",
+     "exampleUk": "Ти дала пані Гансен ліки?"
+    },
+    {
+     "key": "life:helse:a-stelle",
+     "no": "å stelle",
+     "ru": "ухаживать (умыть, одеть, причесать)",
+     "uk": "доглядати (вмити, одягнути, причесати)",
+     "wordClass": "verb",
+     "example": "Jeg steller tre beboere hver morgen.",
+     "exampleRu": "Каждое утро я помогаю умыться и одеться трём проживающим.",
+     "exampleUk": "Щоранку я допомагаю вмитися й одягнутися трьом мешканцям."
+    },
+    {
+     "key": "life:helse:stell",
+     "no": "et stell",
+     "ru": "гигиенический уход",
+     "uk": "гігієнічний догляд",
+     "wordClass": "substantiv",
+     "example": "Morgenstellet tar omtrent en halvtime.",
+     "exampleRu": "Утренний уход занимает около получаса.",
+     "exampleUk": "Ранковий догляд триває приблизно пів години."
+    },
+    {
+     "key": "life:helse:a-dusje",
+     "no": "å dusje",
+     "ru": "принимать душ; помыть в душе",
+     "uk": "приймати душ; помити в душі",
+     "wordClass": "verb",
+     "example": "Kan du hjelpe meg med å dusje Ole i dag?",
+     "exampleRu": "Поможешь мне сегодня помыть Уле в душе?",
+     "exampleUk": "Допоможеш мені сьогодні помити Уле в душі?"
+    },
+    {
+     "key": "life:helse:rullestol",
+     "no": "en rullestol",
+     "ru": "инвалидная коляска",
+     "uk": "інвалідний візок",
+     "wordClass": "substantiv",
+     "example": "Han sitter i rullestol etter hjerneslaget.",
+     "exampleRu": "После инсульта он передвигается на инвалидной коляске.",
+     "exampleUk": "Після інсульту він пересувається на інвалідному візку."
+    },
+    {
+     "key": "life:helse:rullator",
+     "no": "en rullator",
+     "ru": "ходунки на колёсах",
+     "uk": "ходунки на колесах",
+     "wordClass": "substantiv",
+     "example": "Husk å sette rullatoren ved sengen.",
+     "exampleRu": "Не забудь поставить ходунки у кровати.",
+     "exampleUk": "Не забудь поставити ходунки біля ліжка."
+    },
+    {
+     "key": "life:helse:a-re-opp-sengen",
+     "no": "å re opp sengen",
+     "ru": "заправить кровать",
+     "uk": "застелити ліжко",
+     "wordClass": "uttrykk",
+     "example": "Etter frokost rer vi opp sengene.",
+     "exampleRu": "После завтрака мы заправляем кровати.",
+     "exampleUk": "Після сніданку ми застеляємо ліжка."
+    },
+    {
+     "key": "life:helse:hjemmetjenesten",
+     "no": "hjemmetjenesten",
+     "ru": "служба помощи на дому",
+     "uk": "служба допомоги вдома",
+     "wordClass": "substantiv",
+     "example": "Hjemmetjenesten kommer til henne to ganger om dagen.",
+     "exampleRu": "Служба помощи на дому приходит к ней два раза в день.",
+     "exampleUk": "Служба допомоги вдома приходить до неї двічі на день.",
+     "description": "💡 Обычно говорят с определённым артиклем: hjemmetjenesten."
+    },
+    {
+     "key": "life:helse:bruker",
+     "no": "en bruker",
+     "ru": "получатель помощи; клиент",
+     "uk": "отримувач послуг; клієнт",
+     "wordClass": "substantiv",
+     "example": "Jeg besøker åtte brukere i løpet av dagen.",
+     "exampleRu": "За день я навещаю восемь клиентов.",
+     "exampleUk": "За день я відвідую вісьмох клієнтів.",
+     "description": "💡 Людей, которым помогают на дому, называют brukere — дословно «пользователи»."
+    },
+    {
+     "key": "life:helse:parorende",
+     "no": "en pårørende",
+     "ru": "родственник (пациента); близкий",
+     "uk": "родич (пацієнта); близька людина",
+     "wordClass": "substantiv",
+     "example": "Pårørende kan ringe avdelingen etter klokka ti.",
+     "exampleRu": "Родственники могут звонить в отделение после десяти.",
+     "exampleUk": "Родичі можуть телефонувати до відділення після десятої.",
+     "description": "💡 Форма одна и та же: en pårørende — flere pårørende."
+    },
+    {
+     "key": "life:helse:avdeling",
+     "no": "en avdeling",
+     "ru": "отделение",
+     "uk": "відділення",
+     "wordClass": "substantiv",
+     "example": "Avdelingen har tjue plasser.",
+     "exampleRu": "В отделении двадцать мест.",
+     "exampleUk": "У відділенні двадцять місць."
+    },
+    {
+     "key": "life:helse:a-male-blodtrykket",
+     "no": "å måle blodtrykket",
+     "ru": "измерить давление",
+     "uk": "виміряти тиск",
+     "wordClass": "uttrykk",
+     "example": "Nå skal jeg måle blodtrykket ditt.",
+     "exampleRu": "Сейчас я измерю вам давление.",
+     "exampleUk": "Зараз я виміряю вам тиск."
+    },
+    {
+     "key": "life:helse:hanske",
+     "no": "en hanske",
+     "ru": "перчатка",
+     "uk": "рукавичка",
+     "wordClass": "substantiv",
+     "example": "Ta på deg hansker før stellet.",
+     "exampleRu": "Прежде чем начинать уход, надень перчатки.",
+     "exampleUk": "Перед доглядом вдягни рукавички."
+    },
+    {
+     "key": "life:helse:a-vaske-hendene",
+     "no": "å vaske hendene",
+     "ru": "мыть руки",
+     "uk": "мити руки",
+     "wordClass": "uttrykk",
+     "example": "Husk å vaske hendene mellom hver bruker.",
+     "exampleRu": "Не забывай мыть руки после каждого клиента.",
+     "exampleUk": "Не забувай мити руки після кожного клієнта."
+    },
+    {
+     "key": "life:helse:sykemelding",
+     "no": "en sykemelding",
+     "ru": "больничный (лист)",
+     "uk": "лікарняний",
+     "wordClass": "substantiv",
+     "example": "Hun har sykemelding resten av uka.",
+     "exampleRu": "У неё больничный до конца недели.",
+     "exampleUk": "У неї лікарняний до кінця тижня."
+    },
+    {
+     "key": "life:helse:a-melde-avvik",
+     "no": "å melde avvik",
+     "ru": "сообщить об инциденте",
+     "uk": "повідомити про інцидент",
+     "wordClass": "uttrykk",
+     "example": "Hvis noe går galt, må du melde avvik.",
+     "exampleRu": "Если что-то пошло не так, нужно сообщить об инциденте.",
+     "exampleUk": "Якщо щось пішло не так, треба повідомити про інцидент.",
+     "description": "💡 avvik — любое отклонение от правил: лекарство дали не вовремя, пациент упал."
+    },
+    {
+     "key": "life:helse:taushetsplikt",
+     "no": "en taushetsplikt",
+     "ru": "обязанность хранить тайну; конфиденциальность",
+     "uk": "обов'язок зберігати таємницю; конфіденційність",
+     "wordClass": "substantiv",
+     "example": "Vi har taushetsplikt, så vi forteller ikke om beboerne til andre.",
+     "exampleRu": "Мы обязаны хранить тайну, поэтому никому не рассказываем о проживающих.",
+     "exampleUk": "Ми зобов'язані зберігати таємницю, тому нікому не розповідаємо про мешканців."
+    },
+    {
+     "key": "life:helse:hvordan-har-du-det-i-dag",
+     "no": "Hvordan har du det i dag?",
+     "ru": "Как вы сегодня себя чувствуете?",
+     "uk": "Як ви сьогодні почуваєтеся?",
+     "wordClass": "frase",
+     "example": "– Hvordan har du det i dag? – Litt bedre, takk.",
+     "exampleRu": "– Как вы сегодня? – Немного лучше, спасибо.",
+     "exampleUk": "– Як ви сьогодні? – Трохи краще, дякую.",
+     "description": "💡 Пациенту в Норвегии говорят du — по-русски естественнее «вы»."
+    },
+    {
+     "key": "life:helse:har-du-vondt-noe-sted",
+     "no": "Har du vondt noe sted?",
+     "ru": "У вас что-нибудь болит?",
+     "uk": "У вас щось болить?",
+     "wordClass": "frase",
+     "example": "Har du vondt noe sted, eller er alt i orden?",
+     "exampleRu": "Где-нибудь болит или всё в порядке?",
+     "exampleUk": "Десь болить чи все гаразд?"
+    },
+    {
+     "key": "life:helse:trenger-du-hjelp-med-noe",
+     "no": "Trenger du hjelp med noe?",
+     "ru": "Вам с чем-нибудь помочь?",
+     "uk": "Вам із чимось допомогти?",
+     "wordClass": "frase",
+     "example": "Trenger du hjelp med noe før jeg går?",
+     "exampleRu": "Вам с чем-нибудь помочь, пока я не ушла?",
+     "exampleUk": "Вам із чимось допомогти, поки я не пішла?"
+    },
+    {
+     "key": "life:helse:jeg-skal-bare-se-til-deg",
+     "no": "Jeg skal bare se til deg.",
+     "ru": "Я только проверю, всё ли у вас в порядке.",
+     "uk": "Я тільки перевірю, чи все у вас гаразд.",
+     "wordClass": "frase",
+     "example": "God natt! Jeg skal se til deg litt senere.",
+     "exampleRu": "Спокойной ночи! Я ещё загляну к вам попозже.",
+     "exampleUk": "На добраніч! Я ще зазирну до вас пізніше.",
+     "description": "💡 se til noen — проверить, всё ли в порядке с человеком."
+    },
+    {
+     "key": "life:helse:kan-du-ta-over-for-meg",
+     "no": "Kan du ta over for meg?",
+     "ru": "Можешь меня подменить?",
+     "uk": "Можеш мене підмінити?",
+     "wordClass": "frase",
+     "example": "Jeg må gå litt tidligere i dag. Kan du ta over for meg?",
+     "exampleRu": "Мне сегодня надо уйти пораньше. Подменишь меня?",
+     "exampleUk": "Мені сьогодні треба піти трохи раніше. Підміниш мене?"
+    }
+   ]
+  },
+  {
+   "id": "life-jobb-bygg",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "jobb",
+   "name": "Работа: стройка",
+   "nameUk": "Робота: будівництво",
+   "nameNo": "Jobb: bygg og anlegg",
+   "icon": "🏗️",
+   "level": "A2",
+   "tags": [
+    "jobb",
+    "bygg"
+   ],
+   "description": "Слова для стройки и ремонта: профессии, инструменты, безопасность и короткие фразы, которые слышишь на объекте каждый день.",
+   "cards": [
+    {
+     "key": "life:bygg:byggeplass",
+     "no": "en byggeplass",
+     "ru": "стройплощадка",
+     "uk": "будівельний майданчик",
+     "wordClass": "substantiv",
+     "example": "Vi møtes på byggeplassen klokka sju.",
+     "exampleRu": "Встречаемся на стройплощадке в семь.",
+     "exampleUk": "Зустрічаємося на будмайданчику о сьомій."
+    },
+    {
+     "key": "life:bygg:snekker",
+     "no": "en snekker",
+     "ru": "плотник; столяр",
+     "uk": "тесля; столяр",
+     "wordClass": "substantiv",
+     "example": "Snekkeren setter inn nye vinduer i dag.",
+     "exampleRu": "Сегодня плотник ставит новые окна.",
+     "exampleUk": "Сьогодні тесля ставить нові вікна."
+    },
+    {
+     "key": "life:bygg:elektriker",
+     "no": "en elektriker",
+     "ru": "электрик",
+     "uk": "електрик",
+     "wordClass": "substantiv",
+     "example": "Vi må vente på elektrikeren før vi lukker veggen.",
+     "exampleRu": "Нужно дождаться электрика, прежде чем закрывать стену.",
+     "exampleUk": "Треба дочекатися електрика, перш ніж закривати стіну."
+    },
+    {
+     "key": "life:bygg:rorlegger",
+     "no": "en rørlegger",
+     "ru": "сантехник",
+     "uk": "сантехнік",
+     "wordClass": "substantiv",
+     "example": "Rørleggeren kommer på mandag for å koble til vasken.",
+     "exampleRu": "Сантехник придёт в понедельник подключить раковину.",
+     "exampleUk": "Сантехнік прийде в понеділок підключити умивальник."
+    },
+    {
+     "key": "life:bygg:maler",
+     "no": "en maler",
+     "ru": "маляр",
+     "uk": "маляр",
+     "wordClass": "substantiv",
+     "example": "Maleren trenger to dager på stua.",
+     "exampleRu": "Маляру нужно два дня на гостиную.",
+     "exampleUk": "Малярові потрібно два дні на вітальню."
+    },
+    {
+     "key": "life:bygg:arbeidsleder",
+     "no": "en arbeidsleder",
+     "ru": "бригадир; мастер",
+     "uk": "бригадир; майстер",
+     "wordClass": "substantiv",
+     "example": "Spør arbeidslederen hvis du er usikker.",
+     "exampleRu": "Если не уверен, спроси бригадира.",
+     "exampleUk": "Якщо не впевнений, запитай бригадира."
+    },
+    {
+     "key": "life:bygg:hjelm",
+     "no": "en hjelm",
+     "ru": "каска",
+     "uk": "каска",
+     "wordClass": "substantiv",
+     "example": "Uten hjelm får du ikke gå inn på byggeplassen.",
+     "exampleRu": "Без каски на стройплощадку не пустят.",
+     "exampleUk": "Без каски на будмайданчик не пустять."
+    },
+    {
+     "key": "life:bygg:par-vernesko",
+     "no": "et par vernesko",
+     "ru": "пара защитной обуви",
+     "uk": "пара захисного взуття",
+     "wordClass": "substantiv",
+     "example": "Husk å ta med et par vernesko i morgen.",
+     "exampleRu": "Не забудь завтра взять защитную обувь.",
+     "exampleUk": "Не забудь завтра взяти захисне взуття."
+    },
+    {
+     "key": "life:bygg:refleksvest",
+     "no": "en refleksvest",
+     "ru": "светоотражающий жилет",
+     "uk": "світловідбивний жилет",
+     "wordClass": "substantiv",
+     "example": "Bruk refleksvest når du jobber ved veien.",
+     "exampleRu": "Надевай светоотражающий жилет, когда работаешь у дороги.",
+     "exampleUk": "Вдягай світловідбивний жилет, коли працюєш біля дороги."
+    },
+    {
+     "key": "life:bygg:stige",
+     "no": "en stige",
+     "ru": "приставная лестница; стремянка",
+     "uk": "драбина",
+     "wordClass": "substantiv",
+     "example": "Stigen må stå stødig før du klatrer opp.",
+     "exampleRu": "Прежде чем лезть наверх, проверь, что лестница стоит устойчиво.",
+     "exampleUk": "Перш ніж лізти нагору, переконайся, що драбина стоїть стійко.",
+     "description": "💡 Лестница в доме — ei trapp, а stige — переносная."
+    },
+    {
+     "key": "life:bygg:stillas",
+     "no": "et stillas",
+     "ru": "строительные леса",
+     "uk": "будівельне риштування",
+     "wordClass": "substantiv",
+     "example": "Stillaset blir tatt ned neste uke.",
+     "exampleRu": "Леса снимут на следующей неделе.",
+     "exampleUk": "Риштування знімуть наступного тижня."
+    },
+    {
+     "key": "life:bygg:hammer",
+     "no": "en hammer",
+     "ru": "молоток",
+     "uk": "молоток",
+     "wordClass": "substantiv",
+     "example": "Kan du gi meg hammeren?",
+     "exampleRu": "Подай мне молоток.",
+     "exampleUk": "Подай мені молоток."
+    },
+    {
+     "key": "life:bygg:spiker",
+     "no": "en spiker",
+     "ru": "гвоздь",
+     "uk": "цвях",
+     "wordClass": "substantiv",
+     "example": "Vi trenger flere spiker.",
+     "exampleRu": "Нам нужно больше гвоздей.",
+     "exampleUk": "Нам потрібно більше цвяхів.",
+     "description": "💡 Мн. ч. то же самое: en spiker — mange spiker."
+    },
+    {
+     "key": "life:bygg:skrue",
+     "no": "en skrue",
+     "ru": "шуруп; винт",
+     "uk": "шуруп; гвинт",
+     "wordClass": "substantiv",
+     "example": "Denne skruen er for kort.",
+     "exampleRu": "Этот шуруп слишком короткий.",
+     "exampleUk": "Цей шуруп закороткий."
+    },
+    {
+     "key": "life:bygg:drill",
+     "no": "en drill",
+     "ru": "дрель; шуруповёрт",
+     "uk": "дриль; шурупокрут",
+     "wordClass": "substantiv",
+     "example": "Drillen må lades før lunsj.",
+     "exampleRu": "Дрель надо зарядить до обеда.",
+     "exampleUk": "Дриль треба зарядити до обіду."
+    },
+    {
+     "key": "life:bygg:verktoy",
+     "no": "et verktøy",
+     "ru": "инструмент",
+     "uk": "інструмент",
+     "wordClass": "substantiv",
+     "example": "Legg verktøyet tilbake i bilen etter jobb.",
+     "exampleRu": "После работы положи инструменты обратно в машину.",
+     "exampleUk": "Після роботи поклади інструменти назад у машину.",
+     "description": "💡 verktøy — и один инструмент, и инструменты вообще."
+    },
+    {
+     "key": "life:bygg:vegg",
+     "no": "en vegg",
+     "ru": "стена",
+     "uk": "стіна",
+     "wordClass": "substantiv",
+     "example": "Vi skal male denne veggen hvit.",
+     "exampleRu": "Эту стену мы покрасим в белый.",
+     "exampleUk": "Цю стіну ми пофарбуємо в білий."
+    },
+    {
+     "key": "life:bygg:tak",
+     "no": "et tak",
+     "ru": "крыша; потолок",
+     "uk": "дах; стеля",
+     "wordClass": "substantiv",
+     "example": "Taket lekker etter regnet.",
+     "exampleRu": "После дождя протекает крыша.",
+     "exampleUk": "Після дощу протікає дах.",
+     "description": "💡 tak — и крыша, и потолок: понятно по контексту."
+    },
+    {
+     "key": "life:bygg:a-male",
+     "no": "å måle",
+     "ru": "измерять",
+     "uk": "вимірювати",
+     "wordClass": "verb",
+     "example": "Mål to ganger, sag én gang.",
+     "exampleRu": "Семь раз отмерь — один раз отрежь.",
+     "exampleUk": "Сім разів відміряй — один раз відріж."
+    },
+    {
+     "key": "life:bygg:a-sage",
+     "no": "å sage",
+     "ru": "пилить",
+     "uk": "пиляти",
+     "wordClass": "verb",
+     "example": "Han sager plankene i riktig lengde.",
+     "exampleRu": "Он отпиливает доски нужной длины.",
+     "exampleUk": "Він розпилює дошки на потрібну довжину."
+    },
+    {
+     "key": "life:bygg:a-baere",
+     "no": "å bære",
+     "ru": "нести; носить",
+     "uk": "нести; носити",
+     "wordClass": "verb",
+     "example": "Vi bærer gipsplatene opp til andre etasje.",
+     "exampleRu": "Мы несём листы гипсокартона на второй этаж.",
+     "exampleUk": "Ми несемо листи гіпсокартону на другий поверх."
+    },
+    {
+     "key": "life:bygg:a-rive",
+     "no": "å rive",
+     "ru": "сносить; срывать",
+     "uk": "зносити; здирати",
+     "wordClass": "verb",
+     "example": "De skal rive det gamle huset i høst.",
+     "exampleRu": "Осенью старый дом снесут.",
+     "exampleUk": "Восени старий будинок знесуть."
+    },
+    {
+     "key": "life:bygg:kran",
+     "no": "en kran",
+     "ru": "подъёмный кран",
+     "uk": "підіймальний кран",
+     "wordClass": "substantiv",
+     "example": "Ikke stå under kranen!",
+     "exampleRu": "Не стой под краном!",
+     "exampleUk": "Не стій під краном!"
+    },
+    {
+     "key": "life:bygg:hms",
+     "no": "HMS",
+     "ru": "охрана труда (здоровье, среда, безопасность)",
+     "uk": "охорона праці (здоров'я, довкілля, безпека)",
+     "wordClass": "substantiv",
+     "example": "Alle nye ansatte får et kurs i HMS.",
+     "exampleRu": "Все новые сотрудники проходят курс по охране труда.",
+     "exampleUk": "Усі нові працівники проходять курс з охорони праці.",
+     "description": "💡 HMS = helse, miljø og sikkerhet."
+    },
+    {
+     "key": "life:bygg:hms-kort",
+     "no": "et HMS-kort",
+     "ru": "именная карта строителя",
+     "uk": "іменна картка будівельника",
+     "wordClass": "substantiv",
+     "example": "Du må alltid ha HMS-kortet synlig på byggeplassen.",
+     "exampleRu": "На стройке карта HMS всегда должна быть на виду.",
+     "exampleUk": "На будмайданчику картка HMS завжди має бути на видноті.",
+     "description": "💡 Обязательная карта с фото и названием работодателя; без неё на объект не пустят."
+    },
+    {
+     "key": "life:bygg:a-bruke-verneutstyr",
+     "no": "å bruke verneutstyr",
+     "ru": "пользоваться средствами защиты",
+     "uk": "користуватися засобами захисту",
+     "wordClass": "uttrykk",
+     "example": "Alle må bruke verneutstyr på byggeplassen.",
+     "exampleRu": "На стройке все обязаны пользоваться средствами защиты.",
+     "exampleUk": "На будмайданчику всі зобов'язані користуватися засобами захисту."
+    },
+    {
+     "key": "life:bygg:pass-deg",
+     "no": "Pass deg!",
+     "ru": "Осторожно!",
+     "uk": "Обережно!",
+     "wordClass": "frase",
+     "example": "Pass deg! Det er glatt her.",
+     "exampleRu": "Осторожно! Здесь скользко.",
+     "exampleUk": "Обережно! Тут слизько."
+    },
+    {
+     "key": "life:bygg:hvor-skal-dette-sta",
+     "no": "Hvor skal dette stå?",
+     "ru": "Куда это поставить?",
+     "uk": "Куди це поставити?",
+     "wordClass": "frase",
+     "example": "Hvor skal dette stå, ved døra eller i hjørnet?",
+     "exampleRu": "Куда это поставить — у двери или в угол?",
+     "exampleUk": "Куди це поставити — біля дверей чи в куток?"
+    },
+    {
+     "key": "life:bygg:jeg-er-ferdig-med-denne-delen",
+     "no": "Jeg er ferdig med denne delen.",
+     "ru": "С этой частью я закончил.",
+     "uk": "Із цією частиною я закінчив.",
+     "wordClass": "frase",
+     "example": "Jeg er ferdig med denne delen. Hva skal jeg gjøre nå?",
+     "exampleRu": "С этой частью я закончил. Что мне делать дальше?",
+     "exampleUk": "Із цією частиною я закінчив. Що мені робити далі?"
+    },
+    {
+     "key": "life:bygg:kan-du-vise-meg-hvordan",
+     "no": "Kan du vise meg hvordan?",
+     "ru": "Покажешь, как это делается?",
+     "uk": "Покажеш, як це робиться?",
+     "wordClass": "frase",
+     "example": "Jeg har ikke brukt denne maskinen før. Kan du vise meg hvordan?",
+     "exampleRu": "Я раньше не работал на этой машине. Покажешь, как?",
+     "exampleUk": "Я раніше не працював на цій машині. Покажеш, як?"
+    },
+    {
+     "key": "life:bygg:vi-tar-pause-na",
+     "no": "Vi tar pause nå.",
+     "ru": "Сейчас перерыв.",
+     "uk": "Зараз перерва.",
+     "wordClass": "frase",
+     "example": "Vi tar pause nå og fortsetter klokka tolv.",
+     "exampleRu": "Сейчас перерыв, продолжим в двенадцать.",
+     "exampleUk": "Зараз перерва, продовжимо о дванадцятій."
+    },
+    {
+     "key": "life:bygg:det-mangler-materialer",
+     "no": "Det mangler materialer.",
+     "ru": "Не хватает материалов.",
+     "uk": "Бракує матеріалів.",
+     "wordClass": "frase",
+     "example": "Vi kan ikke fortsette, for det mangler materialer.",
+     "exampleRu": "Продолжать нельзя — не хватает материалов.",
+     "exampleUk": "Далі працювати не можна — бракує матеріалів."
+    }
+   ]
+  },
+  {
+   "id": "life-jobb-hotell",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "jobb",
+   "name": "Работа: отель, ресторан и уборка",
+   "nameUk": "Робота: готель, ресторан і прибирання",
+   "nameNo": "Jobb: hotell, restaurant og renhold",
+   "icon": "🛎️",
+   "level": "A2",
+   "tags": [
+    "jobb",
+    "hotell",
+    "restaurant",
+    "renhold"
+   ],
+   "description": "Для работы на ресепшене, в номерах, на кухне и в зале: гости, заказы, уборка и вежливые фразы для клиентов.",
+   "cards": [
+    {
+     "key": "life:hotell:resepsjon",
+     "no": "en resepsjon",
+     "ru": "ресепшен; стойка регистрации",
+     "uk": "рецепція",
+     "wordClass": "substantiv",
+     "example": "Gjestene sjekker inn i resepsjonen.",
+     "exampleRu": "Гости регистрируются на ресепшене.",
+     "exampleUk": "Гості реєструються на рецепції."
+    },
+    {
+     "key": "life:hotell:gjest",
+     "no": "en gjest",
+     "ru": "гость",
+     "uk": "гість",
+     "wordClass": "substantiv",
+     "example": "Gjesten vil ha et rom med utsikt.",
+     "exampleRu": "Гость хочет номер с видом.",
+     "exampleUk": "Гість хоче номер із краєвидом."
+    },
+    {
+     "key": "life:hotell:rom",
+     "no": "et rom",
+     "ru": "номер; комната",
+     "uk": "номер; кімната",
+     "wordClass": "substantiv",
+     "example": "Rommet i tredje etasje er klart nå.",
+     "exampleRu": "Номер на третьем этаже уже готов.",
+     "exampleUk": "Номер на третьому поверсі вже готовий."
+    },
+    {
+     "key": "life:hotell:a-sjekke-inn",
+     "no": "å sjekke inn",
+     "ru": "заселиться; зарегистрироваться",
+     "uk": "заселитися; зареєструватися",
+     "wordClass": "uttrykk",
+     "example": "Du kan sjekke inn fra klokka tre.",
+     "exampleRu": "Заселиться можно с трёх часов.",
+     "exampleUk": "Заселитися можна з третьої години."
+    },
+    {
+     "key": "life:hotell:a-sjekke-ut",
+     "no": "å sjekke ut",
+     "ru": "выехать из номера",
+     "uk": "виселитися з номера",
+     "wordClass": "uttrykk",
+     "example": "Gjestene må sjekke ut før klokka elleve.",
+     "exampleRu": "Гости должны выехать до одиннадцати.",
+     "exampleUk": "Гості мають виселитися до одинадцятої."
+    },
+    {
+     "key": "life:hotell:renholder",
+     "no": "en renholder",
+     "ru": "уборщик; уборщица",
+     "uk": "прибиральник; прибиральниця",
+     "wordClass": "substantiv",
+     "example": "Renholderne begynner på rommene klokka ni.",
+     "exampleRu": "Уборщики начинают убирать номера в девять.",
+     "exampleUk": "Прибиральники починають прибирати номери о дев'ятій."
+    },
+    {
+     "key": "life:hotell:a-vaske",
+     "no": "å vaske",
+     "ru": "мыть; убирать",
+     "uk": "мити; прибирати",
+     "wordClass": "verb",
+     "example": "Jeg vasker gulvet i resepsjonen hver kveld.",
+     "exampleRu": "Каждый вечер я мою пол на ресепшене.",
+     "exampleUk": "Щовечора я мию підлогу на рецепції."
+    },
+    {
+     "key": "life:hotell:a-stovsuge",
+     "no": "å støvsuge",
+     "ru": "пылесосить",
+     "uk": "пилососити",
+     "wordClass": "verb",
+     "example": "Husk å støvsuge under sengen.",
+     "exampleRu": "Не забудь пропылесосить под кроватью.",
+     "exampleUk": "Не забудь пропилососити під ліжком."
+    },
+    {
+     "key": "life:hotell:a-skifte-sengetoy",
+     "no": "å skifte sengetøy",
+     "ru": "сменить постельное бельё",
+     "uk": "змінити постільну білизну",
+     "wordClass": "uttrykk",
+     "example": "Vi skifter sengetøy når gjesten reiser.",
+     "exampleRu": "Постельное бельё меняем, когда гость уезжает.",
+     "exampleUk": "Постільну білизну змінюємо, коли гість виїжджає."
+    },
+    {
+     "key": "life:hotell:handkle",
+     "no": "et håndkle",
+     "ru": "полотенце",
+     "uk": "рушник",
+     "wordClass": "substantiv",
+     "example": "Kan jeg få et ekstra håndkle?",
+     "exampleRu": "Можно мне ещё одно полотенце?",
+     "exampleUk": "Можна мені ще один рушник?"
+    },
+    {
+     "key": "life:hotell:vaskemiddel",
+     "no": "et vaskemiddel",
+     "ru": "моющее средство",
+     "uk": "мийний засіб",
+     "wordClass": "substantiv",
+     "example": "Dette vaskemiddelet er bare for badet.",
+     "exampleRu": "Это средство только для ванной.",
+     "exampleUk": "Цей засіб тільки для ванної."
+    },
+    {
+     "key": "life:hotell:tralle",
+     "no": "en tralle",
+     "ru": "тележка",
+     "uk": "візок",
+     "wordClass": "substantiv",
+     "example": "Trallen står ved heisen.",
+     "exampleRu": "Тележка стоит у лифта.",
+     "exampleUk": "Візок стоїть біля ліфта."
+    },
+    {
+     "key": "life:hotell:kokk",
+     "no": "en kokk",
+     "ru": "повар",
+     "uk": "кухар",
+     "wordClass": "substantiv",
+     "example": "Kokken lager suppe til lunsj.",
+     "exampleRu": "Повар варит суп на обед.",
+     "exampleUk": "Кухар варить суп на обід."
+    },
+    {
+     "key": "life:hotell:servitor",
+     "no": "en servitør",
+     "ru": "официант",
+     "uk": "офіціант",
+     "wordClass": "substantiv",
+     "example": "Servitøren tar imot bestillingen.",
+     "exampleRu": "Официант принимает заказ.",
+     "exampleUk": "Офіціант приймає замовлення."
+    },
+    {
+     "key": "life:hotell:oppvasker",
+     "no": "en oppvasker",
+     "ru": "посудомойщик",
+     "uk": "мийник посуду",
+     "wordClass": "substantiv",
+     "example": "Oppvaskeren har mye å gjøre etter middagen.",
+     "exampleRu": "После ужина у посудомойщика много работы.",
+     "exampleUk": "Після вечері в мийника посуду багато роботи."
+    },
+    {
+     "key": "life:hotell:kjokken",
+     "no": "et kjøkken",
+     "ru": "кухня",
+     "uk": "кухня",
+     "wordClass": "substantiv",
+     "example": "Kjøkkenet stenger klokka ti.",
+     "exampleRu": "Кухня закрывается в десять.",
+     "exampleUk": "Кухня зачиняється о десятій."
+    },
+    {
+     "key": "life:hotell:bestilling",
+     "no": "en bestilling",
+     "ru": "заказ; бронь",
+     "uk": "замовлення; бронювання",
+     "wordClass": "substantiv",
+     "example": "Vi har fått en stor bestilling til lørdag.",
+     "exampleRu": "На субботу у нас большой заказ.",
+     "exampleUk": "На суботу в нас велике замовлення."
+    },
+    {
+     "key": "life:hotell:a-bestille",
+     "no": "å bestille",
+     "ru": "заказывать; бронировать",
+     "uk": "замовляти; бронювати",
+     "wordClass": "verb",
+     "example": "Jeg vil gjerne bestille bord til fire personer.",
+     "exampleRu": "Я хотел бы заказать столик на четверых.",
+     "exampleUk": "Я хотів би забронювати столик на чотирьох."
+    },
+    {
+     "key": "life:hotell:a-dekke-bordet",
+     "no": "å dekke bordet",
+     "ru": "накрыть на стол",
+     "uk": "накрити на стіл",
+     "wordClass": "uttrykk",
+     "example": "Kan du dekke bordene før gjestene kommer?",
+     "exampleRu": "Накроешь столы к приходу гостей?",
+     "exampleUk": "Накриєш столи до приходу гостей?"
+    },
+    {
+     "key": "life:hotell:a-rydde",
+     "no": "å rydde",
+     "ru": "убирать; наводить порядок",
+     "uk": "прибирати; наводити лад",
+     "wordClass": "verb",
+     "example": "Vi rydder bordene med en gang gjestene går.",
+     "exampleRu": "Столы убираем сразу, как только гости уходят.",
+     "exampleUk": "Столи прибираємо одразу, щойно гості йдуть."
+    },
+    {
+     "key": "life:hotell:allergi",
+     "no": "en allergi",
+     "ru": "аллергия",
+     "uk": "алергія",
+     "wordClass": "substantiv",
+     "example": "Gjesten har allergi mot nøtter.",
+     "exampleRu": "У гостя аллергия на орехи.",
+     "exampleUk": "У гостя алергія на горіхи."
+    },
+    {
+     "key": "life:hotell:glutenfri",
+     "no": "glutenfri",
+     "ru": "без глютена",
+     "uk": "без глютену",
+     "wordClass": "adjektiv",
+     "example": "Har dere glutenfritt brød?",
+     "exampleRu": "У вас есть хлеб без глютена?",
+     "exampleUk": "У вас є хліб без глютену?"
+    },
+    {
+     "key": "life:hotell:regning",
+     "no": "en regning",
+     "ru": "счёт",
+     "uk": "рахунок",
+     "wordClass": "substantiv",
+     "example": "Kan vi få regningen, takk?",
+     "exampleRu": "Можно счёт, пожалуйста?",
+     "exampleUk": "Можна рахунок, будь ласка?"
+    },
+    {
+     "key": "life:hotell:skift",
+     "no": "et skift",
+     "ru": "смена",
+     "uk": "зміна",
+     "wordClass": "substantiv",
+     "example": "Jeg har tidlig skift i morgen.",
+     "exampleRu": "Завтра у меня ранняя смена.",
+     "exampleUk": "Завтра в мене рання зміна.",
+     "description": "💡 В больнице чаще говорят vakt, в отеле и на производстве — skift."
+    },
+    {
+     "key": "life:hotell:frokostbuffet",
+     "no": "en frokostbuffet",
+     "ru": "завтрак «шведский стол»",
+     "uk": "сніданок «шведський стіл»",
+     "wordClass": "substantiv",
+     "example": "Frokostbuffeten er åpen fra sju til ti.",
+     "exampleRu": "Завтрак «шведский стол» работает с семи до десяти.",
+     "exampleUk": "Сніданок «шведський стіл» працює з сьомої до десятої."
+    },
+    {
+     "key": "life:hotell:har-du-en-reservasjon",
+     "no": "Har du en reservasjon?",
+     "ru": "У вас есть бронь?",
+     "uk": "У вас є бронювання?",
+     "wordClass": "frase",
+     "example": "Velkommen! Har du en reservasjon, eller trenger du et bord?",
+     "exampleRu": "Добро пожаловать! У вас бронь или вам нужен столик?",
+     "exampleUk": "Ласкаво просимо! У вас бронювання чи вам потрібен столик?"
+    },
+    {
+     "key": "life:hotell:hva-kan-jeg-hjelpe-deg-med",
+     "no": "Hva kan jeg hjelpe deg med?",
+     "ru": "Чем могу помочь?",
+     "uk": "Чим можу допомогти?",
+     "wordClass": "frase",
+     "example": "God morgen! Hva kan jeg hjelpe deg med?",
+     "exampleRu": "Доброе утро! Чем могу помочь?",
+     "exampleUk": "Доброго ранку! Чим можу допомогти?"
+    },
+    {
+     "key": "life:hotell:er-alt-i-orden-med-maten",
+     "no": "Er alt i orden med maten?",
+     "ru": "Вам всё нравится?",
+     "uk": "Вам усе до смаку?",
+     "wordClass": "frase",
+     "example": "Unnskyld at jeg forstyrrer. Er alt i orden med maten?",
+     "exampleRu": "Простите, что отвлекаю. Вам всё нравится?",
+     "exampleUk": "Перепрошую, що турбую. Вам усе до смаку?",
+     "description": "💡 Дословно «всё ли в порядке с едой?» — так официант проверяет, довольны ли гости."
+    },
+    {
+     "key": "life:hotell:rommet-er-ikke-klart-enna",
+     "no": "Rommet er ikke klart ennå.",
+     "ru": "Номер ещё не готов.",
+     "uk": "Номер ще не готовий.",
+     "wordClass": "frase",
+     "example": "Beklager, rommet er ikke klart ennå. Du kan sette bagasjen her.",
+     "exampleRu": "Извините, номер ещё не готов. Багаж можно оставить здесь.",
+     "exampleUk": "Перепрошуємо, номер ще не готовий. Багаж можна залишити тут."
+    },
+    {
+     "key": "life:hotell:ikke-forstyrr",
+     "no": "Ikke forstyrr",
+     "ru": "Не беспокоить",
+     "uk": "Не турбувати",
+     "wordClass": "frase",
+     "example": "Det henger et «Ikke forstyrr»-skilt på døra, så vi venter.",
+     "exampleRu": "На двери табличка «Не беспокоить», так что подождём.",
+     "exampleUk": "На дверях табличка «Не турбувати», тож почекаємо."
+    },
+    {
+     "key": "life:hotell:hvilke-rom-skal-jeg-ta-i-dag",
+     "no": "Hvilke rom skal jeg ta i dag?",
+     "ru": "Какие номера мне сегодня убирать?",
+     "uk": "Які номери мені сьогодні прибирати?",
+     "wordClass": "frase",
+     "example": "Hvilke rom skal jeg ta i dag? Bare tredje etasje?",
+     "exampleRu": "Какие номера мне сегодня убирать? Только третий этаж?",
+     "exampleUk": "Які номери мені сьогодні прибирати? Тільки третій поверх?",
+     "description": "💡 ta et rom — на языке уборщиков «взять номер», то есть убрать его."
+    }
+   ]
+  },
+  {
+   "id": "life-jobb-butikk",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "jobb",
+   "name": "Работа: магазин и склад",
+   "nameUk": "Робота: магазин і склад",
+   "nameNo": "Jobb: butikk og lager",
+   "icon": "🛒",
+   "level": "A2",
+   "tags": [
+    "jobb",
+    "butikk",
+    "lager"
+   ],
+   "description": "Для работы в магазине и на складе: касса, товар на полках, поставки, заказы и фразы для разговора с покупателями.",
+   "cards": [
+    {
+     "key": "life:butikk:butikkmedarbeider",
+     "no": "en butikkmedarbeider",
+     "ru": "продавец; сотрудник магазина",
+     "uk": "продавець; працівник магазину",
+     "wordClass": "substantiv",
+     "example": "Hun er butikkmedarbeider på et kjøpesenter.",
+     "exampleRu": "Она работает продавцом в торговом центре.",
+     "exampleUk": "Вона працює продавчинею в торговельному центрі."
+    },
+    {
+     "key": "life:butikk:butikksjef",
+     "no": "en butikksjef",
+     "ru": "директор магазина",
+     "uk": "директор магазину",
+     "wordClass": "substantiv",
+     "example": "Butikksjefen lager vaktlisten.",
+     "exampleRu": "Директор магазина составляет график смен.",
+     "exampleUk": "Директор магазину складає графік змін."
+    },
+    {
+     "key": "life:butikk:kasse",
+     "no": "en kasse",
+     "ru": "касса",
+     "uk": "каса",
+     "wordClass": "substantiv",
+     "example": "Kan du ta kassen en halvtime?",
+     "exampleRu": "Посидишь на кассе полчаса?",
+     "exampleUk": "Посидиш на касі пів години?"
+    },
+    {
+     "key": "life:butikk:kunde",
+     "no": "en kunde",
+     "ru": "покупатель; клиент",
+     "uk": "покупець; клієнт",
+     "wordClass": "substantiv",
+     "example": "Kunden spør etter en større størrelse.",
+     "exampleRu": "Покупатель спрашивает размер побольше.",
+     "exampleUk": "Покупець питає, чи є більший розмір."
+    },
+    {
+     "key": "life:butikk:hylle",
+     "no": "ei hylle",
+     "ru": "полка",
+     "uk": "полиця",
+     "wordClass": "substantiv",
+     "example": "Melka står på den nederste hylla.",
+     "exampleRu": "Молоко стоит на нижней полке.",
+     "exampleUk": "Молоко стоїть на нижній полиці."
+    },
+    {
+     "key": "life:butikk:a-fylle-pa-varer",
+     "no": "å fylle på varer",
+     "ru": "выкладывать товар",
+     "uk": "викладати товар",
+     "wordClass": "uttrykk",
+     "example": "Om morgenen fyller vi på varer i kjøledisken.",
+     "exampleRu": "По утрам мы выкладываем товар в холодильную витрину.",
+     "exampleUk": "Уранці ми викладаємо товар у холодильну вітрину."
+    },
+    {
+     "key": "life:butikk:vare",
+     "no": "en vare",
+     "ru": "товар",
+     "uk": "товар",
+     "wordClass": "substantiv",
+     "example": "Denne varen er utsolgt.",
+     "exampleRu": "Этот товар закончился.",
+     "exampleUk": "Цей товар закінчився."
+    },
+    {
+     "key": "life:butikk:utsolgt",
+     "no": "utsolgt",
+     "ru": "распродан; нет в наличии",
+     "uk": "розпродано; немає в наявності",
+     "wordClass": "adjektiv",
+     "example": "Brødet er dessverre utsolgt.",
+     "exampleRu": "Хлеб, к сожалению, закончился.",
+     "exampleUk": "Хліб, на жаль, закінчився."
+    },
+    {
+     "key": "life:butikk:pris",
+     "no": "en pris",
+     "ru": "цена",
+     "uk": "ціна",
+     "wordClass": "substantiv",
+     "example": "Prisen på hylla stemmer ikke med prisen i kassen.",
+     "exampleRu": "Цена на полке не совпадает с ценой на кассе.",
+     "exampleUk": "Ціна на полиці не збігається з ціною на касі."
+    },
+    {
+     "key": "life:butikk:tilbud",
+     "no": "et tilbud",
+     "ru": "акция; скидка",
+     "uk": "акція; знижка",
+     "wordClass": "substantiv",
+     "example": "Kaffen er på tilbud denne uka.",
+     "exampleRu": "На этой неделе кофе по акции.",
+     "exampleUk": "Цього тижня кава за акцією."
+    },
+    {
+     "key": "life:butikk:kvittering",
+     "no": "en kvittering",
+     "ru": "чек",
+     "uk": "чек",
+     "wordClass": "substantiv",
+     "example": "Har du kvitteringen? Da kan du bytte varen.",
+     "exampleRu": "У вас есть чек? Тогда товар можно обменять.",
+     "exampleUk": "У вас є чек? Тоді товар можна обміняти."
+    },
+    {
+     "key": "life:butikk:a-bytte",
+     "no": "å bytte",
+     "ru": "обменять",
+     "uk": "обміняти",
+     "wordClass": "verb",
+     "example": "Kan jeg bytte denne genseren?",
+     "exampleRu": "Можно обменять этот свитер?",
+     "exampleUk": "Чи можна обміняти цей светр?"
+    },
+    {
+     "key": "life:butikk:a-returnere",
+     "no": "å returnere",
+     "ru": "вернуть (товар)",
+     "uk": "повернути (товар)",
+     "wordClass": "verb",
+     "example": "Du kan returnere varen innen tretti dager.",
+     "exampleRu": "Товар можно вернуть в течение тридцати дней.",
+     "exampleUk": "Товар можна повернути протягом тридцяти днів."
+    },
+    {
+     "key": "life:butikk:lager",
+     "no": "et lager",
+     "ru": "склад",
+     "uk": "склад",
+     "wordClass": "substantiv",
+     "example": "Jeg skal sjekke om vi har flere på lageret.",
+     "exampleRu": "Сейчас проверю, есть ли ещё на складе.",
+     "exampleUk": "Зараз перевірю, чи є ще на складі."
+    },
+    {
+     "key": "life:butikk:lagermedarbeider",
+     "no": "en lagermedarbeider",
+     "ru": "работник склада",
+     "uk": "працівник складу",
+     "wordClass": "substantiv",
+     "example": "Lagermedarbeiderne begynner klokka seks.",
+     "exampleRu": "Работники склада начинают в шесть.",
+     "exampleUk": "Працівники складу починають о шостій."
+    },
+    {
+     "key": "life:butikk:pall",
+     "no": "en pall",
+     "ru": "поддон; паллета",
+     "uk": "піддон",
+     "wordClass": "substantiv",
+     "example": "Sett pallen ved porten.",
+     "exampleRu": "Поставь поддон у ворот.",
+     "exampleUk": "Постав піддон біля воріт."
+    },
+    {
+     "key": "life:butikk:truck",
+     "no": "en truck",
+     "ru": "погрузчик",
+     "uk": "навантажувач",
+     "wordClass": "substantiv",
+     "example": "Du må ha truckførerbevis for å kjøre truck.",
+     "exampleRu": "Чтобы водить погрузчик, нужно удостоверение водителя погрузчика.",
+     "exampleUk": "Щоб керувати навантажувачем, потрібне посвідчення водія навантажувача.",
+     "description": "💡 truck — не грузовик, а погрузчик! Грузовик — en lastebil."
+    },
+    {
+     "key": "life:butikk:jekketralle",
+     "no": "en jekketralle",
+     "ru": "ручная гидравлическая тележка («рохля»)",
+     "uk": "гідравлічний візок («рокла»)",
+     "wordClass": "substantiv",
+     "example": "Ta jekketrallen og flytt pallene inn.",
+     "exampleRu": "Возьми рохлю и завези поддоны внутрь.",
+     "exampleUk": "Візьми роклу й завези піддони всередину."
+    },
+    {
+     "key": "life:butikk:levering",
+     "no": "en levering",
+     "ru": "поставка; доставка",
+     "uk": "поставка; доставка",
+     "wordClass": "substantiv",
+     "example": "Leveringen kommer i morgen tidlig.",
+     "exampleRu": "Поставка придёт завтра рано утром.",
+     "exampleUk": "Поставка прийде завтра рано-вранці."
+    },
+    {
+     "key": "life:butikk:a-plukke",
+     "no": "å plukke",
+     "ru": "собирать заказы (на складе)",
+     "uk": "комплектувати замовлення (на складі)",
+     "wordClass": "verb",
+     "example": "Jeg plukker varer til butikkene om natta.",
+     "exampleRu": "Ночью я собираю товар для магазинов.",
+     "exampleUk": "Уночі я комплектую товари для магазинів.",
+     "description": "💡 Обычное значение — «срывать, собирать» (ягоды); на складе — собирать товар по заказу."
+    },
+    {
+     "key": "life:butikk:ordre",
+     "no": "en ordre",
+     "ru": "заказ",
+     "uk": "замовлення",
+     "wordClass": "substantiv",
+     "example": "Denne ordren må sendes i dag.",
+     "exampleRu": "Этот заказ надо отправить сегодня.",
+     "exampleUk": "Це замовлення треба відправити сьогодні."
+    },
+    {
+     "key": "life:butikk:eske",
+     "no": "en eske",
+     "ru": "коробка",
+     "uk": "коробка",
+     "wordClass": "substantiv",
+     "example": "Eskene med melk er tunge.",
+     "exampleRu": "Коробки с молоком тяжёлые.",
+     "exampleUk": "Коробки з молоком важкі."
+    },
+    {
+     "key": "life:butikk:holdbarhetsdato",
+     "no": "en holdbarhetsdato",
+     "ru": "срок годности",
+     "uk": "термін придатності",
+     "wordClass": "substantiv",
+     "example": "Sjekk holdbarhetsdatoen før du setter varene i hylla.",
+     "exampleRu": "Прежде чем ставить товар на полку, проверь срок годности.",
+     "exampleUk": "Перш ніж ставити товар на полицю, перевір термін придатності.",
+     "description": "💡 «Best før» — лучше употребить до (часто годится и позже); «Siste forbruksdag» — употребить строго до этой даты."
+    },
+    {
+     "key": "life:butikk:a-telle-varer",
+     "no": "å telle varer",
+     "ru": "пересчитывать товар",
+     "uk": "рахувати товар",
+     "wordClass": "uttrykk",
+     "example": "I januar teller vi alle varene på lageret.",
+     "exampleRu": "В январе мы пересчитываем весь товар на складе.",
+     "exampleUk": "У січні ми перераховуємо весь товар на складі."
+    },
+    {
+     "key": "life:butikk:kort-eller-kontant",
+     "no": "Kort eller kontant?",
+     "ru": "Картой или наличными?",
+     "uk": "Карткою чи готівкою?",
+     "wordClass": "frase",
+     "example": "Det blir åttifem kroner. Kort eller kontant?",
+     "exampleRu": "С вас восемьдесят пять крон. Картой или наличными?",
+     "exampleUk": "З вас вісімдесят п'ять крон. Карткою чи готівкою?"
+    },
+    {
+     "key": "life:butikk:trenger-du-pose",
+     "no": "Trenger du pose?",
+     "ru": "Вам нужен пакет?",
+     "uk": "Вам потрібен пакет?",
+     "wordClass": "frase",
+     "example": "Trenger du pose, eller har du med deg en?",
+     "exampleRu": "Вам нужен пакет или у вас есть свой?",
+     "exampleUk": "Вам потрібен пакет чи у вас є свій?"
+    },
+    {
+     "key": "life:butikk:kan-jeg-hjelpe-deg-a-finne-noe",
+     "no": "Kan jeg hjelpe deg å finne noe?",
+     "ru": "Помочь вам что-нибудь найти?",
+     "uk": "Допомогти вам щось знайти?",
+     "wordClass": "frase",
+     "example": "Hei! Kan jeg hjelpe deg å finne noe, eller ser du deg bare rundt?",
+     "exampleRu": "Здравствуйте! Помочь вам что-нибудь найти или вы просто смотрите?",
+     "exampleUk": "Доброго дня! Допомогти вам щось знайти чи ви просто дивитеся?"
+    },
+    {
+     "key": "life:butikk:vi-har-dessverre-ikke-flere",
+     "no": "Vi har dessverre ikke flere.",
+     "ru": "К сожалению, больше нет.",
+     "uk": "На жаль, більше немає.",
+     "wordClass": "frase",
+     "example": "Vi har dessverre ikke flere i den størrelsen.",
+     "exampleRu": "К сожалению, этого размера больше нет.",
+     "exampleUk": "На жаль, цього розміру більше немає."
+    },
+    {
+     "key": "life:butikk:hvor-finner-jeg",
+     "no": "Hvor finner jeg …?",
+     "ru": "Где мне найти …?",
+     "uk": "Де мені знайти …?",
+     "wordClass": "frase",
+     "example": "Unnskyld, hvor finner jeg vaskemiddel?",
+     "exampleRu": "Извините, где у вас моющие средства?",
+     "exampleUk": "Перепрошую, де у вас мийні засоби?"
+    },
+    {
+     "key": "life:butikk:neste-takk",
+     "no": "Neste, takk!",
+     "ru": "Следующий, пожалуйста!",
+     "uk": "Наступний, будь ласка!",
+     "wordClass": "frase",
+     "example": "Kassen her er åpen. Neste, takk!",
+     "exampleRu": "Эта касса свободна. Следующий, пожалуйста!",
+     "exampleUk": "Ця каса вільна. Наступний, будь ласка!"
+    }
+   ]
+  },
+  {
+   "id": "life-jobb-kontor",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "jobb",
+   "name": "Работа: офис и IT",
+   "nameUk": "Робота: офіс та IT",
+   "nameNo": "Jobb: kontor og IT",
+   "icon": "💻",
+   "level": "B1",
+   "tags": [
+    "jobb",
+    "kontor",
+    "IT"
+   ],
+   "description": "Офисная жизнь по-норвежски: совещания, письма, сроки, компьютер и вежливые фразы для разговора с коллегами.",
+   "cards": [
+    {
+     "key": "life:kontor:kontor",
+     "no": "et kontor",
+     "ru": "офис; кабинет",
+     "uk": "офіс; кабінет",
+     "wordClass": "substantiv",
+     "example": "Hun sitter på kontoret ved siden av meg.",
+     "exampleRu": "Её кабинет рядом с моим.",
+     "exampleUk": "Її кабінет поруч із моїм."
+    },
+    {
+     "key": "life:kontor:kollega",
+     "no": "en kollega",
+     "ru": "коллега",
+     "uk": "колега",
+     "wordClass": "substantiv",
+     "example": "Kollegaene mine spiser lunsj sammen klokka halv tolv.",
+     "exampleRu": "Мои коллеги обедают вместе в половине двенадцатого.",
+     "exampleUk": "Мої колеги обідають разом о пів на дванадцяту.",
+     "description": "💡 Обед в Норвегии рано — около 11:00–12:00, и обычно короткий."
+    },
+    {
+     "key": "life:kontor:lunsjpause",
+     "no": "en lunsjpause",
+     "ru": "обеденный перерыв",
+     "uk": "обідня перерва",
+     "wordClass": "substantiv",
+     "example": "Vi har en halv times lunsjpause.",
+     "exampleRu": "У нас полчаса на обед.",
+     "exampleUk": "У нас пів години на обід."
+    },
+    {
+     "key": "life:kontor:mote",
+     "no": "et møte",
+     "ru": "совещание; встреча",
+     "uk": "нарада; зустріч",
+     "wordClass": "substantiv",
+     "example": "Møtet er flyttet til torsdag.",
+     "exampleRu": "Совещание перенесли на четверг.",
+     "exampleUk": "Нараду перенесли на четвер."
+    },
+    {
+     "key": "life:kontor:moterom",
+     "no": "et møterom",
+     "ru": "переговорная",
+     "uk": "переговорна кімната",
+     "wordClass": "substantiv",
+     "example": "Jeg har booket møterommet fra ti til elleve.",
+     "exampleRu": "Я забронировал переговорную с десяти до одиннадцати.",
+     "exampleUk": "Я забронював переговорну з десятої до одинадцятої."
+    },
+    {
+     "key": "life:kontor:videomote",
+     "no": "et videomøte",
+     "ru": "видеовстреча",
+     "uk": "відеозустріч",
+     "wordClass": "substantiv",
+     "example": "Vi har et videomøte med kunden klokka to.",
+     "exampleRu": "В два у нас видеовстреча с клиентом.",
+     "exampleUk": "О другій у нас відеозустріч із клієнтом."
+    },
+    {
+     "key": "life:kontor:hjemmekontor",
+     "no": "et hjemmekontor",
+     "ru": "работа из дома; домашний офис",
+     "uk": "робота з дому; домашній офіс",
+     "wordClass": "substantiv",
+     "example": "Jeg har hjemmekontor på fredager.",
+     "exampleRu": "По пятницам я работаю из дома.",
+     "exampleUk": "По п'ятницях я працюю з дому."
+    },
+    {
+     "key": "life:kontor:e-post",
+     "no": "en e-post",
+     "ru": "электронное письмо",
+     "uk": "електронний лист",
+     "wordClass": "substantiv",
+     "example": "Jeg sender deg en e-post med detaljene.",
+     "exampleRu": "Я пришлю тебе письмо с подробностями.",
+     "exampleUk": "Я надішлю тобі листа з подробицями."
+    },
+    {
+     "key": "life:kontor:vedlegg",
+     "no": "et vedlegg",
+     "ru": "вложение (к письму)",
+     "uk": "вкладення (до листа)",
+     "wordClass": "substantiv",
+     "example": "Kontrakten ligger som vedlegg i e-posten.",
+     "exampleRu": "Договор во вложении к письму.",
+     "exampleUk": "Договір у вкладенні до листа."
+    },
+    {
+     "key": "life:kontor:a-svare-pa",
+     "no": "å svare på",
+     "ru": "отвечать на",
+     "uk": "відповідати на",
+     "wordClass": "verb",
+     "example": "Kan du svare på e-posten fra kunden i dag?",
+     "exampleRu": "Ответишь сегодня на письмо клиента?",
+     "exampleUk": "Відповіси сьогодні на лист клієнта?"
+    },
+    {
+     "key": "life:kontor:frist",
+     "no": "en frist",
+     "ru": "срок; дедлайн",
+     "uk": "термін; дедлайн",
+     "wordClass": "substantiv",
+     "example": "Fristen for rapporten er fredag.",
+     "exampleRu": "Отчёт нужно сдать до пятницы.",
+     "exampleUk": "Звіт треба здати до п'ятниці."
+    },
+    {
+     "key": "life:kontor:oppgave",
+     "no": "en oppgave",
+     "ru": "задача; задание",
+     "uk": "завдання",
+     "wordClass": "substantiv",
+     "example": "Jeg har mange oppgaver denne uka.",
+     "exampleRu": "На этой неделе у меня много задач.",
+     "exampleUk": "Цього тижня в мене багато завдань."
+    },
+    {
+     "key": "life:kontor:a-prioritere",
+     "no": "å prioritere",
+     "ru": "расставлять приоритеты",
+     "uk": "визначати пріоритети",
+     "wordClass": "verb",
+     "example": "Hva skal jeg prioritere først?",
+     "exampleRu": "Что мне сделать в первую очередь?",
+     "exampleUk": "Що мені зробити насамперед?"
+    },
+    {
+     "key": "life:kontor:leder",
+     "no": "en leder",
+     "ru": "руководитель",
+     "uk": "керівник",
+     "wordClass": "substantiv",
+     "example": "Lederen min er på ferie til mandag.",
+     "exampleRu": "Мой руководитель в отпуске до понедельника.",
+     "exampleUk": "Мій керівник у відпустці до понеділка."
+    },
+    {
+     "key": "life:kontor:passord",
+     "no": "et passord",
+     "ru": "пароль",
+     "uk": "пароль",
+     "wordClass": "substantiv",
+     "example": "Du må bytte passord hver tredje måned.",
+     "exampleRu": "Пароль нужно менять каждые три месяца.",
+     "exampleUk": "Пароль треба змінювати кожні три місяці."
+    },
+    {
+     "key": "life:kontor:a-logge-inn",
+     "no": "å logge inn",
+     "ru": "войти (в систему)",
+     "uk": "увійти (в систему)",
+     "wordClass": "verb",
+     "example": "Jeg får ikke logget inn på PC-en.",
+     "exampleRu": "У меня не получается войти в компьютер.",
+     "exampleUk": "Мені не вдається увійти в комп'ютер.",
+     "description": "💡 få ikke + причастие: Jeg får ikke logget inn — у меня не получается войти."
+    },
+    {
+     "key": "life:kontor:skjerm",
+     "no": "en skjerm",
+     "ru": "экран; монитор",
+     "uk": "екран; монітор",
+     "wordClass": "substantiv",
+     "example": "Skjermen min er helt svart.",
+     "exampleRu": "У меня совсем чёрный экран.",
+     "exampleUk": "У мене зовсім чорний екран."
+    },
+    {
+     "key": "life:kontor:skriver",
+     "no": "en skriver",
+     "ru": "принтер",
+     "uk": "принтер",
+     "wordClass": "substantiv",
+     "example": "Skriveren er tom for papir.",
+     "exampleRu": "В принтере закончилась бумага.",
+     "exampleUk": "У принтері закінчився папір.",
+     "description": "💡 Дословно «писатель», но в офисе это принтер."
+    },
+    {
+     "key": "life:kontor:a-lagre",
+     "no": "å lagre",
+     "ru": "сохранить",
+     "uk": "зберегти",
+     "wordClass": "verb",
+     "example": "Husk å lagre dokumentet før du lukker det.",
+     "exampleRu": "Не забудь сохранить документ, прежде чем закрывать.",
+     "exampleUk": "Не забудь зберегти документ, перш ніж закривати."
+    },
+    {
+     "key": "life:kontor:fil",
+     "no": "en fil",
+     "ru": "файл",
+     "uk": "файл",
+     "wordClass": "substantiv",
+     "example": "Jeg finner ikke filen i mappen.",
+     "exampleRu": "Не могу найти файл в папке.",
+     "exampleUk": "Не можу знайти файл у теці."
+    },
+    {
+     "key": "life:kontor:mappe",
+     "no": "en mappe",
+     "ru": "папка",
+     "uk": "тека; папка",
+     "wordClass": "substantiv",
+     "example": "Legg fakturaene i mappen «Regnskap».",
+     "exampleRu": "Положи счета в папку «Бухгалтерия».",
+     "exampleUk": "Поклади рахунки в теку «Бухгалтерія»."
+    },
+    {
+     "key": "life:kontor:a-oppdatere",
+     "no": "å oppdatere",
+     "ru": "обновить",
+     "uk": "оновити",
+     "wordClass": "verb",
+     "example": "PC-en må oppdateres i kveld.",
+     "exampleRu": "Вечером компьютер нужно обновить.",
+     "exampleUk": "Увечері комп'ютер треба оновити."
+    },
+    {
+     "key": "life:kontor:a-kontakte-it",
+     "no": "å kontakte IT",
+     "ru": "обратиться в IT-отдел",
+     "uk": "звернутися до IT-відділу",
+     "wordClass": "uttrykk",
+     "example": "Hvis PC-en ikke virker, må du kontakte IT.",
+     "exampleRu": "Если компьютер не работает, обратись в IT-отдел.",
+     "exampleUk": "Якщо комп'ютер не працює, звернися до IT-відділу."
+    },
+    {
+     "key": "life:kontor:faktura",
+     "no": "en faktura",
+     "ru": "счёт (на оплату)",
+     "uk": "рахунок (до сплати)",
+     "wordClass": "substantiv",
+     "example": "Fakturaen må betales innen fjorten dager.",
+     "exampleRu": "Счёт нужно оплатить в течение четырнадцати дней.",
+     "exampleUk": "Рахунок треба сплатити протягом чотирнадцяти днів."
+    },
+    {
+     "key": "life:kontor:timeliste",
+     "no": "en timeliste",
+     "ru": "табель рабочего времени",
+     "uk": "табель обліку робочого часу",
+     "wordClass": "substantiv",
+     "example": "Husk å levere timelisten før fredag.",
+     "exampleRu": "Не забудь сдать табель до пятницы.",
+     "exampleUk": "Не забудь здати табель до п'ятниці."
+    },
+    {
+     "key": "life:kontor:a-melde-seg-syk",
+     "no": "å melde seg syk",
+     "ru": "сообщить, что заболел",
+     "uk": "повідомити, що захворів",
+     "wordClass": "uttrykk",
+     "example": "Hvis du blir syk, må du melde deg syk til lederen før klokka åtte.",
+     "exampleRu": "Если заболел, сообщи руководителю до восьми утра.",
+     "exampleUk": "Якщо захворів, повідом керівника до восьмої ранку."
+    },
+    {
+     "key": "life:kontor:har-du-tid-et-oyeblikk",
+     "no": "Har du tid et øyeblikk?",
+     "ru": "Есть минутка?",
+     "uk": "Маєш хвилинку?",
+     "wordClass": "frase",
+     "example": "Har du tid et øyeblikk? Jeg har et spørsmål om rapporten.",
+     "exampleRu": "Есть минутка? У меня вопрос по отчёту.",
+     "exampleUk": "Маєш хвилинку? У мене питання щодо звіту."
+    },
+    {
+     "key": "life:kontor:jeg-kommer-tilbake-til-deg",
+     "no": "Jeg kommer tilbake til deg.",
+     "ru": "Я вам потом отвечу.",
+     "uk": "Я відповім вам згодом.",
+     "wordClass": "frase",
+     "example": "Jeg må sjekke det først. Jeg kommer tilbake til deg i ettermiddag.",
+     "exampleRu": "Сначала мне нужно это проверить. Отвечу вам после обеда.",
+     "exampleUk": "Спершу мені треба це перевірити. Відповім вам після обіду."
+    },
+    {
+     "key": "life:kontor:kan-vi-ta-det-pa-motet",
+     "no": "Kan vi ta det på møtet?",
+     "ru": "Обсудим это на совещании?",
+     "uk": "Обговоримо це на нараді?",
+     "wordClass": "frase",
+     "example": "Det er et stort spørsmål. Kan vi ta det på møtet i morgen?",
+     "exampleRu": "Это большой вопрос. Обсудим его завтра на совещании?",
+     "exampleUk": "Це велике питання. Обговоримо його завтра на нараді?"
+    },
+    {
+     "key": "life:kontor:ha-en-fin-helg",
+     "no": "Ha en fin helg!",
+     "ru": "Хороших выходных!",
+     "uk": "Гарних вихідних!",
+     "wordClass": "frase",
+     "example": "Ha en fin helg! Vi ses på mandag.",
+     "exampleRu": "Хороших выходных! Увидимся в понедельник.",
+     "exampleUk": "Гарних вихідних! Побачимося в понеділок."
+    },
+    {
+     "key": "life:kontor:takk-for-i-dag",
+     "no": "Takk for i dag!",
+     "ru": "Спасибо, до завтра! (в конце рабочего дня)",
+     "uk": "Дякую, до завтра! (наприкінці робочого дня)",
+     "wordClass": "frase",
+     "example": "Takk for i dag, alle sammen! Vi ses i morgen.",
+     "exampleRu": "Всем спасибо! Увидимся завтра.",
+     "exampleUk": "Усім дякую! Побачимося завтра.",
+     "description": "💡 Обычное прощание в конце рабочего дня, урока или встречи."
+    }
+   ]
+  },
+  {
+   "id": "life-jobbintervju",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "intervju",
+   "name": "Собеседование, резюме и трудовой договор",
+   "nameUk": "Співбесіда, резюме і трудовий договір",
+   "nameNo": "Jobbintervju, CV og arbeidskontrakt",
+   "icon": "🤝",
+   "level": "B1",
+   "tags": [
+    "jobb",
+    "intervju",
+    "CV"
+   ],
+   "description": "Как искать работу в Норвегии: вакансия, заявление, резюме, собеседование и трудовой договор — слова и готовые ответы на частые вопросы.",
+   "cards": [
+    {
+     "key": "life:intervju:stillingsannonse",
+     "no": "en stillingsannonse",
+     "ru": "объявление о вакансии",
+     "uk": "оголошення про вакансію",
+     "wordClass": "substantiv",
+     "example": "Jeg så stillingsannonsen på nettsidene til NAV.",
+     "exampleRu": "Я увидел объявление о вакансии на сайте NAV.",
+     "exampleUk": "Я побачив оголошення про вакансію на сайті NAV."
+    },
+    {
+     "key": "life:intervju:stilling",
+     "no": "en stilling",
+     "ru": "должность; вакансия",
+     "uk": "посада; вакансія",
+     "wordClass": "substantiv",
+     "example": "Stillingen er fast, hundre prosent.",
+     "exampleRu": "Это постоянная должность на полную ставку.",
+     "exampleUk": "Це постійна посада на повну ставку."
+    },
+    {
+     "key": "life:intervju:a-soke-pa-en-jobb",
+     "no": "å søke på en jobb",
+     "ru": "откликнуться на вакансию",
+     "uk": "відгукнутися на вакансію",
+     "wordClass": "uttrykk",
+     "example": "Jeg har søkt på tre jobber denne uka.",
+     "exampleRu": "На этой неделе я откликнулся на три вакансии.",
+     "exampleUk": "Цього тижня я відгукнувся на три вакансії.",
+     "description": "💡 søke på — не «искать», а «подавать заявку». Искать работу — å lete etter jobb."
+    },
+    {
+     "key": "life:intervju:soknad",
+     "no": "en søknad",
+     "ru": "заявление; сопроводительное письмо",
+     "uk": "заява; супровідний лист",
+     "wordClass": "substantiv",
+     "example": "Jeg skrev søknaden på norsk.",
+     "exampleRu": "Я написал сопроводительное письмо на норвежском.",
+     "exampleUk": "Я написав супровідний лист норвезькою.",
+     "description": "💡 Письмо работодателю о том, почему вы подходите на эту должность."
+    },
+    {
+     "key": "life:intervju:soknadsfrist",
+     "no": "en søknadsfrist",
+     "ru": "срок подачи заявок",
+     "uk": "кінцевий термін подання заяв",
+     "wordClass": "substantiv",
+     "example": "Søknadsfristen er om to uker.",
+     "exampleRu": "Заявки принимают ещё две недели.",
+     "exampleUk": "Заяви приймають ще два тижні."
+    },
+    {
+     "key": "life:intervju:cv",
+     "no": "en CV",
+     "ru": "резюме",
+     "uk": "резюме",
+     "wordClass": "substantiv",
+     "example": "Husk å oppdatere CV-en din.",
+     "exampleRu": "Не забудь обновить своё резюме.",
+     "exampleUk": "Не забудь оновити своє резюме."
+    },
+    {
+     "key": "life:intervju:arbeidserfaring",
+     "no": "en arbeidserfaring",
+     "ru": "опыт работы",
+     "uk": "досвід роботи",
+     "wordClass": "substantiv",
+     "example": "Jeg har fem års arbeidserfaring som sveiser.",
+     "exampleRu": "У меня пять лет опыта работы сварщиком.",
+     "exampleUk": "У мене п'ять років досвіду роботи зварювальником.",
+     "description": "💡 Обычно без артикля: Jeg har lang arbeidserfaring."
+    },
+    {
+     "key": "life:intervju:utdanning",
+     "no": "en utdanning",
+     "ru": "образование",
+     "uk": "освіта",
+     "wordClass": "substantiv",
+     "example": "Utdanningen min fra hjemlandet er godkjent i Norge.",
+     "exampleRu": "Моё образование, полученное на родине, признано в Норвегии.",
+     "exampleUk": "Мою освіту, здобуту на батьківщині, визнано в Норвегії."
+    },
+    {
+     "key": "life:intervju:intervju",
+     "no": "et intervju",
+     "ru": "собеседование",
+     "uk": "співбесіда",
+     "wordClass": "substantiv",
+     "example": "Jeg skal på intervju på tirsdag.",
+     "exampleRu": "Во вторник у меня собеседование.",
+     "exampleUk": "У вівторок у мене співбесіда."
+    },
+    {
+     "key": "life:intervju:a-bli-innkalt",
+     "no": "å bli innkalt",
+     "ru": "получить приглашение (на собеседование)",
+     "uk": "отримати запрошення (на співбесіду)",
+     "wordClass": "uttrykk",
+     "example": "Hvis du blir innkalt til intervju, får du en e-post.",
+     "exampleRu": "Если вас пригласят на собеседование, придёт письмо.",
+     "exampleUk": "Якщо вас запросять на співбесіду, прийде лист."
+    },
+    {
+     "key": "life:intervju:attest",
+     "no": "en attest",
+     "ru": "рекомендательное письмо (с прошлой работы)",
+     "uk": "рекомендаційний лист (із попередньої роботи)",
+     "wordClass": "substantiv",
+     "example": "Jeg har attest fra den forrige arbeidsplassen min.",
+     "exampleRu": "У меня есть рекомендательное письмо с прошлой работы.",
+     "exampleUk": "У мене є рекомендаційний лист із попереднього місця роботи.",
+     "description": "💡 attest — письменный отзыв; referanse — человек, которому можно позвонить."
+    },
+    {
+     "key": "life:intervju:referanse",
+     "no": "en referanse",
+     "ru": "человек, дающий рекомендацию (ему можно позвонить)",
+     "uk": "особа, яка може дати рекомендацію",
+     "wordClass": "substantiv",
+     "example": "Kan vi ringe referansene dine?",
+     "exampleRu": "Можно нам позвонить людям, которые вас рекомендуют?",
+     "exampleUk": "Чи можемо ми зателефонувати людям, які вас рекомендують?"
+    },
+    {
+     "key": "life:intervju:sterke-sider",
+     "no": "sterke sider",
+     "ru": "сильные стороны",
+     "uk": "сильні сторони",
+     "wordClass": "uttrykk",
+     "example": "– Hva er dine sterke sider? – Jeg er nøyaktig og lærer fort.",
+     "exampleRu": "– Какие у вас сильные стороны? – Я аккуратный и быстро учусь.",
+     "exampleUk": "– Які ваші сильні сторони? – Я акуратний і швидко навчаюся."
+    },
+    {
+     "key": "life:intervju:palitelig",
+     "no": "pålitelig",
+     "ru": "надёжный",
+     "uk": "надійний",
+     "wordClass": "adjektiv",
+     "example": "Jeg er pålitelig og kommer alltid presis.",
+     "exampleRu": "Я надёжный и всегда прихожу вовремя.",
+     "exampleUk": "Я надійний і завжди приходжу вчасно."
+    },
+    {
+     "key": "life:intervju:arbeidsgiver",
+     "no": "en arbeidsgiver",
+     "ru": "работодатель",
+     "uk": "роботодавець",
+     "wordClass": "substantiv",
+     "example": "Arbeidsgiveren må betale lønn hver måned.",
+     "exampleRu": "Работодатель обязан платить зарплату каждый месяц.",
+     "exampleUk": "Роботодавець зобов'язаний платити зарплату щомісяця."
+    },
+    {
+     "key": "life:intervju:arbeidstaker",
+     "no": "en arbeidstaker",
+     "ru": "работник (по найму)",
+     "uk": "найманий працівник",
+     "wordClass": "substantiv",
+     "example": "Som arbeidstaker har du rett til ferie.",
+     "exampleRu": "Как работник вы имеете право на отпуск.",
+     "exampleUk": "Як працівник ви маєте право на відпустку."
+    },
+    {
+     "key": "life:intervju:arbeidskontrakt",
+     "no": "en arbeidskontrakt",
+     "ru": "трудовой договор",
+     "uk": "трудовий договір",
+     "wordClass": "substantiv",
+     "example": "Les arbeidskontrakten nøye før du skriver under.",
+     "exampleRu": "Внимательно прочитайте трудовой договор, прежде чем подписывать.",
+     "exampleUk": "Уважно прочитайте трудовий договір, перш ніж підписувати."
+    },
+    {
+     "key": "life:intervju:a-skrive-under",
+     "no": "å skrive under",
+     "ru": "подписать",
+     "uk": "підписати",
+     "wordClass": "verb",
+     "example": "Du må skrive under på begge sidene.",
+     "exampleRu": "Нужно подписать обе страницы.",
+     "exampleUk": "Треба підписати обидві сторінки."
+    },
+    {
+     "key": "life:intervju:provetid",
+     "no": "en prøvetid",
+     "ru": "испытательный срок",
+     "uk": "випробувальний термін",
+     "wordClass": "substantiv",
+     "example": "Prøvetiden er seks måneder.",
+     "exampleRu": "Испытательный срок — шесть месяцев.",
+     "exampleUk": "Випробувальний термін — шість місяців."
+    },
+    {
+     "key": "life:intervju:fast-ansatt",
+     "no": "fast ansatt",
+     "ru": "на постоянной работе; в штате",
+     "uk": "на постійній роботі; у штаті",
+     "wordClass": "uttrykk",
+     "example": "Etter prøvetiden blir jeg fast ansatt.",
+     "exampleRu": "После испытательного срока меня возьмут в штат.",
+     "exampleUk": "Після випробувального терміну мене візьмуть у штат."
+    },
+    {
+     "key": "life:intervju:midlertidig",
+     "no": "midlertidig",
+     "ru": "временный",
+     "uk": "тимчасовий",
+     "wordClass": "adjektiv",
+     "example": "Det er en midlertidig stilling i ett år.",
+     "exampleRu": "Это временная должность на год.",
+     "exampleUk": "Це тимчасова посада на рік."
+    },
+    {
+     "key": "life:intervju:deltidsstilling",
+     "no": "en deltidsstilling",
+     "ru": "работа на неполную ставку",
+     "uk": "робота на неповну ставку",
+     "wordClass": "substantiv",
+     "example": "Hun har en deltidsstilling på femti prosent.",
+     "exampleRu": "Она работает на полставки.",
+     "exampleUk": "Вона працює на пів ставки."
+    },
+    {
+     "key": "life:intervju:lonn",
+     "no": "en lønn",
+     "ru": "зарплата",
+     "uk": "зарплата",
+     "wordClass": "substantiv",
+     "example": "Lønnen kommer den tjuende hver måned.",
+     "exampleRu": "Зарплату платят двадцатого числа каждого месяца.",
+     "exampleUk": "Зарплату виплачують двадцятого числа щомісяця."
+    },
+    {
+     "key": "life:intervju:timelonn",
+     "no": "en timelønn",
+     "ru": "почасовая оплата",
+     "uk": "погодинна оплата",
+     "wordClass": "substantiv",
+     "example": "Timelønnen er to hundre og ti kroner.",
+     "exampleRu": "Почасовая ставка — двести десять крон.",
+     "exampleUk": "Погодинна ставка — двісті десять крон."
+    },
+    {
+     "key": "life:intervju:oppsigelsestid",
+     "no": "en oppsigelsestid",
+     "ru": "срок предупреждения об увольнении",
+     "uk": "строк попередження про звільнення",
+     "wordClass": "substantiv",
+     "example": "Oppsigelsestiden er én måned.",
+     "exampleRu": "Об увольнении нужно предупредить за месяц.",
+     "exampleUk": "Про звільнення треба попередити за місяць."
+    },
+    {
+     "key": "life:intervju:ferie",
+     "no": "en ferie",
+     "ru": "отпуск",
+     "uk": "відпустка",
+     "wordClass": "substantiv",
+     "example": "Hvor mye ferie har jeg det første året?",
+     "exampleRu": "Сколько отпуска у меня в первый год?",
+     "exampleUk": "Скільки відпустки в мене першого року?"
+    },
+    {
+     "key": "life:intervju:arbeidstillatelse",
+     "no": "en arbeidstillatelse",
+     "ru": "разрешение на работу",
+     "uk": "дозвіл на роботу",
+     "wordClass": "substantiv",
+     "example": "Har du arbeidstillatelse i Norge?",
+     "exampleRu": "У вас есть разрешение на работу в Норвегии?",
+     "exampleUk": "У вас є дозвіл на роботу в Норвегії?"
+    },
+    {
+     "key": "life:intervju:fortell-litt-om-deg-selv",
+     "no": "Fortell litt om deg selv.",
+     "ru": "Расскажите немного о себе.",
+     "uk": "Розкажіть трохи про себе.",
+     "wordClass": "frase",
+     "example": "Velkommen! Kan du først fortelle litt om deg selv?",
+     "exampleRu": "Добро пожаловать! Для начала расскажите немного о себе.",
+     "exampleUk": "Ласкаво просимо! Для початку розкажіть трохи про себе."
+    },
+    {
+     "key": "life:intervju:hvorfor-sokte-du-pa-denne-stillingen",
+     "no": "Hvorfor søkte du på denne stillingen?",
+     "ru": "Почему вы откликнулись на эту вакансию?",
+     "uk": "Чому ви відгукнулися на цю вакансію?",
+     "wordClass": "frase",
+     "example": "– Hvorfor søkte du på denne stillingen? – Fordi jeg liker å jobbe med mennesker.",
+     "exampleRu": "– Почему вы откликнулись на эту вакансию? – Потому что мне нравится работать с людьми.",
+     "exampleUk": "– Чому ви відгукнулися на цю вакансію? – Бо мені подобається працювати з людьми."
+    },
+    {
+     "key": "life:intervju:nar-kan-du-begynne",
+     "no": "Når kan du begynne?",
+     "ru": "Когда вы можете приступить?",
+     "uk": "Коли ви можете стати до роботи?",
+     "wordClass": "frase",
+     "example": "– Når kan du begynne? – Jeg kan begynne allerede neste mandag.",
+     "exampleRu": "– Когда вы можете приступить? – Уже со следующего понедельника.",
+     "exampleUk": "– Коли ви можете стати до роботи? – Уже з наступного понеділка."
+    },
+    {
+     "key": "life:intervju:har-du-noen-sporsmal-til-oss",
+     "no": "Har du noen spørsmål til oss?",
+     "ru": "У вас есть к нам вопросы?",
+     "uk": "У вас є до нас запитання?",
+     "wordClass": "frase",
+     "example": "Til slutt: har du noen spørsmål til oss?",
+     "exampleRu": "И напоследок: у вас есть к нам вопросы?",
+     "exampleUk": "І наостанок: у вас є до нас запитання?",
+     "description": "💡 Хорошо задать один-два вопроса: о задачах, о графике, об обучении."
+    },
+    {
+     "key": "life:intervju:jeg-snakker-norsk-pa-b1-niva",
+     "no": "Jeg snakker norsk på B1-nivå.",
+     "ru": "Я говорю по-норвежски на уровне B1.",
+     "uk": "Я розмовляю норвезькою на рівні B1.",
+     "wordClass": "frase",
+     "example": "Jeg snakker norsk på B1-nivå og går fortsatt på kurs.",
+     "exampleRu": "Я говорю по-норвежски на уровне B1 и продолжаю ходить на курсы.",
+     "exampleUk": "Я розмовляю норвезькою на рівні B1 і досі відвідую курси."
+    },
+    {
+     "key": "life:intervju:jeg-gleder-meg-til-a-hore-fra-dere",
+     "no": "Jeg gleder meg til å høre fra dere.",
+     "ru": "Буду ждать вашего ответа.",
+     "uk": "Чекатиму на вашу відповідь.",
+     "wordClass": "frase",
+     "example": "Takk for at jeg fikk komme. Jeg gleder meg til å høre fra dere.",
+     "exampleRu": "Спасибо, что пригласили. Буду ждать вашего ответа.",
+     "exampleUk": "Дякую, що запросили. Чекатиму на вашу відповідь.",
+     "description": "💡 Хорошая последняя фраза письма-заявления или собеседования."
+    }
+   ]
+  },
+  {
+   "id": "life-bolig",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "bolig",
+   "name": "Жильё: аренда и соседи",
+   "nameUk": "Житло: оренда і сусіди",
+   "nameNo": "Bolig: leie og naboer",
+   "icon": "🏠",
+   "level": "A2",
+   "tags": [
+    "bolig",
+    "leie"
+   ],
+   "description": "Для тех, кто снимает жильё: договор, залог, квартплата, разговор с хозяином и соседями, уборка подъезда и сортировка мусора.",
+   "cards": [
+    {
+     "key": "life:bolig:leilighet",
+     "no": "en leilighet",
+     "ru": "квартира",
+     "uk": "квартира",
+     "wordClass": "substantiv",
+     "example": "Vi leier en leilighet med to soverom.",
+     "exampleRu": "Мы снимаем квартиру с двумя спальнями.",
+     "exampleUk": "Ми винаймаємо квартиру з двома спальнями."
+    },
+    {
+     "key": "life:bolig:hybel",
+     "no": "en hybel",
+     "ru": "съёмная комната (часто с отдельным входом)",
+     "uk": "орендована кімната (часто з окремим входом)",
+     "wordClass": "substantiv",
+     "example": "Studenten bor på en liten hybel i kjelleren.",
+     "exampleRu": "Студент живёт в маленькой съёмной комнате в подвале.",
+     "exampleUk": "Студент живе в маленькій орендованій кімнаті в підвалі.",
+     "description": "💡 Hybel — отдельная комната с мини-кухней в чужом доме, обычный вариант для студентов."
+    },
+    {
+     "key": "life:bolig:a-leie",
+     "no": "å leie",
+     "ru": "снимать, арендовать",
+     "uk": "винаймати, орендувати",
+     "wordClass": "verb",
+     "example": "Vi vil leie en leilighet nær skolen.",
+     "exampleRu": "Мы хотим снять квартиру рядом со школой.",
+     "exampleUk": "Ми хочемо винайняти квартиру поруч зі школою."
+    },
+    {
+     "key": "life:bolig:a-leie-ut",
+     "no": "å leie ut",
+     "ru": "сдавать (в аренду)",
+     "uk": "здавати (в оренду)",
+     "wordClass": "verb",
+     "example": "Naboen leier ut kjelleren sin.",
+     "exampleRu": "Сосед сдаёт свой подвал.",
+     "exampleUk": "Сусід здає свій підвал."
+    },
+    {
+     "key": "life:bolig:utleier",
+     "no": "en utleier",
+     "ru": "арендодатель, хозяин квартиры",
+     "uk": "орендодавець, власник квартири",
+     "wordClass": "substantiv",
+     "example": "Utleieren kommer i morgen og ser på vasken.",
+     "exampleRu": "Хозяин квартиры придёт завтра посмотреть раковину.",
+     "exampleUk": "Власник квартири прийде завтра подивитися на раковину."
+    },
+    {
+     "key": "life:bolig:leietaker",
+     "no": "en leietaker",
+     "ru": "жилец, арендатор",
+     "uk": "орендар, мешканець",
+     "wordClass": "substantiv",
+     "example": "Leietakeren må betale husleien innen den første.",
+     "exampleRu": "Жилец должен платить за квартиру до первого числа.",
+     "exampleUk": "Орендар має сплачувати оренду до першого числа."
+    },
+    {
+     "key": "life:bolig:leiekontrakt",
+     "no": "en leiekontrakt",
+     "ru": "договор аренды",
+     "uk": "договір оренди",
+     "wordClass": "substantiv",
+     "example": "Les leiekontrakten nøye før du skriver under.",
+     "exampleRu": "Внимательно прочитайте договор аренды, прежде чем подписывать.",
+     "exampleUk": "Уважно прочитайте договір оренди, перш ніж підписувати.",
+     "description": "💡 Договор лучше заключать письменно — так проще решать споры."
+    },
+    {
+     "key": "life:bolig:husleie",
+     "no": "en husleie",
+     "ru": "квартплата, арендная плата",
+     "uk": "орендна плата",
+     "wordClass": "substantiv",
+     "example": "Husleien er tolv tusen kroner i måneden.",
+     "exampleRu": "Квартплата — двенадцать тысяч крон в месяц.",
+     "exampleUk": "Орендна плата — дванадцять тисяч крон на місяць."
+    },
+    {
+     "key": "life:bolig:depositum",
+     "no": "et depositum",
+     "ru": "залог",
+     "uk": "застава (депозит)",
+     "wordClass": "substantiv",
+     "example": "Depositumet står på en egen konto.",
+     "exampleRu": "Залог лежит на отдельном счёте.",
+     "exampleUk": "Застава лежить на окремому рахунку.",
+     "description": "💡 Залог обычно кладут на специальный депозитный счёт, а не отдают хозяину наличными."
+    },
+    {
+     "key": "life:bolig:strom",
+     "no": "en strøm",
+     "ru": "электричество",
+     "uk": "електроенергія, світло",
+     "wordClass": "substantiv",
+     "example": "Strømmen er ikke med i husleien.",
+     "exampleRu": "Электричество в квартплату не входит.",
+     "exampleUk": "Електроенергія не входить в орендну плату.",
+     "description": "💡 Strøm — обычное слово для электричества; счёт за него часто приходит отдельно."
+    },
+    {
+     "key": "life:bolig:stromregning",
+     "no": "en strømregning",
+     "ru": "счёт за электричество",
+     "uk": "рахунок за електроенергію",
+     "wordClass": "substantiv",
+     "example": "Om vinteren blir strømregningen høy.",
+     "exampleRu": "Зимой счёт за электричество бывает большим.",
+     "exampleUk": "Узимку рахунок за електроенергію буває великим."
+    },
+    {
+     "key": "life:bolig:nabo",
+     "no": "en nabo",
+     "ru": "сосед",
+     "uk": "сусід",
+     "wordClass": "substantiv",
+     "example": "Naboen vår hjelper oss med å bære sofaen.",
+     "exampleRu": "Наш сосед помогает нам нести диван.",
+     "exampleUk": "Наш сусід допомагає нам нести диван."
+    },
+    {
+     "key": "life:bolig:vaskeliste",
+     "no": "en vaskeliste",
+     "ru": "график уборки",
+     "uk": "графік прибирання",
+     "wordClass": "substantiv",
+     "example": "Ifølge vaskelisten skal jeg vaske trappen denne uken.",
+     "exampleRu": "По графику уборки на этой неделе я мою лестницу.",
+     "exampleUk": "За графіком прибирання цього тижня я мию сходи.",
+     "description": "💡 В многоквартирных домах жильцы часто по очереди моют лестницу — график висит в подъезде."
+    },
+    {
+     "key": "life:bolig:oppgang",
+     "no": "en oppgang",
+     "ru": "подъезд",
+     "uk": "під’їзд",
+     "wordClass": "substantiv",
+     "example": "Det henger en lapp i oppgangen.",
+     "exampleRu": "В подъезде висит записка.",
+     "exampleUk": "У під’їзді висить записка."
+    },
+    {
+     "key": "life:bolig:vaskerom",
+     "no": "et vaskerom",
+     "ru": "прачечная (в доме)",
+     "uk": "пральня (у будинку)",
+     "wordClass": "substantiv",
+     "example": "Vaskerommet er i kjelleren.",
+     "exampleRu": "Прачечная в подвале.",
+     "exampleUk": "Пральня в підвалі."
+    },
+    {
+     "key": "life:bolig:bod",
+     "no": "en bod",
+     "ru": "кладовка",
+     "uk": "комора",
+     "wordClass": "substantiv",
+     "example": "Vi har en bod i kjelleren til vinterklærne.",
+     "exampleRu": "У нас есть кладовка в подвале для зимней одежды.",
+     "exampleUk": "У нас є комора в підвалі для зимового одягу."
+    },
+    {
+     "key": "life:bolig:vaktmester",
+     "no": "en vaktmester",
+     "ru": "смотритель дома, мастер по хозяйству",
+     "uk": "доглядач будинку, майстер",
+     "wordClass": "substantiv",
+     "example": "Ring vaktmesteren hvis lyset i trappen ikke virker.",
+     "exampleRu": "Позвоните смотрителю, если на лестнице не горит свет.",
+     "exampleUk": "Зателефонуйте доглядачеві, якщо на сходах не горить світло."
+    },
+    {
+     "key": "life:bolig:borettslag",
+     "no": "et borettslag",
+     "ru": "жилищный кооператив",
+     "uk": "житловий кооператив",
+     "wordClass": "substantiv",
+     "example": "Vi bor i et borettslag med felles hage.",
+     "exampleRu": "Мы живём в жилищном кооперативе с общим садом.",
+     "exampleUk": "Ми живемо в житловому кооперативі зі спільним садом."
+    },
+    {
+     "key": "life:bolig:dugnad",
+     "no": "en dugnad",
+     "ru": "субботник, общая работа жильцов",
+     "uk": "толока, спільна робота мешканців",
+     "wordClass": "substantiv",
+     "example": "Lørdag er det dugnad, og alle rydder i hagen.",
+     "exampleRu": "В субботу субботник: все убирают сад.",
+     "exampleUk": "У суботу толока: всі прибирають у саду.",
+     "description": "💡 Dugnad — добровольная общая работа; прийти считается хорошим тоном."
+    },
+    {
+     "key": "life:bolig:kildesortering",
+     "no": "en kildesortering",
+     "ru": "сортировка мусора",
+     "uk": "сортування сміття",
+     "wordClass": "substantiv",
+     "example": "Kildesortering er vanlig i hele Norge.",
+     "exampleRu": "Мусор сортируют по всей Норвегии.",
+     "exampleUk": "Сміття сортують по всій Норвегії."
+    },
+    {
+     "key": "life:bolig:a-kaste-soppel",
+     "no": "å kaste søppel",
+     "ru": "выбрасывать мусор",
+     "uk": "викидати сміття",
+     "wordClass": "uttrykk",
+     "example": "Hvor kaster vi søppel her i borettslaget?",
+     "exampleRu": "Куда у нас в кооперативе выбрасывают мусор?",
+     "exampleUk": "Куди в нашому кооперативі викидають сміття?"
+    },
+    {
+     "key": "life:bolig:nokkel",
+     "no": "en nøkkel",
+     "ru": "ключ",
+     "uk": "ключ",
+     "wordClass": "substantiv",
+     "example": "Jeg har mistet nøkkelen til leiligheten.",
+     "exampleRu": "Я потерял ключ от квартиры.",
+     "exampleUk": "Я загубив ключ від квартири."
+    },
+    {
+     "key": "life:bolig:a-flytte-inn",
+     "no": "å flytte inn",
+     "ru": "въезжать, заселяться",
+     "uk": "заселятися, в’їжджати",
+     "wordClass": "verb",
+     "example": "Vi flytter inn den første mars.",
+     "exampleRu": "Мы въезжаем первого марта.",
+     "exampleUk": "Ми заселяємося першого березня."
+    },
+    {
+     "key": "life:bolig:a-si-opp",
+     "no": "å si opp",
+     "ru": "расторгать (договор)",
+     "uk": "розірвати (договір)",
+     "wordClass": "verb",
+     "example": "Vi må si opp leiligheten tre måneder før vi flytter.",
+     "exampleRu": "Нам нужно расторгнуть договор за три месяца до переезда.",
+     "exampleUk": "Нам треба розірвати договір за три місяці до переїзду."
+    },
+    {
+     "key": "life:bolig:oppsigelsestid",
+     "no": "en oppsigelsestid",
+     "ru": "срок предупреждения о расторжении",
+     "uk": "строк попередження про розірвання",
+     "wordClass": "substantiv",
+     "example": "Oppsigelsestiden er tre måneder.",
+     "exampleRu": "Предупредить нужно за три месяца.",
+     "exampleUk": "Попередити треба за три місяці."
+    },
+    {
+     "key": "life:bolig:moblert",
+     "no": "møblert",
+     "ru": "меблированный, с мебелью",
+     "uk": "мебльований, з меблями",
+     "wordClass": "adjektiv",
+     "example": "Leiligheten er delvis møblert.",
+     "exampleRu": "Квартира частично с мебелью.",
+     "exampleUk": "Квартира частково з меблями."
+    },
+    {
+     "key": "life:bolig:lekkasje",
+     "no": "en lekkasje",
+     "ru": "протечка",
+     "uk": "протікання",
+     "wordClass": "substantiv",
+     "example": "Det er en lekkasje under vasken på kjøkkenet.",
+     "exampleRu": "Под раковиной на кухне протекает.",
+     "exampleUk": "Під раковиною на кухні протікає."
+    },
+    {
+     "key": "life:bolig:a-melde-fra",
+     "no": "å melde fra",
+     "ru": "сообщить (о проблеме)",
+     "uk": "повідомити (про проблему)",
+     "wordClass": "verb",
+     "example": "Du må melde fra til utleieren med en gang.",
+     "exampleRu": "Нужно сразу сообщить хозяину квартиры.",
+     "exampleUk": "Треба одразу повідомити власника квартири."
+    },
+    {
+     "key": "life:bolig:roykvarsler",
+     "no": "en røykvarsler",
+     "ru": "датчик дыма",
+     "uk": "датчик диму",
+     "wordClass": "substantiv",
+     "example": "Vi tester røykvarsleren første desember.",
+     "exampleRu": "Первого декабря мы проверяем датчик дыма.",
+     "exampleUk": "Першого грудня ми перевіряємо датчик диму.",
+     "description": "💡 В Норвегии принято проверять датчик дыма 1 декабря — перед сезоном свечей."
+    },
+    {
+     "key": "life:bolig:kan-dere-skru-ned-musikken",
+     "no": "Kan dere skru ned musikken?",
+     "ru": "Можете сделать музыку потише?",
+     "uk": "Можете зробити музику тихіше?",
+     "wordClass": "frase",
+     "example": "Unnskyld, kan dere skru ned musikken? Barna sover.",
+     "exampleRu": "Извините, можете сделать музыку потише? Дети спят.",
+     "exampleUk": "Вибачте, можете зробити музику тихіше? Діти сплять.",
+     "description": "💡 Во многих домах по правилам после 23:00 должно быть тихо."
+    },
+    {
+     "key": "life:bolig:nar-kan-jeg-komme-pa-visning",
+     "no": "Når kan jeg komme på visning?",
+     "ru": "Когда можно прийти посмотреть квартиру?",
+     "uk": "Коли можна прийти подивитися квартиру?",
+     "wordClass": "frase",
+     "example": "Hei! Er leiligheten fortsatt ledig? Når kan jeg komme på visning?",
+     "exampleRu": "Здравствуйте! Квартира ещё свободна? Когда можно прийти посмотреть?",
+     "exampleUk": "Добрий день! Квартира ще вільна? Коли можна прийти подивитися?",
+     "description": "💡 Visning — показ квартиры, часто сразу для нескольких желающих."
+    },
+    {
+     "key": "life:bolig:er-strom-inkludert-i-husleien",
+     "no": "Er strøm inkludert i husleien?",
+     "ru": "Электричество входит в квартплату?",
+     "uk": "Електроенергія входить в орендну плату?",
+     "wordClass": "frase",
+     "example": "Før jeg skriver under: er strøm inkludert i husleien?",
+     "exampleRu": "Прежде чем я подпишу: электричество входит в квартплату?",
+     "exampleUk": "Перш ніж я підпишу: електроенергія входить в орендну плату?"
+    },
+    {
+     "key": "life:bolig:vasken-er-tett",
+     "no": "Vasken er tett.",
+     "ru": "Раковина засорилась.",
+     "uk": "Раковина засмітилася.",
+     "wordClass": "frase",
+     "example": "Vasken på badet er tett, kan du se på den?",
+     "exampleRu": "Раковина в ванной засорилась, посмотришь?",
+     "exampleUk": "Раковина у ванній засмітилася, подивишся?"
+    }
+   ]
+  },
+  {
+   "id": "life-lege",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "lege",
+   "name": "У врача и в аптеке",
+   "nameUk": "У лікаря та в аптеці",
+   "nameNo": "Lege og apotek",
+   "icon": "🩺",
+   "level": "A2",
+   "tags": [
+    "lege",
+    "helse"
+   ],
+   "description": "Как записаться к семейному врачу, рассказать о симптомах, получить рецепт и больничный, что сказать в аптеке и в дежурном пункте.",
+   "cards": [
+    {
+     "key": "life:lege:fastlege",
+     "no": "en fastlege",
+     "ru": "семейный (постоянный) врач",
+     "uk": "сімейний лікар",
+     "wordClass": "substantiv",
+     "example": "Jeg må ringe fastlegen min og bestille time.",
+     "exampleRu": "Мне нужно позвонить своему семейному врачу и записаться на приём.",
+     "exampleUk": "Мені треба зателефонувати своєму сімейному лікареві й записатися на прийом.",
+     "description": "💡 Каждый, кто живёт в Норвегии, имеет право на своего fastlege; врача можно сменить, если он вам не подходит."
+    },
+    {
+     "key": "life:lege:legevakt",
+     "no": "en legevakt",
+     "ru": "дежурный медпункт (неотложная помощь)",
+     "uk": "черговий медпункт (невідкладна допомога)",
+     "wordClass": "substantiv",
+     "example": "Legekontoret er stengt, så vi drar på legevakten.",
+     "exampleRu": "Поликлиника закрыта, поэтому мы едем в дежурный медпункт.",
+     "exampleUk": "Поліклініка зачинена, тож ми їдемо до чергового медпункту.",
+     "description": "💡 Дежурная служба — 116 117; при угрозе жизни звоните 113."
+    },
+    {
+     "key": "life:lege:legekontor",
+     "no": "et legekontor",
+     "ru": "кабинет врача, поликлиника",
+     "uk": "кабінет лікаря, поліклініка",
+     "wordClass": "substantiv",
+     "example": "Legekontoret åpner klokka åtte.",
+     "exampleRu": "Поликлиника открывается в восемь.",
+     "exampleUk": "Поліклініка відкривається о восьмій."
+    },
+    {
+     "key": "life:lege:time",
+     "no": "en time",
+     "ru": "приём (запись к врачу); час",
+     "uk": "прийом (запис до лікаря); година",
+     "wordClass": "substantiv",
+     "example": "Jeg har time hos legen på torsdag.",
+     "exampleRu": "У меня приём у врача в четверг.",
+     "exampleUk": "У мене прийом у лікаря в четвер.",
+     "description": "💡 Time — и «час», и «запись на приём»: bestille time — записаться."
+    },
+    {
+     "key": "life:lege:a-bestille-time",
+     "no": "å bestille time",
+     "ru": "записаться на приём",
+     "uk": "записатися на прийом",
+     "wordClass": "uttrykk",
+     "example": "Du kan bestille time på nett eller på telefon.",
+     "exampleRu": "Записаться можно онлайн или по телефону.",
+     "exampleUk": "Записатися можна онлайн або телефоном."
+    },
+    {
+     "key": "life:lege:apotek",
+     "no": "et apotek",
+     "ru": "аптека",
+     "uk": "аптека",
+     "wordClass": "substantiv",
+     "example": "Apoteket ligger ved siden av butikken.",
+     "exampleRu": "Аптека рядом с магазином.",
+     "exampleUk": "Аптека поруч із магазином."
+    },
+    {
+     "key": "life:lege:resept",
+     "no": "en resept",
+     "ru": "рецепт (на лекарство)",
+     "uk": "рецепт (на ліки)",
+     "wordClass": "substantiv",
+     "example": "Legen skriver ut en resept på antibiotika.",
+     "exampleRu": "Врач выписывает рецепт на антибиотики.",
+     "exampleUk": "Лікар виписує рецепт на антибіотики.",
+     "description": "💡 Рецепты электронные: в аптеке достаточно показать удостоверение личности."
+    },
+    {
+     "key": "life:lege:reseptfri",
+     "no": "reseptfri",
+     "ru": "безрецептурный",
+     "uk": "безрецептурний",
+     "wordClass": "adjektiv",
+     "example": "Denne medisinen er reseptfri.",
+     "exampleRu": "Это лекарство продаётся без рецепта.",
+     "exampleUk": "Ці ліки продаються без рецепта."
+    },
+    {
+     "key": "life:lege:medisin",
+     "no": "en medisin",
+     "ru": "лекарство",
+     "uk": "ліки",
+     "wordClass": "substantiv",
+     "example": "Husk å ta medisinen etter maten.",
+     "exampleRu": "Не забудьте принять лекарство после еды.",
+     "exampleUk": "Не забудьте прийняти ліки після їди."
+    },
+    {
+     "key": "life:lege:tablett",
+     "no": "en tablett",
+     "ru": "таблетка",
+     "uk": "таблетка",
+     "wordClass": "substantiv",
+     "example": "Ta én tablett tre ganger om dagen.",
+     "exampleRu": "Принимайте по одной таблетке три раза в день.",
+     "exampleUk": "Приймайте по одній таблетці тричі на день."
+    },
+    {
+     "key": "life:lege:bivirkning",
+     "no": "en bivirkning",
+     "ru": "побочное действие",
+     "uk": "побічна дія",
+     "wordClass": "substantiv",
+     "example": "Kan medisinen gi bivirkninger?",
+     "exampleRu": "У этого лекарства бывают побочные эффекты?",
+     "exampleUk": "Чи бувають у цих ліків побічні дії?"
+    },
+    {
+     "key": "life:lege:jeg-har-vondt-i-hodet",
+     "no": "Jeg har vondt i hodet.",
+     "ru": "У меня болит голова.",
+     "uk": "У мене болить голова.",
+     "wordClass": "frase",
+     "example": "Jeg har hatt vondt i hodet og halsen siden i går.",
+     "exampleRu": "Со вчерашнего дня у меня болят голова и горло.",
+     "exampleUk": "Від учора в мене болять голова і горло.",
+     "description": "💡 Схема: ha vondt i + часть тела — vondt i magen, vondt i ryggen."
+    },
+    {
+     "key": "life:lege:feber",
+     "no": "en feber",
+     "ru": "температура, жар",
+     "uk": "температура, жар",
+     "wordClass": "substantiv",
+     "example": "Barnet har hatt feber i to dager.",
+     "exampleRu": "У ребёнка уже два дня температура.",
+     "exampleUk": "У дитини вже два дні температура.",
+     "description": "💡 Норвежцы говорят «ha feber», а не «ha temperatur»."
+    },
+    {
+     "key": "life:lege:forkjolet",
+     "no": "forkjølet",
+     "ru": "простуженный",
+     "uk": "застуджений",
+     "wordClass": "adjektiv",
+     "example": "Jeg er forkjølet og blir hjemme i dag.",
+     "exampleRu": "Я простудился и сегодня побуду дома.",
+     "exampleUk": "Я застудився і сьогодні побуду вдома."
+    },
+    {
+     "key": "life:lege:hoste",
+     "no": "en hoste",
+     "ru": "кашель",
+     "uk": "кашель",
+     "wordClass": "substantiv",
+     "example": "Hosten blir verre om natten.",
+     "exampleRu": "Ночью кашель усиливается.",
+     "exampleUk": "Уночі кашель посилюється."
+    },
+    {
+     "key": "life:lege:svimmel",
+     "no": "svimmel",
+     "ru": "с головокружением (голова кружится)",
+     "uk": "із запамороченням (паморочиться голова)",
+     "wordClass": "adjektiv",
+     "example": "Jeg blir svimmel når jeg reiser meg.",
+     "exampleRu": "Когда я встаю, у меня кружится голова.",
+     "exampleUk": "Коли я встаю, у мене паморочиться голова."
+    },
+    {
+     "key": "life:lege:allergisk",
+     "no": "allergisk",
+     "ru": "с аллергией",
+     "uk": "алергічний",
+     "wordClass": "adjektiv",
+     "example": "Jeg er allergisk mot penicillin.",
+     "exampleRu": "У меня аллергия на пенициллин.",
+     "exampleUk": "У мене алергія на пеніцилін.",
+     "description": "💡 allergisk mot — предлог mot, не på."
+    },
+    {
+     "key": "life:lege:a-undersoke",
+     "no": "å undersøke",
+     "ru": "осматривать, обследовать",
+     "uk": "оглядати, обстежувати",
+     "wordClass": "verb",
+     "example": "Legen undersøker ørene til gutten.",
+     "exampleRu": "Врач осматривает мальчику уши.",
+     "exampleUk": "Лікар оглядає хлопчикові вуха."
+    },
+    {
+     "key": "life:lege:blodprove",
+     "no": "en blodprøve",
+     "ru": "анализ крови",
+     "uk": "аналіз крові",
+     "wordClass": "substantiv",
+     "example": "Du må ta en blodprøve før neste time.",
+     "exampleRu": "Перед следующим приёмом нужно сдать кровь.",
+     "exampleUk": "Перед наступним прийомом треба здати аналіз крові."
+    },
+    {
+     "key": "life:lege:henvisning",
+     "no": "en henvisning",
+     "ru": "направление (к специалисту)",
+     "uk": "направлення (до фахівця)",
+     "wordClass": "substantiv",
+     "example": "Fastlegen gir deg en henvisning til spesialist.",
+     "exampleRu": "Семейный врач даст вам направление к специалисту.",
+     "exampleUk": "Сімейний лікар дасть вам направлення до фахівця."
+    },
+    {
+     "key": "life:lege:sykemelding",
+     "no": "en sykemelding",
+     "ru": "больничный (лист)",
+     "uk": "лікарняний",
+     "wordClass": "substantiv",
+     "example": "Legen ga meg sykemelding i en uke.",
+     "exampleRu": "Врач дал мне больничный на неделю.",
+     "exampleUk": "Лікар дав мені лікарняний на тиждень."
+    },
+    {
+     "key": "life:lege:egenmelding",
+     "no": "en egenmelding",
+     "ru": "больничный без справки (по своему заявлению)",
+     "uk": "лікарняний без довідки (за власною заявою)",
+     "wordClass": "substantiv",
+     "example": "Med egenmelding kan du være hjemme noen dager uten å gå til legen.",
+     "exampleRu": "По egenmelding можно несколько дней побыть дома, не ходя к врачу.",
+     "exampleUk": "За egenmelding можна кілька днів побути вдома, не йдучи до лікаря.",
+     "description": "💡 Сколько дней можно брать по egenmelding, зависит от работы — уточните у начальника."
+    },
+    {
+     "key": "life:lege:egenandel",
+     "no": "en egenandel",
+     "ru": "доплата пациента",
+     "uk": "доплата пацієнта",
+     "wordClass": "substantiv",
+     "example": "Hvor mye er egenandelen for timen?",
+     "exampleRu": "Сколько нужно доплатить за приём?",
+     "exampleUk": "Скільки треба доплатити за прийом?",
+     "description": "💡 Egenandel — часть цены, которую платит сам пациент; после годового лимита выдают frikort."
+    },
+    {
+     "key": "life:lege:frikort",
+     "no": "et frikort",
+     "ru": "освобождение от доплат (frikort)",
+     "uk": "звільнення від доплат (frikort)",
+     "wordClass": "substantiv",
+     "example": "Når du har frikort, betaler du ikke egenandel.",
+     "exampleRu": "Когда у вас есть frikort, доплачивать не нужно.",
+     "exampleUk": "Коли у вас є frikort, доплачувати не потрібно."
+    },
+    {
+     "key": "life:lege:tannlege",
+     "no": "en tannlege",
+     "ru": "стоматолог",
+     "uk": "стоматолог",
+     "wordClass": "substantiv",
+     "example": "Jeg har tannpine og må til tannlegen.",
+     "exampleRu": "У меня болит зуб, нужно к стоматологу.",
+     "exampleUk": "У мене болить зуб, треба до стоматолога."
+    },
+    {
+     "key": "life:lege:tolk",
+     "no": "en tolk",
+     "ru": "переводчик (устный)",
+     "uk": "перекладач (усний)",
+     "wordClass": "substantiv",
+     "example": "Jeg vil gjerne ha tolk på neste time.",
+     "exampleRu": "Я бы хотел, чтобы на следующем приёме был переводчик.",
+     "exampleUk": "Я хотів би, щоб на наступному прийомі був перекладач.",
+     "description": "💡 К врачу можно попросить переводчика — скажите об этом при записи."
+    },
+    {
+     "key": "life:lege:vaksine",
+     "no": "en vaksine",
+     "ru": "прививка, вакцина",
+     "uk": "щеплення, вакцина",
+     "wordClass": "substantiv",
+     "example": "Babyen skal få vaksine på helsestasjonen.",
+     "exampleRu": "Малышу будут делать прививку в детской консультации.",
+     "exampleUk": "Малюкові робитимуть щеплення в дитячій консультації."
+    },
+    {
+     "key": "life:lege:helsestasjon",
+     "no": "en helsestasjon",
+     "ru": "детская консультация, центр здоровья",
+     "uk": "дитяча консультація, центр здоров’я",
+     "wordClass": "substantiv",
+     "example": "På helsestasjonen veier de babyen.",
+     "exampleRu": "В консультации взвешивают малыша.",
+     "exampleUk": "У консультації зважують малюка."
+    },
+    {
+     "key": "life:lege:det-haster",
+     "no": "Det haster.",
+     "ru": "Это срочно.",
+     "uk": "Це терміново.",
+     "wordClass": "frase",
+     "example": "Jeg trenger time i dag, det haster.",
+     "exampleRu": "Мне нужно попасть сегодня, это срочно.",
+     "exampleUk": "Мені треба потрапити сьогодні, це терміново."
+    },
+    {
+     "key": "life:lege:hvor-lenge-har-du-hatt-disse-plagene",
+     "no": "Hvor lenge har du hatt disse plagene?",
+     "ru": "Как давно вас это беспокоит?",
+     "uk": "Як давно вас це турбує?",
+     "wordClass": "frase",
+     "example": "Legen spør: «Hvor lenge har du hatt disse plagene?»",
+     "exampleRu": "Врач спрашивает: «Как давно вас это беспокоит?»",
+     "exampleUk": "Лікар питає: «Як давно вас це турбує?»",
+     "description": "💡 Plager — жалобы, недомогания; обычный вопрос на приёме."
+    },
+    {
+     "key": "life:lege:ring-113-ved-livsfare",
+     "no": "Ring 113 ved livsfare.",
+     "ru": "При угрозе жизни звоните 113.",
+     "uk": "У разі загрози життю телефонуйте 113.",
+     "wordClass": "frase",
+     "example": "Hvis noen puster dårlig, må du ringe 113 med en gang.",
+     "exampleRu": "Если человеку трудно дышать, сразу звоните 113.",
+     "exampleUk": "Якщо людині важко дихати, одразу телефонуйте 113."
+    },
+    {
+     "key": "life:lege:kan-jeg-fa-noe-mot-hoste",
+     "no": "Kan jeg få noe mot hoste?",
+     "ru": "Можно мне что-нибудь от кашля?",
+     "uk": "Можна мені щось від кашлю?",
+     "wordClass": "frase",
+     "example": "På apoteket: «Hei, kan jeg få noe mot hoste?»",
+     "exampleRu": "В аптеке: «Здравствуйте, дайте, пожалуйста, что-нибудь от кашля».",
+     "exampleUk": "В аптеці: «Добрий день, дайте, будь ласка, щось від кашлю»."
+    }
+   ]
+  },
+  {
+   "id": "life-nav",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "nav",
+   "name": "NAV, налоговая и госучреждения",
+   "nameUk": "NAV, податкова та держустанови",
+   "nameNo": "NAV og offentlige kontorer",
+   "icon": "🏛",
+   "level": "B1",
+   "tags": [
+    "nav",
+    "offentlig"
+   ],
+   "description": "Слова из писем и сайтов госорганов: заявление, решение, срок, налоговая карта, личный номер, переезд, пособия и электронный почтовый ящик.",
+   "cards": [
+    {
+     "key": "life:nav:nav-kontor",
+     "no": "et NAV-kontor",
+     "ru": "отделение NAV",
+     "uk": "відділення NAV",
+     "wordClass": "substantiv",
+     "example": "Jeg har en avtale på NAV-kontoret klokka ti.",
+     "exampleRu": "У меня встреча в отделении NAV в десять.",
+     "exampleUk": "У мене зустріч у відділенні NAV о десятій.",
+     "description": "💡 NAV — государственная служба труда и социального обеспечения: пособия, поиск работы, больничные."
+    },
+    {
+     "key": "life:nav:soknad",
+     "no": "en søknad",
+     "ru": "заявление",
+     "uk": "заява",
+     "wordClass": "substantiv",
+     "example": "Søknaden må sendes før fristen.",
+     "exampleRu": "Заявление нужно отправить до окончания срока.",
+     "exampleUk": "Заяву треба надіслати до кінця терміну."
+    },
+    {
+     "key": "life:nav:a-soke-om",
+     "no": "å søke om",
+     "ru": "подавать заявление (на что-то)",
+     "uk": "подавати заяву (на щось)",
+     "wordClass": "verb",
+     "example": "Vi vil søke om barnehageplass.",
+     "exampleRu": "Мы хотим подать заявление на место в детском саду.",
+     "exampleUk": "Ми хочемо подати заяву на місце в дитсадку.",
+     "description": "💡 søke om noe — просить что-то по заявлению; søke på en jobb — откликаться на вакансию."
+    },
+    {
+     "key": "life:nav:vedtak",
+     "no": "et vedtak",
+     "ru": "решение (официальное)",
+     "uk": "рішення (офіційне)",
+     "wordClass": "substantiv",
+     "example": "Du får vedtaket i den digitale postkassen.",
+     "exampleRu": "Решение придёт в ваш электронный почтовый ящик.",
+     "exampleUk": "Рішення надійде до вашої електронної поштової скриньки."
+    },
+    {
+     "key": "life:nav:frist",
+     "no": "en frist",
+     "ru": "крайний срок",
+     "uk": "кінцевий термін",
+     "wordClass": "substantiv",
+     "example": "Fristen for å klage er seks uker.",
+     "exampleRu": "Обжаловать можно в течение шести недель.",
+     "exampleUk": "Оскаржити можна протягом шести тижнів."
+    },
+    {
+     "key": "life:nav:a-klage-pa",
+     "no": "å klage på",
+     "ru": "обжаловать, жаловаться на",
+     "uk": "оскаржувати, скаржитися на",
+     "wordClass": "verb",
+     "example": "Du kan klage på vedtaket hvis du er uenig.",
+     "exampleRu": "Если вы не согласны, решение можно обжаловать.",
+     "exampleUk": "Якщо ви не згодні, рішення можна оскаржити."
+    },
+    {
+     "key": "life:nav:saksbehandler",
+     "no": "en saksbehandler",
+     "ru": "сотрудник, который ведёт дело",
+     "uk": "працівник, який веде справу",
+     "wordClass": "substantiv",
+     "example": "Saksbehandleren ringer deg neste uke.",
+     "exampleRu": "Сотрудник, который ведёт ваше дело, позвонит вам на следующей неделе.",
+     "exampleUk": "Працівник, який веде вашу справу, зателефонує вам наступного тижня."
+    },
+    {
+     "key": "life:nav:skjema",
+     "no": "et skjema",
+     "ru": "бланк, анкета",
+     "uk": "бланк, анкета",
+     "wordClass": "substantiv",
+     "example": "Fyll ut skjemaet og legg ved en kopi av passet.",
+     "exampleRu": "Заполните бланк и приложите копию паспорта.",
+     "exampleUk": "Заповніть бланк і додайте копію паспорта."
+    },
+    {
+     "key": "life:nav:a-fylle-ut",
+     "no": "å fylle ut",
+     "ru": "заполнять",
+     "uk": "заповнювати",
+     "wordClass": "verb",
+     "example": "Kan du hjelpe meg med å fylle ut dette?",
+     "exampleRu": "Можете помочь мне это заполнить?",
+     "exampleUk": "Можете допомогти мені це заповнити?"
+    },
+    {
+     "key": "life:nav:a-legge-ved",
+     "no": "å legge ved",
+     "ru": "прилагать (документ)",
+     "uk": "додавати (документ)",
+     "wordClass": "verb",
+     "example": "Husk å legge ved arbeidskontrakten.",
+     "exampleRu": "Не забудьте приложить трудовой договор.",
+     "exampleUk": "Не забудьте додати трудовий договір."
+    },
+    {
+     "key": "life:nav:skattekort",
+     "no": "et skattekort",
+     "ru": "налоговая карта",
+     "uk": "податкова картка",
+     "wordClass": "substantiv",
+     "example": "Arbeidsgiveren trenger skattekortet ditt.",
+     "exampleRu": "Работодателю нужна ваша налоговая карта.",
+     "exampleUk": "Роботодавцю потрібна ваша податкова картка.",
+     "description": "💡 Skattekort показывает, сколько налога удерживать из зарплаты; его заказывают у Skatteetaten."
+    },
+    {
+     "key": "life:nav:skatteetaten",
+     "no": "Skatteetaten",
+     "ru": "Налоговая служба Норвегии",
+     "uk": "Податкова служба Норвегії",
+     "wordClass": "substantiv",
+     "example": "Du bestiller skattekort hos Skatteetaten.",
+     "exampleRu": "Налоговую карту заказывают в Налоговой службе.",
+     "exampleUk": "Податкову картку замовляють у Податковій службі."
+    },
+    {
+     "key": "life:nav:skattemelding",
+     "no": "en skattemelding",
+     "ru": "налоговая декларация",
+     "uk": "податкова декларація",
+     "wordClass": "substantiv",
+     "example": "Skattemeldingen kommer om våren.",
+     "exampleRu": "Налоговая декларация приходит весной.",
+     "exampleUk": "Податкова декларація приходить навесні.",
+     "description": "💡 Декларацию присылают уже заполненной: её нужно проверить и при необходимости исправить."
+    },
+    {
+     "key": "life:nav:fodselsnummer",
+     "no": "et fødselsnummer",
+     "ru": "личный номер (11 цифр)",
+     "uk": "особистий номер (11 цифр)",
+     "wordClass": "substantiv",
+     "example": "Kan du oppgi fødselsnummeret ditt?",
+     "exampleRu": "Назовите, пожалуйста, ваш личный номер.",
+     "exampleUk": "Назвіть, будь ласка, ваш особистий номер."
+    },
+    {
+     "key": "life:nav:d-nummer",
+     "no": "et D-nummer",
+     "ru": "временный идентификационный номер (D-nummer)",
+     "uk": "тимчасовий ідентифікаційний номер (D-nummer)",
+     "wordClass": "substantiv",
+     "example": "Før jeg fikk fødselsnummer, hadde jeg D-nummer.",
+     "exampleRu": "Пока у меня не было личного номера, у меня был D-nummer.",
+     "exampleUk": "Поки в мене не було особистого номера, я мав D-nummer."
+    },
+    {
+     "key": "life:nav:folkeregisteret",
+     "no": "Folkeregisteret",
+     "ru": "Национальный регистр населения",
+     "uk": "Національний реєстр населення",
+     "wordClass": "substantiv",
+     "example": "Når du flytter, må du melde det til Folkeregisteret.",
+     "exampleRu": "При переезде нужно сообщить в регистр населения.",
+     "exampleUk": "Під час переїзду треба повідомити реєстр населення."
+    },
+    {
+     "key": "life:nav:a-melde-flytting",
+     "no": "å melde flytting",
+     "ru": "сообщить о смене адреса",
+     "uk": "повідомити про зміну адреси",
+     "wordClass": "uttrykk",
+     "example": "Jeg meldte flytting på nett i går.",
+     "exampleRu": "Вчера я сообщил о переезде через интернет.",
+     "exampleUk": "Учора я повідомив про переїзд через інтернет."
+    },
+    {
+     "key": "life:nav:kommune",
+     "no": "en kommune",
+     "ru": "коммуна (муниципалитет)",
+     "uk": "комуна (муніципалітет)",
+     "wordClass": "substantiv",
+     "example": "Kommunen tilbyr norskkurs for nye innbyggere.",
+     "exampleRu": "Коммуна предлагает курсы норвежского для новых жителей.",
+     "exampleUk": "Комуна пропонує курси норвезької для нових мешканців."
+    },
+    {
+     "key": "life:nav:oppholdstillatelse",
+     "no": "en oppholdstillatelse",
+     "ru": "вид на жительство",
+     "uk": "посвідка на проживання",
+     "wordClass": "substantiv",
+     "example": "Oppholdstillatelsen min gjelder ett år til.",
+     "exampleRu": "Мой вид на жительство действует ещё год.",
+     "exampleUk": "Моя посвідка на проживання дійсна ще рік."
+    },
+    {
+     "key": "life:nav:legitimasjon",
+     "no": "en legitimasjon",
+     "ru": "удостоверение личности",
+     "uk": "посвідчення особи",
+     "wordClass": "substantiv",
+     "example": "Ta med gyldig legitimasjon til timen.",
+     "exampleRu": "Возьмите с собой действующее удостоверение личности.",
+     "exampleUk": "Візьміть із собою дійсне посвідчення особи.",
+     "description": "💡 Это может быть паспорт, ID-карта или водительские права."
+    },
+    {
+     "key": "life:nav:pass",
+     "no": "et pass",
+     "ru": "паспорт",
+     "uk": "паспорт",
+     "wordClass": "substantiv",
+     "example": "Passet mitt går ut neste år.",
+     "exampleRu": "Срок моего паспорта истекает в следующем году.",
+     "exampleUk": "Термін дії мого паспорта спливає наступного року."
+    },
+    {
+     "key": "life:nav:dagpenger",
+     "no": "dagpenger",
+     "ru": "пособие по безработице",
+     "uk": "допомога з безробіття",
+     "wordClass": "substantiv",
+     "example": "Hun får dagpenger mens hun søker jobb.",
+     "exampleRu": "Она получает пособие по безработице, пока ищет работу.",
+     "exampleUk": "Вона отримує допомогу з безробіття, поки шукає роботу.",
+     "description": "💡 Слово употребляется только во множественном числе."
+    },
+    {
+     "key": "life:nav:arbeidsledig",
+     "no": "arbeidsledig",
+     "ru": "безработный",
+     "uk": "безробітний",
+     "wordClass": "adjektiv",
+     "example": "Han har vært arbeidsledig i tre måneder.",
+     "exampleRu": "Он уже три месяца без работы.",
+     "exampleUk": "Він уже три місяці без роботи."
+    },
+    {
+     "key": "life:nav:a-registrere-seg-som-arbeidssoker",
+     "no": "å registrere seg som arbeidssøker",
+     "ru": "встать на учёт как ищущий работу",
+     "uk": "стати на облік як шукач роботи",
+     "wordClass": "uttrykk",
+     "example": "Først må du registrere deg som arbeidssøker hos NAV.",
+     "exampleRu": "Сначала нужно встать на учёт в NAV как ищущий работу.",
+     "exampleUk": "Спочатку треба стати на облік у NAV як шукач роботи."
+    },
+    {
+     "key": "life:nav:introduksjonsprogram",
+     "no": "et introduksjonsprogram",
+     "ru": "программа адаптации (для новоприбывших)",
+     "uk": "програма адаптації (для новоприбулих)",
+     "wordClass": "substantiv",
+     "example": "I introduksjonsprogrammet lærer vi norsk og samfunnskunnskap.",
+     "exampleRu": "В программе адаптации мы изучаем норвежский и обществознание.",
+     "exampleUk": "У програмі адаптації ми вивчаємо норвезьку та суспільствознавство."
+    },
+    {
+     "key": "life:nav:barnetrygd",
+     "no": "en barnetrygd",
+     "ru": "детское пособие",
+     "uk": "допомога на дітей",
+     "wordClass": "substantiv",
+     "example": "Barnetrygden kommer inn på kontoen hver måned.",
+     "exampleRu": "Детское пособие приходит на счёт каждый месяц.",
+     "exampleUk": "Допомога на дітей надходить на рахунок щомісяця."
+    },
+    {
+     "key": "life:nav:bostotte",
+     "no": "en bostøtte",
+     "ru": "жилищная субсидия",
+     "uk": "житлова субсидія",
+     "wordClass": "substantiv",
+     "example": "Med lav inntekt kan du søke om bostøtte.",
+     "exampleRu": "При низком доходе можно подать заявление на жилищную субсидию.",
+     "exampleUk": "За низького доходу можна подати заяву на житлову субсидію."
+    },
+    {
+     "key": "life:nav:digital-postkasse",
+     "no": "en digital postkasse",
+     "ru": "электронный почтовый ящик (для писем от госорганов)",
+     "uk": "електронна поштова скринька (для листів від держорганів)",
+     "wordClass": "substantiv",
+     "example": "Sjekk den digitale postkassen din hver uke.",
+     "exampleRu": "Проверяйте свой электронный почтовый ящик каждую неделю.",
+     "exampleUk": "Перевіряйте свою електронну поштову скриньку щотижня."
+    },
+    {
+     "key": "life:nav:a-logge-inn",
+     "no": "å logge inn",
+     "ru": "войти (в систему)",
+     "uk": "увійти (в систему)",
+     "wordClass": "verb",
+     "example": "Du logger inn med elektronisk ID.",
+     "exampleRu": "Входить нужно через электронное удостоверение.",
+     "exampleUk": "Входити треба через електронне посвідчення.",
+     "description": "💡 Почти все госуслуги в Норвегии — онлайн, вход по электронному удостоверению."
+    },
+    {
+     "key": "life:nav:jeg-har-fatt-et-brev-som-jeg-ikke-forsta",
+     "no": "Jeg har fått et brev som jeg ikke forstår.",
+     "ru": "Мне пришло письмо, которое я не понимаю.",
+     "uk": "Мені прийшов лист, якого я не розумію.",
+     "wordClass": "frase",
+     "example": "Unnskyld, jeg har fått et brev som jeg ikke forstår. Kan du forklare?",
+     "exampleRu": "Извините, мне пришло письмо, которое я не понимаю. Можете объяснить?",
+     "exampleUk": "Вибачте, мені прийшов лист, якого я не розумію. Можете пояснити?",
+     "description": "💡 В придаточном ikke стоит перед глаголом: som jeg ikke forstår."
+    },
+    {
+     "key": "life:nav:hvor-lang-er-saksbehandlingstiden",
+     "no": "Hvor lang er saksbehandlingstiden?",
+     "ru": "Сколько времени рассматривают заявление?",
+     "uk": "Скільки часу розглядають заяву?",
+     "wordClass": "frase",
+     "example": "Jeg sendte søknaden i mai. Hvor lang er saksbehandlingstiden?",
+     "exampleRu": "Я отправил заявление в мае. Сколько его обычно рассматривают?",
+     "exampleUk": "Я надіслав заяву в травні. Скільки її зазвичай розглядають?"
+    },
+    {
+     "key": "life:nav:kan-jeg-fa-tolk",
+     "no": "Kan jeg få tolk?",
+     "ru": "Можно мне переводчика?",
+     "uk": "Можна мені перекладача?",
+     "wordClass": "frase",
+     "example": "Samtalen er viktig for meg. Kan jeg få tolk?",
+     "exampleRu": "Это важный для меня разговор. Можно мне переводчика?",
+     "exampleUk": "Ця розмова для мене важлива. Можна мені перекладача?"
+    }
+   ]
+  },
+  {
+   "id": "life-skole",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "skole",
+   "name": "Школа и детский сад",
+   "nameUk": "Школа і дитячий садок",
+   "nameNo": "Skole og barnehage",
+   "icon": "🎒",
+   "level": "A2",
+   "tags": [
+    "skole",
+    "barnehage"
+   ],
+   "description": "Для родителей: садик и адаптация, школа и продлёнка, собрания и беседы с учителем, уроки, записки о болезни.",
+   "cards": [
+    {
+     "key": "life:skole:barnehage",
+     "no": "en barnehage",
+     "ru": "детский сад",
+     "uk": "дитячий садок",
+     "wordClass": "substantiv",
+     "example": "Datteren min går i barnehagen fra klokka åtte.",
+     "exampleRu": "Моя дочь в садике с восьми утра.",
+     "exampleUk": "Моя донька в садочку з восьмої ранку."
+    },
+    {
+     "key": "life:skole:barnehageplass",
+     "no": "en barnehageplass",
+     "ru": "место в детском саду",
+     "uk": "місце в дитячому садку",
+     "wordClass": "substantiv",
+     "example": "Vi fikk barnehageplass fra august.",
+     "exampleRu": "Нам дали место в садике с августа.",
+     "exampleUk": "Нам дали місце в садочку з серпня."
+    },
+    {
+     "key": "life:skole:tilvenning",
+     "no": "en tilvenning",
+     "ru": "адаптация (в детском саду)",
+     "uk": "адаптація (у дитсадку)",
+     "wordClass": "substantiv",
+     "example": "De første dagene er en av foreldrene med på tilvenningen.",
+     "exampleRu": "В первые дни адаптации с ребёнком остаётся один из родителей.",
+     "exampleUk": "У перші дні адаптації з дитиною залишається один із батьків."
+    },
+    {
+     "key": "life:skole:a-levere",
+     "no": "å levere",
+     "ru": "приводить (ребёнка); сдавать",
+     "uk": "приводити (дитину); здавати",
+     "wordClass": "verb",
+     "example": "Jeg leverer barna i barnehagen før jobb.",
+     "exampleRu": "Перед работой я отвожу детей в сад.",
+     "exampleUk": "Перед роботою я відводжу дітей у садочок.",
+     "description": "💡 levere / hente — привести / забрать ребёнка; так говорят все родители."
+    },
+    {
+     "key": "life:skole:a-hente",
+     "no": "å hente",
+     "ru": "забирать",
+     "uk": "забирати",
+     "wordClass": "verb",
+     "example": "Hvem henter Ali i dag?",
+     "exampleRu": "Кто сегодня забирает Али?",
+     "exampleUk": "Хто сьогодні забирає Алі?"
+    },
+    {
+     "key": "life:skole:matpakke",
+     "no": "en matpakke",
+     "ru": "бутерброды с собой, обед из дома",
+     "uk": "бутерброди з собою, обід з дому",
+     "wordClass": "substantiv",
+     "example": "Husk matpakke og drikkeflaske i sekken.",
+     "exampleRu": "Не забудь положить в рюкзак обед и бутылку с водой.",
+     "exampleUk": "Не забудь покласти в рюкзак обід і пляшку з водою.",
+     "description": "💡 Matpakke — норвежская традиция: бутерброды в коробочке; горячий обед в школах обычно не дают."
+    },
+    {
+     "key": "life:skole:regntoy",
+     "no": "et regntøy",
+     "ru": "непромокаемый костюм",
+     "uk": "непромокальний костюм",
+     "wordClass": "substantiv",
+     "example": "Barna trenger regntøy hver dag i barnehagen.",
+     "exampleRu": "Детям в садике каждый день нужен непромокаемый костюм.",
+     "exampleUk": "Дітям у садочку щодня потрібен непромокальний костюм.",
+     "description": "💡 «Det finnes ikke dårlig vær, bare dårlige klær» — дети гуляют в любую погоду."
+    },
+    {
+     "key": "life:skole:ekstra-klaer",
+     "no": "ekstra klær",
+     "ru": "сменная одежда",
+     "uk": "змінний одяг",
+     "wordClass": "uttrykk",
+     "example": "Kan du ta med ekstra klær i morgen?",
+     "exampleRu": "Можете завтра принести сменную одежду?",
+     "exampleUk": "Можете завтра принести змінний одяг?"
+    },
+    {
+     "key": "life:skole:skole",
+     "no": "en skole",
+     "ru": "школа",
+     "uk": "школа",
+     "wordClass": "substantiv",
+     "example": "Skolen begynner halv ni.",
+     "exampleRu": "Уроки начинаются в половине девятого.",
+     "exampleUk": "Уроки починаються о пів на дев’яту.",
+     "description": "💡 halv ni = 8:30: «половина до девяти»."
+    },
+    {
+     "key": "life:skole:klasse",
+     "no": "en klasse",
+     "ru": "класс",
+     "uk": "клас",
+     "wordClass": "substantiv",
+     "example": "Sønnen min går i tredje klasse.",
+     "exampleRu": "Мой сын учится в третьем классе.",
+     "exampleUk": "Мій син навчається в третьому класі."
+    },
+    {
+     "key": "life:skole:elev",
+     "no": "en elev",
+     "ru": "ученик",
+     "uk": "учень",
+     "wordClass": "substantiv",
+     "example": "Det er tjue elever i klassen.",
+     "exampleRu": "В классе двадцать учеников.",
+     "exampleUk": "У класі двадцять учнів."
+    },
+    {
+     "key": "life:skole:kontaktlaerer",
+     "no": "en kontaktlærer",
+     "ru": "классный руководитель",
+     "uk": "класний керівник",
+     "wordClass": "substantiv",
+     "example": "Send en melding til kontaktlæreren hvis barnet er sykt.",
+     "exampleRu": "Если ребёнок болеет, напишите классному руководителю.",
+     "exampleUk": "Якщо дитина хворіє, напишіть класному керівникові."
+    },
+    {
+     "key": "life:skole:lekse",
+     "no": "en lekse",
+     "ru": "домашнее задание",
+     "uk": "домашнє завдання",
+     "wordClass": "substantiv",
+     "example": "Vi gjør lekser sammen etter middag.",
+     "exampleRu": "После ужина мы вместе делаем уроки.",
+     "exampleUk": "Після вечері ми разом робимо уроки.",
+     "description": "💡 Обычно во множественном числе: lekser."
+    },
+    {
+     "key": "life:skole:ukeplan",
+     "no": "en ukeplan",
+     "ru": "план на неделю (от школы)",
+     "uk": "план на тиждень (від школи)",
+     "wordClass": "substantiv",
+     "example": "På ukeplanen står det at klassen skal på tur på fredag.",
+     "exampleRu": "В плане на неделю написано, что в пятницу класс идёт в поход.",
+     "exampleUk": "У плані на тиждень написано, що в п’ятницю клас іде в похід."
+    },
+    {
+     "key": "life:skole:friminutt",
+     "no": "et friminutt",
+     "ru": "перемена",
+     "uk": "перерва",
+     "wordClass": "substantiv",
+     "example": "I friminuttet leker barna ute.",
+     "exampleRu": "На перемене дети играют на улице.",
+     "exampleUk": "На перерві діти граються надворі."
+    },
+    {
+     "key": "life:skole:sfo-plass",
+     "no": "en SFO-plass",
+     "ru": "место на продлёнке (SFO)",
+     "uk": "місце в групі продовженого дня (SFO)",
+     "wordClass": "substantiv",
+     "example": "Vi har søkt om SFO-plass for neste skoleår.",
+     "exampleRu": "Мы подали заявление на продлёнку на следующий учебный год.",
+     "exampleUk": "Ми подали заяву на групу продовженого дня на наступний навчальний рік.",
+     "description": "💡 SFO (skolefritidsordning) — присмотр за младшими школьниками до и после уроков."
+    },
+    {
+     "key": "life:skole:foreldremote",
+     "no": "et foreldremøte",
+     "ru": "родительское собрание",
+     "uk": "батьківські збори",
+     "wordClass": "substantiv",
+     "example": "Foreldremøtet er på tirsdag klokka seks.",
+     "exampleRu": "Родительское собрание во вторник в шесть.",
+     "exampleUk": "Батьківські збори у вівторок о шостій."
+    },
+    {
+     "key": "life:skole:utviklingssamtale",
+     "no": "en utviklingssamtale",
+     "ru": "беседа с родителями о развитии ребёнка",
+     "uk": "розмова з батьками про розвиток дитини",
+     "wordClass": "substantiv",
+     "example": "På utviklingssamtalen snakker vi om hvordan barnet har det.",
+     "exampleRu": "На беседе мы обсуждаем, как у ребёнка дела.",
+     "exampleUk": "На розмові ми обговорюємо, як у дитини справи."
+    },
+    {
+     "key": "life:skole:fravaer",
+     "no": "et fravær",
+     "ru": "пропуск, отсутствие",
+     "uk": "пропуск, відсутність",
+     "wordClass": "substantiv",
+     "example": "Fravær må meldes før skolen begynner.",
+     "exampleRu": "О пропуске нужно сообщить до начала уроков.",
+     "exampleUk": "Про пропуск треба повідомити до початку уроків."
+    },
+    {
+     "key": "life:skole:planleggingsdag",
+     "no": "en planleggingsdag",
+     "ru": "методический день (детей не принимают)",
+     "uk": "методичний день (дітей не приймають)",
+     "wordClass": "substantiv",
+     "example": "Fredag er det planleggingsdag, og barnehagen er stengt.",
+     "exampleRu": "В пятницу методический день, садик закрыт.",
+     "exampleUk": "У п’ятницю методичний день, садочок зачинений."
+    },
+    {
+     "key": "life:skole:utflukt",
+     "no": "en utflukt",
+     "ru": "экскурсия, выезд",
+     "uk": "екскурсія, виїзд",
+     "wordClass": "substantiv",
+     "example": "Klassen skal på utflukt til museet.",
+     "exampleRu": "Класс поедет на экскурсию в музей.",
+     "exampleUk": "Клас поїде на екскурсію до музею."
+    },
+    {
+     "key": "life:skole:gymtoy",
+     "no": "et gymtøy",
+     "ru": "спортивная форма",
+     "uk": "спортивна форма",
+     "wordClass": "substantiv",
+     "example": "Glemte du gymtøyet igjen?",
+     "exampleRu": "Ты опять забыл спортивную форму?",
+     "exampleUk": "Ти знову забув спортивну форму?"
+    },
+    {
+     "key": "life:skole:skolesekk",
+     "no": "en skolesekk",
+     "ru": "школьный рюкзак",
+     "uk": "шкільний рюкзак",
+     "wordClass": "substantiv",
+     "example": "Skolesekken er altfor tung.",
+     "exampleRu": "Школьный рюкзак слишком тяжёлый.",
+     "exampleUk": "Шкільний рюкзак занадто важкий."
+    },
+    {
+     "key": "life:skole:karakter",
+     "no": "en karakter",
+     "ru": "оценка; характер",
+     "uk": "оцінка; характер",
+     "wordClass": "substantiv",
+     "example": "På barneskolen får elevene ikke karakterer.",
+     "exampleRu": "В начальной школе оценки не ставят.",
+     "exampleUk": "У початковій школі оцінок не ставлять.",
+     "description": "💡 Ложный друг: karakter — прежде всего «оценка». Оценки ставят только с 8-го класса."
+    },
+    {
+     "key": "life:skole:a-leke",
+     "no": "å leke",
+     "ru": "играть (о детях)",
+     "uk": "гратися (про дітей)",
+     "wordClass": "verb",
+     "example": "Barna leker i sandkassen.",
+     "exampleRu": "Дети играют в песочнице.",
+     "exampleUk": "Діти граються в пісочниці.",
+     "description": "💡 leke — играть в игры (о детях); spille — играть на инструменте или в спортивную игру."
+    },
+    {
+     "key": "life:skole:bursdagsselskap",
+     "no": "et bursdagsselskap",
+     "ru": "детский праздник на день рождения",
+     "uk": "святкування дня народження",
+     "wordClass": "substantiv",
+     "example": "Ella har invitert hele klassen i bursdagsselskap.",
+     "exampleRu": "Элла пригласила на день рождения весь класс.",
+     "exampleUk": "Елла запросила на день народження весь клас.",
+     "description": "💡 На детский праздник часто зовут весь класс — чтобы никто не обиделся."
+    },
+    {
+     "key": "life:skole:hun-er-syk-og-blir-hjemme-i-dag",
+     "no": "Hun er syk og blir hjemme i dag.",
+     "ru": "Она заболела и сегодня побудет дома.",
+     "uk": "Вона захворіла і сьогодні побуде вдома.",
+     "wordClass": "frase",
+     "example": "Hei! Sara er syk og blir hjemme i dag. Hilsen mamma.",
+     "exampleRu": "Здравствуйте! Сара заболела и сегодня побудет дома. Мама.",
+     "exampleUk": "Добрий день! Сара захворіла і сьогодні побуде вдома. Мама."
+    },
+    {
+     "key": "life:skole:hvem-henter-i-dag",
+     "no": "Hvem henter i dag?",
+     "ru": "Кто сегодня забирает?",
+     "uk": "Хто сьогодні забирає?",
+     "wordClass": "frase",
+     "example": "Personalet spør om morgenen: «Hvem henter i dag?»",
+     "exampleRu": "Утром воспитатели спрашивают: «Кто сегодня забирает?»",
+     "exampleUk": "Уранці вихователі питають: «Хто сьогодні забирає?»"
+    },
+    {
+     "key": "life:skole:hvordan-har-dagen-vaert",
+     "no": "Hvordan har dagen vært?",
+     "ru": "Как прошёл день?",
+     "uk": "Як минув день?",
+     "wordClass": "frase",
+     "example": "Når jeg henter, spør jeg: «Hvordan har dagen vært?»",
+     "exampleRu": "Когда я забираю ребёнка, спрашиваю: «Как прошёл день?»",
+     "exampleUk": "Коли я забираю дитину, питаю: «Як минув день?»"
+    },
+    {
+     "key": "life:skole:kan-jeg-fa-snakke-med-laereren",
+     "no": "Kan jeg få snakke med læreren?",
+     "ru": "Можно мне поговорить с учителем?",
+     "uk": "Можна мені поговорити з учителем?",
+     "wordClass": "frase",
+     "example": "Unnskyld, kan jeg få snakke med læreren etter timen?",
+     "exampleRu": "Извините, можно мне поговорить с учителем после урока?",
+     "exampleUk": "Вибачте, можна мені поговорити з учителем після уроку?"
+    }
+   ]
+  },
+  {
+   "id": "life-transport",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "transport",
+   "name": "Транспорт",
+   "nameUk": "Транспорт",
+   "nameNo": "Transport",
+   "icon": "🚌",
+   "level": "A1",
+   "tags": [
+    "transport",
+    "buss"
+   ],
+   "description": "Автобус, трамвай, поезд и паром: билеты, пересадки, задержки — и немного о водительских правах.",
+   "cards": [
+    {
+     "key": "life:transport:buss",
+     "no": "en buss",
+     "ru": "автобус",
+     "uk": "автобус",
+     "wordClass": "substantiv",
+     "example": "Bussen går hvert kvarter.",
+     "exampleRu": "Автобус ходит каждые пятнадцать минут.",
+     "exampleUk": "Автобус ходить кожні п’ятнадцять хвилин."
+    },
+    {
+     "key": "life:transport:trikk",
+     "no": "en trikk",
+     "ru": "трамвай",
+     "uk": "трамвай",
+     "wordClass": "substantiv",
+     "example": "Vi tar trikken til sentrum.",
+     "exampleRu": "Мы едем в центр на трамвае.",
+     "exampleUk": "Ми їдемо в центр трамваєм."
+    },
+    {
+     "key": "life:transport:tog",
+     "no": "et tog",
+     "ru": "поезд",
+     "uk": "потяг",
+     "wordClass": "substantiv",
+     "example": "Toget til Bergen går klokka åtte.",
+     "exampleRu": "Поезд в Берген отправляется в восемь.",
+     "exampleUk": "Потяг до Бергена відправляється о восьмій."
+    },
+    {
+     "key": "life:transport:t-bane",
+     "no": "en T-bane",
+     "ru": "метро",
+     "uk": "метро",
+     "wordClass": "substantiv",
+     "example": "T-banen er den raskeste veien til jobb.",
+     "exampleRu": "На метро до работы быстрее всего.",
+     "exampleUk": "Метро — найшвидший шлях до роботи."
+    },
+    {
+     "key": "life:transport:ferje",
+     "no": "en ferje",
+     "ru": "паром",
+     "uk": "пором",
+     "wordClass": "substantiv",
+     "example": "Vi tar ferjen over fjorden.",
+     "exampleRu": "Мы переправляемся через фьорд на пароме.",
+     "exampleUk": "Ми переправляємося через фіорд поромом."
+    },
+    {
+     "key": "life:transport:billett",
+     "no": "en billett",
+     "ru": "билет",
+     "uk": "квиток",
+     "wordClass": "substantiv",
+     "example": "Jeg kjøper billett i appen.",
+     "exampleRu": "Я покупаю билет в приложении.",
+     "exampleUk": "Я купую квиток у застосунку."
+    },
+    {
+     "key": "life:transport:periodebillett",
+     "no": "en periodebillett",
+     "ru": "проездной",
+     "uk": "проїзний",
+     "wordClass": "substantiv",
+     "example": "En periodebillett for tretti dager lønner seg.",
+     "exampleRu": "Проездной на тридцать дней выгоднее.",
+     "exampleUk": "Проїзний на тридцять днів вигідніший."
+    },
+    {
+     "key": "life:transport:holdeplass",
+     "no": "en holdeplass",
+     "ru": "остановка",
+     "uk": "зупинка",
+     "wordClass": "substantiv",
+     "example": "Holdeplassen ligger rett ved butikken.",
+     "exampleRu": "Остановка прямо у магазина.",
+     "exampleUk": "Зупинка просто біля магазину."
+    },
+    {
+     "key": "life:transport:stasjon",
+     "no": "en stasjon",
+     "ru": "станция, вокзал",
+     "uk": "станція, вокзал",
+     "wordClass": "substantiv",
+     "example": "Vi møtes på stasjonen klokka fem.",
+     "exampleRu": "Встречаемся на вокзале в пять.",
+     "exampleUk": "Зустрічаємося на вокзалі о п’ятій."
+    },
+    {
+     "key": "life:transport:spor",
+     "no": "et spor",
+     "ru": "путь (на вокзале)",
+     "uk": "колія (на вокзалі)",
+     "wordClass": "substantiv",
+     "example": "Toget går fra spor tre.",
+     "exampleRu": "Поезд отправляется с третьего пути.",
+     "exampleUk": "Потяг відправляється з третьої колії."
+    },
+    {
+     "key": "life:transport:a-ga-pa",
+     "no": "å gå på",
+     "ru": "садиться (в транспорт)",
+     "uk": "сідати (в транспорт)",
+     "wordClass": "verb",
+     "example": "Vi går på bussen foran.",
+     "exampleRu": "В автобус мы входим через переднюю дверь.",
+     "exampleUk": "В автобус ми заходимо через передні двері.",
+     "description": "💡 Садиться в автобус — gå på bussen, выходить — gå av."
+    },
+    {
+     "key": "life:transport:a-ga-av",
+     "no": "å gå av",
+     "ru": "выходить (из транспорта)",
+     "uk": "виходити (з транспорту)",
+     "wordClass": "verb",
+     "example": "Jeg skal gå av på neste holdeplass.",
+     "exampleRu": "Я выхожу на следующей остановке.",
+     "exampleUk": "Я виходжу на наступній зупинці."
+    },
+    {
+     "key": "life:transport:a-bytte",
+     "no": "å bytte",
+     "ru": "пересаживаться; менять",
+     "uk": "пересідати; міняти",
+     "wordClass": "verb",
+     "example": "Du må bytte til trikken på stasjonen.",
+     "exampleRu": "На вокзале нужно пересесть на трамвай.",
+     "exampleUk": "На вокзалі треба пересісти на трамвай."
+    },
+    {
+     "key": "life:transport:a-rekke",
+     "no": "å rekke",
+     "ru": "успеть (на что-то)",
+     "uk": "встигнути (на щось)",
+     "wordClass": "verb",
+     "example": "Jeg løp, men jeg rakk ikke toget.",
+     "exampleRu": "Я бежал, но не успел на поезд.",
+     "exampleUk": "Я біг, але не встиг на потяг."
+    },
+    {
+     "key": "life:transport:forsinkelse",
+     "no": "en forsinkelse",
+     "ru": "задержка",
+     "uk": "затримка",
+     "wordClass": "substantiv",
+     "example": "Det er forsinkelser på grunn av snøen.",
+     "exampleRu": "Из-за снега транспорт задерживается.",
+     "exampleUk": "Через сніг транспорт затримується."
+    },
+    {
+     "key": "life:transport:forsinket",
+     "no": "forsinket",
+     "ru": "задерживающийся, опаздывающий",
+     "uk": "із затримкою",
+     "wordClass": "adjektiv",
+     "example": "Toget er tjue minutter forsinket.",
+     "exampleRu": "Поезд опаздывает на двадцать минут.",
+     "exampleUk": "Потяг запізнюється на двадцять хвилин."
+    },
+    {
+     "key": "life:transport:innstilt",
+     "no": "innstilt",
+     "ru": "отменённый (о рейсе)",
+     "uk": "скасований (про рейс)",
+     "wordClass": "adjektiv",
+     "example": "Bussen er innstilt i dag.",
+     "exampleRu": "Сегодня автобус отменён.",
+     "exampleUk": "Сьогодні автобус скасовано."
+    },
+    {
+     "key": "life:transport:rute",
+     "no": "en rute",
+     "ru": "маршрут; расписание",
+     "uk": "маршрут; розклад",
+     "wordClass": "substantiv",
+     "example": "I helgen kjører bussen etter en annen rute.",
+     "exampleRu": "В выходные автобус ходит по другому расписанию.",
+     "exampleUk": "У вихідні автобус ходить за іншим розкладом."
+    },
+    {
+     "key": "life:transport:avgang",
+     "no": "en avgang",
+     "ru": "отправление, рейс",
+     "uk": "відправлення, рейс",
+     "wordClass": "substantiv",
+     "example": "Neste avgang er om ti minutter.",
+     "exampleRu": "Следующий рейс через десять минут.",
+     "exampleUk": "Наступний рейс за десять хвилин."
+    },
+    {
+     "key": "life:transport:sone",
+     "no": "en sone",
+     "ru": "зона (тарифная)",
+     "uk": "зона (тарифна)",
+     "wordClass": "substantiv",
+     "example": "Billetten gjelder i to soner.",
+     "exampleRu": "Билет действует в двух зонах.",
+     "exampleUk": "Квиток діє у двох зонах."
+    },
+    {
+     "key": "life:transport:billettkontroll",
+     "no": "en billettkontroll",
+     "ru": "проверка билетов",
+     "uk": "перевірка квитків",
+     "wordClass": "substantiv",
+     "example": "Det var billettkontroll på trikken i dag.",
+     "exampleRu": "Сегодня в трамвае проверяли билеты.",
+     "exampleUk": "Сьогодні в трамваї перевіряли квитки."
+    },
+    {
+     "key": "life:transport:gebyr",
+     "no": "et gebyr",
+     "ru": "штраф; сбор",
+     "uk": "штраф; збір",
+     "wordClass": "substantiv",
+     "example": "Uten billett må du betale gebyr.",
+     "exampleRu": "Без билета придётся заплатить штраф.",
+     "exampleUk": "Без квитка доведеться заплатити штраф."
+    },
+    {
+     "key": "life:transport:sitteplass",
+     "no": "en sitteplass",
+     "ru": "сидячее место",
+     "uk": "сидяче місце",
+     "wordClass": "substantiv",
+     "example": "Om morgenen er det vanskelig å få sitteplass.",
+     "exampleRu": "Утром трудно найти свободное место.",
+     "exampleUk": "Уранці важко знайти вільне місце."
+    },
+    {
+     "key": "life:transport:rushtid",
+     "no": "en rushtid",
+     "ru": "час пик",
+     "uk": "година пік",
+     "wordClass": "substantiv",
+     "example": "I rushtiden er bussen full.",
+     "exampleRu": "В час пик автобус переполнен.",
+     "exampleUk": "У годину пік автобус переповнений."
+    },
+    {
+     "key": "life:transport:forerkort",
+     "no": "et førerkort",
+     "ru": "водительские права",
+     "uk": "посвідчення водія",
+     "wordClass": "substantiv",
+     "example": "Jeg må ta norsk førerkort.",
+     "exampleRu": "Мне нужно получить норвежские права.",
+     "exampleUk": "Мені треба отримати норвезьке посвідчення водія.",
+     "description": "💡 Права из многих стран нужно обменять или сдать заново — правила зависят от страны."
+    },
+    {
+     "key": "life:transport:kjoretime",
+     "no": "en kjøretime",
+     "ru": "урок вождения",
+     "uk": "урок водіння",
+     "wordClass": "substantiv",
+     "example": "Jeg har kjøretime hver onsdag.",
+     "exampleRu": "По средам у меня урок вождения.",
+     "exampleUk": "Щосереди в мене урок водіння."
+    },
+    {
+     "key": "life:transport:oppkjoring",
+     "no": "en oppkjøring",
+     "ru": "экзамен по вождению",
+     "uk": "іспит з водіння",
+     "wordClass": "substantiv",
+     "example": "Oppkjøringen er neste fredag.",
+     "exampleRu": "Экзамен по вождению в следующую пятницу.",
+     "exampleUk": "Іспит з водіння наступної п’ятниці."
+    },
+    {
+     "key": "life:transport:sykkel",
+     "no": "en sykkel",
+     "ru": "велосипед",
+     "uk": "велосипед",
+     "wordClass": "substantiv",
+     "example": "Om sommeren tar jeg sykkelen til jobben.",
+     "exampleRu": "Летом я езжу на работу на велосипеде.",
+     "exampleUk": "Улітку я їжджу на роботу велосипедом."
+    },
+    {
+     "key": "life:transport:gar-denne-bussen-til-sentrum",
+     "no": "Går denne bussen til sentrum?",
+     "ru": "Этот автобус идёт в центр?",
+     "uk": "Цей автобус їде до центру?",
+     "wordClass": "frase",
+     "example": "Unnskyld, går denne bussen til sentrum?",
+     "exampleRu": "Извините, этот автобус идёт в центр?",
+     "exampleUk": "Вибачте, цей автобус їде до центру?"
+    },
+    {
+     "key": "life:transport:hvor-ma-jeg-ga-av",
+     "no": "Hvor må jeg gå av?",
+     "ru": "Где мне выходить?",
+     "uk": "Де мені виходити?",
+     "wordClass": "frase",
+     "example": "Jeg skal til sykehuset. Hvor må jeg gå av?",
+     "exampleRu": "Мне нужно в больницу. Где мне выходить?",
+     "exampleUk": "Мені треба до лікарні. Де мені виходити?"
+    },
+    {
+     "key": "life:transport:nar-gar-neste-buss",
+     "no": "Når går neste buss?",
+     "ru": "Когда следующий автобус?",
+     "uk": "Коли наступний автобус?",
+     "wordClass": "frase",
+     "example": "Jeg rakk ikke bussen. Når går neste buss?",
+     "exampleRu": "Я не успел на автобус. Когда следующий?",
+     "exampleUk": "Я не встиг на автобус. Коли наступний?"
+    },
+    {
+     "key": "life:transport:er-denne-plassen-ledig",
+     "no": "Er denne plassen ledig?",
+     "ru": "Это место свободно?",
+     "uk": "Це місце вільне?",
+     "wordClass": "frase",
+     "example": "Unnskyld, er denne plassen ledig?",
+     "exampleRu": "Извините, это место свободно?",
+     "exampleUk": "Вибачте, це місце вільне?"
+    }
+   ]
+  },
+  {
+   "id": "life-butikk",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "butikk",
+   "name": "Магазин, деньги и банк",
+   "nameUk": "Магазин, гроші та банк",
+   "nameNo": "Butikk og penger",
+   "icon": "🛒",
+   "level": "A1",
+   "tags": [
+    "butikk",
+    "penger"
+   ],
+   "description": "Касса, чек, акции, залог за бутылки, оплата картой и телефоном, банк и счета.",
+   "cards": [
+    {
+     "key": "life:butikk:butikk",
+     "no": "en butikk",
+     "ru": "магазин",
+     "uk": "магазин",
+     "wordClass": "substantiv",
+     "example": "Butikken er åpen til klokka ti.",
+     "exampleRu": "Магазин открыт до десяти.",
+     "exampleUk": "Магазин відчинений до десятої."
+    },
+    {
+     "key": "life:butikk:kasse",
+     "no": "en kasse",
+     "ru": "касса",
+     "uk": "каса",
+     "wordClass": "substantiv",
+     "example": "Det er lang kø ved kassen.",
+     "exampleRu": "На кассе длинная очередь.",
+     "exampleUk": "Біля каси довга черга."
+    },
+    {
+     "key": "life:butikk:ko",
+     "no": "en kø",
+     "ru": "очередь",
+     "uk": "черга",
+     "wordClass": "substantiv",
+     "example": "Står du i kø?",
+     "exampleRu": "Вы стоите в очереди?",
+     "exampleUk": "Ви стоїте в черзі?"
+    },
+    {
+     "key": "life:butikk:selvbetjent-kasse",
+     "no": "en selvbetjent kasse",
+     "ru": "касса самообслуживания",
+     "uk": "каса самообслуговування",
+     "wordClass": "substantiv",
+     "example": "Jeg betaler i den selvbetjente kassen.",
+     "exampleRu": "Я плачу на кассе самообслуживания.",
+     "exampleUk": "Я плачу на касі самообслуговування."
+    },
+    {
+     "key": "life:butikk:kvittering",
+     "no": "en kvittering",
+     "ru": "чек",
+     "uk": "чек",
+     "wordClass": "substantiv",
+     "example": "Vil du ha kvitteringen?",
+     "exampleRu": "Вам нужен чек?",
+     "exampleUk": "Вам потрібен чек?"
+    },
+    {
+     "key": "life:butikk:pose",
+     "no": "en pose",
+     "ru": "пакет",
+     "uk": "пакет",
+     "wordClass": "substantiv",
+     "example": "Jeg har med egen pose.",
+     "exampleRu": "У меня свой пакет.",
+     "exampleUk": "У мене свій пакет.",
+     "description": "💡 Пакеты в магазинах платные — многие приносят свои."
+    },
+    {
+     "key": "life:butikk:handlekurv",
+     "no": "en handlekurv",
+     "ru": "корзина для покупок",
+     "uk": "кошик для покупок",
+     "wordClass": "substantiv",
+     "example": "Ta en handlekurv ved inngangen.",
+     "exampleRu": "Возьмите корзину у входа.",
+     "exampleUk": "Візьміть кошик біля входу."
+    },
+    {
+     "key": "life:butikk:pris",
+     "no": "en pris",
+     "ru": "цена",
+     "uk": "ціна",
+     "wordClass": "substantiv",
+     "example": "Prisen står på hyllen.",
+     "exampleRu": "Цена указана на полке.",
+     "exampleUk": "Ціна вказана на полиці."
+    },
+    {
+     "key": "life:butikk:a-koste",
+     "no": "å koste",
+     "ru": "стоить",
+     "uk": "коштувати",
+     "wordClass": "verb",
+     "example": "Hva koster en liter melk?",
+     "exampleRu": "Сколько стоит литр молока?",
+     "exampleUk": "Скільки коштує літр молока?"
+    },
+    {
+     "key": "life:butikk:krone",
+     "no": "en krone",
+     "ru": "крона",
+     "uk": "крона",
+     "wordClass": "substantiv",
+     "example": "En kaffe koster førti kroner.",
+     "exampleRu": "Кофе стоит сорок крон.",
+     "exampleUk": "Кава коштує сорок крон."
+    },
+    {
+     "key": "life:butikk:billig",
+     "no": "billig",
+     "ru": "дешёвый",
+     "uk": "дешевий",
+     "wordClass": "adjektiv",
+     "example": "Jordbærene er billige denne uken.",
+     "exampleRu": "На этой неделе клубника дешёвая.",
+     "exampleUk": "Цього тижня полуниця дешева."
+    },
+    {
+     "key": "life:butikk:dyr",
+     "no": "dyr",
+     "ru": "дорогой",
+     "uk": "дорогий",
+     "wordClass": "adjektiv",
+     "example": "Kjøtt er dyrt i Norge.",
+     "exampleRu": "Мясо в Норвегии дорогое.",
+     "exampleUk": "М’ясо в Норвегії дороге."
+    },
+    {
+     "key": "life:butikk:tilbud",
+     "no": "et tilbud",
+     "ru": "акция, спецпредложение",
+     "uk": "акція, спеціальна пропозиція",
+     "wordClass": "substantiv",
+     "example": "Kyllingen er på tilbud i dag.",
+     "exampleRu": "Курица сегодня по акции.",
+     "exampleUk": "Курка сьогодні за акцією."
+    },
+    {
+     "key": "life:butikk:rabatt",
+     "no": "en rabatt",
+     "ru": "скидка",
+     "uk": "знижка",
+     "wordClass": "substantiv",
+     "example": "Studenter får ti prosent rabatt.",
+     "exampleRu": "Студентам скидка десять процентов.",
+     "exampleUk": "Студентам знижка десять відсотків."
+    },
+    {
+     "key": "life:butikk:pant",
+     "no": "en pant",
+     "ru": "залог за тару (бутылки и банки)",
+     "uk": "застава за тару (пляшки й банки)",
+     "wordClass": "substantiv",
+     "example": "Vi leverer flaskene og får pant tilbake.",
+     "exampleRu": "Мы сдаём бутылки и получаем залог обратно.",
+     "exampleUk": "Ми здаємо пляшки й отримуємо заставу назад.",
+     "description": "💡 За бутылки и банки при покупке платят залог — его возвращает автомат в магазине."
+    },
+    {
+     "key": "life:butikk:pantelapp",
+     "no": "en pantelapp",
+     "ru": "квитанция за сданную тару",
+     "uk": "квитанція за здану тару",
+     "wordClass": "substantiv",
+     "example": "Jeg gir pantelappen til kassereren.",
+     "exampleRu": "Я отдаю кассиру квитанцию за бутылки.",
+     "exampleUk": "Я віддаю касирові квитанцію за пляшки."
+    },
+    {
+     "key": "life:butikk:a-betale",
+     "no": "å betale",
+     "ru": "платить",
+     "uk": "платити",
+     "wordClass": "verb",
+     "example": "Jeg vil betale med kort.",
+     "exampleRu": "Я хочу заплатить картой.",
+     "exampleUk": "Я хочу заплатити карткою."
+    },
+    {
+     "key": "life:butikk:bankkort",
+     "no": "et bankkort",
+     "ru": "банковская карта",
+     "uk": "банківська картка",
+     "wordClass": "substantiv",
+     "example": "Bankkortet mitt virker ikke.",
+     "exampleRu": "Моя банковская карта не работает.",
+     "exampleUk": "Моя банківська картка не працює."
+    },
+    {
+     "key": "life:butikk:kontanter",
+     "no": "kontanter",
+     "ru": "наличные",
+     "uk": "готівка",
+     "wordClass": "substantiv",
+     "example": "Jeg har ikke kontanter, bare kort.",
+     "exampleRu": "У меня нет наличных, только карта.",
+     "exampleUk": "У мене немає готівки, тільки картка."
+    },
+    {
+     "key": "life:butikk:a-betale-med-mobilen",
+     "no": "å betale med mobilen",
+     "ru": "платить телефоном",
+     "uk": "платити телефоном",
+     "wordClass": "uttrykk",
+     "example": "Mange betaler med mobilen, også på loppemarkedet.",
+     "exampleRu": "Многие платят телефоном, даже на блошином рынке.",
+     "exampleUk": "Багато хто платить телефоном, навіть на блошиному ринку."
+    },
+    {
+     "key": "life:butikk:bank",
+     "no": "en bank",
+     "ru": "банк",
+     "uk": "банк",
+     "wordClass": "substantiv",
+     "example": "Jeg må åpne konto i en norsk bank.",
+     "exampleRu": "Мне нужно открыть счёт в норвежском банке.",
+     "exampleUk": "Мені треба відкрити рахунок у норвезькому банку."
+    },
+    {
+     "key": "life:butikk:bankkonto",
+     "no": "en bankkonto",
+     "ru": "банковский счёт",
+     "uk": "банківський рахунок",
+     "wordClass": "substantiv",
+     "example": "Lønnen kommer inn på bankkontoen.",
+     "exampleRu": "Зарплата приходит на банковский счёт.",
+     "exampleUk": "Зарплата надходить на банківський рахунок."
+    },
+    {
+     "key": "life:butikk:minibank",
+     "no": "en minibank",
+     "ru": "банкомат",
+     "uk": "банкомат",
+     "wordClass": "substantiv",
+     "example": "Finnes det en minibank her i nærheten?",
+     "exampleRu": "Здесь поблизости есть банкомат?",
+     "exampleUk": "Тут поблизу є банкомат?"
+    },
+    {
+     "key": "life:butikk:a-ta-ut-penger",
+     "no": "å ta ut penger",
+     "ru": "снимать деньги",
+     "uk": "знімати гроші",
+     "wordClass": "uttrykk",
+     "example": "Jeg tar ut penger i minibanken.",
+     "exampleRu": "Я снимаю деньги в банкомате.",
+     "exampleUk": "Я знімаю гроші в банкоматі."
+    },
+    {
+     "key": "life:butikk:regning",
+     "no": "en regning",
+     "ru": "счёт (к оплате)",
+     "uk": "рахунок (до сплати)",
+     "wordClass": "substantiv",
+     "example": "Regningen må betales innen fredag.",
+     "exampleRu": "Счёт нужно оплатить до пятницы.",
+     "exampleUk": "Рахунок треба сплатити до п’ятниці."
+    },
+    {
+     "key": "life:butikk:faktura",
+     "no": "en faktura",
+     "ru": "счёт (на оплату), инвойс",
+     "uk": "рахунок (до сплати), інвойс",
+     "wordClass": "substantiv",
+     "example": "Fakturaen kommer på e-post.",
+     "exampleRu": "Счёт придёт по электронной почте.",
+     "exampleUk": "Рахунок прийде електронною поштою."
+    },
+    {
+     "key": "life:butikk:a-bytte",
+     "no": "å bytte",
+     "ru": "обменивать (товар)",
+     "uk": "обмінювати (товар)",
+     "wordClass": "verb",
+     "example": "Kan jeg bytte genseren til en større størrelse?",
+     "exampleRu": "Можно обменять свитер на размер побольше?",
+     "exampleUk": "Можна обміняти светр на більший розмір?"
+    },
+    {
+     "key": "life:butikk:byttelapp",
+     "no": "en byttelapp",
+     "ru": "чек для обмена (без цены)",
+     "uk": "чек для обміну (без ціни)",
+     "wordClass": "substantiv",
+     "example": "Med byttelapp kan du bytte gaven etter jul.",
+     "exampleRu": "С обменным чеком подарок можно обменять после Рождества.",
+     "exampleUk": "З чеком для обміну подарунок можна обміняти після Різдва.",
+     "description": "💡 Byttelapp — специальный чек без цены, его кладут к подарку."
+    },
+    {
+     "key": "life:butikk:apningstider",
+     "no": "åpningstider",
+     "ru": "часы работы",
+     "uk": "години роботи",
+     "wordClass": "substantiv",
+     "example": "Åpningstidene står på døren.",
+     "exampleRu": "Часы работы указаны на двери.",
+     "exampleUk": "Години роботи вказані на дверях.",
+     "description": "💡 По воскресеньям большинство магазинов закрыто."
+    },
+    {
+     "key": "life:butikk:a-spare",
+     "no": "å spare",
+     "ru": "экономить; копить",
+     "uk": "економити; заощаджувати",
+     "wordClass": "verb",
+     "example": "Vi sparer penger til ferien.",
+     "exampleRu": "Мы откладываем деньги на отпуск.",
+     "exampleUk": "Ми відкладаємо гроші на відпустку."
+    },
+    {
+     "key": "life:butikk:hvor-finner-jeg-melken",
+     "no": "Hvor finner jeg melken?",
+     "ru": "Где у вас молоко?",
+     "uk": "Де у вас молоко?",
+     "wordClass": "frase",
+     "example": "Unnskyld, hvor finner jeg melken? — Helt bakerst i butikken.",
+     "exampleRu": "Извините, где у вас молоко? — В самом конце зала.",
+     "exampleUk": "Вибачте, де у вас молоко? — У самому кінці залу."
+    },
+    {
+     "key": "life:butikk:det-blir-to-hundre-kroner",
+     "no": "Det blir to hundre kroner.",
+     "ru": "С вас двести крон.",
+     "uk": "З вас двісті крон.",
+     "wordClass": "frase",
+     "example": "Det blir to hundre kroner. Kort eller mobil?",
+     "exampleRu": "С вас двести крон. Картой или телефоном?",
+     "exampleUk": "З вас двісті крон. Карткою чи телефоном?",
+     "description": "💡 «Det blir …» — так кассир называет сумму."
+    },
+    {
+     "key": "life:butikk:var-det-alt",
+     "no": "Var det alt?",
+     "ru": "Это всё?",
+     "uk": "Це все?",
+     "wordClass": "frase",
+     "example": "Var det alt? — Ja, takk.",
+     "exampleRu": "Это всё? — Да, спасибо.",
+     "exampleUk": "Це все? — Так, дякую."
+    }
+   ]
+  },
+  {
+   "id": "life-smalltalk",
+   "ver": 1,
+   "kind": "word",
+   "group": "life",
+   "section": "smalltalk",
+   "name": "Вежливость и светская беседа",
+   "nameUk": "Ввічливість і невимушена розмова",
+   "nameNo": "Høflighet og smalltalk",
+   "icon": "💬",
+   "level": "A1",
+   "tags": [
+    "høflighet",
+    "smalltalk"
+   ],
+   "description": "Короткие фразы на каждый день: приветствия, «спасибо за прошлую встречу», погода, выходные, извинения и пожелания.",
+   "cards": [
+    {
+     "key": "life:smalltalk:hvordan-gar-det",
+     "no": "Hvordan går det?",
+     "ru": "Как дела?",
+     "uk": "Як справи?",
+     "wordClass": "frase",
+     "example": "Hei, Kari! Hvordan går det?",
+     "exampleRu": "Привет, Кари! Как дела?",
+     "exampleUk": "Привіт, Карі! Як справи?"
+    },
+    {
+     "key": "life:smalltalk:det-gar-bra-takk-og-med-deg",
+     "no": "Det går bra, takk. Og med deg?",
+     "ru": "Хорошо, спасибо. А у тебя?",
+     "uk": "Добре, дякую. А в тебе?",
+     "wordClass": "frase",
+     "example": "Det går bra, takk. Og med deg? — Jo takk, fint.",
+     "exampleRu": "Хорошо, спасибо. А у тебя? — Спасибо, отлично.",
+     "exampleUk": "Добре, дякую. А в тебе? — Дякую, чудово."
+    },
+    {
+     "key": "life:smalltalk:takk-for-sist",
+     "no": "Takk for sist!",
+     "ru": "Спасибо за прошлую встречу!",
+     "uk": "Дякую за минулу зустріч!",
+     "wordClass": "frase",
+     "example": "Hei, takk for sist! Det var en hyggelig kveld.",
+     "exampleRu": "Привет! Спасибо за тот вечер — было очень приятно.",
+     "exampleUk": "Привіт! Дякую за той вечір — було дуже приємно.",
+     "description": "💡 Takk for sist говорят при следующей встрече после совместного вечера или визита — это важная норвежская вежливость."
+    },
+    {
+     "key": "life:smalltalk:takk-for-maten",
+     "no": "Takk for maten!",
+     "ru": "Спасибо за еду!",
+     "uk": "Дякую за їжу!",
+     "wordClass": "frase",
+     "example": "Takk for maten, det var kjempegodt!",
+     "exampleRu": "Спасибо, было очень вкусно!",
+     "exampleUk": "Дякую, було дуже смачно!",
+     "description": "💡 Так благодарят хозяев после еды — даже дома, родителей."
+    },
+    {
+     "key": "life:smalltalk:ha-det-bra",
+     "no": "Ha det bra!",
+     "ru": "Всего хорошего! Пока!",
+     "uk": "Усього доброго! Бувай!",
+     "wordClass": "frase",
+     "example": "Vi ses i morgen. Ha det bra!",
+     "exampleRu": "Увидимся завтра. Пока!",
+     "exampleUk": "Побачимося завтра. Бувай!"
+    },
+    {
+     "key": "life:smalltalk:ha-en-fin-helg",
+     "no": "Ha en fin helg!",
+     "ru": "Хороших выходных!",
+     "uk": "Гарних вихідних!",
+     "wordClass": "frase",
+     "example": "Endelig fredag! Ha en fin helg!",
+     "exampleRu": "Наконец-то пятница! Хороших выходных!",
+     "exampleUk": "Нарешті п’ятниця! Гарних вихідних!"
+    },
+    {
+     "key": "life:smalltalk:i-like-mate",
+     "no": "I like måte!",
+     "ru": "И вам того же!",
+     "uk": "І вам того ж!",
+     "wordClass": "frase",
+     "example": "Ha en fin helg! — Takk, i like måte!",
+     "exampleRu": "Хороших выходных! — Спасибо, и вам!",
+     "exampleUk": "Гарних вихідних! — Дякую, і вам!"
+    },
+    {
+     "key": "life:smalltalk:hva-skal-du-gjore-i-helgen",
+     "no": "Hva skal du gjøre i helgen?",
+     "ru": "Что будешь делать на выходных?",
+     "uk": "Що робитимеш на вихідних?",
+     "wordClass": "frase",
+     "example": "Hva skal du gjøre i helgen? — Jeg skal på hytta.",
+     "exampleRu": "Что будешь делать на выходных? — Поеду на дачу.",
+     "exampleUk": "Що робитимеш на вихідних? — Поїду на дачу."
+    },
+    {
+     "key": "life:smalltalk:fint-vaer-i-dag-ikke-sant",
+     "no": "Fint vær i dag, ikke sant?",
+     "ru": "Хорошая сегодня погода, правда?",
+     "uk": "Гарна сьогодні погода, правда?",
+     "wordClass": "frase",
+     "example": "Fint vær i dag, ikke sant? — Ja, endelig sol!",
+     "exampleRu": "Хорошая сегодня погода, правда? — Да, наконец-то солнце!",
+     "exampleUk": "Гарна сьогодні погода, правда? — Так, нарешті сонце!",
+     "description": "💡 Погода — самая безопасная тема для разговора с норвежцем."
+    },
+    {
+     "key": "life:smalltalk:det-regner-igjen",
+     "no": "Det regner igjen.",
+     "ru": "Опять дождь.",
+     "uk": "Знову дощ.",
+     "wordClass": "frase",
+     "example": "Det regner igjen, men vi går tur likevel.",
+     "exampleRu": "Опять дождь, но мы всё равно идём гулять.",
+     "exampleUk": "Знову дощ, але ми все одно йдемо гуляти."
+    },
+    {
+     "key": "life:smalltalk:hyggelig-a-treffe-deg",
+     "no": "Hyggelig å treffe deg!",
+     "ru": "Приятно познакомиться!",
+     "uk": "Приємно познайомитися!",
+     "wordClass": "frase",
+     "example": "Jeg heter Lena. — Hyggelig å treffe deg!",
+     "exampleRu": "Меня зовут Лена. — Приятно познакомиться!",
+     "exampleUk": "Мене звати Лена. — Приємно познайомитися!"
+    },
+    {
+     "key": "life:smalltalk:hvor-lenge-har-du-bodd-i-norge",
+     "no": "Hvor lenge har du bodd i Norge?",
+     "ru": "Сколько ты уже живёшь в Норвегии?",
+     "uk": "Скільки ти вже живеш у Норвегії?",
+     "wordClass": "frase",
+     "example": "Hvor lenge har du bodd i Norge? — I to år.",
+     "exampleRu": "Сколько ты уже живёшь в Норвегии? — Два года.",
+     "exampleUk": "Скільки ти вже живеш у Норвегії? — Два роки.",
+     "description": "💡 «Живу уже два года» по-норвежски — перфект: har bodd."
+    },
+    {
+     "key": "life:smalltalk:kan-du-snakke-litt-saktere",
+     "no": "Kan du snakke litt saktere?",
+     "ru": "Можешь говорить чуть медленнее?",
+     "uk": "Можеш говорити трохи повільніше?",
+     "wordClass": "frase",
+     "example": "Unnskyld, jeg lærer norsk. Kan du snakke litt saktere?",
+     "exampleRu": "Извини, я учу норвежский. Можешь говорить чуть медленнее?",
+     "exampleUk": "Вибач, я вчу норвезьку. Можеш говорити трохи повільніше?"
+    },
+    {
+     "key": "life:smalltalk:kan-du-si-det-en-gang-til",
+     "no": "Kan du si det en gang til?",
+     "ru": "Можешь повторить?",
+     "uk": "Можеш повторити?",
+     "wordClass": "frase",
+     "example": "Beklager, jeg forsto ikke. Kan du si det en gang til?",
+     "exampleRu": "Простите, я не понял. Можете повторить?",
+     "exampleUk": "Вибачте, я не зрозумів. Можете повторити?"
+    },
+    {
+     "key": "life:smalltalk:takk-for-hjelpen",
+     "no": "Takk for hjelpen!",
+     "ru": "Спасибо за помощь!",
+     "uk": "Дякую за допомогу!",
+     "wordClass": "frase",
+     "example": "Du bar alle eskene. Tusen takk for hjelpen!",
+     "exampleRu": "Ты перенёс все коробки. Огромное спасибо за помощь!",
+     "exampleUk": "Ти переніс усі коробки. Щиро дякую за допомогу!"
+    },
+    {
+     "key": "life:smalltalk:bare-hyggelig",
+     "no": "Bare hyggelig!",
+     "ru": "Не за что! (рад помочь)",
+     "uk": "Нема за що! (радий допомогти)",
+     "wordClass": "frase",
+     "example": "Takk for hjelpen! — Bare hyggelig!",
+     "exampleRu": "Спасибо за помощь! — Не за что!",
+     "exampleUk": "Дякую за допомогу! — Нема за що!",
+     "description": "💡 Обычный ответ на «спасибо»: Bare hyggelig! или Ingen årsak!"
+    },
+    {
+     "key": "life:smalltalk:unnskyld",
+     "no": "Unnskyld!",
+     "ru": "Извините!",
+     "uk": "Вибачте!",
+     "wordClass": "frase",
+     "example": "Unnskyld, sitter det noen her?",
+     "exampleRu": "Извините, здесь кто-нибудь сидит?",
+     "exampleUk": "Вибачте, тут хтось сидить?",
+     "description": "💡 Unnskyld — чтобы обратиться или пройти; beklager — когда вы виноваты."
+    },
+    {
+     "key": "life:smalltalk:beklager-jeg-er-sent-ute",
+     "no": "Beklager, jeg er sent ute.",
+     "ru": "Извините, я опаздываю.",
+     "uk": "Вибачте, я запізнююся.",
+     "wordClass": "frase",
+     "example": "Beklager, jeg er sent ute. Bussen var forsinket.",
+     "exampleRu": "Извините, я опаздываю. Автобус задержался.",
+     "exampleUk": "Вибачте, я запізнююся. Автобус затримався."
+    },
+    {
+     "key": "life:smalltalk:god-bedring",
+     "no": "God bedring!",
+     "ru": "Выздоравливай!",
+     "uk": "Одужуй!",
+     "wordClass": "frase",
+     "example": "Er du syk? God bedring!",
+     "exampleRu": "Ты заболел? Выздоравливай!",
+     "exampleUk": "Ти захворів? Одужуй!"
+    },
+    {
+     "key": "life:smalltalk:gratulerer-med-dagen",
+     "no": "Gratulerer med dagen!",
+     "ru": "С днём рождения! (С праздником!)",
+     "uk": "З днем народження! (Зі святом!)",
+     "wordClass": "frase",
+     "example": "Gratulerer med dagen! Har du fått mange gaver?",
+     "exampleRu": "С днём рождения! Много подарков получил?",
+     "exampleUk": "З днем народження! Багато подарунків отримав?",
+     "description": "💡 Так поздравляют с днём рождения, а 17 мая — с Днём Конституции."
+    },
+    {
+     "key": "life:smalltalk:lykke-til",
+     "no": "Lykke til!",
+     "ru": "Удачи!",
+     "uk": "Щасти!",
+     "wordClass": "frase",
+     "example": "Har du jobbintervju i morgen? Lykke til!",
+     "exampleRu": "Завтра собеседование? Удачи!",
+     "exampleUk": "Завтра співбесіда? Щасти!"
+    },
+    {
+     "key": "life:smalltalk:kos-deg",
+     "no": "Kos deg!",
+     "ru": "Хорошо тебе провести время!",
+     "uk": "Гарно тобі провести час!",
+     "wordClass": "frase",
+     "example": "Skal du på konsert i kveld? Kos deg!",
+     "exampleRu": "Идёшь сегодня на концерт? Хорошо тебе провести время!",
+     "exampleUk": "Ідеш сьогодні на концерт? Гарно тобі провести час!"
+    },
+    {
+     "key": "life:smalltalk:snakkes",
+     "no": "Snakkes!",
+     "ru": "До связи! Ещё поговорим!",
+     "uk": "На зв’язку! Ще поговоримо!",
+     "wordClass": "frase",
+     "example": "Jeg må gå nå. Snakkes!",
+     "exampleRu": "Мне пора. До связи!",
+     "exampleUk": "Мені пора. На зв’язку!"
+    },
+    {
+     "key": "life:smalltalk:skal-vi-ta-en-kaffe",
+     "no": "Skal vi ta en kaffe?",
+     "ru": "Может, выпьем кофе?",
+     "uk": "Може, вип’ємо кави?",
+     "wordClass": "frase",
+     "example": "Jeg har pause nå. Skal vi ta en kaffe?",
+     "exampleRu": "У меня сейчас перерыв. Может, выпьем кофе?",
+     "exampleUk": "У мене зараз перерва. Може, вип’ємо кави?"
+    },
+    {
+     "key": "life:smalltalk:det-hores-fint-ut",
+     "no": "Det høres fint ut!",
+     "ru": "Звучит отлично!",
+     "uk": "Звучить чудово!",
+     "wordClass": "frase",
+     "example": "Skal vi gå tur på søndag? — Det høres fint ut!",
+     "exampleRu": "Пойдём гулять в воскресенье? — Отличная идея!",
+     "exampleUk": "Підемо гуляти в неділю? — Чудова ідея!"
+    },
+    {
+     "key": "life:smalltalk:velkommen",
+     "no": "Velkommen!",
+     "ru": "Добро пожаловать!",
+     "uk": "Ласкаво просимо!",
+     "wordClass": "frase",
+     "example": "Velkommen! Bare kom inn.",
+     "exampleRu": "Добро пожаловать! Проходите.",
+     "exampleUk": "Ласкаво просимо! Заходьте."
+    },
+    {
+     "key": "life:smalltalk:hyggelig",
+     "no": "hyggelig",
+     "ru": "приятный, милый",
+     "uk": "приємний, милий",
+     "wordClass": "adjektiv",
+     "example": "Naboen vår er veldig hyggelig.",
+     "exampleRu": "Наш сосед очень приятный человек.",
+     "exampleUk": "Наш сусід дуже приємна людина."
+    },
+    {
+     "key": "life:smalltalk:koselig",
+     "no": "koselig",
+     "ru": "уютный, приятный",
+     "uk": "затишний, приємний",
+     "wordClass": "adjektiv",
+     "example": "Det var en koselig kveld hos dere.",
+     "exampleRu": "Вечер у вас получился очень уютным.",
+     "exampleUk": "Вечір у вас вийшов дуже затишним.",
+     "description": "💡 Koselig — одно из любимых слов норвежцев: про дом, вечер, свечи, встречу."
+    },
+    {
+     "key": "life:smalltalk:helg",
+     "no": "en helg",
+     "ru": "выходные",
+     "uk": "вихідні",
+     "wordClass": "substantiv",
+     "example": "Helgen gikk altfor fort.",
+     "exampleRu": "Выходные пролетели слишком быстро.",
+     "exampleUk": "Вихідні пролетіли надто швидко."
+    },
+    {
+     "key": "life:smalltalk:a-hilse-pa",
+     "no": "å hilse på",
+     "ru": "здороваться (с кем-то), знакомиться",
+     "uk": "вітатися (з кимось), знайомитися",
+     "wordClass": "verb",
+     "example": "Kom og hils på naboene våre!",
+     "exampleRu": "Иди познакомься с нашими соседями!",
+     "exampleUk": "Ходи познайомся з нашими сусідами!"
+    },
+    {
+     "key": "life:smalltalk:prat",
+     "no": "en prat",
+     "ru": "разговор, беседа",
+     "uk": "розмова, балачка",
+     "wordClass": "substantiv",
+     "example": "Vi tok en liten prat i trappen.",
+     "exampleRu": "Мы немного поболтали на лестнице.",
+     "exampleUk": "Ми трохи побалакали на сходах."
+    },
+    {
+     "key": "life:smalltalk:a-invitere",
+     "no": "å invitere",
+     "ru": "приглашать",
+     "uk": "запрошувати",
+     "wordClass": "verb",
+     "example": "Vi vil gjerne invitere dere på middag.",
+     "exampleRu": "Мы хотели бы пригласить вас на ужин.",
+     "exampleUk": "Ми хотіли б запросити вас на вечерю."
+    }
+   ]
+  }
+ ]
+}

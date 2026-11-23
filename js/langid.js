@@ -244,8 +244,58 @@
     return { music: ler < 0.18, ler }; // NRK speech (Supernytt, music beds too): ≥ 0.23 on 2 s; a pop song on P3: median 0.13
   }
 
+  /* ---------- 🇬🇧 English lines: which words in them are Norwegian (a teacher explaining Norwegian in English) ----------
+   * High precision: a word counts as Norwegian only when it is clearly not English — æ / ø / å, Norwegian spelling
+   * (-sjon, skj, kj, gj), a Norwegian function word that is not also an English one, a word the user already has on a
+   * card, or a non-English word in quotes («hygge», "koselig"). */
+  // Norwegian words that are ordinary English words too (never marked Norwegian inside an English line)
+  const EN_TOO = new Set(`under over land man men sin ham den mat bare tar alt god hat time hit her hare ting hus by me
+    dag sa gang tur bra folk barn mann vann år for at til fra ser han hun var vel kan vil skal jo ja nei da om men selv
+    lite mens rett sent ord dit ute igjen ganger enn nok best stor din min dine mine sitt hans its tid ned opp inn ut
+    still ever art arm bank bad bed bil bit bok bor bro bud dom dun eng fin fot gal gift hel helt hold kost kart kort
+    lag lys mens mild mor far pass plan pris rom sang sterk sum tak tal tre vind vis yr hver hver alle sted sted ingen`.split(/\s+/));
+  const bareW = s => String(s || '').replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
+  function isNoWord(tok, known) {
+    const raw = bareW(tok), w = raw.toLowerCase();
+    if (!w || w.length < 2 || raw === 'I') return false;
+    if (/^«/.test(tok) || /»[.,!?;:)]*$/.test(tok)) return !EN.has(w) || w.length >= 3; // «god morgen» — quoted the Norwegian way
+    if (EN.has(w) || EN_TOO.has(w)) return false;
+    if (/[æøå]/.test(w)) return true;
+    if (/(sjon|sjonen|sjoner)$/.test(w) || /^(skj|kj|gj)/.test(w) || /(skj|kj)/.test(w)) return true;
+    if (NO.has(w) && w.length >= 3) return true;
+    if (known && known.has && known.has(w) && w.length >= 3) return true;
+    const quoted = /^[«"“„'‘]/.test(tok) || /[»"”'’][.,!?;:)]*$/.test(tok);
+    return quoted && w.length >= 3 && !/(ing|ed|ly|tion|ous)$/.test(w);
+  }
+  /** how much of the text is made of each language's known words → { no, en, sv, da, de, n } (shares 0…1) */
+  function cover(text) {
+    const toks = tokens(String(text || '')).filter(k => !k.cap);
+    const n = toks.length, out = { n };
+    Object.keys(PROF).forEach(X => { out[X] = n ? toks.filter(k => PROF[X].has(k.w)).length / n : 0; });
+    return out;
+  }
+  /**
+   * 🎵 a song the app recognized by ear (NB-Whisper is told «Norwegian», so a Swedish song comes out half-Norwegian,
+   * a Spanish one as gibberish) → { lang: 'no' | 'en' | 'sv' | 'da' | 'de' | 'xx', noWords }
+   */
+  function songLang(text) {
+    const r = detect(text, { asr: true, music: true });
+    if (r.noWords) return { lang: r.lang, noWords: true };
+    if (r.lang !== learn() && r.lang !== 'xx') return { lang: r.lang, noWords: false };
+    const c = cover(text);
+    if (r.lang === 'xx' || c.n < 2) return { lang: c.n < 2 && r.lang !== 'xx' ? r.lang : 'xx', noWords: false };
+    // the learn language with hardly any of its own words: a language the recognizer does not know
+    if (c.no >= 0.25 || (c.n <= 4 && c.no >= 0.2)) return { lang: r.lang, noWords: false };
+    let best = 'xx', bv = 0.3;
+    ['en', 'sv', 'da', 'de'].forEach(X => { if (c[X] > bv && c[X] > c.no) { best = X; bv = c[X]; } });
+    return { lang: best, noWords: false };
+  }
+  /** «на шведском языке» */
+  const IN = { no: 'на норвежском', en: 'на английском', sv: 'на шведском', da: 'на датском', de: 'на немецком', fr: 'на французском', es: 'на испанском', it: 'на итальянском', fi: 'на финском', ru: 'на русском', uk: 'на украинском' };
+  const nameIn = l => (IN[l] ? IN[l] + ' языке' : 'на другом языке');
+
   window.LangId = {
-    detect, audioHint, learn, translatable,
+    detect, audioHint, learn, translatable, isNoWord, cover, songLang, nameIn,
     /** «EN», «SV»… */
     code: l => String(l || '').toUpperCase(),
     name: l => NAMES[l] || NAMES.xx,

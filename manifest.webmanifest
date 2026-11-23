@@ -1,7 +1,7 @@
 {
-  "name": "Norsk Kort — норвежский ⇄ русский",
-  "short_name": "Norsk Kort",
-  "description": "Флеш-карточки норвежский ⇄ русский: интервальные повторения, озвучка, картинки, проверка нейросетями.",
+  "name": "Norsk – UKR·RU AI",
+  "short_name": "Norsk UKR AI",
+  "description": "Картки норвезька ⇄ українська · російська: інтервальні повторення, озвучення, картинки, перевірка ШІ. Карточки норвежский ⇄ украинский · русский: интервальные повторения, озвучка, картинки, проверка нейросетями.",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",
@@ -24,6 +24,8 @@
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

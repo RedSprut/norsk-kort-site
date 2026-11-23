@@ -1,11 +1,13 @@
 /* ============ 📗 Справочник грамматики — the public grammar reference (A1–B1, in Russian) ============
  * Data: data/grammar-reference.json (Norsk Kort's own text; books were only a checklist of topics).
  *   { version, groups: [{ id, icon, pos, ru, no }], topics: [{ id, group, level A1|A2|B1, no, ru, keys, rule, uk,
- *     tables: [{ title?, h: [headers], r: [[cells]], ru?: [Russian-only column indexes] }], ex: [[no, ru]],
+ *     tables: [{ title?, h: [headers], r: [[cells]], ru?: [Russian-only column indexes] }], ex: [[no, ru, uk?]],
  *     err: { t, bad?, good? }, tip?, see: [topic ids], train: [trainer ids] }] }
  *   A cell «Norwegian|Russian» shows the form with its translation and is read aloud on a tap (🔊 TTS.speak).
  *   A header «no · ru» is shown as a bilingual label (like Gram.label); a known term («Preteritum») goes through Gram.label.
  *   Text: **bold**, «\n» = new paragraph.
+ *   Examples follow «Язык перевода» (Study.trLang): ru → Russian, uk → Ukrainian (Russian when a translation is missing),
+ *   both → both lines. The search looks in all of them.
  *
  *   GramRef.open(topicId?)   → the window «📗 Справочник грамматики»: topics grouped by part of speech, search (Russian or
  *                              Norwegian), level filter A1/A2/B1; a topic: rule, tables, examples with 🔊, «типичная ошибка»,
@@ -22,7 +24,7 @@
   const esc = s => { try { return U.esc(s == null ? '' : String(s)); } catch (e) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); } };
   const toast = (msg, type) => { try { if (window.UI && UI.toast) UI.toast(msg, type || ''); } catch (e) { /* no toast */ } };
   const plural = (n, f) => { try { return U.plural(n, f); } catch (e) { return f[2]; } };
-  const fold = s => String(s == null ? '' : s).toLowerCase().normalize('NFC').replace(/ё/g, 'е');
+  const fold = s => String(s == null ? '' : s).toLowerCase().normalize('NFC').replace(/ё/g, 'е').replace(/[’ʼ`]/g, "'");
   const ascii = s => s.replace(/å/g, 'a').replace(/[øö]/g, 'o').replace(/[æä]/g, 'ae');
   const MSG = {
     load: '📗 Справочник не загрузился. Проверьте интернет и попробуйте ещё раз.',
@@ -140,7 +142,7 @@
     };
     return `<div class="gr-intro"><span aria-hidden="true">📗</span><span>Грамматика норвежского (букмол) от A1 до B1 простыми словами: короткое правило, таблица форм с переводом, примеры с 🔊 и <b>типичная ошибка русскоязычных</b>. Нажмите на тему.</span></div>
       <div class="gr-tools">
-        <label class="gr-search"><span aria-hidden="true">🔍</span><input type="search" class="input" data-gr-q value="${esc(ctx.q)}" placeholder="Поиск: «предлоги», «sin», «прошедшее»…" aria-label="Поиск по темам — по-русски или по-норвежски" autocomplete="off" spellcheck="false"></label>
+        <label class="gr-search"><span aria-hidden="true">🔍</span><input type="search" class="input" data-gr-q value="${esc(ctx.q)}" placeholder="Поиск: «предлоги», «sin», «прошедшее»…" aria-label="Поиск по темам — по-русски, по-украински или по-норвежски" autocomplete="off" spellcheck="false"></label>
         <div class="gr-levels" role="group" aria-label="Уровень">${lv.map(l => `<button type="button" class="gr-lvbtn ${l ? 'gr-lv-' + l.toLowerCase() : ''}" data-gr-level="${l}" aria-pressed="${ctx.level === l}" title="${l ? `Показать только темы уровня ${l}` : 'Показать все уровни'}">${l || 'Все'}</button>`).join('')}</div>
       </div>
       <nav class="gr-jump" aria-label="Разделы">${D.groups.map(g => `<button type="button" class="gr-jumpbtn" data-gr-jump="${esc(g.id)}" title="Перейти к разделу «${esc(g.ru)}»"><span aria-hidden="true">${esc(g.icon || '')}</span> ${esc(g.ru)}</button>`).join('')}</nav>
@@ -179,6 +181,16 @@
   }
 
   /* ---------- one topic ---------- */
+  const trl = () => { try { return window.Study && Study.trLang ? Study.trLang() : 'ru'; } catch (e) { return 'ru'; } };
+  /** an example's translation by «Язык перевода»: ru · uk (Russian when there is no Ukrainian) · both */
+  function exTr(e) {
+    const ru = String(e[1] || ''), uk = String(e[2] || ''), l = trl();
+    const ruLine = ru ? `<div class="gr-ex-ru" lang="ru">${esc(ru)}</div>` : '';
+    const ukLine = uk ? `<div class="gr-ex-ru gr-ex-uk" lang="uk">${esc(uk)}</div>` : '';
+    if (l === 'uk') return ukLine || ruLine;
+    if (l === 'both') return uk && ru ? `<div class="gr-ex-ru" lang="ru"><span class="gr-flag" aria-hidden="true">🇷🇺</span> ${esc(ru)}</div><div class="gr-ex-ru gr-ex-uk" lang="uk"><span class="gr-flag" aria-hidden="true">🇺🇦</span> ${esc(uk)}</div>` : ruLine || ukLine;
+    return ruLine || ukLine;
+  }
   function topicHtml(t) {
     const D = DATA;
     const g = D.groups.find(x => x.id === t.group) || {};
@@ -192,18 +204,18 @@
       <article class="gr-topic" aria-labelledby="gr-th-${esc(t.id)}">
         <header class="gr-th">${levelTag(t.level)}<div><h3 id="gr-th-${esc(t.id)}">${esc(t.ru)}</h3>${t.no ? `<div class="gr-th-no" lang="nb">${esc(t.no)}</div>` : ''}</div></header>
         <section class="gr-rule"><h4><span aria-hidden="true">📌</span> Правило</h4>${(() => {
-          const trl = window.Study && Study.trLang ? Study.trLang() : 'ru';
-          return trl === 'uk' && t.uk ? `<div lang="uk">${paras(t.uk)}</div>`
-            : trl === 'both' && t.uk ? `${paras(t.rule)}<details class="gr-uk"><summary>🇺🇦 Українською</summary><div lang="uk">${paras(t.uk)}</div></details>`
+          const l = trl();
+          return l === 'uk' && t.uk ? `<div lang="uk">${paras(t.uk)}</div>`
+            : l === 'both' && t.uk ? `${paras(t.rule)}<details class="gr-uk"><summary>🇺🇦 Українською</summary><div lang="uk">${paras(t.uk)}</div></details>`
             : paras(t.rule);
         })()}</section>
         ${(t.tables || []).length ? `<section class="gr-tables"><h4><span aria-hidden="true">📋</span> Таблица <span class="gr-hint small muted">нажмите на норвежское слово — 🔊</span></h4>${t.tables.map(tableHtml).join('')}</section>` : ''}
-        ${(t.ex || []).length ? `<section class="gr-exs"><h4><span aria-hidden="true">💬</span> Примеры</h4><ul class="gr-ex">${t.ex.map(e => `<li>${spk(e[0])}<div class="gr-ex-txt"><div class="gr-ex-no" lang="nb">${esc(e[0])}</div><div class="gr-ex-ru">${esc(e[1] || '')}</div></div></li>`).join('')}</ul></section>` : ''}
+        ${(t.ex || []).length ? `<section class="gr-exs"><h4><span aria-hidden="true">💬</span> Примеры</h4><ul class="gr-ex">${t.ex.map(e => `<li>${spk(e[0])}<div class="gr-ex-txt"><div class="gr-ex-no" lang="nb">${esc(e[0])}</div>${exTr(e)}</div></li>`).join('')}</ul></section>` : ''}
         ${err ? `<section class="gr-err"><h4><span aria-hidden="true">⚠️</span> Типичная ошибка русскоязычных</h4>${paras(err.t)}
           ${err.bad || err.good ? `<div class="gr-bg">${err.bad ? `<div class="gr-bad"><span class="gr-mark" aria-hidden="true">✗</span><span class="gr-bad-t" lang="nb"><span class="sr-only">Неправильно: </span>${esc(err.bad)}</span></div>` : ''}
             ${err.good ? `<div class="gr-good"><span class="gr-mark" aria-hidden="true">✓</span><span class="gr-good-t" lang="nb"><span class="sr-only">Правильно: </span>${esc(err.good)}</span>${spk(err.good, 'sm')}</div>` : ''}</div>` : ''}</section>` : ''}
         ${t.tip ? `<div class="gr-tip"><span aria-hidden="true">💡</span><span>${rich(t.tip)}</span></div>` : ''}
-        ${trains.length ? `<section class="gr-train"><h4><span aria-hidden="true">🏋️</span> К тренажёру</h4><div class="gr-btns">${trains.map(([id, x]) => `<button type="button" class="btn gr-trbtn" data-gr-train="${esc(id)}" title="Открыть: ${esc(x.label)}"><span aria-hidden="true">${esc(x.ico)}</span> ${esc(x.label)}</button>`).join('')}</div></section>` : ''}
+        ${trains.length ? `<section class="gr-train"><h4><span aria-hidden="true">🏋️</span> К тренажёру</h4><div class="gr-btns">${trains.map(([id, x]) => `<button type="button" class="btn gr-trbtn" data-gr-train="${esc(id)}" title="Открыть: ${esc(x.label)}"><span aria-hidden="true">${x.ico === '📊' && window.NavIcons ? NavIcons.statsIco() : esc(x.ico)}</span> ${esc(x.label)}</button>`).join('')}</div></section>` : ''}
         ${see.length ? `<section class="gr-see"><h4><span aria-hidden="true">🔗</span> См. также</h4><div class="gr-chips">${see.map(s => `<button type="button" class="gr-chip" data-gr-topic="${esc(s.id)}" title="Открыть тему «${esc(s.ru)}»">${levelTag(s.level)} ${esc(s.ru)}</button>`).join('')}</div></section>` : ''}
         <nav class="gr-nav" aria-label="Соседние темы">
           ${prev ? `<button type="button" class="gr-navbtn" data-gr-topic="${esc(prev.id)}" title="Предыдущая тема"><span aria-hidden="true">‹</span><span><small>Назад</small>${esc(prev.ru)}</span></button>` : '<span></span>'}

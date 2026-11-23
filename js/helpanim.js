@@ -8,6 +8,7 @@
  *  ▶/⏸, ↺, speed (1× → 1,5× → 0,75×); it pauses itself when scrolled away or the tab is hidden; reduced motion — no autoplay, no glides.
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const reduce = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const plain = html => { const d = document.createElement('div'); d.innerHTML = String(html || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
@@ -15,7 +16,8 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const STOP = { stop: true };
   const TG = () => (window.Telegram && Telegram.TG_SVG ? Telegram.TG_SVG(18) : '✈️');
-  const ico = (i, t) => (i === 'tg' ? TG() : i === 'tap' || i === '👆' || i === '👉' ? esc((t && t.icon !== 'tg' && t.icon) || '✨') : esc(i));
+  const SIC = () => (window.NavIcons ? NavIcons.statsIco() : '📊'); // 📊 → the drawn «Статистика» bars (js/app.js NavIcons)
+  const ico = (i, t) => (i === 'tg' ? TG() : i === '📊' ? SIC() : i === 'tap' || i === '👆' || i === '👉' ? esc((t && t.icon !== 'tg' && t.icon) || '✨') : esc(i));
   /** a short label from a step without «…»: up to the first comma / dot, ~30 letters */
   const short = html => {
     let p = plain(html).replace(/^(нажмите|откройте|выберите|найдите)\s+/i, m => m);
@@ -51,7 +53,7 @@
   }
 
   /* ---------------- richer scripts for the main topics ---------------- */
-  const tab = on => `<div class="hd-tabbar"><span class="hd-tab">📚<small>Колоды</small></span><span class="hd-tab t-study ${on ? 'on' : ''}">▶<small>Учить</small></span><span class="hd-tab">📊<small>Статистика</small></span></div>`;
+  const tab = on => `<div class="hd-tabbar"><span class="hd-tab">📚<small>Колоды</small></span><span class="hd-tab t-study ${on ? 'on' : ''}">▶<small>Учить</small></span><span class="hd-tab">${SIC()}<small>Статистика</small></span></div>`;
   const card = (front, back, ex) => `<div class="hd-flash"><div class="hd-fl-in"><div class="hd-face f"><small>🔊</small><b>${front}</b></div><div class="hd-face b"><b>${back}</b><small>${ex}</small></div></div></div>`;
   const appBar = right => `<div class="hd-appbar"><span class="hd-logo">N</span><b>Norsk Kort</b><span class="grow"></span>${right}</div>`;
   const wave = (n = 9) => `<span class="hd-wave">${Array.from({ length: n }, (x, i) => `<i style="--k:${i}"></i>`).join('')}</span>`;
@@ -157,6 +159,37 @@
     ],
   };
   DEMOS.audiocourse = null; // the generic one fits
+
+  /* 🎤 «Бегущая строка»: the word lights up (with its translation) the moment it is said */
+  const karLine = (cls = '') => `<div class="hd-subs on words hd-kar ${cls}"><span class="hd-voice">🔊${wave(5)}</span><span class="hd-knote">⏳ слова опаздывают</span><div class="hd-sl">${WORDS.map(([w, r], i) => `<span class="hd-w" data-w="${i}">${w}<i>${r}</i></span>`).join(' ')}</div><div class="hd-slr">У меня всё хорошо, спасибо.</div></div>`;
+  const karBar = (on, mode) => `<div class="hd-kbar"><span class="hd-chip hd-kbtn ${on ? 'on' : ''}">🎤 Бегущая строка</span>${on ? `<span class="hd-chip hd-khl ${mode === 'hl' ? 'on' : ''}">✨ Подсветка</span><span class="hd-chip hd-kwbw ${mode === 'wbw' ? 'on' : ''}">👣 Слово за словом</span>` : ''}</div>`;
+  /** the words one after another, as if said: kp — said, kc — now */
+  const sayWords = async (A, ms = 430) => {
+    A.rm('.hd-w', 'kp'); A.rm('.hd-w', 'kc'); A.add('.hd-kar', 'go');
+    if (A.$('.hd-kar.late')) await A.wait(420); // the voice is ahead of the words
+    for (let i = 0; i < WORDS.length; i++) {
+      if (i) { A.rm(`.hd-w[data-w="${i - 1}"]`, 'kc'); A.add(`.hd-w[data-w="${i - 1}"]`, 'kp'); }
+      A.add(`.hd-w[data-w="${i}"]`, 'kc');
+      await A.wait(i === 3 ? ms + 260 : ms); // «bra,» — a comma: a short pause after it
+    }
+    A.rm('.hd-w', 'kc'); A.add('.hd-w', 'kp'); A.rm('.hd-kar', 'go');
+  };
+  DEMOS.karaoke = [
+    { s: 0, html: top('Nytt på nytt', '📺') + `<div class="hd-body hd-vbody">${video(karLine('idle'))}${karBar(false)}</div>`,
+      run: async A => { await A.wait(500); await A.tap('.hd-kbtn'); A.add('.hd-kbtn', 'on'); A.rm('.hd-kar', 'idle'); await A.wait(250); await sayWords(A); await A.wait(500); } },
+    { s: 1, html: top('Nytt på nytt', '📺') + `<div class="hd-body hd-vbody">${video(karLine())}${karBar(true, 'hl')}</div>`,
+      run: async A => { await A.wait(300); await A.point('.hd-khl', { dy: 0.9 }); await A.wait(200); A.handAway(); await sayWords(A); await A.wait(400); await sayWords(A, 380); await A.wait(500); } },
+    { s: 2, html: top('Nytt på nytt', '📺') + `<div class="hd-body hd-vbody">${video(karLine())}${karBar(true, 'hl')}</div>`,
+      run: async A => { await A.wait(300); await A.tap('.hd-kwbw'); A.rm('.hd-khl', 'on'); A.add('.hd-kwbw', 'on'); A.add('.hd-kar', 'wbw'); await A.wait(200); A.handAway(); await sayWords(A, 470); await A.wait(700); } },
+    { s: 3, html: top('Nytt på nytt', '📺') + `<div class="hd-body hd-vbody">${video(karLine('late'))}<div class="hd-ksh"><small>⏱ Сдвиг слов</small><span class="hd-rb hd-kmin">−</span><b class="hd-kv">0,0 с</b><span class="hd-rb hd-kplus">+</span></div></div>`,
+      run: async A => {
+        await A.wait(300); await sayWords(A, 400); await A.wait(250);
+        await A.tap('.hd-kmin'); A.text('.hd-kv', '−0,1 с'); await A.wait(200); await A.tap('.hd-kmin', { quick: true }); A.text('.hd-kv', '−0,2 с'); A.rm('.hd-kar', 'late'); A.add('.hd-kv', 'ok'); A.text('.hd-knote', '✓ вместе с голосом'); A.add('.hd-knote', 'ok');
+        await A.wait(250); A.handAway(); await sayWords(A, 400); await A.wait(600);
+      } },
+    { s: 4, html: top('Aa Вид субтитров', 'Aa') + `<div class="hd-body"><small class="hd-muted">🎤 Бегущая строка</small><div class="hd-chips c3"><span class="hd-chip hd-koff">Выкл</span><span class="hd-chip hd-khl on">✨ Подсветка</span><span class="hd-chip hd-kwbw">👣 Слово за словом</span></div>${video(karLine())}</div>`,
+      run: async A => { await A.wait(350); await A.tap('.hd-kwbw'); A.rm('.hd-khl', 'on'); A.add('.hd-kwbw', 'on'); A.add('.hd-kar', 'wbw'); await A.wait(150); A.handAway(); await sayWords(A, 400); await A.wait(800); } },
+  ];
 
   /* ---------------- the player ---------------- */
   function mount(host, t, o = {}) {
@@ -286,7 +319,7 @@
       const old = S.cur;
       const p = document.createElement('div');
       p.className = 'hd-p';
-      p.innerHTML = sc.html;
+      p.innerHTML = String(sc.html).replace(/🤖/g, () => BOT()).replace(/📊/g, SIC); // 📊 → the drawn bars (scenes are built before js/app.js loads)
       stage.appendChild(p);
       S.cur = p;
       hand.classList.add('on');

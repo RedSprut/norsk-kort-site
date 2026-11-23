@@ -8,6 +8,7 @@
  * Web version: the screen must stay on (use 🌑 dark screen); with the screen off it will work in the app (Capacitor).
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const st = () => Store.settings;
   const MIC = (s = 20, on = false) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="${on ? '#22c55e' : 'none'}" stroke="${on ? '#22c55e' : 'currentColor'}" stroke-width="1.9"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5" stroke="${on ? '#22c55e' : 'currentColor'}" stroke-width="1.9" stroke-linecap="round"/></svg>`;
   const RESUME_WORDS = /^(продолж|дальше|fortsett|fortsette|videre|continue|далее|поехали)/i;
@@ -31,7 +32,7 @@
     return { text: String(j.text || '').trim(), lang: String(j.language || '').toLowerCase() };
   }
   /** speak and wait until done (foreground voice is fine here: the screen is on) */
-  function say(text, lang) { return TTS.speak(text, lang, { keep: false }); }
+  function say(text, lang) { return TTS.speak(text, lang, { keep: false, place: 'interpreter' }); }
 
   const Interp = {
     MIC, on: false, busy: false, log: [],
@@ -47,6 +48,7 @@
         <div class="setting"><div><div>Продолжать прослушивание через</div><div class="desc">секунд тишины после перевода (0 — только по команде «продолжить»)</div></div><div class="ctl"><input class="input" type="number" min="0" max="60" data-num="interpResume" value="${o.resume}" style="width:80px"></div></div>
         <div class="setting"><div><div>Подсказывать ответы</div><div class="desc">2 коротких варианта ответа по-норвежски</div></div><div class="ctl">${UI.switchHtml('interpReplies', o.replies)}</div></div>
         <div class="setting"><div><div>Проговаривать подсказку ответа</div><div class="desc">«Можно ответить: Ja, jeg skal gjøre det»</div></div><div class="ctl">${UI.switchHtml('interpSpeak', o.speakReply)}</div></div>
+        ${window.Voices && Voices.openChooser ? `<div class="setting"><div><div>Голос переводчика</div><div class="desc">Свой голос для перевода в наушниках — или как везде</div></div><div class="ctl">${Voices.langButtons('interpreter')}</div></div>` : ''}
         <div class="tiny muted">В веб-версии экран должен оставаться включённым (включите 🌑 тёмный экран). С выключенным экраном переводчик заработает в приложении для iPhone / Android.</div>`;
     },
 
@@ -128,7 +130,7 @@
         try {
           const r = await transcribe(blob);
           await this.handle(r.text, r.lang);
-        } catch (e) { this.status('⚠️ ' + e.message); }
+        } catch (e) { this.status('⚠️ ' + U.niceErr(e)); }
         this.busy = false;
       };
       rec.stop();
@@ -147,7 +149,7 @@
         const tr = String(res[0].transcript || '').trim(), conf = res[0].confidence;
         if (/^[{[(<].*[}\])>]$/.test(tr) || (conf > 0 && conf < 0.45) || (tr.split(/\s+/).length < 2 && tr.length < 5)) return;
         this.busy = true;
-        try { await this.handle(res[0].transcript.trim(), ''); } catch (err) { this.status('⚠️ ' + err.message); }
+        try { await this.handle(res[0].transcript.trim(), ''); } catch (err) { this.status('⚠️ ' + U.niceErr(err)); }
         this.busy = false;
       };
       sr.onerror = e => { if (e.error === 'not-allowed') { UI.toast('Нет доступа к микрофону', 'bad'); this.stopListening(); } };
@@ -223,7 +225,7 @@
       const ai = typeof AI !== 'undefined' && AI.available();
       b.classList.toggle('ai', ai);
       b.innerHTML = ai
-        ? `<span>🤖</span><span>Переводит нейросеть <b>${U.esc(AI.PROVIDERS[AI.current()].short)}</b> — по смыслу, с подсказками ответа</span><span class="tr-who-go">сменить</span>`
+        ? `<span>${BOT(20)}</span><span>Переводит нейросеть <b>${U.esc(AI.PROVIDERS[AI.current()].short)}</b> — по смыслу, с подсказками ответа</span><span class="tr-who-go">сменить</span>`
         : '<span>🌐</span><span>Переводит бесплатный переводчик — без подсказок ответа, может ошибаться</span><span class="tr-who-go">⚡ Точнее с нейросетью</span>';
       b.onclick = () => { if (window.TrNotice) { const m = TrNotice.open(); if (m && m.el) { const once = () => this.whoLine(p); const t = setInterval(() => { if (!m.el.isConnected) { clearInterval(t); once(); } }, 500); } } };
     },
@@ -251,16 +253,17 @@
             <button class="icon-btn sm" data-ip="min" title="Свернуть">▾</button><button class="icon-btn sm" data-ip="off" title="Выключить переводчик">✕</button></div>
           <div class="small" data-ips></div>
           <div class="tiny muted ip-what">🎙 Это переводчик для <b>живого разговора</b>: микрофон слушает людей рядом и переводит в наушники. Чтобы <b>слушать карточки</b> — кнопка «🎧 Слушать колоду» слева или 🎧 вверху (переводчик тогда сам поставит их на паузу, если к вам обратятся). Не нужен — ✕.</div>
-          <button type="button" class="tr-who ip-who" data-ipwho></button>
+          <span class="ip-trb" data-iptrb></span>
           <div class="ip-log" data-iplog></div>
           <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-ip="resume">▶ Продолжить прослушивание</button><button class="btn sm" data-ip="dark">🌑 Тёмный экран</button><button class="btn sm ghost" data-ip="save">➕ Фразы в колоду</button>${Listen.hereBtn('.ip-log', 'Разговор', 'Прослушать разговор')}</div>`;
         p.addEventListener('click', e => {
-          const a = e.target.closest('[data-ip]'); if (!a) { const s = e.target.closest('[data-say]'); if (s) TTS.speak(s.dataset.say, s.dataset.lang || 'no'); return; }
+          const a = e.target.closest('[data-ip]'); if (!a) { const s = e.target.closest('[data-say]'); if (s) TTS.speak(s.dataset.say, s.dataset.lang || 'no', { place: 'interpreter' }); return; }
           ({ off: () => this.offAsk(), min: () => p.classList.toggle('min'), resume: () => this.resumeMedia(true), dark: () => Listen.dark(true), save: () => this.saveToDeck() })[a.dataset.ip]();
         });
         document.body.appendChild(p);
+        if (window.TrBadge) TrBadge.mount(p.querySelector('[data-iptrb]'), { place: 'interpreter' }); // 🌐 who translates now
       }
-      this.whoLine(p);
+      this.whoLine(p); // (no-op now: the shared «кто переводит» badge replaced the old line)
       this.renderLog();
     },
     renderLog() {

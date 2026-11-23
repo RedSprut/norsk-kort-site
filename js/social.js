@@ -156,7 +156,7 @@
               <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm primary" data-play="${i}">▶ Слушать с этой фразы</button><button class="btn sm ai" data-pcard="${i}">➕ В карточку</button></div><div data-pl="${i}"></div></div>`).join('')
             : `<div class="small muted">В расшифровках «${U.esc(q)}» не встретилось. Попробуйте другую форму слова.</div>`)
             + (others.length ? `<h3 style="margin:14px 0 6px">Другие подкасты</h3>${others.map(x => `<div class="tg-post"><div class="tg-post-head">${x.flag} <b>${U.esc(x.name)}</b> · ${U.esc(x.title)}</div><div class="small muted">${U.esc(x.desc.slice(0, 200))}</div>${x.audio ? `<audio controls preload="none" src="${U.esc(x.audio)}"></audio>` : ''}</div>`).join('')}` : '');
-        } catch (e) { res.innerHTML = `<div class="mt-warn">⚠️ <span>Подкаст не загрузился: ${U.esc(e.message)}</span></div>`; }
+        } catch (e) { res.innerHTML = `<div class="mt-warn">⚠️ <span>Подкаст не загрузился: ${U.esc(U.niceErr(e, '', true))}</span></div>`; }
       };
       el.addEventListener('click', e => {
         if (e.target.closest('[data-pgo]')) { run(); return; }
@@ -195,7 +195,7 @@
           const res = el.querySelector('[data-vres]');
           res.innerHTML = '<span class="spinner sm"></span>';
           const all = [];
-          for (const [g, n] of groups) { try { (await vkSearch(g, q)).forEach(p => all.push(Object.assign({ n }, p))); } catch (err) { all.push({ n, error: err.message }); } }
+          for (const [g, n] of groups) { try { (await vkSearch(g, q)).forEach(p => all.push(Object.assign({ n }, p))); } catch (err) { all.push({ n, error: U.niceErr(err) }); } }
           this._vk = all.filter(p => !p.error);
           res.innerHTML = this._vk.length ? this._vk.map((p, i) => `<div class="tg-post"><div class="tg-post-head">🟦 <b>${U.esc(p.n)}</b><span class="small muted">${new Date(p.date).toLocaleDateString('ru-RU')}</span><span class="grow"></span><a class="small" href="${U.esc(p.link)}" target="_blank" rel="noopener">↗</a></div>
               <div class="tg-text">${UI.rich(p.text)}</div>${p.photos.length ? `<div class="tg-photos">${p.photos.slice(0, 4).map(u => `<img src="${U.esc(u)}" alt="">`).join('')}</div>` : ''}

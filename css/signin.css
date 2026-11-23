@@ -1,0 +1,173 @@
+/* ============ ☁️ optional sign-in sheet (js/signin.js) ============
+ * Full-bleed collage of the app's own pictures, dimmed, drifting slowly (the `translate` property, never `transform`);
+ * the logo, the promise and the buttons on a dark glass panel. Phone: the panel sits at the bottom, the collage shows above.
+ * prefers-reduced-motion → the collage stands still. */
+.si-bd {
+  --si-ink: #f5f6ff; --si-mut: rgba(232, 234, 255, .74); --si-line: rgba(255, 255, 255, .14);
+  position: fixed; inset: 0; z-index: 120; padding: 0; display: grid; place-items: center; overflow: hidden;
+  background: #070816; backdrop-filter: none; color: var(--si-ink); animation: fadeIn .3s;
+}
+.si-bd.closing { animation: fadeOut .2s forwards; }
+html.si-open { overflow: hidden; }
+
+/* --- the collage --- */
+.si-collage { position: absolute; inset: -12% -8%; pointer-events: none; rotate: -7deg; scale: 1.08; }
+.si-cols { --si-gap: 16px; display: flex; gap: var(--si-gap); height: 100%; justify-content: center; }
+.si-col { flex: 0 0 210px; overflow: visible; }
+.si-track { display: flex; flex-direction: column; gap: var(--si-gap); animation: siDrift var(--si-dur, 100s) linear infinite; animation-delay: var(--si-delay, 0s); will-change: translate; }
+.si-col.rev .si-track { animation-direction: reverse; }
+@keyframes siDrift { from { translate: 0 0; } to { translate: 0 calc(-50% - var(--si-gap) / 2); } }
+.si-tile { position: relative; margin: 0; border-radius: 20px; overflow: hidden; flex: 0 0 auto; background: #1a1d3a;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .7), inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.si-ph { aspect-ratio: 3 / 4; }
+.si-ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.si-ph figcaption { position: absolute; inset: auto 0 0; padding: 40px 12px 14px; text-align: center; display: grid; gap: 2px;
+  background: linear-gradient(transparent, rgba(4, 6, 20, .78)); }
+.si-ph b { font: 800 22px/1.1 var(--font); color: #fff; letter-spacing: -.01em; }
+.si-ph i { font: 600 13px/1.2 var(--font); font-style: normal; color: #9fe3ff; }
+.si-art { aspect-ratio: 3 / 4; }
+.si-art .ac-card { position: absolute; inset: 0; border-radius: inherit; }
+.si-art .ac-tools, .si-art .ac-i, .si-art .aim-art, .si-art .ac-pic { display: none !important; }
+.si-sc { aspect-ratio: 9 / 7; background: #f2e2d0; }
+.si-sc svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.si-bub { position: absolute; left: 10px; right: 10px; top: 10px; padding: 7px 10px; border-radius: 14px; background: #fff; color: #1d2140;
+  font: 700 13px/1.25 var(--font); text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .18); }
+.si-shade { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 70% at 50% 52%, rgba(7, 8, 22, .9) 0%, rgba(7, 8, 22, .7) 45%, rgba(7, 8, 22, .42) 100%); }
+
+/* --- the panel --- */
+.si-panel { position: relative; z-index: 1; width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto;
+  padding: 30px 28px 18px; border-radius: 28px; text-align: center;
+  background: rgba(14, 16, 36, .72); border: 1px solid var(--si-line); backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .8); animation: siUp .35s cubic-bezier(.2, .8, .2, 1); }
+@keyframes siUp { from { opacity: 0; translate: 0 18px; } }
+.si-brand { display: inline-flex; align-items: center; gap: 10px; font: 800 20px/1 var(--font); letter-spacing: -.01em; }
+.si-brand img { width: 44px; height: 44px; border-radius: 12px; }
+.si-brand b { background: linear-gradient(90deg, #a99dff, #29c7ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.si-panel h2 { margin: 18px 0 8px; font: 800 clamp(24px, 3.2vw, 30px)/1.15 var(--font); letter-spacing: -.02em; color: var(--si-ink); text-wrap: balance; }
+.si-sub { margin: 0 auto 20px; max-width: 34ch; color: var(--si-mut); font-size: 15px; line-height: 1.45; }
+.si-body { text-align: left; }
+.si-acts { display: grid; gap: 10px; }
+
+/* buttons: ≥ 52 px */
+.si-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 14px;
+  font: 600 16px/1.2 var(--font); cursor: pointer; border: 1px solid transparent; transition: background-color .15s, filter .15s, box-shadow .15s, translate .15s; }
+.si-btn:focus-visible, .si-txt:focus-visible, .si-x:focus-visible, .si-later:focus-visible, .si-in:focus-visible { outline: 3px solid #9fe3ff; outline-offset: 2px; }
+.si-btn:disabled { opacity: .6; cursor: progress; }
+.si-mail { background: linear-gradient(135deg, #7c6cff, #4f8dff); color: #fff; box-shadow: 0 10px 24px -12px #7c6cff; }
+.si-mail:hover:not(:disabled) { filter: brightness(1.1); translate: 0 -1px; }
+.si-ghost { background: rgba(255, 255, 255, .06); color: var(--si-ink); border-color: var(--si-line); }
+.si-ghost:hover { background: rgba(255, 255, 255, .12); }
+/* Google — «light» theme: white fill, #747775 stroke, #1F1F1F text, the standard four-colour G */
+.si-google, .si-applebtn { gap: 10px; } /* the brand buttons keep their own logo spacing */
+.si-google { background: #fff; color: #1f1f1f; border-color: #747775; font-family: Roboto, var(--font); font-weight: 500; }
+.si-google:hover:not(:disabled) { background: #f2f2f2; box-shadow: 0 1px 3px rgba(60, 64, 67, .3); }
+/* Apple — «white» style on a dark background: white fill, black logo and title */
+.si-applebtn { background: #fff; color: #000; border-color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font); font-weight: 600; }
+.si-applebtn:hover:not(:disabled) { background: #ececec; }
+.si-applebtn .si-apple { width: 19px; height: 19px; margin-top: -3px; }
+.si-or { display: flex; align-items: center; gap: 12px; margin: 4px 0; color: var(--si-mut); font-size: 13px; }
+.si-or::before, .si-or::after { content: ''; flex: 1; height: 1px; background: var(--si-line); }
+.si-more { display: flex; justify-content: center; align-items: center; gap: 4px; color: var(--si-mut); }
+.si-txt { min-height: 44px; padding: 0 10px; border: 0; background: none; color: #b9b2ff; font: 600 14px/1.2 var(--font); cursor: pointer; border-radius: 10px; }
+.si-txt:hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, .08); }
+.si-txt:disabled { color: var(--si-mut); cursor: default; opacity: .8; }
+.si-later { display: block; margin: 14px auto 0; min-height: 44px; min-width: 140px; padding: 0 18px; border: 0; border-radius: 12px; background: none;
+  color: var(--si-mut); font: 600 15px/1 var(--font); cursor: pointer; }
+.si-later:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.si-x { position: absolute; z-index: 2; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--si-line); background: rgba(14, 16, 36, .6); color: #fff; font-size: 18px; cursor: pointer; backdrop-filter: blur(8px);
+  display: grid; place-items: center; padding: 0; }
+.si-x:hover { background: rgba(255, 255, 255, .16); }
+
+.si-legal, .si-note { margin: 14px 2px 0; color: var(--si-mut); font-size: 12.5px; line-height: 1.45; text-align: center; }
+.si-note { color: #ffd98a; }
+.si-wait { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; color: var(--si-mut); }
+.si-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .2); border-top-color: #9fe3ff; animation: siSpin .8s linear infinite; }
+@keyframes siSpin { to { rotate: 1turn; } }
+
+/* e-mail / code */
+.si-form { display: grid; gap: 8px; }
+.si-lab { font-size: 13px; font-weight: 600; color: var(--si-mut); margin-top: 2px; }
+.si-in { width: 100%; min-height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--si-line); background: rgba(255, 255, 255, .07); color: #fff; font: 500 16px var(--font); }
+.si-in::placeholder { color: rgba(232, 234, 255, .4); }
+.si-in:hover { border-color: rgba(255, 255, 255, .3); }
+.si-in[aria-invalid="true"] { border-color: #ff8a8a; }
+.si-code { text-align: center; letter-spacing: .4em; font-size: 22px; font-weight: 700; }
+.si-form .si-btn { margin-top: 6px; }
+.si-row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+.si-sent { margin: 0 0 4px; color: var(--si-ink); font-size: 14.5px; line-height: 1.45; }
+
+/* no cloud yet: the row is ready, but switched off */
+.si-soon { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 12px 12px 14px; border-radius: 16px;
+  border: 1px dashed rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .03); }
+.si-soon-i { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(159, 227, 255, .12); color: #9fe3ff; }
+.si-soon-t { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.si-soon-t b { font-size: 14.5px; }
+.si-soon-t small { color: var(--si-mut); font-size: 12.5px; line-height: 1.35; }
+.si-soon-b { flex: 0 0 auto; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--si-line); background: transparent; color: var(--si-mut); font: 600 14px var(--font); cursor: not-allowed; }
+
+/* phone: collage on top, the panel as a bottom sheet */
+@media (max-width: 600px) {
+  .si-bd { place-items: end center; }
+  .si-collage { inset: -6% -30% 30%; rotate: -6deg; }
+  .si-cols { --si-gap: 10px; }
+  .si-col { flex-basis: 138px; }
+  .si-tile { border-radius: 16px; }
+  .si-ph b { font-size: 17px; } .si-ph i { font-size: 11.5px; }
+  .si-bub { font-size: 11px; padding: 5px 8px; }
+  .si-shade { background: linear-gradient(rgba(7, 8, 22, .25) 0%, rgba(7, 8, 22, .55) 30%, rgba(7, 8, 22, .96) 52%, #070816 100%); }
+  .si-panel { width: 100%; max-height: 82dvh; border-radius: 28px 28px 0 0; border-width: 1px 0 0; padding: 24px 18px max(14px, env(safe-area-inset-bottom));
+    background: rgba(10, 12, 28, .55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .si-panel h2 { margin-top: 14px; font-size: 25px; }
+  .si-sub { font-size: 14.5px; margin-bottom: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .si-track, .si-panel, .si-bd, .si-spin { animation: none !important; }
+  .si-btn { transition: none; }
+  .si-mail:hover:not(:disabled) { translate: none; }
+}
+
+/* «👤 Мой кабинет»: the account card */
+.acc-cloud h3 { margin-bottom: 8px; }
+.acc-free { margin: 0 0 12px; line-height: 1.5; }
+.acc-cloud-acts { gap: 8px; flex-wrap: wrap; }
+.acc-cloud-acts .btn { min-height: 44px; }
+
+/* ☁️ sync between devices (js/cloudsync.js): status, «what syncs / what never leaves», the first-sync choice */
+.acc-who { gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.acc-who .btn, .acc-who .btn.sm { min-height: 44px; }
+.acc-sync-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 4px 0 12px; }
+.acc-sync-row .btn { min-height: 44px; }
+.cs-status { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 5px 12px; border-radius: 999px;
+  font-size: 13.5px; line-height: 1.3; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); max-width: 100%; }
+.cs-status .cs-ico { flex: none; display: grid; place-items: center; width: 16px; height: 16px; }
+.cs-status .cs-ico .ui-ico { display: block; translate: none; }
+.cs-status.cs-ok { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.cs-status.cs-ok .cs-ico { color: var(--good); }
+.cs-status.cs-offline, .cs-status.cs-wait, .cs-status.cs-ask { border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+.cs-status.cs-error, .cs-status.cs-setup, .cs-status.cs-auth { border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.cs-status.cs-sync .cs-ico { animation: csSpin 1.2s linear infinite; }
+@keyframes csSpin { to { rotate: 1turn; } }
+.acc-sync-what { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.acc-sw { border: 1px solid var(--panel-border); border-radius: 14px; padding: 12px 14px; background: var(--panel); }
+.acc-sw > b { display: flex; margin-bottom: 6px; font-size: 14px; }
+.acc-sw ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.acc-sw li + li { margin-top: 3px; }
+.cs-first-p { margin: 0 0 12px; line-height: 1.5; }
+.cs-opts { display: flex; flex-direction: column; gap: 10px; }
+.cs-opt { display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 12px 14px; text-align: left;
+  border-radius: 14px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }
+.cs-opt > .ui-ico { translate: none; }
+.cs-opt-t { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.cs-opt b { font-size: 15px; }
+/* «Мой кабинет»: the signed-in line, the personal-decks note — a drawn icon + words */
+.acc-in { flex-wrap: nowrap; max-width: 100%; }
+.acc-in > span { overflow-wrap: anywhere; }
+.acc-pers { display: flex; align-items: center; gap: 8px; }
+.acc-pers .ui-ico { translate: none; }
+.cs-opt small { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.cs-opt:hover, .cs-opt:focus-visible { border-color: var(--accent); }
+.cs-opt.rec { border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+@media (prefers-reduced-motion: reduce) { .cs-status.cs-sync .cs-ico { animation: none; } }
+.modal-foot [data-out] { min-height: 44px; } /* «Выйти?» — the sign-out choices */

@@ -522,3 +522,8 @@ body:has(.np-modal) #listen-bar { display: none !important; }
 .np-modal .modal-head .np-x { width: 40px; height: 40px; border-radius: 50%; margin-left: 6px; flex: none; }
 .np-modal .modal-head .np-x:hover { color: var(--bad, #ef4444); }
 .np-ask { margin: 0; color: var(--muted); }
+
+/* 🎙 voice commands: the language of the commands (🇷🇺 / 🇺🇦) */
+.lxv-lang { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 8px; }
+.lxv-lang .seg button { min-height: 44px; padding: 8px 14px; }
+.lxv-lang .seg button:not(.active):hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); color: var(--text); }

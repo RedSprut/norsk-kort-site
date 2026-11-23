@@ -267,6 +267,7 @@
             <button class="np-pill" data-np="loop" title="Когда закончится — заново">${ico('loop', 16)} По кругу</button>
             <button class="np-pill np-darkpill" data-np="dark" title="Чёрный экран, заблокированный от касаний — для кармана">🌑 Тёмный экран</button>
             <button class="np-pill" data-lx="where" title="Где слушать: в наушниках или через динамик">🔈 Где слушать?</button>
+            ${window.Voices && Voices.openChooser ? Voices.LANGS.map(l => `<button class="np-pill" data-voices-open="${l}" data-voices-place="listen" title="${Voices.LANG_NAME[l]} голос для «Слушать» — свой или как везде">${Voices.FLAG[l]} ${Voices.LANG_NAME[l]} голос</button>`).join('') : ''}
             ${X ? '<button class="np-pill" data-lx="voice" title="Команды голосом: тише, громче, пауза, дальше, знаю…">🎙 Голос</button>' : ''}
           </div>
           <div class="np-opts">

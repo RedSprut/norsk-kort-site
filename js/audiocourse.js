@@ -32,7 +32,11 @@
   const bridgeUp = () => !!(window.AI && AI.bridge && AI.bridge.up);
   const AUDIO_RE = /\.(mp3|m4a|aac|ogg|oga|opus|wav|flac)$/i;
   const MIME = n => (/\.m4a$|\.aac$/i.test(n) ? 'audio/mp4' : /\.og[ga]$|\.opus$/i.test(n) ? 'audio/ogg' : /\.wav$/i.test(n) ? 'audio/wav' : /\.flac$/i.test(n) ? 'audio/flac' : 'audio/mpeg');
-  const NEED_BRIDGE = 'Сайт 50languages не даёт браузеру загрузить курс напрямую. Запустите мост на Mac (в Терминале: python3 …/bridge/server.py) и нажмите ещё раз. Или скачайте архив с сайта и добавьте его кнопкой «📂 У меня уже скачано».';
+  // the app runs on this Mac itself: only here do hints with the Terminal command make sense (not for site visitors)
+  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  const NEED_BRIDGE_MAC = 'Сайт 50languages не даёт браузеру загрузить курс напрямую. Запустите мост на Mac (в Терминале: python3 …/bridge/server.py) и нажмите ещё раз. Или скачайте архив с сайта и добавьте его кнопкой «📂 У меня уже скачано».';
+  const NEED_BRIDGE_SITE = 'Сайт 50languages не даёт браузеру загрузить курс напрямую. Скачайте архив с сайта курса (кнопка «⬇ Скачать файл» в «📚 Книгах») и добавьте его сюда кнопкой «📂 У меня уже скачано» — уроки будут играть без интернета.';
+  const needBridge = () => (onMac() ? NEED_BRIDGE_MAC : NEED_BRIDGE_SITE);
   const RESTART = 'Мост на Mac нужно перезапустить — в нём новая функция: в окне Терминала, где он запущен, нажмите Ctrl+C и снова запустите python3 …/bridge/server.py. Потом нажмите «Загрузить» ещё раз.';
   const LICENCE = 'Источник: 50languages / Goethe Verlag — бесплатно для личного использования';
 
@@ -215,7 +219,7 @@
       noCors.add(host);
     }
     if (!bridgeUp() && window.AI && AI.detectBridge && /^https?:$/.test(location.protocol)) { try { await AI.detectBridge(); } catch (e) { /* ignore */ } }
-    if (!bridgeUp()) throw friendly(NEED_BRIDGE, { needBridge: true });
+    if (!bridgeUp()) throw friendly(needBridge(), { needBridge: true });
     let r;
     try {
       r = await fetch('/api/proxy', { method: 'POST', headers: { 'content-type': 'application/json' }, signal,
@@ -592,13 +596,42 @@
     emit();
     return true;
   }
+  /** 📺 without the Mac bridge (the public site, or the bridge is off): the lessons live on this device (Cache Storage),
+   *  a TV cannot fetch them by itself — so the ways that send the SOUND of this device: AirPlay, Bluetooth, mirroring */
+  function castNoBridge(cid) {
+    const ua = navigator.userAgent;
+    const iOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const mac = /Macintosh/.test(ua) && !iOS, android = /Android/.test(ua);
+    const chrome = /Chrome|Edg/.test(ua) && !/OPR|SamsungBrowser|CriOS/.test(ua);
+    const airplay = !!(window.HTMLMediaElement && 'webkitShowPlaybackTargetPicker' in HTMLMediaElement.prototype);
+    const way = (ic, h, t, btn = '') => `<div class="ac-way"><span class="ac-way-ic" aria-hidden="true">${ic}</span><div class="ac-way-t"><b>${h}</b><small>${t}</small>${btn}</div></div>`;
+    const ways = [];
+    if (airplay) ways.push(way('◎', 'AirPlay — Apple TV, телевизор или колонка с AirPlay', 'Включите урок и нажмите кнопку — появится список устройств.', '<button type="button" class="btn primary" data-acn-airplay>◎ Выбрать AirPlay</button>'));
+    ways.push(way('🔈', 'Колонка Bluetooth или наушники', 'Подключите их в настройках Bluetooth этого устройства — урок зазвучит там.', '<button type="button" class="btn" data-lx="where">🔈 Где слушать</button>'));
+    if (iOS) ways.push(way('📱', 'Повтор экрана на телевизор', 'Пункт управления (смахните вниз от правого верхнего угла) → <b>Повтор экрана</b> → телевизор с AirPlay. Звук урока пойдёт на телевизор.'));
+    if (mac) ways.push(way('🍎', 'Mac → телевизор или колонка с AirPlay', 'Пункт управления в строке меню → <b>Звук</b> (или <b>Повтор экрана</b>) → выберите телевизор или колонку.'));
+    if (android) ways.push(way('🤖', 'Трансляция экрана на телевизор', 'Быстрые настройки (смахните сверху вниз) → <b>Трансляция экрана</b> (или «Smart View» на Samsung) → выберите телевизор. Звук урока пойдёт тоже.'));
+    if (chrome && !android) ways.push(way('🖥', 'Chrome → телевизор с Chromecast', 'Меню Chrome <b>⋮</b> → <b>Трансляция, сохранение и отправка</b> → <b>Трансляция…</b> → источник <b>«Транслировать вкладку»</b> → телевизор. Звук этой вкладки пойдёт на телевизор.'));
+    if (!iOS && !android) ways.push(way('🔌', 'Кабель HDMI', 'Компьютер, подключённый к телевизору кабелем, сразу играет звук через телевизор.'));
+    const m = UI.modal({ title: `${TV(22)} На телевизор или колонку`, cls: 'ac-cast-modal',
+      body: `<p class="ac-msg">Уроки хранятся <b>прямо на этом устройстве</b>, поэтому телевизор сам их открыть не может. Но слушать на телевизоре или колонке можно — звук пойдёт отсюда:</p>
+        <div class="ac-ways">${ways.join('')}</div>` });
+    m.el.addEventListener('click', e => {
+      if (e.target.closest('[data-lx]')) { m.close(); return; } // «Где слушать» opens its own window (js/listenx.js)
+      if (!e.target.closest('[data-acn-airplay]')) return;
+      const p = window.Listen && Listen.p, a = p && ours(p) ? p.audio : null;
+      if (!a) { m.close(); play(cid); setTimeout(() => UI.toast('Урок играет — теперь нажмите «◎ AirPlay» и выберите устройство', '', 5000), 300); return; }
+      try { a.setAttribute('x-webkit-airplay', 'allow'); a.webkitShowPlaybackTargetPicker(); m.close(); } catch (err) { UI.toast('AirPlay сейчас недоступен — выберите устройство в Пункте управления', 'warn', 5000); }
+    });
+  }
   /** 📺 the list of TVs and Google speakers; picking one plays the current / chosen lesson there */
   function castPick(cid) {
+    if (!bridgeUp()) { castNoBridge(cid); return; }
     const m = UI.modal({ title: `${TV(22)} На телевизор или колонку`, cls: 'ac-cast-modal',
       body: `<p class="small muted">Телевизор с Chromecast, Android TV / Google TV или колонка Google Home — в той же Wi-Fi сети, что и этот Mac. Урок передаётся с Mac, поэтому мост должен быть запущен.</p><div data-acc></div>` });
     const box = m.$('[data-acc]');
     const load = async () => {
-      if (!bridgeUp()) { box.innerHTML = `<div class="mt-warn">ℹ️ <span>Для телевизора нужен мост на Mac: запустите его (python3 …/bridge/server.py) и откройте это окно снова. На iPhone и в Safari можно и без моста — кнопка «AirPlay».</span></div>`; return; }
+      if (!bridgeUp()) { m.close(); castNoBridge(cid); return; } // the bridge went away meanwhile
       box.innerHTML = '<div class="ac-msg"><span class="spinner sm"></span> Ищу телевизоры и колонки в вашей сети…</div>';
       try {
         const list = (await castApi('devices', { timeout: 7, audio: true })).devices || [];
@@ -753,7 +786,7 @@
     const outRow = `<div class="ac-out">
         <button type="button" class="btn sm ghost" data-lx="where" title="Наушники, динамик, колонка — куда идёт звук">🔈 Где слушать</button>
         ${airplay ? '<button type="button" class="btn sm ghost" data-ac-airplay title="Слушать на колонке или телевизоре AirPlay">◎ AirPlay</button>' : ''}
-        <button type="button" class="btn sm ghost" data-ac-cast="${esc(cid)}" title="Слушать на телевизоре или колонке Google (через мост на Mac)">${TV(16)} На телевизор</button>
+        <button type="button" class="btn sm ghost" data-ac-cast="${esc(cid)}" title="${bridgeUp() ? 'Слушать на телевизоре или колонке Google (через мост на Mac)' : 'Слушать на телевизоре или колонке'}">${TV(16)} На телевизор</button>
       </div>`;
     if (cast && cast.cid === cid) {
       const L = stored(cid), x = L[cast.idx] || {};

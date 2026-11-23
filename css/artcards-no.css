@@ -1,0 +1,65 @@
+/* ============ 🇳🇴 Norway art-card templates (js/artcards-no.js) — load after css/artcards.css ============
+ * The pictures and corner ornaments come from js/artcards-no.js (a generated <style id="acno-vars">, our own SVG).
+ * This file: frames, the elk sign, the album look of «Старая Норвегия» (black-and-white photos, grain, photo corners),
+ * readable labels on the studio buttons. Nothing here moves — no extra motion to switch off.
+ */
+
+/* studio buttons with a picture: a stronger shade so the white name stays readable on light pictures */
+.ac-thb:is([data-v="troll"], [data-v="skog"], [data-v="viking"], [data-v="stavkirke"], [data-v="fjellhytte"], [data-v="elg"], [data-v="midnattsol"], [data-v="polarnatt"], [data-v="lofoten"], [data-v="frokost"], [data-v="kongelig"], [data-v="gammel"])::after {
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.3) 55%, rgba(0,0,0,.5));
+}
+
+/* 🧌 Тролли — a thin double frame like an old book illustration */
+:is(.ac-th-troll .ac-card, .ac-card.ac-th-troll) { outline: 1.5px solid rgba(255, 222, 160, .55); outline-offset: -8px; }
+:is(.ac-th-troll .ac-card, .ac-card.ac-th-troll)::before, :is(.ac-th-troll .ac-card, .ac-card.ac-th-troll)::after { width: 26%; }
+
+/* 🍄 Лес и грибы · 🏡 Хютте — the spruce bough hangs from the corners */
+:is(.ac-th-skog .ac-card, .ac-card.ac-th-skog)::before, :is(.ac-th-skog .ac-card, .ac-card.ac-th-skog)::after,
+:is(.ac-th-fjellhytte .ac-card, .ac-card.ac-th-fjellhytte)::before, :is(.ac-th-fjellhytte .ac-card, .ac-card.ac-th-fjellhytte)::after { width: 30%; }
+
+/* ⛵ Викинги — iron rim, shields in the corners */
+:is(.ac-th-viking .ac-card, .ac-card.ac-th-viking) { outline: 2px solid rgba(138, 152, 158, .55); outline-offset: -6px; }
+:is(.ac-th-viking .ac-card, .ac-card.ac-th-viking)::before, :is(.ac-th-viking .ac-card, .ac-card.ac-th-viking)::after { width: 22%; top: 2%; }
+:is(.ac-th-viking .ac-card, .ac-card.ac-th-viking)::before { left: 2%; }
+:is(.ac-th-viking .ac-card, .ac-card.ac-th-viking)::after { right: 2%; }
+
+/* ⛪ Ставкирка — carved dragon heads facing each other */
+:is(.ac-th-stavkirke .ac-card, .ac-card.ac-th-stavkirke)::before, :is(.ac-th-stavkirke .ac-card, .ac-card.ac-th-stavkirke)::after { width: 30%; }
+
+/* 🫎 Лось — one road sign, not two */
+:is(.ac-th-elg .ac-card, .ac-card.ac-th-elg)::before { width: 22%; top: 3%; left: 3%; }
+:is(.ac-th-elg .ac-card, .ac-card.ac-th-elg)::after { display: none; }
+
+/* 🌞 / 🌌 */
+:is(.ac-th-midnattsol .ac-card, .ac-card.ac-th-midnattsol)::before, :is(.ac-th-midnattsol .ac-card, .ac-card.ac-th-midnattsol)::after { width: 28%; }
+:is(.ac-th-polarnatt .ac-card, .ac-card.ac-th-polarnatt)::before, :is(.ac-th-polarnatt .ac-card, .ac-card.ac-th-polarnatt)::after { width: 24%; }
+:is(.ac-th-polarnatt .ac-card, .ac-card.ac-th-polarnatt)::after { transform: none; right: 2%; top: 6%; width: 14%; opacity: .7; }
+
+/* 🐟 Лофотены — the drying rack along the top */
+:is(.ac-th-lofoten .ac-card, .ac-card.ac-th-lofoten)::before, :is(.ac-th-lofoten .ac-card, .ac-card.ac-th-lofoten)::after { width: 34%; }
+
+/* 🧇 Норвежский завтрак — a waffle on the left, coffee on the right (not mirrored) */
+:is(.ac-th-frokost .ac-card, .ac-card.ac-th-frokost)::before, :is(.ac-th-frokost .ac-card, .ac-card.ac-th-frokost)::after { width: 24%; top: 2%; }
+:is(.ac-th-frokost .ac-card, .ac-card.ac-th-frokost)::before { left: 2%; }
+:is(.ac-th-frokost .ac-card, .ac-card.ac-th-frokost)::after { background-image: var(--acno-orn2, var(--ac-orn)); transform: none; right: 2%; }
+:is(.ac-th-frokost .ac-card, .ac-card.ac-th-frokost) { --ac-radius: 26px; }
+
+/* 👑 Королевская Норвегия — a gold ceremonial frame inside the accent ring */
+:is(.ac-th-kongelig .ac-card, .ac-card.ac-th-kongelig) { outline: 1.5px solid rgba(240, 207, 116, .75); outline-offset: -10px; }
+:is(.ac-th-kongelig .ac-card, .ac-card.ac-th-kongelig)::before, :is(.ac-th-kongelig .ac-card, .ac-card.ac-th-kongelig)::after { width: 26%; }
+
+/* 📷 Старая Норвегия — an old album: the photo turns black-and-white / sepia by itself, white photo border, grain */
+.ac-th-gammel { --ac-grade: grayscale(1) sepia(.55) contrast(1.12) brightness(.94) !important; }
+.ac-th-gammel .ac-tint {
+  opacity: .55; mix-blend-mode: multiply;
+  background: radial-gradient(120% 95% at 50% 45%, transparent 55%, rgba(58, 46, 30, .55) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .18 0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel) { --ac-radius: 6px; background: var(--ac-paper); }
+:is(.ac-th-gammel.ac-lay-paper .ac-card, .ac-card.ac-th-gammel.ac-lay-paper) { padding: 8px; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--g) 70%, transparent), 0 14px 30px -18px rgba(40, 30, 15, .55); }
+:is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel) .ac-media { border: 5px solid #f6efdf; border-radius: 3px; box-shadow: 0 1px 4px rgba(40, 30, 15, .35); }
+:is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel)::before, :is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel)::after { width: 16%; top: 3px; filter: none; opacity: 1; }
+:is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel)::before { left: 3px; }
+:is(.ac-th-gammel .ac-card, .ac-card.ac-th-gammel)::after { right: 3px; }
+.ac-th-gammel .ac-letter { color: rgba(255, 250, 235, .7); }
+.ac-th-gammel .ac-word { letter-spacing: calc(var(--ac-track) + .01em); }

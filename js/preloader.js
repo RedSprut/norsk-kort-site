@@ -6,7 +6,7 @@
  *    photo flashcards (fjords, Lofoten, hytte, nordlys, Bryggen…) + the app's feature badges swirl in from every side
  *    → a mini «video» plays a Norwegian subtitle line, karaoke-highlighted, with the Russian word under each word
  *    → everything is pulled into one deck → the deck fans out like a hand of cards → a graduation cap drops on it
- *    → «Norsk Kort» 🇳🇴⇄🇷🇺 → fade + zoom into the app.
+ *    → «Norsk Kort» 🇳🇴⇄🇺🇦🇷🇺 (Ukrainian right after Norwegian — owner's request) → fade + zoom into the app.
  *  No «seen» flag / short mode: the full show plays on every load (owner's request).
  *  prefers-reduced-motion: a calm static composition, then a fade.
  *
@@ -182,6 +182,8 @@
     if (!root) return;
     built = true;
     root.classList.add('nkp-js');
+    // 🎄 a holiday (js/apptheme.js, when loaded before this): the season's light + a tiny ribbon (css/preloader.css)
+    try { var season = W.AppThemes && W.AppThemes.season && W.AppThemes.season(); if (season) root.setAttribute('data-season', season); } catch (e) { /* never block the loading screen */ }
     stage = root.querySelector('.nkp-stage');
     if (!stage) { stage = D.createElement('div'); stage.className = 'nkp-stage'; root.appendChild(stage); }
     stage.setAttribute('aria-hidden', 'true');
@@ -209,7 +211,7 @@
   function brand(G) {
     var b = D.createElement('div');
     b.className = 'nkp-brand';
-    b.innerHTML = '<div><div class="nkp-flags">🇳🇴<span>⇄</span>🇷🇺</div><div class="nkp-title">Norsk <b>Kort</b></div>' +
+    b.innerHTML = '<div><div class="nkp-flags">🇳🇴<span>⇄</span>🇺🇦<i>🇷🇺</i></div><div class="nkp-title">Norsk <b>Kort</b></div>' +
       '<div class="nkp-tag">Норвежский — карточка за карточкой</div><div class="nkp-bar"></div></div>';
     stage.appendChild(b);
     return b;

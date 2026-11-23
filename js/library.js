@@ -302,7 +302,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
             x.aiBy = AI.lastProvider;
           });
           by.add('ai'); Translators.lastAI = AI.lastProvider;
-        } catch (e) { log(`${AI.name()}: ${e.message} — перевожу переводчиком`); }
+        } catch (e) { log(`${AI.name()}: ${U.niceErr(e, '', true)} — перевожу переводчиком`); }
       }
     }
     // 3) machine translators for whatever is still missing (meaning = translated definition)
@@ -432,7 +432,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
                <label class="field"><span>Сколько выражений</span><input class="input" type="number" data-o="count" value="25" min="1"></label>`,
         cxn: `<div class="field-row"><label class="field"><span>Уровень</span><select class="input" data-o="level">${[['all', 'Любой (сначала с уровнем и объяснением)'], ['A1', 'A1'], ['A2', 'A2'], ['B1', 'B1'], ['B2', 'B2'], ['C1', 'C1']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
               <label class="field"><span>Сколько</span><input class="input" type="number" data-o="count" value="20" min="1"></label></div>`,
-        book2: `${AI.bridge.up ? '' : `<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Запустите мост на Mac (Настройки → Нейросети → Claude, команда в Терминале) и перезапустите его, если он был запущен раньше. Без моста: откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>`}
+        book2: `${AI.bridge.up ? '' : !(AI.onMac && AI.onMac()) ? '<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>' : `<div class="mt-warn">⚠️ <span>Сайт 50languages не пускает браузер напрямую. Запустите мост на Mac (Настройки → Нейросети → Claude, команда в Терминале) и перезапустите его, если он был запущен раньше. Без моста: откройте урок ↗, скопируйте фразы и нажмите «📋 Вставить текст».</span></div>`}
                <div class="field-row"><label class="field"><span>Уроки с</span><input class="input" type="number" data-o="from" value="1" min="1" max="100"></label>
                <label class="field"><span>по</span><input class="input" type="number" data-o="to" value="5" min="1" max="100"></label>
                <label class="field"><span>Максимум фраз</span><input class="input" type="number" data-o="count" value="90" min="1"></label></div>
@@ -468,7 +468,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
           cats: ['idioms', 'phrases', 'proverbs'].filter(c => on('cat-' + c)),
           en: on('lib-en'), uk: on('lib-uk'), examples: on('lib-ex'), skipKnown: on('lib-skip'),
         };
-        if (s.id === 'book2') { o.to = Math.min(100, Math.max(o.from, o.to)); if (!AI.bridge.up) { UI.toast('Нужен мост на Mac — или вставьте текст урока вручную', 'warn', 5000); return; } }
+        if (s.id === 'book2') { o.to = Math.min(100, Math.max(o.from, o.to)); if (!AI.bridge.up) { UI.toast(AI.onMac && AI.onMac() ? 'Нужен мост на Mac — или вставьте текст урока вручную' : 'В версии на сайте это пока недоступно — вставьте текст урока вручную', 'warn', 5000); return; } }
         await this.run(body, s, o, () => Load[s.id](o, msg => this.status(body, msg)), m);
       };
     },
@@ -523,6 +523,7 @@ ${JSON.stringify(part.map(x => ({ no: x.no, def: x.def || '', en: x.en || '', ru
         const deck = deckSel ? Store.deck(deckSel) : Store.addDeck(s.id === 'book2' ? 'Разговорные фразы' : 'Устойчивые выражения', `Библиотека выражений · ${s.name}`);
         const ready = items.filter(x => x.no && (x.ru || x.en));
         ready.forEach(x => Store.addCard(deck.id, toCard(x, s, by)));
+        Store.autoNameDeck(deck.id); // 🏷 a deck without a name: its first expression
         await Store.saveNow();
         m.close();
         const machine = !by.includes('ai') && ready.some(x => !x.humanRu);

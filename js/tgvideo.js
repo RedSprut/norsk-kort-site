@@ -38,7 +38,7 @@
 
   async function api(action, params = {}) {
     let r;
-    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error('Мост на Mac не отвечает — запустите его и попробуйте снова'); }
+    try { r = await fetch(`/api/tg/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error(window.Telegram && Telegram.home && !Telegram.home() ? 'Это видео сейчас недоступно здесь — откройте канал в Телеграме' : 'Мост на Mac не отвечает — запустите его и попробуйте снова'); }
     const ct = r.headers.get('Content-Type') || '';
     if (!/json/.test(ct)) throw new Error('Мост на Mac старой версии — перезапустите его (в Терминале Ctrl+C, затем снова python3 …/bridge/server.py)');
     const j = await r.json().catch(() => ({}));
@@ -66,6 +66,19 @@
     /** bridge + Telegram connected? Otherwise a clear explanation (no technical errors) */
     async gate(el) {
       const up = window.AI && AI.bridge && AI.bridge.up;
+      if (!up && !(window.Telegram && Telegram.home ? Telegram.home() : true)) {
+        // the site: no bridge, no account — the channels' videos play inside Telegram's own post widget
+        el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Видео из норвежских каналов</b>
+          <p>Откройте канал во вкладке «📢 Норвежские каналы» и нажмите «📖 Читать здесь» — видео играют прямо в постах, без входа в Телеграм.</p>
+          <button type="button" class="btn primary tgv-tochan" data-tgv-chan>📢 Норвежские каналы</button></div>`;
+        el.querySelector('[data-tgv-chan]').onclick = () => {
+          const tab = el.closest('.tg-modal') && el.closest('.tg-modal').querySelector('[data-tgtab="channels"]');
+          if (tab) { tab.click(); return; }
+          const mm = el.closest('.modal-backdrop'); if (mm && mm._m) mm._m.close();
+          Telegram.open(null, 'channels');
+        };
+        return false;
+      }
       if (!up) {
         el.innerHTML = `<div class="tgv-gate">${TG(40)}<b>Видео авторов открываются через приложение на Mac</b>
           <p>Telegram показывает видео каналов только вашему аккаунту. Его читает «мост» — маленькая программа на вашем Mac: запустите её и откройте приложение по адресу <b>http://localhost:8787</b>.</p>
@@ -90,7 +103,7 @@
           <input class="input tgv-find" data-tgv-find type="search" placeholder="🔎 Найти канал" aria-label="Найти канал"></div>
         <div class="tgv-authors" data-tgv-authors><div class="tgv-wait"><span class="spinner sm"></span> загружаю ваши каналы…</div></div>`;
       let list = [];
-      try { list = (await api('dialogs')).dialogs || []; } catch (e) { el.querySelector('[data-tgv-authors]').innerHTML = `<div class="mt-warn">⚠️ <span>${esc(e.message)}</span></div>`; return; }
+      try { list = (await api('dialogs')).dialogs || []; } catch (e) { el.querySelector('[data-tgv-authors]').innerHTML = `<div class="mt-warn">⚠️ <span>${esc(U.niceErr(e))}</span></div>`; return; }
       const recent = ls(RECENT_KEY, []);
       const rank = d => (recent.indexOf(d.id) >= 0 ? recent.indexOf(d.id) : 99) * 4 + (d.match ? 0 : 2) + (d.kind === 'channel' ? 0 : 1);
       list.sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name), 'ru'));
@@ -160,7 +173,7 @@
           const ava = $('[data-tgv-ava]'); ava.textContent = initial(S.info.title); ava.style.setProperty('--h', hue(S.chat));
           paint();
         } catch (e) {
-          if (!S.videos.length) $('[data-tgv-grid]').innerHTML = `<div class="mt-warn">⚠️ <span>${esc(e.message)}</span></div>`;
+          if (!S.videos.length) $('[data-tgv-grid]').innerHTML = `<div class="mt-warn">⚠️ <span>${esc(U.niceErr(e))}</span></div>`;
           else UI.toast(e.message, 'warn', 5000);
           paint();
         } finally { S.busy = false; }

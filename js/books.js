@@ -5,6 +5,9 @@
  *  - Wikimedia PDFs are fetched (CORS) and shown from memory;
  *  - the rest open in a new tab, or come through the Mac bridge.
  * "🃏 Слова в карточки" sends the PDF to the card importer (pairs "norsk – русский" become cards).
+ * A PDF the app can read (CORS or the Mac bridge) is drawn by the app itself (js/bookview.js, loaded on first use):
+ * the word being read aloud lights up on the page, «Aa» and «🔊 Голос» sit right in the player row; otherwise the
+ * browser's own PDF viewer shows it as before.
  */
 (function () {
   // [title, langs, level, kind, url, licence, how: 'frame' | 'blob' | 'tab', note]
@@ -57,11 +60,43 @@
       if (r.ok) return r.blob();
     }
     throw new Error(window.AI && AI.bridge.up ? 'сайт не отдал книгу — откройте её на сайте ↗'
-      : 'этот сайт не даёт приложению загрузить книгу напрямую. Чтобы слушать её вслух или сделать карточки — запустите мост на Mac (в облачной версии это будет работать само). Читать глазами можно и так.');
+      : (window.AI && AI.onMac && AI.onMac()
+        ? 'этот сайт не даёт приложению загрузить книгу напрямую. Чтобы слушать её вслух или сделать карточки — запустите мост на Mac (в облачной версии это будет работать само). Читать глазами можно и так.'
+        : 'этот сайт не даёт приложению загрузить книгу напрямую — в версии на сайте это пока недоступно. Читать глазами можно и так: откройте книгу на сайте ↗.'));
+  }
+
+  /** one PDF document per book for this visit: the page view and «Читать вслух» share it (the last 2 books are kept) */
+  const DOCS = new Map();
+  function pdfDoc(url) {
+    if (DOCS.has(url)) { const d = DOCS.get(url); DOCS.delete(url); DOCS.set(url, d); return d; }
+    const d = (async () => (await U.lib.pdf()).getDocument({ data: new Uint8Array(await (await fetchBlob(url)).arrayBuffer()) }).promise)();
+    DOCS.set(url, d);
+    d.catch(() => { if (DOCS.get(url) === d) DOCS.delete(url); });
+    while (DOCS.size > 2) { const [k, old] = DOCS.entries().next().value; DOCS.delete(k); old.then(x => { try { x.destroy(); } catch (e) { /* ignore */ } }, () => {}); }
+    return d;
+  }
+  /** js/bookview.js + css/bookview.css, the first time a book is opened (the same version as this file) */
+  let viewP = null;
+  function loadView() {
+    if (window.BookView) return Promise.resolve(window.BookView);
+    if (viewP) return viewP;
+    const q = (((document.querySelector('script[src*="js/books.js"]') || {}).src || '').match(/\?v=[^&#]+/) || [''])[0];
+    if (!document.querySelector('link[href*="css/bookview.css"]')) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'css/bookview.css' + q; document.head.appendChild(l);
+    }
+    viewP = new Promise((res, rej) => {
+      const sc = document.createElement('script'); sc.src = 'js/bookview.js' + q; sc.async = true;
+      sc.onload = () => (window.BookView ? res(window.BookView) : rej(new Error('no view')));
+      sc.onerror = () => rej(new Error('no view'));
+      document.head.appendChild(sc);
+    });
+    viewP.catch(() => { viewP = null; });
+    return viewP;
   }
 
   const Books = {
     SHELF,
+    pdfDoc,
     open() {
       const m = UI.modal({
         title: '📚 Книги — бесплатно и легально', cls: 'wide books-modal',
@@ -119,13 +154,25 @@
     /** 🎧 a PDF read aloud: its text page by page (Norwegian / Russian / Ukrainian / English voices), from any page */
     async listen(b, fromPage = 1) {
       try {
-        const pdf = await (await U.lib.pdf()).getDocument({ data: await (await fetchBlob(b[4])).arrayBuffer() }).promise;
-        const pages = [];
+        const pdf = await pdfDoc(b[4]);
+        const raw = [];
         for (let n = Math.max(1, fromPage); n <= Math.min(pdf.numPages, fromPage + 199); n++) {
-          const tc = await (await pdf.getPage(n)).getTextContent();
-          const text = tc.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('').replace(/[ \t]+/g, ' ').trim();
-          if (text.length > 20) pages.push({ title: `${b[0]} · стр. ${n}`, text, page: n });
+          const pg = await pdf.getPage(n);
+          const tc = await pg.getTextContent();
+          // lines with their place on the page: page numbers / running headers live in the top and bottom margins
+          let lines = window.PageText ? PageText.pdfLines(tc.items, pg.view) : tc.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('').split('\n');
+          // a scanned page whose text was found on the page view (🔎 Распознать, js/bookview.js)
+          const ocr = window.BookView && !lines.some(l => /\p{L}{2}/u.test(typeof l === 'string' ? l : l.s)) ? BookView.ocrText(b[4], n) : '';
+          if (ocr) lines = ocr.split('\n');
+          raw.push({ n, lines });
         }
+        // 📄 no page numbers, running headers / footers, «. . .» separators; words cut at line ends glued back (util.js)
+        const clean = window.PageText ? PageText.cleanPages(raw.map(r => r.lines), { join: true, pdf: true, nums: raw.map(r => r.n) }) : raw.map(r => r.lines);
+        const pages = [];
+        raw.forEach((r, k) => {
+          const text = clean[k].map(l => (typeof l === 'string' ? l : l.s)).join('\n').replace(/[ \t]+/g, ' ').trim();
+          if (text.length > 20) pages.push({ title: `${b[0]} · стр. ${r.n}`, text, page: r.n });
+        });
         if (!pages.length) { UI.toast('В этой книге текст нарисован картинкой — прочитать вслух не получится', 'warn', 6000); return false; }
         this.pagesCache[b[4]] = pdf.numPages;
         Listen.startText(b[0], pages, { loop: false, totalPages: pdf.numPages, bookUrl: b[4], book: b });
@@ -133,25 +180,49 @@
       } catch (err) { UI.toast(err.message, 'warn', 6000); return false; }
     },
     pagesCache: {},
+    /** 🖨 «Печать и файлы» (js/printx.js): the PDF's text page by page (the same cleaning as for reading aloud) */
+    async print(b, btn) {
+      if (!window.PrintX) { UI.toast('Печать ещё загружается — попробуйте через секунду'); return; }
+      const label = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner sm"></span> собираю текст…'; }
+      try {
+        const pdf = await pdfDoc(b[4]);
+        const raw = [];
+        for (let n = 1; n <= Math.min(pdf.numPages, 400); n++) {
+          const pg = await pdf.getPage(n);
+          const tc = await pg.getTextContent();
+          raw.push({ n, lines: window.PageText ? PageText.pdfLines(tc.items, pg.view) : tc.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('').split('\n') });
+        }
+        const clean = window.PageText ? PageText.cleanPages(raw.map(r => r.lines), { join: true, pdf: true, nums: raw.map(r => r.n) }) : raw.map(r => r.lines);
+        const blocks = [];
+        raw.forEach((r, k) => clean[k].map(l => (typeof l === 'string' ? l : l.s)).join('\n').split(/\n+/)
+          .map(x => x.replace(/[ \t]+/g, ' ').trim()).filter(x => /\p{L}{2}/u.test(x)).forEach(no => blocks.push({ no, page: r.n })));
+        if (!blocks.length) { UI.toast('В этой книге текст нарисован картинкой — напечатать его текстом не получится. Откройте книгу отдельно и распечатайте из браузера', 'warn', 7000); return; }
+        PrintX.text({ title: b[0], blocks, source: { id: 'book:' + b[4], name: b[0], kind: 'book', url: b[4], protected: false } });
+      } catch (err) { UI.toast(U.niceErr ? U.niceErr(err, 'Печать книги') : 'Печать книги: не получилось — попробуйте ещё раз', 'warn', 6000); }
+      finally { if (btn) { btn.disabled = false; btn.innerHTML = label; } }
+    },
     async read(b) {
-      const [t, , , , url, , how] = b;
+      const [t, langs, , , url, , how] = b;
       const pdf = /\.pdf|\/pdf\//i.test(url);
-      const m = UI.modal({ title: `📖 ${U.esc(t)}`, cls: 'wide book-reader', body: '<div data-reader class="book-frame"><span class="spinner sm"></span> открываю…</div>' });
+      const off = []; // what to undo when the window closes
+      const m = UI.modal({ title: `📖 ${U.esc(t)}`, cls: 'wide book-reader', body: '<div data-reader class="book-frame"><span class="spinner sm"></span> открываю…</div>',
+        onClose: () => { off.splice(0).forEach(f => { try { f(); } catch (e) { /* ignore */ } }); } });
       const box = m.$('[data-reader]');
       try {
         let src = url;
         if (how === 'blob') src = URL.createObjectURL(await fetchBlob(url));
         box.innerHTML = `${pdf ? `<div class="book-toolbar">
-            <button class="btn primary listen-btn listen-cta" data-rlisten>${Listen.HEADPHONES(18, true)} Читать вслух</button>
-            <div class="book-nav"><button class="icon-btn sm" data-pg="-1" title="Предыдущая страница">‹</button>
-              <span>Страница <input class="input" type="number" min="1" value="1" data-rpage> из <b data-ptotal>…</b></span>
-              <button class="icon-btn sm" data-pg="1" title="Следующая страница">›</button><button class="btn sm" data-pggo>Перейти</button></div>
+            <button class="btn primary listen-btn listen-cta" data-rlisten title="Читать книгу вслух с этой страницы — слово, которое звучит, подсвечивается на странице">${Listen.HEADPHONES(18, true)} Читать вслух</button>
+            <div class="book-nav"><button class="icon-btn sm" data-pg="-1" title="Предыдущая страница" aria-label="Предыдущая страница">‹</button>
+              <span><span class="bn-l">Страница</span> <input class="input" type="number" min="1" value="1" inputmode="numeric" data-rpage aria-label="Номер страницы" title="Номер страницы"> из <b data-ptotal>…</b></span>
+              <button class="icon-btn sm" data-pg="1" title="Следующая страница" aria-label="Следующая страница">›</button><button class="btn sm" data-pggo title="Открыть страницу с этим номером">Перейти</button></div>
             <span class="small muted">через динамик или наушники</span></div>
-            <div data-mini hidden></div>` : ''}
+            <div data-mini></div>` : ''}
           <div class="mt-warn ok tb-hint"><span>📘</span><span><b>Не понимаете слова?</b> Откройте книгу в режиме учебника: перевод каждого абзаца, предложения или слова, озвучка, <b>новые слова → карточки</b> в колоду «📘 ${U.esc(t)}».</span>
-            <button class="btn sm primary" data-astb>📘 Читать с переводом и карточками</button></div>
-          <div data-frame-wrap><iframe src="${U.esc(src)}" title="${U.esc(t)}"></iframe></div>
-          <div class="row" style="gap:6px;margin-top:6px"><a class="btn sm" href="${U.esc(url)}" target="_blank" rel="noopener">↗ Открыть отдельно</a><span class="small muted">Если книга не показалась — откройте её отдельно.</span></div>`;
+            <button class="btn sm primary" data-astb title="Перевод абзацев, предложений и слов, новые слова — в карточки">📘 Читать с переводом и карточками</button></div>
+          <div data-frame-wrap>${pdf ? '<div class="bv-loading"><span class="spinner sm"></span> открываю книгу…</div>' : `<iframe src="${U.esc(src)}" title="${U.esc(t)}"></iframe>`}</div>
+          <div class="row" style="gap:6px;margin-top:6px"><a class="btn sm" href="${U.esc(url)}" target="_blank" rel="noopener" title="Открыть книгу в отдельной вкладке браузера">↗ Открыть отдельно</a>${pdf && window.PrintX ? '<button type="button" class="btn sm" data-bprint aria-haspopup="dialog" title="Распечатать текст книги (все страницы или часть) или сохранить в Word">🖨 Печать и файлы</button>' : ''}<span class="small muted" data-fnote>Если книга не показалась — откройте её отдельно.</span></div>`;
         // the same book in «📘 My textbook»: translation views, new words → cards, page → cards, listening
         box.querySelector('[data-astb]').onclick = async ev => {
           const btn = ev.currentTarget; btn.disabled = true; btn.innerHTML = '<span class="spinner sm"></span> загружаю книгу…';
@@ -164,47 +235,89 @@
             Textbook.openWith(file, t);
           } catch (e) { UI.toast(e.message, 'bad', 7000); btn.disabled = false; btn.textContent = '📘 Читать с переводом и карточками'; }
         };
-        const lb = box.querySelector('[data-rlisten]');
-        Listen.miniPlayer(box.querySelector('[data-mini]'));
-        if (pdf) {
-          const inp = box.querySelector('[data-rpage]'), tot = box.querySelector('[data-ptotal]');
-          let shown = 1;
-          const total = () => +(this.pagesCache[url] || 0);
-          // total number of pages (from the PDF itself; '—' if the site does not let us read it)
-          if (this.pagesCache[url]) tot.textContent = this.pagesCache[url];
-          else fetchBlob(url).then(async bl => { const d = await (await U.lib.pdf()).getDocument({ data: await bl.arrayBuffer() }).promise; this.pagesCache[url] = d.numPages; tot.textContent = d.numPages; inp.max = d.numPages; }).catch(() => { tot.textContent = '—'; });
-          // show page n: a new frame with #page=n (works in Safari / Chrome / Firefox PDF viewers)
-          const showPage = n => {
-            n = Math.max(1, total() ? Math.min(total(), n) : n);
-            shown = n; inp.value = n;
-            box.querySelector('[data-frame-wrap]').innerHTML = `<iframe src="${U.esc(src)}#page=${n}" title="${U.esc(t)}"></iframe>`;
-            if (window.Resume) Resume.save('book', url, n, { unit: 'page', total: total(), title: t }); // 📍 the page is remembered
-          };
-          const go = n => {
-            showPage(n);
-            // reading aloud? continue from this page
-            const p = Listen.p;
-            if (p && p.o.bookUrl === url) {
-              const k = p.cards.findIndex(c => c.page >= shown);
-              if (k >= 0) Listen.goTo(k); else { Listen.prime(); this.listen(b, shown); }
-            }
-          };
-          box.querySelector('[data-pggo]').onclick = () => go(+inp.value || 1);
-          inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(+inp.value || 1); });
-          box.querySelectorAll('[data-pg]').forEach(x => { x.onclick = () => go(shown + +x.dataset.pg); });
-          // the book follows the voice: the page being read is shown
-          const follow = () => { const p = Listen.p; if (!p || p.o.bookUrl !== url || !document.body.contains(box)) return; const c = p.cards[p.i]; if (c && c.page && c.page !== shown) showPage(c.page); };
-          document.addEventListener('listen-state', follow);
-          // 📍 «Продолжить с места, где остановились (стр. N)?»
-          if (window.Resume) Resume.ask({ kind: 'book', id: url, title: t, owner: box }).then(n => { if (n && document.body.contains(box)) showPage(n); }).catch(() => {});
-        }
-        if (lb) lb.onclick = async () => {
-          Listen.prime(); lb.disabled = true; lb.innerHTML = '<span class="spinner sm"></span> готовлю текст…';
-          await this.listen(b, +box.querySelector('[data-rpage]').value || 1);
+        if (!pdf) return;
+        const pb = box.querySelector('[data-bprint]');
+        if (pb) pb.onclick = () => this.print(b, pb);
+        const inp = box.querySelector('[data-rpage]'), tot = box.querySelector('[data-ptotal]'), wrap = box.querySelector('[data-frame-wrap]');
+        let shown = 1, view = null, saveT = 0;
+        const total = () => +(this.pagesCache[url] || 0);
+        const setTotal = n => { this.pagesCache[url] = n; tot.textContent = n; inp.max = n; };
+        if (this.pagesCache[url]) setTotal(this.pagesCache[url]);
+        const remember = n => { clearTimeout(saveT); saveT = setTimeout(() => {
+          if (window.Resume) Resume.save('book', url, n, { unit: 'page', total: total(), title: t }); // 📍 the page is remembered
+          // 🎓 «Учить по книге»: after three pages — «Сделать колоду из прочитанного?» (js/learnby.js)
+          if (window.LearnBy && LearnBy.offer) LearnBy.offer({ key: 'books:' + url, title: t, page: n, src: 'books', id: url, open: () => this.read(b),
+            text: async () => { const pg = await (await pdfDoc(url)).getPage(n); const tc = await pg.getTextContent(); return tc.items.map(x => x.str + (x.hasEOL ? ' ' : '')).join('').replace(/\s+/g, ' '); } });
+        }, 600); };
+        const startListen = async n => {
+          const lb = box.querySelector('[data-rlisten]');
+          lb.disabled = true; lb.innerHTML = '<span class="spinner sm"></span> готовлю текст…';
+          await this.listen(b, n || shown);
           lb.disabled = false; lb.innerHTML = `${Listen.HEADPHONES(18, true)} Читать вслух`;
         };
+        // the player row: works before reading starts too (▶ = read from this page); «Aa» and «🔊 Голос» right here
+        const extra = `<button type="button" class="btn sm ghost bv-mp-b bv-aa" data-bv-aa aria-haspopup="dialog" aria-expanded="false" title="Вид: цвет подсветки, слово или вся строка, масштаб страницы" aria-label="Вид страницы и подсветки">Aa</button>
+          <button type="button" class="btn sm ghost bv-mp-b" data-bv-voice aria-haspopup="dialog" aria-expanded="false" title="Каким голосом читать норвежский и перевод — можно сменить прямо во время чтения">🔊 Голос</button>`;
+        off.push(Listen.miniPlayer(box.querySelector('[data-mini]'), {
+          keep: true, extra,
+          mine: p => !!(p && p.o && p.o.bookUrl === url),
+          idleLabel: () => `▶ — читать вслух со стр. ${shown}${total() ? ' из ' + total() : ''}`,
+          onIdle: () => { Listen.prime(); startListen(shown); },
+        }));
+        box.querySelector('[data-mini]').addEventListener('click', e => {
+          const aa = e.target.closest('[data-bv-aa]'), vo = e.target.closest('[data-bv-voice]');
+          if (!aa && !vo) return;
+          loadView().then(V => { if (aa) V.lookPop(aa, view); else V.voicePop(vo, (window.BookView || V).langsOf(langs)); }).catch(() => UI.toast('Не получилось открыть настройки — попробуйте ещё раз', 'warn'));
+        });
+        off.push(() => { if (window.BookView) BookView.closePop(); });
+        // show page n: our own page view, or a new frame with #page=n (Safari / Chrome / Firefox PDF viewers)
+        const showPage = n => {
+          n = Math.max(1, total() ? Math.min(total(), n) : n);
+          shown = n; inp.value = n;
+          if (view) view.goTo(n, true);
+          else if (wrap.querySelector('iframe')) wrap.innerHTML = `<iframe src="${U.esc(src)}#page=${n}" title="${U.esc(t)}"></iframe>`;
+          remember(n);
+        };
+        const go = n => {
+          showPage(n);
+          // reading aloud? continue from this page
+          const p = Listen.p;
+          if (p && p.o.bookUrl === url) {
+            const k = p.cards.findIndex(c => c.page >= shown);
+            if (k >= 0) Listen.goTo(k); else { Listen.prime(); this.listen(b, shown); }
+          }
+        };
+        box.querySelector('[data-pggo]').onclick = () => go(+inp.value || 1);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(+inp.value || 1); });
+        inp.addEventListener('change', () => { if (+inp.value && +inp.value !== shown) go(+inp.value); }); // a phone's number pad has no Enter
+        box.querySelectorAll('[data-pg]').forEach(x => { x.onclick = () => go(shown + +x.dataset.pg); });
+        // the old way (the browser's viewer): the page being read is shown
+        const follow = () => { const p = Listen.p; if (view || !p || p.o.bookUrl !== url || !document.body.contains(box)) return; const c = p.cards[p.i]; if (c && c.page && c.page !== shown) showPage(c.page); };
+        document.addEventListener('listen-state', follow);
+        off.push(() => document.removeEventListener('listen-state', follow));
+        const lb = box.querySelector('[data-rlisten]');
+        lb.onclick = () => { Listen.prime(); startListen(+inp.value || shown); };
+        // 📍 «Продолжить с места, где остановились (стр. N)?»
+        if (window.Resume) Resume.ask({ kind: 'book', id: url, title: t, owner: box }).then(n => { if (n && document.body.contains(box)) showPage(n); }).catch(() => {});
+        // the pages themselves: drawn by the app (the word being read lights up), else the browser's viewer
+        try {
+          const [V, doc, lib] = await Promise.all([loadView(), pdfDoc(url), U.lib.pdf()]);
+          if (!document.body.contains(box)) return;
+          setTotal(doc.numPages);
+          view = await V.mount(wrap, { doc, lib, url, title: t, page: shown, langs: V.langsOf(langs),
+            onPage: n => { shown = n; if (document.activeElement !== inp) inp.value = n; remember(n); const mp = box.querySelector('[data-mini]'); if (mp && mp._mpPaint) mp._mpPaint(); } });
+          off.push(() => view && view.destroy());
+          { const mp = box.querySelector('[data-mini]'); if (mp && mp._mpPaint) mp._mpPaint(); }
+          const fn = box.querySelector('[data-fnote]'); if (fn) fn.textContent = 'Масштаб — двумя пальцами или кнопками «− +». Слово, которое звучит, подсвечивается прямо на странице.';
+          if (!document.body.contains(box)) view.destroy();
+        } catch (e) {
+          console.warn('book view', e);
+          view = null;
+          wrap.innerHTML = `<iframe src="${U.esc(src)}#page=${shown}" title="${U.esc(t)}"></iframe>`;
+          pdfDoc(url).then(d => { if (document.body.contains(box)) setTotal(d.numPages); }).catch(() => { if (!total()) tot.textContent = '—'; });
+        }
       } catch (e) {
-        box.innerHTML = `<div class="mt-warn">⚠️ <span>${U.esc(e.message)}</span></div><a class="btn sm" href="${U.esc(url)}" target="_blank" rel="noopener">↗ Открыть на сайте</a>`;
+        box.innerHTML = `<div class="mt-warn">⚠️ <span>${U.esc(U.niceErr(e))}</span></div><a class="btn sm" href="${U.esc(url)}" target="_blank" rel="noopener">↗ Открыть на сайте</a>`;
       }
     },
   };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
-  <title>Norsk ⇄ Русский — флеш-карточки</title>
+  <title>Norsk Kort — вчимо норвезьку · учим норвежский</title>
   <meta name="description" content="Флеш-карточки норвежский ⇄ русский: интервальные повторения, озвучка, картинки, проверка нейросетями." />
   <meta name="theme-color" content="#0f1222" />
   <meta http-equiv="Cache-Control" content="no-cache" />
@@ -12,65 +12,94 @@
   <!-- the free Google voice refuses requests that carry a Referer; embeds that need it set their own policy -->
   <meta name="referrer" content="no-referrer" />
   <!-- 🎴 loading screen: tiny CSS + script first, so it shows on the very first paint (markup at the top of <body>) -->
-  <link rel="stylesheet" href="css/preloader.css?v=2" />
-  <script src="js/preloader.js?v=2"></script>
+  <link rel="stylesheet" href="css/preloader.css?v=3" />
+  <script src="js/preloader.js?v=3"></script>
+  <!-- 🎨 themes + holiday dress-up: before the first paint -->
+  <!-- ℹ️ the version: ONE source of truth (window.APP) — bump with tools/bump-version.mjs N -->
+  <script src="js/version.js?v=231"></script>
+  <script src="js/apptheme.js?v=231"></script>
   <!-- installable app (iPhone / Android) -->
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Norsk Kort" />
+  <meta name="apple-mobile-web-app-title" content="Norsk UKR AI" />
   <meta name="format-detection" content="telephone=no" />
-  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="css/styles.css?v=184" />
-  <link rel="stylesheet" href="css/news.css?v=184" />
-  <link rel="stylesheet" href="css/subs.css?v=184" />
-  <link rel="stylesheet" href="css/drills.css?v=184" />
-  <link rel="stylesheet" href="css/speech.css?v=184" />
-  <link rel="stylesheet" href="css/trnotice.css?v=184" />
-  <link rel="stylesheet" href="css/listen.css?v=184" />
-  <link rel="stylesheet" href="css/help.css?v=184" />
-  <link rel="stylesheet" href="css/gramterms.css?v=184" />
-  <link rel="stylesheet" href="css/ordtrainer.css?v=184" />
-  <link rel="stylesheet" href="css/tgvideo.css?v=184" />
-  <link rel="stylesheet" href="css/tgaudio.css?v=184" />
-  <link rel="stylesheet" href="css/audiocourse.css?v=184" />
-  <link rel="stylesheet" href="css/levels.css?v=184" />
-  <link rel="stylesheet" href="css/klokka.css?v=184" />
-  <link rel="stylesheet" href="css/reader.css?v=184" />
-  <link rel="stylesheet" href="css/prove.css?v=184" />
-  <link rel="stylesheet" href="css/bookshelf.css?v=184" />
-  <link rel="stylesheet" href="css/dialogs.css?v=184" />
-  <link rel="stylesheet" href="css/gramref.css?v=184" />
+  <link rel="stylesheet" href="css/styles.css?v=231" />
+  <link rel="stylesheet" href="css/news.css?v=231" />
+  <link rel="stylesheet" href="css/subs.css?v=231" />
+  <link rel="stylesheet" href="css/drills.css?v=231" />
+  <link rel="stylesheet" href="css/speech.css?v=231" />
+  <link rel="stylesheet" href="css/trnotice.css?v=231" />
+  <link rel="stylesheet" href="css/listen.css?v=231" />
+  <link rel="stylesheet" href="css/help.css?v=231" />
+  <link rel="stylesheet" href="css/gramterms.css?v=231" />
+  <link rel="stylesheet" href="css/ordtrainer.css?v=231" />
+  <link rel="stylesheet" href="css/tgvideo.css?v=231" />
+  <link rel="stylesheet" href="css/tgaudio.css?v=231" />
+  <link rel="stylesheet" href="css/audiocourse.css?v=231" />
+  <link rel="stylesheet" href="css/levels.css?v=231" />
+  <link rel="stylesheet" href="css/klokka.css?v=231" />
+  <link rel="stylesheet" href="css/reader.css?v=231" />
+  <link rel="stylesheet" href="css/prove.css?v=231" />
+  <link rel="stylesheet" href="css/bookshelf.css?v=231" />
+  <link rel="stylesheet" href="css/dialogs.css?v=231" />
+  <link rel="stylesheet" href="css/gramref.css?v=231" />
+  <link rel="stylesheet" href="css/artcards.css?v=231" />
+  <link rel="stylesheet" href="css/artcards-no.css?v=231" />
+  <link rel="stylesheet" href="css/signin.css?v=231" />
+  <link rel="stylesheet" href="css/apptheme.css?v=231" />
+  <link rel="stylesheet" href="css/aihub.css?v=231" />
+  <link rel="stylesheet" href="css/aichooser.css?v=231" />
+  <link rel="stylesheet" href="css/showcase.css?v=231" />
+  <!-- 📱 phone layout (js/mobile.js): last, every rule is under html.m-phone -->
+  <link rel="stylesheet" href="css/mobile.css?v=231" />
+  <!-- v211: «Продолжить», 🧭 навигатор, плашки главной, нейросети на странице колоды (desktop + html.m-phone rules) -->
+  <link rel="stylesheet" href="css/navigator.css?v=231" />
+  <link rel="stylesheet" href="css/about.css?v=231" />
+  <!-- v214: 🎓 «Учить по материалам» — the home tile, the player's bar, the plan, #/learn (js/learnby.js) -->
+  <link rel="stylesheet" href="css/learnby.css?v=231" />
 </head>
 <body>
   <!-- 🎴 loading screen (css/preloader.css + js/preloader.js): cards, features, subtitles → deck + cap → logo; removes itself once the app has rendered (tap / any key skips) -->
   <div id="nkp" class="nkp" role="status" aria-label="Загрузка Norsk Kort"><div class="nkp-aur a1"></div><div class="nkp-aur a2"></div><div class="nkp-aur a3"></div><div class="nkp-stars"></div><div class="nkp-stage" aria-hidden="true"></div></div>
   <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
+  <!-- gradients for the drawn icons: the open section (top bar, tab bar), the round «▶ Смотреть видео» button and the brand robot everywhere (App.robotSvg, js/app.js) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="nkg-nav" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22"><stop offset="0" stop-color="#8b80ff"/><stop offset="1" stop-color="#29c7ff"/></linearGradient><linearGradient id="nkg-play" gradientUnits="userSpaceOnUse" x1="3" y1="3" x2="21" y2="21"><stop offset="0" stop-color="#7c6cff"/><stop offset="1" stop-color="#e8366b"/></linearGradient><linearGradient id="nkr-head" gradientUnits="userSpaceOnUse" x1="4" y1="4" x2="20" y2="22"><stop offset="0" stop-color="#a99dff"/><stop offset=".5" stop-color="#7d86ff"/><stop offset="1" stop-color="#2fc4ff"/></linearGradient><linearGradient id="nkr-eye" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8fdff"/><stop offset="1" stop-color="#3fd2ff"/></linearGradient><radialGradient id="nkr-visor" cx=".35" cy=".25" r="1"><stop offset="0" stop-color="#2a2d63"/><stop offset="1" stop-color="#0f1130"/></radialGradient></defs></svg>
 
   <header class="topbar">
     <button class="logo" data-action="nav" data-view="home" title="Колоды">
-      <span class="logo-flag">🇳🇴</span><span class="logo-arrows">⇄</span><span class="logo-flag">🇷🇺</span>
+      <span class="logo-flag">🇳🇴</span><span class="logo-arrows">⇄</span><span class="logo-flag">🇺🇦</span><span class="logo-flag">🇷🇺</span>
       <span class="logo-text">Norsk&nbsp;<b>Kort</b></span>
     </button>
-    <!-- 🏠 back to the main screen from anywhere (closes open windows; asks if something is unsaved) -->
-    <button type="button" class="icon-btn home-btn top-home" data-home aria-label="На главный экран" data-tip="На главный экран"><svg class="ico home-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 10.8 12 3.6l8.8 7.2"/><path d="M5.6 9.2v10.1c0 .8.6 1.4 1.4 1.4h10c.8 0 1.4-.6 1.4-1.4V9.2"/><path class="home-door" d="M10 20.7v-4.9c0-.5.4-.9.9-.9h2.2c.5 0 .9.4.9.9v4.9"/></svg></button>
-    <nav class="nav">
-      <button data-action="nav" data-view="home" class="nav-btn" data-nav="home" aria-label="Колоды">📚 <span>Колоды</span></button>
-      <button data-action="nav" data-view="stats" class="nav-btn" data-nav="stats" aria-label="Статистика">📊 <span>Статистика</span></button>
-      <button data-action="nav" data-view="settings" class="nav-btn" data-nav="settings" aria-label="Настройки">⚙️ <span>Настройки</span></button>
+    <!-- top bar (desktop): logo · [🏠 ⤴ ?] · Колоды Статистика Настройки ··· [🎧 Слушать 🎙 Переводчик 🤖 Нейросеть] · [👤 ☀]
+         the labels fold into icons when the room runs out — js/app.js fitBadge (css/styles.css «top bar v215»); phones: css/mobile.css -->
+    <div class="top-icons" role="group" aria-label="Главный экран, поделиться, навигатор">
+      <!-- 🏠 back to the main screen from anywhere (closes open windows; asks if something is unsaved) -->
+      <button type="button" class="icon-btn home-btn top-home" data-home aria-label="На главный экран" data-tip="На главный экран"><svg class="ico home-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 10.8 12 3.6l8.8 7.2"/><path d="M5.6 9.2v10.1c0 .8.6 1.4 1.4 1.4h10c.8 0 1.4-.6 1.4-1.4V9.2"/><path class="home-door" d="M10 20.7v-4.9c0-.5.4-.9.9-.9h2.2c.5 0 .9.4.9.9v4.9"/></svg></button>
+      <button id="share-app-btn" type="button" class="icon-btn share-top" data-action="share-app" aria-label="Поделиться приложением" data-tip="Поделиться приложением"><svg class="ico share-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.6 10.7 15.4 6.8M8.6 13.3l6.8 3.9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="18" cy="5.5" r="2.9" fill="currentColor"/><circle cx="6" cy="12" r="2.9" fill="currentColor"/><circle cx="18" cy="18.5" r="2.9" fill="currentColor"/></svg></button>
+      <!-- 🧭 «?» = «Навигатор по приложению» (js/navigator.js): экскурсия по экрану, помощь по разделам, быстрые пути, знакомство; on phones it is in the ⋯ menu -->
+      <button id="help-btn" type="button" class="icon-btn help-top" data-appnav aria-haspopup="dialog" aria-label="Навигатор по приложению: экскурсия по экрану, помощь, быстрые пути" data-tip="Навигатор по приложению"><span aria-hidden="true">?</span></button>
+    </div>
+    <nav class="nav" aria-label="Разделы">
+      <button data-action="nav" data-view="home" class="nav-btn" data-nav="home" aria-label="Колоды"><i class="nav-ico" data-nav-ico="decks" aria-hidden="true"></i><span>Колоды</span></button>
+      <button data-action="nav" data-view="stats" class="nav-btn" data-nav="stats" aria-label="Статистика"><i class="nav-ico" data-nav-ico="stats" aria-hidden="true"></i><span>Статистика</span></button>
+      <button data-action="nav" data-view="settings" class="nav-btn" data-nav="settings" aria-label="Настройки"><i class="nav-ico" data-nav-ico="settings" aria-hidden="true"></i><span>Настройки</span></button>
     </nav>
     <div class="topbar-right">
-      <button id="share-app-btn" class="icon-btn share-top" data-action="share-app" title="Поделиться приложением"><svg class="ico share-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.6 10.7 15.4 6.8M8.6 13.3l6.8 3.9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="18" cy="5.5" r="2.9" fill="currentColor"/><circle cx="6" cy="12" r="2.9" fill="currentColor"/><circle cx="18" cy="18.5" r="2.9" fill="currentColor"/></svg></button>
-      <button id="listen-btn" class="icon-btn listen-top" data-action="listen" data-label="Слушать" aria-label="Слушать: колоды, книги, новости — в наушниках или через динамик" title="🎧 Слушать — колоды, книги, новости: в наушниках или через динамик (можно с выключенным экраном)"></button>
-      <button id="interp-btn" class="icon-btn interp-top" data-action="interp" aria-label="Переводчик: слушает людей вокруг и переводит в наушники" title="🗣 Переводчик — это другое: слушает людей вокруг (по-норвежски) и переводит вам в наушники"></button>
-      <button id="claude-badge" class="claude-badge" data-action="ai-menu" title="Нейросеть"></button>
-      <!-- ❓ «Как пользоваться» — every topic + «▶ Показать по шагам на экране» (js/help.js); on phones (and 721–790 px) it is in the ⋯ menu -->
-      <button id="help-btn" type="button" class="icon-btn help-top" data-help="" aria-label="Как пользоваться — подсказки ко всему" data-tip="Как пользоваться"><span aria-hidden="true">?</span></button>
-      <button id="more-btn" class="icon-btn more-top" data-action="more-menu" title="Ещё: переводчик, поделиться, тема" aria-label="Ещё"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></svg></button>
-      <button id="account-btn" class="account-top" data-action="account" title="👤 Мой кабинет"></button>
-      <button class="icon-btn theme-btn" id="theme-btn" data-action="toggle-theme" title="Светлая / тёмная тема">🌞</button>
+      <div class="top-actions">
+        <button id="listen-btn" class="icon-btn listen-top" data-action="listen" data-label="Слушать" aria-label="Слушать: колоды, книги, новости — в наушниках или через динамик" title="🎧 Слушать — колоды, книги, новости: в наушниках или через динамик (можно с выключенным экраном)"></button>
+        <button id="interp-btn" class="icon-btn interp-top" data-action="interp" aria-label="Переводчик: слушает людей вокруг и переводит в наушники" title="🗣 Переводчик — это другое: слушает людей вокруг (по-норвежски) и переводит вам в наушники"></button>
+        <button id="claude-badge" class="claude-badge" data-action="ai-menu" title="Нейросеть"></button>
+      </div>
+      <div class="top-user">
+        <button id="more-btn" class="icon-btn more-top" data-action="more-menu" title="Ещё: переводчик, поделиться, тема" aria-label="Ещё"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></svg></button>
+        <button id="account-btn" class="account-top" data-action="account" title="👤 Мой кабинет"></button>
+        <button class="icon-btn theme-btn" id="theme-btn" data-action="toggle-theme" title="Светлая / тёмная тема">🌞</button>
+      </div>
     </div>
   </header>
 
@@ -78,10 +107,10 @@
 
   <!-- bottom tab bar (phones) -->
   <nav class="tabbar" aria-label="Навигация">
-    <button data-action="nav" data-view="home" data-nav="home"><span class="ti">📚</span><span>Колоды</span></button>
+    <button data-action="nav" data-view="home" data-nav="home"><span class="ti"><i class="nav-ico" data-nav-ico="decks" aria-hidden="true"></i></span><span>Колоды</span></button>
     <button data-action="study-all" class="tab-study"><span class="ti">▶</span><span>Учить</span></button>
-    <button data-action="nav" data-view="stats" data-nav="stats"><span class="ti">📊</span><span>Статистика</span></button>
-    <button data-action="nav" data-view="settings" data-nav="settings"><span class="ti">⚙️</span><span>Настройки</span></button>
+    <button data-action="nav" data-view="stats" data-nav="stats"><span class="ti"><i class="nav-ico" data-nav-ico="stats" aria-hidden="true"></i></span><span>Статистика</span></button>
+    <button data-action="nav" data-view="settings" data-nav="settings"><span class="ti"><i class="nav-ico" data-nav-ico="settings" aria-hidden="true"></i></span><span>Настройки</span></button>
   </nav>
 
   <!-- floating reading player (pause / continue / stop / restart) -->
@@ -99,78 +128,102 @@
   <canvas id="confetti" aria-hidden="true"></canvas>
   <input type="file" id="file-input" multiple hidden />
 
-  <script src="js/util.js?v=184"></script>
-  <script src="js/resume.js?v=184"></script>
-  <script src="js/store.js?v=184"></script>
-  <script src="js/fsrs.js?v=184"></script>
-  <script src="js/fsrs-opt.js?v=184"></script>
-  <script src="js/tts.js?v=184"></script>
-  <script src="js/voices.js?v=184"></script>
-  <script src="js/speech.js?v=184"></script>
-  <script src="js/ai.js?v=184"></script>
-  <script src="js/images.js?v=184"></script>
-  <script src="js/anki.js?v=184"></script>
-  <script src="js/importers.js?v=184"></script>
-  <script src="js/exporters.js?v=184"></script>
-  <script src="js/translators.js?v=184"></script>
-  <script src="js/glossary.js?v=184"></script>
-  <script src="js/align.js?v=184"></script>
-  <script src="js/selection.js?v=184"></script>
-  <script src="js/ordbok.js?v=184"></script>
-  <script src="js/sources.js?v=184"></script>
-  <script src="js/library.js?v=184"></script>
-  <script src="js/grammar.js?v=184"></script>
-  <script src="js/youtube.js?v=184"></script>
-  <script src="js/pairguard.js?v=184"></script>
-  <script src="js/telegram.js?v=184"></script>
-  <script src="js/photos.js?v=184"></script>
-  <script src="js/books.js?v=184"></script>
-  <script src="js/lexicon.js?v=184"></script>
-  <script src="js/textbook.js?v=184"></script>
-  <script src="js/reader.js?v=184"></script>
-  <script src="js/exams.js?v=184"></script>
-  <script src="js/news.js?v=184"></script>
-  <script src="js/langid.js?v=184"></script>
-  <script src="js/subs.js?v=184"></script>
-  <script src="js/nrk.js?v=184"></script>
-  <script src="js/nrkradio.js?v=184"></script>
-  <script src="js/drills.js?v=184"></script>
-  <script src="js/genders.js?v=184"></script>
-  <script src="js/progress.js?v=184"></script>
-  <script src="js/create.js?v=184"></script>
-  <script src="js/social.js?v=184"></script>
-  <script src="js/listen.js?v=184"></script>
-  <script src="js/listenx.js?v=184"></script>
-  <script src="js/listenui.js?v=184"></script>
-  <script src="js/interpreter.js?v=184"></script>
-  <script src="js/share.js?v=184"></script>
-  <script src="js/avatar.js?v=184"></script>
-  <script src="js/shareapp.js?v=184"></script>
-  <script src="js/guides.js?v=184"></script>
-  <script src="js/tgchan.js?v=184"></script>
-  <script src="js/tgvideo.js?v=184"></script>
-  <script src="js/tgaudio.js?v=184"></script>
-  <script src="js/audiocourse.js?v=184"></script>
-  <script src="js/frameocr.js?v=184"></script>
-  <script src="js/help.js?v=184"></script>
-  <script src="js/gramterms.js?v=184"></script>
-  <script src="js/ordtrainer.js?v=184"></script>
-  <script src="js/provenance.js?v=184"></script>
-  <script src="js/cardmaker.js?v=184"></script>
-  <script src="js/trnotice.js?v=184"></script>
-  <script src="js/sample.js?v=184"></script>
-  <script src="js/ui.js?v=184"></script>
-  <script src="js/bookshelf.js?v=184"></script>
-  <script src="js/views.js?v=184"></script>
-  <script src="js/account.js?v=184"></script>
-  <script src="js/study.js?v=184"></script>
-  <script src="js/levels.js?v=184"></script>
-  <script src="js/mycourse.js?v=184"></script>
-  <script src="js/klokka.js?v=184"></script>
-  <script src="js/prove.js?v=184"></script>
-  <script src="js/dialogs.js?v=184"></script>
-  <script src="js/gramref.js?v=184"></script>
-  <script src="js/coachmarks.js?v=184"></script>
-  <script src="js/app.js?v=184"></script>
+  <script src="js/util.js?v=231"></script>
+  <script src="js/resume.js?v=231"></script>
+  <script src="js/store.js?v=231"></script>
+  <script src="js/fsrs.js?v=231"></script>
+  <script src="js/fsrs-opt.js?v=231"></script>
+  <script src="js/tts.js?v=231"></script>
+  <script src="js/voices.js?v=231"></script>
+  <script src="js/speech.js?v=231"></script>
+  <script src="js/ai.js?v=231"></script>
+  <script src="js/images.js?v=231"></script>
+  <script src="js/anki.js?v=231"></script>
+  <script src="js/importers.js?v=231"></script>
+  <script src="js/exporters.js?v=231"></script>
+  <script src="js/printx.js?v=231"></script>
+  <script src="js/translators.js?v=231"></script>
+  <script src="js/glossary.js?v=231"></script>
+  <script src="js/align.js?v=231"></script>
+  <script src="js/glossguard.js?v=231"></script>
+  <script src="js/selection.js?v=231"></script>
+  <script src="js/ordbok.js?v=231"></script>
+  <script src="js/sources.js?v=231"></script>
+  <script src="js/library.js?v=231"></script>
+  <script src="js/grammar.js?v=231"></script>
+  <script src="js/youtube.js?v=231"></script>
+  <script src="js/pairguard.js?v=231"></script>
+  <script src="js/telegram.js?v=231"></script>
+  <script src="js/photos.js?v=231"></script>
+  <script src="js/books.js?v=231"></script>
+  <script src="js/lexicon.js?v=231"></script>
+  <script src="js/textbook.js?v=231"></script>
+  <script src="js/reader.js?v=231"></script>
+  <script src="js/exams.js?v=231"></script>
+  <script src="js/news.js?v=231"></script>
+  <script src="js/langid.js?v=231"></script>
+  <script src="js/subs.js?v=231"></script>
+  <script src="js/nrk.js?v=231"></script>
+  <script src="js/nrkradio.js?v=231"></script>
+  <script src="js/drills.js?v=231"></script>
+  <script src="js/genders.js?v=231"></script>
+  <script src="js/progress.js?v=231"></script>
+  <script src="js/create.js?v=231"></script>
+  <script src="js/social.js?v=231"></script>
+  <script src="js/listen.js?v=231"></script>
+  <script src="js/listenx.js?v=231"></script>
+  <script src="js/listenui.js?v=231"></script>
+  <script src="js/interpreter.js?v=231"></script>
+  <script src="js/share.js?v=231"></script>
+  <script src="js/avatar.js?v=231"></script>
+  <script src="js/shareapp.js?v=231"></script>
+  <script src="js/guides.js?v=231"></script>
+  <script src="js/tgchan.js?v=231"></script>
+  <script src="js/tgvideo.js?v=231"></script>
+  <script src="js/tgaudio.js?v=231"></script>
+  <script src="js/audiocourse.js?v=231"></script>
+  <script src="js/frameocr.js?v=231"></script>
+  <script src="js/help.js?v=231"></script>
+  <script src="js/gramterms.js?v=231"></script>
+  <script src="js/ordtrainer.js?v=231"></script>
+  <script src="js/provenance.js?v=231"></script>
+  <script src="js/cardmaker.js?v=231"></script>
+  <script src="js/trnotice.js?v=231"></script>
+  <script src="js/sample.js?v=231"></script>
+  <script src="js/ui.js?v=231"></script>
+  <script src="js/bookshelf.js?v=231"></script>
+  <script src="js/views.js?v=231"></script>
+  <script src="js/account.js?v=231"></script>
+  <script src="js/signin.js?v=231"></script>
+  <script src="js/cloudsync.js?v=231"></script>
+  <script src="js/study.js?v=231"></script>
+  <script src="js/artcards.js?v=231"></script>
+  <script src="js/artcards-no.js?v=231"></script>
+  <script src="js/levels.js?v=231"></script>
+  <script src="js/mycourse.js?v=231"></script>
+  <script src="js/klokka.js?v=231"></script>
+  <script src="js/prove.js?v=231"></script>
+  <!-- v212: ⭐ очки, 🌅 фраза дня, 🎯 тест уровня, 🧪 тренировка Norskprøven (css/practice.css — lazy) -->
+  <script src="js/xp.js?v=231"></script>
+  <script src="js/phraseday.js?v=231"></script>
+  <script src="js/leveltest.js?v=231"></script>
+  <script src="js/examtrainer.js?v=231"></script>
+  <script src="js/dialogs.js?v=231"></script>
+  <script src="js/gramref.js?v=231"></script>
+  <script src="js/coachmarks.js?v=231"></script>
+  <script src="js/aihub.js?v=231"></script>
+  <!-- 🔑 «Войти в Claude» одной кнопкой (мост открывает Терминал с tools/claude-token.sh) -->
+  <script src="js/claudelogin.js?v=231"></script>
+  <script src="js/showcase.js?v=231"></script>
+  <script src="js/learnby.js?v=231"></script>
+  <script src="js/continue.js?v=231"></script>
+  <script src="js/mypath.js?v=231"></script>
+  <script src="js/navigator.js?v=231"></script>
+  <script src="js/about.js?v=231"></script>
+  <script src="js/app.js?v=231"></script>
+  <script src="js/aichooser.js?v=231"></script>
+  <script src="js/mobile.js?v=231"></script>
+  <!-- ⬅ one Back for the whole app: browser Back, Esc, the Android button (js/nav.js) -->
+  <script src="js/nav.js?v=231"></script>
 </body>
 </html>

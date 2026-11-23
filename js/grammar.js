@@ -7,6 +7,8 @@
  * Only short parts are stored in the card; the whole topic stays on the author's site.
  */
 (function () {
+  /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — on the site its hints are not shown */
+  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
   const BASE = 'https://grammatikk.com/';
   const AUTHOR = 'Kjell H. Ullestad';
   const GROUPS = {
@@ -287,7 +289,7 @@
       const m = UI.modal({
         title: '📐 Грамматика · grammatikk.com', cls: 'wide gk-modal',
         body: `<div class="lib-intro">📐 <span>Бесплатные материалы по грамматике норвежского от <b>${AUTHOR}</b> (grammatikk.com). ${word ? `Подобрано к «<b>${U.esc(word)}</b>»: нажмите тему — увидите объяснение с переводом на русский и сможете добавить нужное в карточку.` : 'Выберите тему.'}</span></div>
-          ${!bridge ? '<div class="mt-warn"><span>ℹ️</span><span>Сайт не даёт приложению прочитать PDF напрямую — тема откроется для чтения здесь же. <b>Перевод на русский и «В карточку»</b> работают, когда запущен мост на Mac (в облачной версии будет работать само).</span></div>' : ''}
+          ${!bridge ? '<div class="mt-warn"><span>ℹ️</span><span>Сайт не даёт приложению прочитать PDF напрямую — тема откроется для чтения здесь же. ' + (onMac() ? '<b>Перевод на русский и «В карточку»</b> работают, когда запущен мост на Mac (в облачной версии будет работать само).' : 'Чтобы <b>перевести тему и перенести её в карточку</b>, откройте тему, нажмите «↗ PDF на сайте», скачайте файл и выберите его здесь.') + '</span></div>' : ''}
           ${card ? `<div class="gk-sec">${found.length ? `К этой карточке подходят:` : 'Для этого слова нет отдельной темы — посмотрите список ниже'}${bridge ? ` <button class="btn sm ghost" data-gk-search title="Скачать все темы и найти, где встречается это слово (первый раз ~1 минута, потом мгновенно)">🔍 Найти «${U.esc(word.slice(0, 24))}» во всех темах</button>` : ''}</div>
           <div class="gk-list" data-found>${found.map(f => this.topicBtn(f.t, f.why)).join('')}</div>` : ''}
           <div class="gk-reader" data-reader hidden></div>
@@ -330,8 +332,8 @@
       try { paras = await this.load(t); } catch (e) {
         if (this._cur.t !== t) return;
         // the app can't read the PDF by itself: show it, and offer to pick the downloaded file → translate → card
-        box.innerHTML = head + `<div class="mt-warn"><span>${e.nobridge ? 'ℹ️' : '⚠️'}</span><span>${e.nobridge ? 'Сайт не даёт приложению прочитать тему напрямую.' : U.esc(e.message) + '.'}
-            Чтобы <b>перевести тему и перенести её в карточку</b>: ${e.nobridge ? 'запустите мост на Mac — или' : 'перезапустите мост (в Терминале: <code>python3 bridge/server.py</code>) — или'}
+        box.innerHTML = head + `<div class="mt-warn"><span>${e.nobridge ? 'ℹ️' : '⚠️'}</span><span>${e.nobridge ? 'Сайт не даёт приложению прочитать тему напрямую.' : U.esc(U.niceErr(e)) + '.'}
+            Чтобы <b>перевести тему и перенести её в карточку</b>: ${!onMac() ? '' : e.nobridge ? 'запустите мост на Mac — или' : 'перезапустите мост (в Терминале: <code>python3 bridge/server.py</code>) — или'}
             нажмите «↗ PDF на сайте», скачайте файл и выберите его здесь:</span></div>
           <label class="btn primary gk-file">📄 Выбрать скачанный PDF — перевести и перенести<input type="file" accept="application/pdf,.pdf" hidden data-gk-file></label>
           <iframe class="gk-pdf" src="${url(t)}" title="${U.esc(t.no)}"></iframe>`;

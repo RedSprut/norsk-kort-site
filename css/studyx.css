@@ -1,0 +1,203 @@
+/* ============ Study card extras (js/study.js loads this on first use, same ?v= as study.js) ============
+ * 📄 text cards in 4 views: «По словам» · «По предложениям» · «По абзацам» · «Полностью» (Study.tvHtml)
+ * ⏯ the reading controls right on the card: ⏮ ⏪ ⏯ ⏩ ⏹ (Study.tvpHtml / tvpPlace), shown while the card is read aloud
+ * Colours come from the theme variables only (dark / light / holiday themes). */
+
+/* ---------- 📄 the views ---------- */
+.tv { width: 100%; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.tv-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.tv-bar.seg-mini { flex-wrap: nowrap; max-width: 100%; opacity: .92; transition: opacity .15s; }
+.tv-bar.seg-mini:hover, .tv-bar.seg-mini:focus-within { opacity: 1; }
+.tv-bar button { min-height: 44px; min-width: 44px; padding: 0 12px; font-size: 13px; line-height: 1.15; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+.tv-bar button:not(.active):hover { color: var(--text); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.tv-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tv-s { display: none; }
+.tv-retry { min-height: 44px; }
+.tv-trb:empty { display: none; }
+.tv-body { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tv-sent .tv-body, .tv-para .tv-body, .tv-full .tv-body { align-items: stretch; text-align: left; }
+/* «По предложениям»: Norwegian sentence, its translation on the next line */
+.tv-para { display: flex; flex-direction: column; gap: 4px; }
+.tv-para + .tv-para { margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--panel-border); }
+.tv-pair, .tv-p { padding: 6px 10px; border-radius: 12px; transition: background-color .25s, box-shadow .25s; }
+.tv-no { font-size: 17px; font-weight: 600; line-height: 1.55; color: var(--text); overflow-wrap: anywhere; }
+.tv-ru { font-size: 15.5px; line-height: 1.5; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+/* «По абзацам» */
+.tv-pp .tv-ru { margin-top: 6px; }
+.tv-pp + .tv-pp { margin-top: 6px; }
+/* «Полностью»: 🇳🇴 Norsk, then 🇷🇺 Русский */
+.tv-h { align-self: flex-start; margin: 6px 0 -2px; font-size: 12.5px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
+.tv-word .tv-h { align-self: center; width: 100%; max-width: 680px; text-align: left; margin-top: 10px; }
+.tv-blk { display: flex; flex-direction: column; gap: 6px; }
+.tv-blk .tv-ru { margin-top: 0; }
+/* translation on its way / did not come */
+.tv-wait { display: flex; flex-direction: column; gap: 7px; padding: 5px 0 3px; }
+.tv-shim { display: block; height: 11px; width: 80%; border-radius: 6px;
+  background: linear-gradient(90deg, var(--panel-border) 0%, color-mix(in srgb, var(--accent) 22%, var(--panel-border)) 50%, var(--panel-border) 100%);
+  background-size: 200% 100%; animation: tvShim 1.3s linear infinite; opacity: .8; }
+.tv-shim:nth-child(2n) { width: 64%; }
+.tv-shim:nth-child(3n) { width: 72%; }
+@keyframes tvShim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.tv-miss { font-size: 13.5px; font-style: italic; opacity: .8; }
+/* reading: the sentence / paragraph being read gets a soft frame, the word being said lights up */
+.tv-now { background: color-mix(in srgb, var(--accent) 13%, transparent); box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 75%, transparent); }
+::highlight(tv-say) { background-color: rgba(255, 196, 0, .42); }
+
+/* a text face: an empty strip on the left for ⏯ (the front without service tiles; the back always has them) */
+.face.front.tv-face:not(.has-rail) { padding-left: 72px; padding-right: 72px; }
+
+/* ---------- ⏯ the reading controls on the card ---------- */
+.tvp {
+  position: absolute; left: 10px; bottom: 10px; z-index: 8; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 5px;
+  border-radius: 28px; border: 1px solid var(--panel-border); cursor: default;
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  transform: translateZ(6px); /* in front of both faces of the turning card */
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .22s ease, visibility 0s linear .22s;
+}
+.tvp.on { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .22s ease, visibility 0s; }
+.tvp.row { flex-direction: row; }
+.tvp .media-btn, .tvp .media-btn.main { width: 44px; height: 44px; flex: none; }
+.tvp .media-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* room for it: a strip on the left (column) or at the bottom (row, when the AI tiles fill the left strip) */
+.flashcard.tvp-gut .face:not(.has-rail):not(.tv-face) { padding-left: 72px; padding-right: 72px; }
+.flashcard.tvp-row .face { padding-bottom: 72px; }
+/* 🎨 the art view: nothing on the picture — the controls stand just left of the card */
+.flashcard.tvp-art .tvp { left: -68px; }
+
+/* ---------- 📱 phone ---------- */
+html.m-phone .study.m-focus .face.front.tv-face:not(.has-rail) { padding-left: 16px; padding-right: 16px; }
+html.m-phone .study.m-focus .face.tv-face .tv { margin-top: 10px; } /* clear of the ✏️ 🔊 buttons in the corner */
+html.m-phone .tv-l { display: none; }
+html.m-phone .tv-s { display: inline; }
+html.m-phone .tv-bar button { padding: 0 9px; font-size: 12.5px; }
+html.m-phone .tv-no { font-size: 16px; }
+html.m-phone .tv-ru { font-size: 14.5px; }
+html.m-phone .tv-pair, html.m-phone .tv-p { padding: 5px 6px; }
+html.m-phone .study.m-focus .tvp { left: 50%; bottom: 8px; flex-direction: row; gap: 2px; padding: 3px; transform: translate3d(-50%, 0, 6px); }
+html.m-phone .study.m-focus .flashcard.tvp-ph .face { padding-bottom: 66px; }
+/* a narrow window on a computer: the short names */
+@media (max-width: 980px) {
+  .tv-l { display: none; }
+  .tv-s { display: inline; }
+  .tv-bar button { padding: 0 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tvp, .tvp.on, .tv-pair, .tv-p, .tv-bar.seg-mini { transition: none; }
+  .tv-shim { animation: none; }
+}
+
+/* ===== «Подробнее»: extra info on the back in blocks that open and close, each with where it came from (Study.extrasHtml) ===== */
+.sx-more { width: 100%; max-width: 640px; margin-top: 6px; text-align: left; }
+.sx-more > summary { list-style: none; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; min-height: 44px; padding: 6px 10px; border-radius: 12px; cursor: pointer;
+  background: color-mix(in srgb, var(--text) 4%, transparent); border: 1px solid var(--panel-border); transition: background .15s, border-color .15s; }
+.sx-more > summary::-webkit-details-marker { display: none; }
+.sx-more > summary:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); border-color: color-mix(in srgb, var(--accent) 35%, var(--panel-border)); }
+.sx-more > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sxm-t { font-weight: 800; font-size: 13.5px; color: var(--text); }
+.sxm-src { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); min-height: 32px; padding: 0 6px; border-radius: 8px; }
+.sxm-src:hover { color: var(--text); background: color-mix(in srgb, var(--text) 7%, transparent); }
+.sxm-src .ico, .sxm-src img, .sxm-src svg { width: 14px; height: 14px; }
+.sxm-n { display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding: 0 3px; border-radius: 8px; font-size: 10.5px; font-weight: 800; line-height: 1; color: #fff; background: var(--accent); vertical-align: 0; }
+.sxm-more { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--accent); }
+.sxm-more svg { transition: transform .2s; }
+.sx-more[open] .sxm-more svg { transform: rotate(180deg); }
+.sx-more .sxm-c, .sx-more[open] .sxm-o { display: none; }
+.sx-more[open] .sxm-c { display: inline; }
+.sx-more > .forms-box, .sx-more > .desc { margin-top: 6px; max-width: none; }
+.sx-more > .forms-box > .fb-title { display: none; } /* the title and the source are in the summary */
+.sx-more > .forms-box > .fb-title + .fg-row, .sx-more > .forms-box > .fb-title + .ex-row { border-top: 0; }
+
+/* ===== ✅ the AI tile on the card: the check popup, the caption under the card, 👀 live ===== */
+.aif-bubble .tr-bubble-head { flex-wrap: wrap; gap: 6px; }
+.aif-bubble .aiw-logo, .aif-cap .aiw-logo { flex: none; }
+.aif-load { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.aif-swap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; font-size: 19px; }
+.aif-swap s { color: var(--muted); text-decoration-color: var(--bad, #ef4444); text-decoration-thickness: 2px; }
+.aif-swap b { color: var(--good); }
+.aif-reason { font-size: 14px; line-height: 1.45; }
+.aif-list { margin: 0; padding: 0 0 0 2px; list-style: none; font-size: 13.5px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.aif-acts { gap: 8px; flex-wrap: wrap; }
+.aif-acts:empty { display: none; }
+.aif-acts .btn, .aif-cap .btn { min-height: 44px; }
+.aif-chip-fix { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
+.aif-cap { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; width: min(100%, 640px); margin: 10px auto 0; padding: 8px 12px; border-radius: 14px;
+  background: var(--panel); border: 1px solid var(--panel-border); font-size: 14px; line-height: 1.4; }
+.aif-cap-t { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 260px; }
+.aif-cap-a { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.aif-cap .icon-btn { min-width: 44px; min-height: 44px; }
+/* the card while the AI reads it: a glowing frame and a reading line */
+[data-card].aif-live .face { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 34px -6px color-mix(in srgb, var(--accent) 60%, transparent); }
+[data-card].aif-reading .face::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 36%; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent) 70%, color-mix(in srgb, var(--accent) 55%, transparent) 72%, transparent 74%);
+  animation: aifScan 1.6s ease-in-out infinite; }
+@keyframes aifScan { from { transform: translateY(-40%); } to { transform: translateY(220%); } }
+.aif-typing-host .aif-old { transition: color .3s, opacity .4s; }
+.aif-typing-host .aif-old.gone { text-decoration: line-through; text-decoration-color: var(--bad, #ef4444); text-decoration-thickness: 3px; color: var(--muted); opacity: .6; }
+.aif-typing-host .aif-new { color: var(--good); }
+.aif-typing-host .aif-new:not(:empty)::after { content: ""; display: inline-block; width: 2px; height: .9em; margin-left: 2px; background: currentColor; vertical-align: -.1em; animation: aifCaret .8s steps(1) infinite; }
+@keyframes aifCaret { 50% { opacity: 0; } }
+.word.aif-flash { animation: aifFlash 1.2s ease; border-radius: 10px; }
+@keyframes aifFlash { 0% { background: color-mix(in srgb, var(--good) 28%, transparent); } 100% { background: transparent; } }
+.fg-row.aif-pre { opacity: 0; transform: translateX(-10px); }
+.fg-row.aif-in, .example.aif-in { animation: aifIn .5s ease both; }
+@keyframes aifIn { from { opacity: 0; transform: translateX(-10px); background: color-mix(in srgb, var(--good) 24%, transparent); } to { opacity: 1; transform: none; background: transparent; } }
+@media (max-width: 560px) {
+  .aif-cap { margin-top: 8px; }
+  .aif-cap-a { width: 100%; }
+  .aif-cap-a .btn { flex: 1 1 auto; justify-content: center; }
+  .sxm-more .sxm-o, .sxm-more .sxm-c { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-card].aif-reading .face::after { animation: none; opacity: .5; transform: none; }
+  .fg-row.aif-in, .example.aif-in, .word.aif-flash, .aif-typing-host .aif-new::after { animation: none; }
+  .fg-row.aif-pre { transform: none; }
+  .sxm-more svg { transition: none; }
+}
+
+/* ---------- 📚 word forms: «presens · настоящее время — håper — надеюсь» (labels from AI.FORM_TAGS, js/ai.js) ----------
+ * a wide box (≥ 600px): one line per form · narrower (the card on a laptop, a phone): the name on the first line,
+ * «the word — its translation» on the second; 🔊 ✎ on the right */
+.forms-box.fg-v2 { container: fgbox / inline-size; }
+.forms-box.fg-v2[data-forms-box] .fg-row, .fg-row.fg-v2r {
+  grid-template-columns: minmax(150px, 32%) minmax(0, max-content) auto minmax(0, 1fr) auto;
+  grid-template-areas: "lab no dash tr btn"; gap: 2px 8px; align-items: center; padding: 5px 4px; }
+.forms-box.fg-v2 .fg-row > .fg-label, .fg-row.fg-v2r > .fg-label { grid-area: lab; font-size: 12.5px; font-weight: 500; line-height: 1.3; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.forms-box.fg-v2 .fg-row > .fg-no, .fg-row.fg-v2r > .fg-no { grid-area: no; font-size: 16px; min-width: 0; overflow-wrap: anywhere; }
+.forms-box.fg-v2 .fg-row > .fg-dash, .fg-row.fg-v2r > .fg-dash { grid-area: dash; color: var(--muted); opacity: .7; }
+.forms-box.fg-v2 .fg-row > .fg-ru, .fg-row.fg-v2r > .fg-ru { grid-area: tr; min-width: 0; color: var(--ru, var(--text)); font-size: 15px; }
+.forms-box.fg-v2 .fg-row > .fg-btns, .fg-row.fg-v2r > .icon-btn { grid-area: btn; align-self: center; }
+.forms-box.fg-v2 .fg-tr { min-height: 44px; padding: 2px 6px; }
+.forms-box.fg-v2 .fg-tr:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.forms-box.fg-v2 .fg-row:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); border-radius: 10px; }
+.fl-no { color: var(--text); font-weight: 650; }
+.fl-dot { opacity: .55; }
+.fl-ru { color: var(--muted); }
+.fl-note { color: var(--muted); font-style: italic; }
+.fl { cursor: help; }
+.fg-gender { font-size: 12.5px; margin: -2px 4px 4px; color: var(--muted); }
+.fg-gender .fl-no { font-weight: 650; }
+.fg-gender.fg-g-m .fl-no { color: #3b82f6; }
+.fg-gender.fg-g-f .fl-no { color: #ec4899; }
+.fg-gender.fg-g-n .fl-no { color: #10b981; }
+.fg-gender.fg-g-mf .fl-no { color: #a855f7; }
+.fg-row.fg-v2r > .icon-btn.sm { width: 44px; height: 44px; font-size: 15px; }
+@container fgbox (max-width: 600px) {
+  .forms-box.fg-v2[data-forms-box] .fg-row {
+    grid-template-columns: minmax(0, max-content) auto minmax(0, 1fr) auto;
+    grid-template-areas: "lab lab lab lab" "no dash tr btn"; gap: 0 6px; padding: 6px 2px; }
+  .forms-box.fg-v2 .fg-row > .fg-label { font-size: 12px; }
+  .forms-box.fg-v2 .fg-row > .fg-btns { gap: 2px; }
+}
+@media (max-width: 720px) {
+  .forms-box.fg-v2[data-forms-box] .fg-row, .fg-row.fg-v2r {
+    grid-template-columns: minmax(0, max-content) auto minmax(0, 1fr) auto;
+    grid-template-areas: "lab lab lab lab" "no dash tr btn"; gap: 0 6px; padding: 6px 2px; }
+  .forms-box.fg-v2 .fg-row > .fg-label, .fg-row.fg-v2r > .fg-label { font-size: 12px; }
+  .forms-box.fg-v2 .fg-row > .fg-no, .fg-row.fg-v2r > .fg-no { font-size: 15.5px; }
+  .forms-box.fg-v2 .fg-row > .fg-ru, .fg-row.fg-v2r > .fg-ru { font-size: 14.5px; }
+  .forms-box.fg-v2 .fg-tr { padding: 2px 4px; }
+  .forms-box.fg-v2 .fg-row > .fg-btns { gap: 2px; }
+}
+@media (hover: none) { .forms-box.fg-v2 .fg-row:hover { background: none; } }

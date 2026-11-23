@@ -28,8 +28,13 @@
     },
     isLong(s) { s = String(s || ''); return s.length > 60 || s.includes('\n'); },
 
+    /** 🙂 any error → a calm Russian sentence (no «Failed to fetch»); the technical detail goes to console.warn only.
+     *  UI.friendlyError(e, 'Перевод') → «Перевод: нет интернета — попробуйте, когда связь появится» */
+    friendlyError(e, context) { return U.niceErr(e, context); },
+
     /* ---------- toasts ---------- */
     toast(msg, type = '', ms = 3200) {
+      msg = U.calm(msg); // never «Failed to fetch» / «NetworkError…» on screen (js/util.js)
       const el = document.createElement('div');
       el.className = 'toast ' + type;
       el.innerHTML = `<span>${type === 'good' ? '✅' : type === 'bad' ? '⛔' : type === 'warn' ? '⚠️' : 'ℹ️'}</span><span>${U.esc(msg)}</span>`;
@@ -41,6 +46,7 @@
     },
     /** toast with an action button, e.g. "Удалено · ↶ Вернуть" */
     toastAction(msg, label, fn, ms = 10000, icon = '🗑') {
+      msg = U.calm(msg);
       const el = document.createElement('div');
       el.className = 'toast warn toast-action';
       el.innerHTML = `<span>${icon}</span><span>${U.esc(msg)}</span><button class="btn sm primary">${label}</button><span class="toast-timer"></span>`;
@@ -59,7 +65,7 @@
       document.getElementById('toast-root').appendChild(el);
       return {
         set(done, total, m) {
-          if (m) el.querySelector('.pt-msg').textContent = m;
+          if (m) el.querySelector('.pt-msg').textContent = U.calm(m);
           el.querySelector('.fill').style.width = (total ? Math.round(done / total * 100) : 0) + '%';
         },
         close(finalMsg, type) {
@@ -107,7 +113,7 @@
       document.addEventListener('keydown', onKey, true);
       bd.addEventListener('mousedown', e => { if (e.target === bd && dismissable) tryClose(); });
       bd.querySelector('[data-close]').onclick = () => tryClose();
-      const m = { el: bd.querySelector('.modal'), close, tryClose, $: s => bd.querySelector(s), $$: s => [...bd.querySelectorAll(s)] };
+      const m = { el: bd.querySelector('.modal'), close, tryClose, dismissable, $: s => bd.querySelector(s), $$: s => [...bd.querySelectorAll(s)] };
       bd._m = m; // 🏠 «на главный экран» closes every window through it (asking about unsaved changes)
       onMount && onMount(m);
       UI.fitBody(m);
@@ -310,6 +316,7 @@
       const outside = e => { if (!pop.contains(e.target) && !anchor.contains(e.target)) close(); };
       const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
       setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', esc, true); }, 0);
+      pop._close = close; // Back / Esc (js/nav.js) close the bubble the same way
       return { el: pop, close };
     },
 
@@ -332,8 +339,10 @@
           document.body.appendChild(el);
         }
         el.classList.remove('out');
-        el.innerHTML = `<span class="hourglass" aria-hidden="true">⏳</span><div class="busy-txt"><b>${U.esc(top.text)}</b>${top.sub ? `<small>${U.esc(top.sub)}</small>` : ''}
+        // 🌀 while an AI or a translator works, its living logo takes the hourglass's place (js/aihub.js paints it)
+        el.innerHTML = `<span class="hourglass" data-aiw-live="tr,ai" data-aiw-idle="hg" data-aiw-size="34" aria-hidden="true">⏳</span><div class="busy-txt"><b>${U.esc(top.text)}</b>${top.sub ? `<small>${U.esc(top.sub)}</small>` : ''}
           ${top.pct != null ? `<div class="busy-bar"><i style="width:${top.pct}%"></i></div>` : '<div class="busy-bar indet"><i></i></div>'}</div>`;
+        if (window.AIHub && AIHub.paintWork) AIHub.paintWork();
       };
       const timer = setTimeout(() => { item.shown = true; draw(); }, 350);
       return {
@@ -437,7 +446,7 @@
     /** 🔒 explanation for the user: API keys never leave their device */
     keysNoteHtml() {
       return `<details class="keys-note" ${Store.settings.keysNoteSeen ? '' : 'open'}>
-        <summary>🔒 <b>Ваши ключи — только у вас.</b> <span class="small muted">Подробнее</span></summary>
+        <summary>${window.NavIcons ? NavIcons.icon('lock', 18) : ''} <b>Ваши ключи — только у вас.</b> <span class="small muted">Подробнее</span></summary>
         <ul>
           <li>Все ключи, которые вы вводите (нейросети, DeepL, Microsoft, голоса, YouTube, ВКонтакте…), <b>хранятся только на этом устройстве</b> — в памяти этого браузера (в приложении для телефона — в защищённом хранилище iPhone / Android).</li>
           <li>Разработчики приложения <b>не имеют к ним доступа</b>: ключи не отправляются на наш сервер, не попадают в облачную синхронизацию, на GitHub и в резервные копии (файл бэкапа сохраняется без ключей).</li>

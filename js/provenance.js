@@ -5,6 +5,7 @@
  *   f:  { field: { old, new } }   n: note
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   // clear line icons (the 📥 / ✍️ emoji were too small to recognise on the card)
   const SVG = {
     // arrow going down into a box = "imported from a file / another app"
@@ -45,11 +46,11 @@
     icon(by, size = 16) {
       if (BASE[by]) return SVG[by](size);
       const [k, id] = String(by).split(':');
-      if (k === 'ai') return AI.icon(id, size, Prov.name(by)) || '🤖';
+      if (k === 'ai') { const h = AI.icon(id, size, Prov.name(by)); return h && !/>🤖</.test(h) ? h : BOT(size); }
       if (k === 'tr' && Translators.LIST[id]) {
         const t = Translators.LIST[id];
         if (t.emoji) return Translators.icon(id, size);
-        return t.ai ? '🤖' : `<img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${t.domain}&sz=64" width="${size}" height="${size}" alt="${U.esc(t.name)}" onerror="this.replaceWith(document.createTextNode('🌐'))">`;
+        return t.ai ? BOT(size) : `<img class="ai-ico" src="https://www.google.com/s2/favicons?domain=${t.domain}&sz=64" width="${size}" height="${size}" alt="${U.esc(t.name)}" onerror="this.replaceWith(document.createTextNode('🌐'))">`;
       }
       return '❔';
     },

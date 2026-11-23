@@ -257,6 +257,29 @@
 .hd-dots i.on { margin: 0 5px; transform: scaleX(2.3); background: linear-gradient(90deg, var(--hc1), var(--hc2)); }
 .hd-cap { min-height: 2.8em; font-size: 13px; line-height: 1.4; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .hd-cap b { margin-right: 4px; color: var(--text); white-space: nowrap; }
+/* 🎤 «Бегущая строка»: kp — said, kc — being said (with its translation), the rest dim / not yet shown (wbw) */
+.hd-kar .hd-w { opacity: .42; transition: opacity .25s, background .25s, box-shadow .25s; }
+.hd-kar .hd-w i { opacity: 1; transform: none; }
+.hd-kar.idle .hd-w { opacity: 1; }
+.hd-kar .hd-w.kp { opacity: 1; }
+.hd-kar .hd-w.kc { opacity: 1; background: rgba(236, 64, 150, .85); box-shadow: 0 0 0 2px rgba(236, 64, 150, .85), 0 0 14px rgba(255, 90, 170, .6); }
+.hd-kar.wbw .hd-w { visibility: hidden; }
+.hd-kar.wbw .hd-w.kp, .hd-kar.wbw .hd-w.kc { visibility: visible; }
+.hd-kar.wbw .hd-w.kc { animation: hdKarPop .35s ease-out; }
+@keyframes hdKarPop { from { opacity: 0; transform: translateY(5px) scale(.85); } }
+.hd-voice { position: absolute; left: 4px; top: -30px; display: inline-flex; align-items: center; gap: 2px; padding: 0 6px; border-radius: 999px; font-size: 11px; background: rgba(0, 0, 0, .45); }
+.hd-voice .hd-wave { height: 14px; gap: 2px; }
+.hd-voice .hd-wave i { width: 2px; }
+.hd-kar.go .hd-voice .hd-wave i { animation: hdWave .7s ease-in-out infinite; animation-delay: calc(var(--k) * -.12s); }
+.hd-knote { display: none; position: absolute; right: 4px; top: -30px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: #fff; background: rgba(224, 72, 79, .85); }
+.hd-kar.late .hd-knote, .hd-knote.ok { display: block; }
+.hd-knote.ok { background: rgba(21, 163, 98, .9); }
+.hd-kbar, .hd-ksh { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; }
+.hd-kbtn.on { color: #fff; border-color: transparent; background: linear-gradient(135deg, #ff6fb5, #7c6cff); }
+.hd-ksh small { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.hd-ksh .hd-rb { font-size: 16px; font-weight: 800; }
+.hd-kv { min-width: 52px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; transition: color .3s; }
+.hd-kv.ok { color: #3ccf8e; }
 /* paused / scrolled away: the little screen's own loops stand still too */
 .hd.frozen .hd-stage *, .hd.frozen .hd-stage *::before { animation-play-state: paused !important; }
 

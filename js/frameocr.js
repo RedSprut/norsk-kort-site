@@ -1,9 +1,10 @@
 /* ============ 🔎 «Найти слова в кадре» — the words burned into a video frame → cards ============
  * The subtitle player (js/subs.js) calls FrameOcr.open({ video, at, label, url, key, deck, deckId, onDone, onClose })
- * on a paused video (a Telegram author's video through the Mac bridge, or the user's own file — both from THIS site,
- * so the frame can be read: drawImage → canvas is not «tainted»; a frame from another site is refused politely).
+ * on a paused video (a Telegram author's video through the Mac bridge, the user's own file, NRK TV — a picture the page
+ * may read: drawImage → canvas is not «tainted»; a frame from another site without CORS is refused politely).
  *  - Tesseract.js (cdn.jsdelivr.net, loaded only when asked; the CSP allows jsdelivr, blob: workers and WebAssembly)
- *    with the Norwegian dictionary «nor» — asked once with its size (≈ 6 МБ, then from the browser's cache);
+ *    with the Norwegian + English models «nor», «eng» — asked once with its size (≈ 7 МБ, then from the browser's cache);
+ *  - 📝 FrameOcr.auto — the same engine for «Надписи в кадре» (js/subs.js reads the picture by itself while it plays);
  *  - the frame is enlarged for small captions; lines → phrases, words → chips with their boxes on the frame;
  *  - ticked words / phrases go to CardMaker (⚡ automatically or ✍️ by hand): a word in a sentence is translated
  *    MEANING FIRST (the sentence is translated, the word takes its meaning from it — Study.translateUnits/glossInfo);
@@ -12,7 +13,8 @@
  */
 (function () {
   const OK_KEY = 'nk-frameocr-ok';
-  const SIZE = '≈ 6 МБ';
+  // Tesseract.js core (≈ 1,5 МБ) + the Norwegian (≈ 2,5 МБ) and English (≈ 3 МБ) models — measured, compressed
+  const SIZE = '≈ 7 МБ';
   const esc = s => U.esc(s == null ? '' : String(s));
   const mss = t => { t = Math.max(0, Math.floor(t || 0)); const h = Math.floor(t / 3600); return h ? `${h}:${String(Math.floor(t % 3600 / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}` : `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
   const bare = w => String(w || '').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
@@ -20,14 +22,18 @@
   const NOR_WORD = /^[A-Za-zÆØÅæøåÉéÈèÊêÓóÒòÔôÜüÄäÖö]+(?:[-'][A-Za-zÆØÅæøåÉéÈèÊêÓóÒòÔôÜüÄäÖö]+)*$/;
   let workerP = null;
 
-  /** one Tesseract worker for Norwegian (the shared 4-language one from the photo import is used if it is already there) */
+  /** one Tesseract worker (its own Web Worker) for Norwegian + English — the shared 4-language one from the photo
+   *  import is used if it is already there. onLog: the download / reading progress (undefined — the listener stays) */
+  let workerOk = false;
   function worker(onLog) {
-    FrameOcr._onLog = onLog || null;
+    if (onLog !== undefined) FrameOcr._onLog = onLog || null;
     if (U.lib._ocr) return Promise.resolve(U.lib._ocr);
     if (!workerP) {
       workerP = (async () => {
         await U.loadScript(U.LIBS.tesseract);
-        return window.Tesseract.createWorker('nor', 1, { logger: m => { if (FrameOcr._onLog) FrameOcr._onLog(m); } });
+        const w = await window.Tesseract.createWorker(['nor', 'eng'], 1, { logger: m => { if (FrameOcr._onLog) FrameOcr._onLog(m); } });
+        workerOk = true;
+        return w;
       })();
       workerP.catch(() => { workerP = null; });
     }
@@ -120,10 +126,10 @@
 
   /** the first time: what will be downloaded, how big, that the frame stays here */
   async function consent() {
-    try { if (localStorage.getItem(OK_KEY) || U.lib._ocr) return true; } catch (e) { /* private mode */ }
+    try { if (localStorage.getItem(OK_KEY) || localStorage.getItem(AUTO_KEY) === 'yes' || U.lib._ocr || workerOk) return true; } catch (e) { /* private mode */ }
     const ok = await UI.confirm(`<div class="fo-consent">
         <p><b>Приложение прочитает надписи, впечатанные в этот кадр</b> — титры, слова на доске, подписи — и покажет найденные слова и фразы: отметьте нужные, и они станут карточками.</p>
-        <p>Для этого <b>один раз</b> скачивается модуль распознавания текста и словарь норвежского языка — <b>${SIZE}</b> (с cdn.jsdelivr.net). Потом он берётся из памяти браузера.</p>
+        <p>Для этого <b>один раз</b> скачивается модуль распознавания текста с норвежским и английским — <b>${SIZE}</b> (с cdn.jsdelivr.net). Потом он берётся из памяти браузера.</p>
         <p class="small muted">🔒 Кадр обрабатывается прямо на этом устройстве и никуда не отправляется. На телефоне чтение кадра занимает несколько секунд.</p></div>`,
     { ok: `⬇ Скачать (${SIZE}) и найти слова`, cancel: 'Не сейчас', title: '🔎 Найти слова в кадре' });
     if (ok) { try { localStorage.setItem(OK_KEY, '1'); } catch (e) { /* private mode */ } }
@@ -256,6 +262,139 @@
         onDone: cards => { if (o.onDone) o.onDone(cards); if (m && m.el && m.el.isConnected) m.close(); },
       });
     },
+  };
+
+  /* ============ 📝 «Надписи в кадре» — read by themselves while the video plays (js/subs.js drives it: when, how often,
+   * stability, translation, the line on the video). Here: a small copy of the frame (≤ 960 px wide, grey; a dark picture
+   * is turned light so white letters on black read as print), a cheap «are there letters at all» count of sharp strokes,
+   * a fingerprint to notice an unchanged picture, and a strict reading: confident Norwegian / English words only, the
+   * corners (channel logo, age mark, clock) ignored, spaced capitals «H Å P» joined into one word. ============ */
+  const AUTO_KEY = 'nk-ink-dl'; // the answer to «Скачать распознавание надписей?»: 'yes' | 'no'
+  const AUTO_W = 960;
+  const ONE = /^(i|å|o|I|Å|O)$/; // one-letter words that are real words
+  const FP_W = 32, FP_H = 18;
+  function autoGrab(video) {
+    const w = video.videoWidth, h = video.videoHeight;
+    if (!w || !h || video.readyState < 2) return null;
+    const k = Math.min(1, AUTO_W / w), W = Math.max(2, Math.round(w * k)), H = Math.max(2, Math.round(h * k));
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(video, 0, 0, W, H);
+    let d;
+    try { d = g.getImageData(0, 0, W, H); } catch (e) { throw Object.assign(new Error('tainted'), { tainted: true }); }
+    const a = d.data, n = W * H, grey = new Uint8ClampedArray(n);
+    let sum = 0;
+    for (let i = 0, j = 0; j < n; i += 4, j++) { const y = (a[i] * 77 + a[i + 1] * 150 + a[i + 2] * 29) >> 8; grey[j] = y; sum += y; }
+    const mean = sum / n;
+    // sharp steps of brightness along every other row — letters make many; the corners (logos) are not counted
+    let edges = 0;
+    const cx = W * 0.14, cy = H * 0.16;
+    for (let y = 1; y < H; y += 2) {
+      const row = y * W, band = y < cy || y > H - cy;
+      for (let x = 1; x < W; x++) {
+        if (band && (x < cx || x > W - cx)) continue;
+        const dd = grey[row + x] - grey[row + x - 1];
+        if (dd > 80 || dd < -80) edges++;
+      }
+    }
+    // the fingerprint: the mean brightness of 32×18 cells (every pixel counts — a thin line of letters on black too)
+    const fs = new Uint32Array(FP_W * FP_H), fc = new Uint32Array(FP_W * FP_H);
+    for (let y = 0; y < H; y++) {
+      const gy = Math.min(FP_H - 1, Math.floor(y * FP_H / H)) * FP_W, row = y * W;
+      for (let x = 0; x < W; x++) { const c = gy + Math.min(FP_W - 1, Math.floor(x * FP_W / W)); fs[c] += grey[row + x]; fc[c]++; }
+    }
+    const fp = new Uint8Array(FP_W * FP_H);
+    for (let c = 0; c < fp.length; c++) fp[c] = fc[c] ? Math.round(fs[c] / fc[c]) : 0;
+    fp.edges = edges;
+    const inv = mean < 110;
+    for (let i = 0, j = 0; j < n; i += 4, j++) { const y = inv ? 255 - grey[j] : grey[j]; a[i] = a[i + 1] = a[i + 2] = y; a[i + 3] = 255; }
+    g.putImageData(d, 0, 0);
+    return { canvas: c, W, H, edges: Math.round(edges * AUTO_W / W), mean, fp, inv };
+  }
+  /** two fingerprints of practically the same picture (no cell changed noticeably, the same amount of sharp strokes) */
+  function fpSame(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    let s = 0, mx = 0;
+    for (let i = 0; i < a.length; i++) { const d = Math.abs(a[i] - b[i]); s += d; if (d > mx) mx = d; }
+    const ea = a.edges || 0, eb = b.edges || 0;
+    return s / a.length < 1.5 && mx < 6 && Math.abs(ea - eb) <= Math.max(30, Math.max(ea, eb) * 0.12);
+  }
+  const union = ws => ws.reduce((b, w) => (!w.box ? b : !b ? Object.assign({}, w.box) : { x0: Math.min(b.x0, w.box.x0), y0: Math.min(b.y0, w.box.y0), x1: Math.max(b.x1, w.box.x1), y1: Math.max(b.y1, w.box.y1) }), null);
+  /** «H Å P» (a title with wide letter spacing: one letter per «word») → «HÅP» */
+  function joinSpaced(ws) {
+    const out = [];
+    const one = w => w.text === bare(w.text) && /^\p{Lu}$/u.test(w.text);
+    for (let i = 0; i < ws.length;) {
+      let j = i; while (j < ws.length && one(ws[j])) j++;
+      if (j - i >= 3) {
+        const grp = ws.slice(i, j);
+        out.push({ text: grp.map(w => w.text).join(''), conf: Math.min(...grp.map(w => w.conf)), box: union(grp), spaced: true });
+        i = j;
+      } else { out.push(ws[i]); i++; }
+    }
+    return out;
+  }
+  /** Tesseract's answer → the confident lines [{ text, conf, box, h (letter height / frame height), spaced }] top to bottom */
+  function autoLines(data, W, H) {
+    let lines = [];
+    if (data && Array.isArray(data.blocks) && data.blocks.length) data.blocks.forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(l => lines.push(l))));
+    else if (data && Array.isArray(data.lines)) lines = data.lines;
+    const corner = b => { if (!b) return false; const x = (b.x0 + b.x1) / 2, y = (b.y0 + b.y1) / 2; return (x < W * 0.14 || x > W * 0.86) && (y < H * 0.16 || y > H * 0.84); };
+    const out = [];
+    lines.forEach(l => {
+      let ws = (l.words || []).map(w => ({ text: String(w.text || '').trim(), conf: +w.confidence || 0, box: w.bbox })).filter(w => w.text && !corner(w.box));
+      if (!ws.length) return;
+      ws = joinSpaced(ws);
+      const ok = w => { const b = bare(w.text); return NOR_WORD.test(b) && (b.length >= 2 || ONE.test(b)) && w.conf >= 60 && !/[^\p{L}\p{N}\s.,!?:;«»"'()\-–—…]/u.test(w.text); };
+      const good = ws.filter(ok);
+      if (!good.length || good.length < ws.length * 0.6) return; // more noise than words: a texture, a logo
+      const conf = good.reduce((s, w) => s + w.conf, 0) / good.length;
+      if (conf < 72) return;
+      if (!good.some(w => bare(w.text).length >= 3)) return;
+      const hs = good.map(w => (w.box ? w.box.y1 - w.box.y0 : 0)).sort((x, y) => x - y);
+      const text = good.map(w => w.text).join(' ').replace(/\s+([,.!?;:])/g, '$1').replace(/^[^\p{L}\p{N}«"(]+|[^\p{L}\p{N}.!?…»")]+$/gu, '').trim();
+      if (!text) return;
+      // 🎬 credits: «Andrea Bræin Hovig — Anja», «Regi ........ Ole Hansen» — the parts of a line split at a dash / dots
+      // or a wide gap (two columns), so the person and the role (or the character) are told apart
+      const mh = hs[hs.length >> 1] || 0, cols = [];
+      let cur = [], prevX = null;
+      ws.forEach(w => {
+        const sep = /^[—–\-…·.:|•_]+$/.test(w.text);
+        const gap = w.box && prevX != null && mh ? w.box.x0 - prevX : 0;
+        if ((sep || gap > mh * 1.6) && cur.length) { cols.push(cur); cur = []; }
+        if (!sep && good.includes(w)) cur.push(w.text);
+        if (w.box) prevX = w.box.x1;
+      });
+      if (cur.length) cols.push(cur);
+      out.push({ text, conf, box: union(good), h: (hs[hs.length >> 1] || 0) / H, spaced: good.some(w => w.spaced), cols: cols.length > 1 ? cols.map(c => c.join(' ')) : null });
+    });
+    out.sort((a, b) => (a.box ? a.box.y0 : 0) - (b.box ? b.box.y0 : 0));
+    return out;
+  }
+  FrameOcr.auto = {
+    SIZE,
+    /** the reading engine is on this device already (this session, or downloaded before and answered «yes») */
+    ready() { return workerOk || !!U.lib._ocr; },
+    answer() {
+      try { return localStorage.getItem(AUTO_KEY) || (localStorage.getItem(OK_KEY) ? 'yes' : ''); } catch (e) { return ''; }
+    },
+    save(v) {
+      try { if (v) localStorage.setItem(AUTO_KEY, v); else localStorage.removeItem(AUTO_KEY); if (v === 'yes') localStorage.setItem(OK_KEY, '1'); } catch (e) { /* private mode */ }
+    },
+    /** the engine (downloaded once): onLog({ status, progress }) while it loads */
+    async load(onLog) {
+      const w = await worker(onLog || null);
+      if (U.lib._ocr) workerOk = true;
+      return w;
+    },
+    grab: autoGrab, same: fpSame,
+    /** shot (from grab) → the confident lines */
+    async read(shot) {
+      const w = await worker();
+      const r = await w.recognize(shot.canvas, {}, { blocks: true, text: true });
+      return autoLines(r && r.data, shot.W, shot.H);
+    },
+    _lines: autoLines, _join: joinSpaced,
   };
 
   window.FrameOcr = FrameOcr;

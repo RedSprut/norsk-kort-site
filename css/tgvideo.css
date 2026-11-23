@@ -110,3 +110,156 @@
 .fo-src { overflow-wrap: anywhere; }
 .fo-consent p { margin: 0 0 8px; line-height: 1.5; }
 @media (max-width: 720px) { .fo-wrap { grid-template-columns: minmax(0, 1fr); } }
+
+/* ============ 📖 «Читать здесь» — a Telegram channel on the site through Telegram's own post widget (js/tgchan.js) ============ */
+.tgc-acts .btn, .tcr .btn, .tg-site .btn, .tgv-gate .btn, .tgcur-seg button { min-height: 44px; }
+.tgc-read { --b: linear-gradient(135deg, var(--tg1, #37bbfe), var(--tg2, #1d8fd8)) !important; --c: #fff; border-color: transparent; }
+.tgc-read:hover { box-shadow: 0 10px 22px -10px var(--tg1, #37bbfe); }
+.tcr { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tcr-head { display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
+.tcr-head .tgc-ava { width: 48px; height: 48px; font-size: 20px; }
+.tcr-back { flex: none; }
+.tcr-back:hover { color: var(--tg1, #37bbfe); }
+.tcr-who { flex: 1 1 160px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tcr-who b { font-size: 17px; line-height: 1.25; overflow-wrap: anywhere; }
+.tcr-who small { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.tcr-open { flex: none; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.tcr-open:hover { border-color: var(--tg1, #37bbfe); background: color-mix(in srgb, var(--tg1, #37bbfe) 14%, var(--panel)); }
+.tcr-about { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+.tcr-note { margin: 0; display: flex; gap: 8px; align-items: flex-start; padding: 9px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.45;
+  background: color-mix(in srgb, var(--tg1, #37bbfe) 8%, var(--panel)); border: 1px solid color-mix(in srgb, var(--tg1, #37bbfe) 30%, transparent); }
+.tcr-status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; padding: 6px 2px; }
+.tcr-status[hidden] { display: none; }
+.tcr-list { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+.tcr-post { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 6px; animation: hcIn .3s ease both; }
+.tcr-post.wait { height: 0; overflow: hidden; margin: -7px 0; animation: none; }
+.tcr-fwrap { width: 100%; min-width: 0; }
+.tcr-frame { display: block; width: 100%; min-width: 0; height: 180px; border: 0; border-radius: 14px; background: transparent; color-scheme: normal; transition: height .2s; }
+.tcr-acts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.tcr-acts .btn { min-height: 44px; text-decoration: none; }
+.tcr-acts a.btn:hover { border-color: var(--tg1, #37bbfe); }
+.tcr-more-row { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.tcr-more { min-width: 200px; }
+.tcr-end { margin: 0; text-align: center; }
+.tcr-probe { position: absolute; left: -10000px; top: 0; width: 360px; height: 1px; overflow: hidden; pointer-events: none; }
+.tcr-probe iframe { width: 360px; height: 120px; border: 0; }
+.tcr-empty { width: 100%; max-width: 560px; }
+.tcr-empty-acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.tcr-empty-acts .btn { min-height: 44px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.tcr-steps { margin: 0 0 10px; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; line-height: 1.45; }
+.tcr-text { width: 100%; min-height: 150px; resize: vertical; font-size: 15px; line-height: 1.45; }
+.tcr-paste .modal-foot .btn { min-height: 44px; }
+@media (max-width: 480px) {
+  .tcr-open, .tcr-back { flex: 1 1 100%; justify-content: center; }
+  .tcr-acts .btn { flex: 1 1 100%; justify-content: center; }
+}
+.tcr-head .tgc-ava { position: relative; overflow: hidden; }
+.tcr-head .tgc-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.tcr-note[hidden], .tcr-tip[hidden] { display: none; }
+.tcr-note.lock { background: color-mix(in srgb, var(--warn, #f5a524) 9%, var(--panel)); border-color: color-mix(in srgb, var(--warn, #f5a524) 35%, transparent); }
+.tcr-tip { display: flex; gap: 8px 10px; align-items: center; flex-wrap: wrap; padding: 9px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.45;
+  background: color-mix(in srgb, var(--accent, #7c6cff) 8%, var(--panel)); border: 1px dashed color-mix(in srgb, var(--accent, #7c6cff) 40%, var(--panel-border)); }
+.tcr-tip > span:nth-child(2) { flex: 1 1 220px; }
+.tcr-tip .btn:hover { border-color: var(--accent, #7c6cff); }
+.tcr-locked p { max-width: 46ch; margin: 4px auto 10px; line-height: 1.5; }
+
+/* 📖 the posts drawn by the app itself (through the user's Telegram on the Mac): one card per post, like Telegram's own */
+.tcn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tcn-post { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 18px; min-width: 0;
+  background: var(--panel-solid, var(--panel)); border: 1px solid var(--panel-border); box-shadow: 0 10px 26px -22px rgba(0, 0, 0, .55); overflow: hidden; animation: hcIn .3s ease both; }
+.tcn-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.tcn-ava { position: relative; flex: none; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-weight: 800;
+  background: linear-gradient(135deg, hsl(var(--h, 200) 70% 58%), hsl(calc(var(--h, 200) + 40) 70% 44%)); }
+.tcn-ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tcn-ava img.broken, .tcr-head .tgc-ava img.broken { display: none; }
+.tcn-who { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tcn-who b { font-size: 15px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tcn-who small { color: var(--muted); font-size: 12.5px; }
+.tcn-text { font-size: 15.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; cursor: text; }
+.tcn-text.clamp { max-height: calc(1.55em * 12); overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.tcn-text a { color: var(--tg1, #1d8fd8); text-decoration: underline; text-underline-offset: 2px; }
+.tcn-text a:hover { text-decoration-thickness: 2px; }
+.tcn-text code { font-size: .92em; padding: 1px 5px; border-radius: 6px; background: color-mix(in srgb, var(--muted) 16%, transparent); }
+.tcn-q { margin: 4px 0; padding: 4px 0 4px 12px; border-left: 3px solid var(--tg1, #37bbfe); white-space: pre-wrap; }
+.tcn-pre { margin: 4px 0; padding: 8px 10px; border-radius: 10px; overflow-x: auto; white-space: pre; font-size: 13.5px; background: color-mix(in srgb, var(--muted) 12%, transparent); }
+.tcn-spoiler { border-radius: 4px; color: transparent; background: color-mix(in srgb, var(--muted) 55%, transparent); cursor: pointer; transition: color .2s, background .2s; }
+.tcn-spoiler.on { color: inherit; background: none; cursor: text; }
+.tcn-more { align-self: flex-start; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--tg1, #1d8fd8); font: inherit; font-weight: 700; cursor: pointer; }
+.tcn-more:hover { text-decoration: underline; }
+.tcn-media { display: grid; gap: 4px; margin: 0 -14px; overflow: hidden; }
+.tcn-media.grid { grid-template-columns: 1fr 1fr; margin: 0; border-radius: 12px; }
+.tcn-media.grid.odd > :first-child { grid-column: span 2; aspect-ratio: 2 / 1; }
+.tcn-tile { position: relative; display: block; width: 100%; padding: 0; border: 0; cursor: zoom-in; overflow: hidden; aspect-ratio: 1; min-height: 44px;
+  background: color-mix(in srgb, var(--muted) 16%, var(--panel)); }
+.tcn-tile img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease, filter .25s; }
+.tcn-tile img.broken { visibility: hidden; }
+.tcn-tile:hover img { transform: scale(1.025); filter: brightness(1.05); }
+.tcn-tile.vid { cursor: pointer; background: #10131f; }
+.tcn-tile.round { width: min(260px, 100%); justify-self: center; border-radius: 50%; }
+.tcn-play { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; display: grid; place-items: center; padding-left: 4px;
+  font-size: 22px; color: #fff; background: rgba(10, 14, 28, .62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: transform .15s, background .15s; }
+.tcn-tile.vid:hover .tcn-play, .tcn-tile.vid:focus-visible .tcn-play { transform: scale(1.08); background: linear-gradient(135deg, var(--tg1, #37bbfe), var(--tg2, #1d8fd8)); }
+.tcn-dur { position: absolute; left: 8px; bottom: 8px; padding: 2px 7px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, .6); }
+.tcn-files { display: flex; flex-direction: column; gap: 6px; }
+.tcn-file { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 12px 6px 6px; border-radius: 14px; border: 1px solid var(--panel-border); text-align: left;
+  background: color-mix(in srgb, var(--tg1, #37bbfe) 6%, var(--panel)); color: var(--text); font: inherit; text-decoration: none; cursor: pointer; transition: border-color .15s, background .15s; }
+.tcn-file:hover { border-color: var(--tg1, #37bbfe); background: color-mix(in srgb, var(--tg1, #37bbfe) 12%, var(--panel)); }
+.tcn-fi { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 15px;
+  background: linear-gradient(135deg, var(--tg1, #37bbfe), var(--tg2, #1d8fd8)); }
+.tcn-file:not(.aud) .tcn-fi { background: color-mix(in srgb, var(--muted) 22%, transparent); }
+.tcn-fn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tcn-file small { flex: none; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tcn-foot { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+.tcn-stats { display: inline-flex; gap: 12px; color: var(--muted); font-size: 13px; margin-right: auto; font-variant-numeric: tabular-nums; }
+.tcn-open { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; font-size: 13px; color: var(--muted); text-decoration: none; border-radius: 10px; }
+.tcn-open:hover, .tcn-open:focus-visible { color: var(--tg1, #1d8fd8); text-decoration: underline; }
+.tcn-card { min-height: 44px; min-width: 150px; justify-content: center; }
+.tcn-card:hover { box-shadow: 0 10px 22px -12px var(--accent, #7c6cff); }
+.tcn-card.sel { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #7c6cff) 35%, transparent); }
+/* while the posts load: the same shape, so nothing jumps when they come */
+.tcn-skel { min-height: 236px; gap: 12px; animation: none; }
+.tcn-skel .tcn-ava.sk { background: color-mix(in srgb, var(--muted) 22%, transparent); }
+.tcn-skel .tcn-who { flex: 1; gap: 7px; }
+.sk-l, .sk-box { display: block; height: 12px; width: 100%; border-radius: 6px; background: linear-gradient(90deg, color-mix(in srgb, var(--muted) 16%, transparent) 30%, color-mix(in srgb, var(--muted) 28%, transparent) 50%, color-mix(in srgb, var(--muted) 16%, transparent) 70%);
+  background-size: 300% 100%; animation: tcnSk 1.3s ease-in-out infinite; }
+.sk-l.w25 { width: 25%; } .sk-l.w45 { width: 45%; } .sk-l.w70 { width: 70%; }
+.sk-box { height: 110px; border-radius: 12px; }
+@keyframes tcnSk { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (max-width: 480px) {
+  .tcn-post { padding: 10px 12px; border-radius: 16px; }
+  .tcn-media { margin: 0 -12px; }
+  .tcn-media.grid { margin: 0; }
+  .tcn-card { flex: 1 1 100%; }
+  .tcn-stats { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tcn-post, .tcr-post { animation: none; }
+  .sk-l, .sk-box { animation: none; }
+  .tcn-tile img, .tcn-play, .tcn-spoiler, .tcn-file { transition: none; }
+  .tcn-tile:hover img { transform: none; }
+}
+
+/* 🔎 the site's search: Telegram's own search, one link per channel */
+.tg-site { display: flex; flex-direction: column; gap: 10px; }
+.tg-site-lead { margin: 0; line-height: 1.45; }
+.tg-site-form { flex-wrap: wrap; }
+.tg-site-form .input { min-width: 0; flex: 1 1 220px; min-height: 44px; }
+.tg-site-link { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+.tg-site-link:hover { border-color: var(--tg1, #37bbfe); }
+.tg-site-alt { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45;
+  background: color-mix(in srgb, var(--tg1, #37bbfe) 7%, var(--panel)); border: 1px dashed color-mix(in srgb, var(--tg1, #37bbfe) 45%, var(--panel-border)); }
+.tg-site-alt > span:nth-child(2) { flex: 1 1 220px; }
+.tgv-tochan:hover, .tg-site-alt .btn:hover { box-shadow: 0 10px 22px -10px var(--tg1, #37bbfe); }
+
+/* 🧭 the owner's picker: «только каналы, где учат норвежский» */
+.tgcur-rule { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 8px; padding: 10px 12px; border-radius: 14px; font-size: 13.5px; line-height: 1.5;
+  background: color-mix(in srgb, var(--tg1, #37bbfe) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--tg1, #37bbfe) 40%, transparent); }
+.tgcur-rule > span:first-child { font-size: 20px; flex: none; }
+.tgcur-seg button:hover:not(.active) { color: var(--text); background: color-mix(in srgb, var(--tg1, #37bbfe) 12%, transparent); }
+.tgcur-tag.off { color: var(--muted); background: color-mix(in srgb, var(--muted) 16%, transparent); }
+.tgcur-row.low.on { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); }
+.tgcur-warn { grid-column: 1 / -1; margin: 0; padding: 7px 10px; border-radius: 10px; font-size: 13px; line-height: 1.4; color: var(--text);
+  background: color-mix(in srgb, var(--warn) 14%, transparent); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); }
+@media (max-width: 560px) { .tgcur-seg { display: flex; width: 100%; } .tgcur-seg button { flex: 1 1 100%; text-align: left; } }
+.tcn-print { min-height: 44px; min-width: 44px; padding: 0 10px; justify-content: center; font-size: 18px; }
+@media (max-width: 480px) { .tcn-foot .tcn-print + .tcn-card { flex: 1 1 0; } }

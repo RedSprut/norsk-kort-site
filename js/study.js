@@ -1,6 +1,148 @@
 /* ============ Study session ============ */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   let S = null; // current session
+
+  /* =====================================================================
+   * 🎚 PHOTO SETTINGS of a card picture (card.imageFx) — like a camera: frame, rotation, mirror, light, colour, styles.
+   * Non-destructive: the picture stays as it is, the look is drawn with CSS (filter + transform + two overlays) on the
+   * study card and on the art cards. The settings belong to ONE picture (imageFx.src = a short fingerprint of it):
+   * a new picture starts clean, «↶ Вернуть» of the old one brings its settings back.
+   * The editor itself is js/photofx.js + css/photofx.css, loaded on first use (PhotoFxCore.open).
+   * imageFx: { v, src, iw, ih, zoom 100–300, ox, oy 0–100, rot 0|90|180|270, fine −15…15°, flip, preset,
+   *            bright, contrast, sat, warmth, tint −100…100, fade, vignette 0–100 }
+   * ===================================================================== */
+  const PhotoFxCore = (() => {
+    // a style = the sliders it sets + its own touch (a filter, a colour wash in soft light)
+    const PRESETS = {
+      orig: { n: 'Оригинал', v: {} },
+      fjord: { n: 'Фьорд', v: { warmth: -32, contrast: 18, sat: 12, bright: 4 } },
+      retro: { n: 'Ретро', v: { warmth: 30, contrast: -12, sat: -30, fade: 42, vignette: 28 }, f: [['sepia', 0.2]] },
+      bw: { n: 'Чёрно-белое', v: { contrast: 20, bright: 2 }, f: [['gray', 1]] },
+      sepia: { n: 'Сепия', v: { contrast: 6, fade: 12, vignette: 24 }, f: [['sepia', 0.9]] },
+      aurora: { n: 'Северное сияние', v: { sat: 20, contrast: 12, bright: -4 }, ov: ['rgba(0,255,190,.95)', 'rgba(230,30,220,.9)', 165] },
+      evening: { n: 'Тёплый вечер', v: { warmth: 42, sat: 14, bright: 2, vignette: 22 }, ov: ['rgba(255,190,80,.55)', 'rgba(255,80,70,.5)', 180] },
+      film: { n: 'Плёнка', v: { fade: 30, contrast: 10, sat: -14, warmth: 10, tint: 12, vignette: 14 } },
+    };
+    const COLOR = ['bright', 'contrast', 'sat', 'warmth', 'tint', 'fade', 'vignette'];
+    const num = (v, lo, hi, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v * 10) / 10)) : d; };
+    /** only known keys and numbers in range — imageFx may come from a shared deck or an old backup */
+    function clean(fx) {
+      if (!fx || typeof fx !== 'object' || Array.isArray(fx)) return null;
+      const o = {
+        v: 1, src: typeof fx.src === 'string' ? fx.src.slice(0, 40) : '', iw: num(fx.iw, 0, 30000, 0), ih: num(fx.ih, 0, 30000, 0),
+        zoom: num(fx.zoom, 100, 300, 100), ox: num(fx.ox, 0, 100, 50), oy: num(fx.oy, 0, 100, 50),
+        rot: [0, 90, 180, 270].includes(+fx.rot) ? +fx.rot : 0, fine: num(fx.fine, -15, 15, 0), flip: fx.flip === true,
+        preset: typeof fx.preset === 'string' && Object.prototype.hasOwnProperty.call(PRESETS, fx.preset) ? fx.preset : 'orig',
+      };
+      COLOR.forEach(k => { o[k] = num(fx[k], k === 'fade' || k === 'vignette' ? 0 : -100, 100, 0); });
+      return o;
+    }
+    const plainColor = o => o.preset === 'orig' && COLOR.every(k => !o[k]);
+    const plainGeo = o => !o.rot && !o.fine && !o.flip;
+    const plain = o => plainColor(o) && plainGeo(o) && o.zoom === 100;
+    /** a short fingerprint of the picture (a data: URL may be megabytes: every n-th character + the length) */
+    let memoS = null, memoK = '';
+    function key(s) {
+      s = String(s || ''); if (s === memoS) return memoK;
+      let h = 2166136261; const n = s.length, step = Math.max(1, Math.floor(n / 4096));
+      for (let i = 0; i < n; i += step) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+      for (let i = Math.max(0, n - 64); i < n; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+      memoS = s; memoK = n.toString(36) + '.' + (h >>> 0).toString(36);
+      return memoK;
+    }
+    /** the card's settings when they belong to its current picture and change something; else null */
+    function of(card) {
+      if (!card || !card.imageFx || !card.image) return null;
+      const o = clean(card.imageFx);
+      return o && o.src === key(card.image) && !plain(o) ? o : null;
+    }
+    /** the colour steps in order (the same list draws the CSS filter and the saved picture) */
+    function ops(o) {
+      const p = PRESETS[o.preset] || PRESETS.orig, out = (p.f || []).slice();
+      if (o.bright) out.push(['bright', 1 + o.bright / 200]);
+      if (o.contrast) out.push(['contrast', 1 + o.contrast / (o.contrast > 0 ? 150 : 200)]);
+      if (o.fade) out.push(['contrast', 1 - o.fade / 100 * 0.38], ['bright', 1 + o.fade / 100 * 0.1]);
+      if (o.sat || o.fade) out.push(['sat', Math.max(0, 1 + o.sat / 100 - o.fade / 100 * 0.15)]);
+      return out;
+    }
+    const FN = { bright: 'brightness', contrast: 'contrast', sat: 'saturate', gray: 'grayscale', sepia: 'sepia' };
+    const filter = o => ops(o).map(([k, v]) => `${FN[k]}(${+v.toFixed(3)})`).join(' ');
+    /** colour washes laid over the photo in «soft light»: [c1, c2, angle] */
+    function casts(o) {
+      const out = [], a = v => (Math.abs(v) / 100 * 0.7).toFixed(3);
+      if (o.warmth > 0) out.push([`rgba(255,150,40,${a(o.warmth)})`, `rgba(255,150,40,${a(o.warmth)})`, 180]);
+      if (o.warmth < 0) out.push([`rgba(40,135,255,${a(o.warmth)})`, `rgba(40,135,255,${a(o.warmth)})`, 180]);
+      if (o.tint > 0) out.push([`rgba(235,60,200,${a(o.tint)})`, `rgba(235,60,200,${a(o.tint)})`, 180]);
+      if (o.tint < 0) out.push([`rgba(60,210,90,${a(o.tint)})`, `rgba(60,210,90,${a(o.tint)})`, 180]);
+      const p = PRESETS[o.preset]; if (p && p.ov) out.push(p.ov);
+      return out;
+    }
+    const castCss = o => casts(o).map(([c1, c2, ang]) => `linear-gradient(${ang}deg,${c1},${c2})`).join(',');
+    const vigA = o => +(o.vignette / 100 * 0.82).toFixed(3);
+    /** the two overlays (colour wash, dark edges) — absolutely over the photo, inside its frame */
+    function overlays(o, { compare } = {}) {
+      const c = castCss(o), v = vigA(o), hide = compare ? 'opacity:0;' : '';
+      return (c ? `<i class="pfx-cast" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;${hide}background:${c}"></i>` : '')
+        + (v ? `<i class="pfx-vig" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;${hide}background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,0,${v}) 100%)"></i>` : '');
+    }
+    /**
+     * the rotated layer: it covers the frame W×H at any angle (its size = the frame's bounding box turned back).
+     * unit: 'cq' (the frame is a size container) or the frame's aspect W/H (sizes in % of the frame).
+     */
+    function geo(o, ar) {
+      const phi = (o.rot + o.fine) * Math.PI / 180, c = Math.abs(Math.cos(phi)), s = Math.abs(Math.sin(phi)), f = x => +x.toFixed(4);
+      const wh = ar === 'cq' ? [`calc(100cqw * ${f(c)} + 100cqh * ${f(s)})`, `calc(100cqw * ${f(s)} + 100cqh * ${f(c)})`]
+        : [`${f((c + s / ar) * 100)}%`, `${f((s * ar + c) * 100)}%`];
+      return `position:absolute;left:50%;top:50%;width:${wh[0]};height:${wh[1]};transform:translate(-50%,-50%) rotate(${f(o.rot + o.fine)}deg)${o.flip ? ' scaleX(-1)' : ''}`;
+    }
+    const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const still = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+    /** the study card picture with settings: a transparent stand-in keeps the card's own size rules (max-height…) */
+    function studyInner(card, o) {
+      const swap = o.rot % 180 === 90, has = o.iw > 0 && o.ih > 0;
+      const W = has ? (swap ? o.ih : o.iw) : 0, H = has ? (swap ? o.iw : o.ih) : 0;
+      const sizer = has ? `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${Math.round(W)}' height='${Math.round(H)}' viewBox='0 0 ${Math.round(W)} ${Math.round(H)}'/%3E` : esc(card.image);
+      const z = o.zoom / 100, f = filter(o);
+      const img = `position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border-radius:0;box-shadow:none;object-fit:cover;object-position:${o.ox}% ${o.oy}%;transform-origin:${o.ox}% ${o.oy}%${z !== 1 ? `;scale:${z}` : ''}${f ? `;filter:${f}` : ''}`;
+      return `<img class="card-img pfx-sizer" src="${sizer}" alt="" aria-hidden="true" style="visibility:hidden">`
+        + `<span class="pfx-r" style="${geo(o, has ? W / H : 1.5)};pointer-events:none"><img class="pfx-img" src="${esc(card.image)}" alt="" draggable="false" style="${img}" onerror="var w=this.closest('.card-img-wrap');if(w){w.classList.add('img-broken');w.querySelectorAll('.pfx-r,.pfx-sizer,.pfx-cast,.pfx-vig').forEach(function(x){x.style.display='none'})}"></span>`
+        + overlays(o);
+    }
+    const wrapStyle = () => `overflow:hidden;border-radius:16px;isolation:isolate;box-shadow:0 10px 30px -15px rgba(0,0,0,.6)${still() ? '' : ';animation:imgIn .5s ease both'}`;
+    /** art cards: the filter goes into --ac-pf (before the card's own effects); rotation / mirror = a layer around .ac-img */
+    const artFilter = o => filter(o);
+    const artGeo = o => (plainGeo(o) ? '' : geo(o, 'cq'));
+    /* 🎚 the editor: js/photofx.js + css/photofx.css on first use (like «🔎 Лента фото») */
+    let loading = null;
+    function load() {
+      if (window.PhotoFx) return Promise.resolve(window.PhotoFx);
+      if (loading) return loading;
+      const v = (document.querySelector('script[src*="js/study.js"]') || {}).src || '';
+      const q = (v.match(/\?v=[^&]+/) || [''])[0];
+      if (!document.querySelector('link[data-photofx]')) {
+        const l = document.createElement('link');
+        l.rel = 'stylesheet'; l.href = 'css/photofx.css' + q; l.setAttribute('data-photofx', '');
+        document.head.appendChild(l);
+      }
+      loading = new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'js/photofx.js' + q; s.async = true;
+        s.onload = () => (window.PhotoFx ? res(window.PhotoFx) : rej(new Error('no photofx')));
+        s.onerror = () => rej(new Error('no photofx'));
+        document.head.appendChild(s);
+      });
+      loading.catch(() => { loading = null; });
+      return loading;
+    }
+    /** open the editor: PhotoFxCore.open(cardId, { art, ar, onSaved }) or ({ draft: { image, fx, frame }, onApply }) */
+    async function open(id, opts) {
+      try { const P = await load(); return P.open(id, opts || {}); }
+      catch (e) { UI.toast('Настройки фото не открылись — проверьте интернет и попробуйте ещё раз', 'warn'); return null; }
+    }
+    return { PRESETS, COLOR, clean, plain, plainColor, plainGeo, key, of, ops, filter, casts, castCss, vigA, overlays, geo, studyInner, wrapStyle, artFilter, artGeo, load, open, esc };
+  })();
+  window.PhotoFxCore = PhotoFxCore;
 
   const Study = {
     get session() { return S; },
@@ -82,6 +224,7 @@
           <button class="btn sm" data-act="all-cards" title="Быстро посмотреть все карты этой сессии и перейти к любой">🗂 Все карты · ${S.allIds.length}</button>
           <button class="btn sm" data-act="reshuffle" title="Перемешать оставшиеся карты">🔀 Перемешать</button>
           ${S.mode === 'listen' ? '' : this.trSegHtml('study-trseg')}
+          ${window.ArtCards ? ArtCards.studyToggleHtml(S) : ''}
         </div>
         <div class="counters"><span class="k" data-k>✓ 0</span><span class="u" data-u>✗ 0</span><span class="r" data-r></span></div>
         <div data-area></div>
@@ -173,17 +316,491 @@
     },
     /** a text (several lines, or longer than a couple of sentences) — not a single word / phrase / sentence */
     isText(text) { const s = String(text || ''); return s.includes('\n') || s.length > 200; },
+
+    /* =====================================================================
+     * 📄 TEXT CARDS: four views of a long text (Store.settings.textView: word | sent | para | full) and
+     * ⏯ the reading controls right on the card (⏮ ⏪ ⏯ ⏩ ⏹ — shown while the card is read aloud).
+     * The card itself is never changed: «По словам» shows «Jeg (Я) går (иду) …» exactly as before; the other views use
+     * the text without the (glosses) and the card's own translation when it is a whole text that matches sentence by
+     * sentence / paragraph by paragraph — otherwise the translator chain (cache 's:', so it is done once).
+     * The word being read lights up (CSS Custom Highlight `tv-say`), the sentence / paragraph gets a soft frame.
+     * Styles: css/studyx.css, loaded on first use with the same ?v= as this file.
+     * ===================================================================== */
+    TVM: [['word', 'По словам', 'Слова', 'Каждое норвежское слово — и сразу его перевод'],
+      ['sent', 'По предложениям', 'Предложения', 'Норвежское предложение, под ним — перевод'],
+      ['para', 'По абзацам', 'Абзацы', 'Норвежский абзац, под ним — перевод'],
+      ['full', 'Полностью', 'Целиком', 'Весь норвежский текст, потом весь перевод']],
+    tvMode() { const v = Store.settings.textView; return ['word', 'sent', 'para', 'full'].includes(v) ? v : 'word'; },
+    tvCss() {
+      if (this._tvCss) return;
+      this._tvCss = true;
+      if (document.querySelector('link[data-studyx]')) return;
+      const v = (document.querySelector('script[src*="js/study.js"]') || {}).src || '';
+      const q = (v.match(/\?v=[^&]+/) || [''])[0];
+      const l = document.createElement('link');
+      l.rel = 'stylesheet'; l.href = 'css/studyx.css' + q; l.setAttribute('data-studyx', '');
+      document.head.appendChild(l);
+    },
+    /** «Jeg (Я) går (иду) til (к) badet (ванной).» → «Jeg går til badet.» (only brackets with Cyrillic in them go) */
+    tvClean(s) {
+      return String(s || '').replace(/\s*\([^()]*[Ѐ-ӿ][^()]*\)/g, '').replace(/\*\*|__/g, '').replace(/[ \t ]+/g, ' ')
+        .replace(/ ([,.!?;:…»”)])/g, '$1').replace(/([«„“(]) /g, '$1').trim();
+    },
+    /** paragraphs: blank lines between them; a text without blank lines — every line is one */
+    tvParas(s) {
+      const t = String(s || '').replace(/\r/g, '').trim();
+      let ps = t.split(/\n[ \t]*\n+/);
+      if (ps.length < 2 && t.includes('\n')) ps = t.split(/\n+/);
+      return ps.map(x => x.replace(/\s*\n\s*/g, ' ').trim()).filter(x => /\p{L}/u.test(x) && !this.isSrcLine(x));
+    },
+    /** the card's text in pieces: paragraphs → sentences (clean Norwegian) + the card's own translation, when it fits */
+    tvData(card) {
+      const tl = this.trLang(), uk = this.ukOf(card), ru = String(card.ru || '');
+      const key = [card.no, ru, uk, tl].join('\u0001');
+      const m = this._tvd || (this._tvd = new Map());
+      if (m.has(key)) return m.get(key);
+      const paras = this.tvParas(card.no).map(p => { const no = this.tvClean(p); return { no, sents: this.splitSent(no).filter(s => /\p{L}/u.test(s)) }; }).filter(p => p.sents.length);
+      const nSent = paras.reduce((n, p) => n + p.sents.length, 0), noLen = paras.reduce((n, p) => n + p.no.length, 0);
+      const own = (tl === 'uk' ? uk || ru : ru).trim();
+      // the card's own translation counts only when it is a whole text (not a title or a word)
+      const full = !!own && own.length >= noLen * 0.35 && U.cyrRatio(own) > 0.5 && this.splitSent(own).length >= Math.min(2, nSent);
+      const ownParas = full ? this.tvParas(own) : [];
+      let rParas = full ? ownParas.slice() : null, sentRu = null;
+      if (full) {
+        const per = rParas.length === paras.length ? rParas.map(r => this.splitSent(r)) : null;
+        if (per && per.every((rs, i) => rs.length === paras[i].sents.length)) sentRu = [].concat(...per);
+        else { const all = this.splitSent(rParas.join(' ')); if (all.length === nSent) sentRu = all; }
+        if (rParas.length !== paras.length) {
+          let k = 0;
+          rParas = sentRu ? paras.map(p => { const r = sentRu.slice(k, k + p.sents.length).join(' '); k += p.sents.length; return r; }) : null;
+        }
+      }
+      const d = { paras, nSent, noLen, glossed: /\([^()]*[Ѐ-ӿ][^()]*\)/.test(String(card.no || '')), full, ownParas, rParas, sentRu,
+        lang: full ? (tl === 'uk' && uk ? 'uk' : 'ru') : (tl === 'uk' ? 'uk' : 'ru') };
+      if (m.size > 40) m.clear();
+      m.set(key, d);
+      return d;
+    },
+    /** a text card: a long text of two sentences or more (an imported text with word glosses, a story, a dialogue) */
+    tvOn(card) {
+      if (!card || !this.isText(card.no)) return false;
+      const d = this.tvData(card);
+      return d.nSent >= 2 && (d.glossed || d.noLen >= 120);
+    },
+    /** this face of the study card shows the views: the back always, the front when it is the Norwegian side
+     *  (the art view, listening, typing and the quiz stay exactly as they are) */
+    tvFaceOn(card, back, item) {
+      if (!S || S.mode === 'listen' || !this.tvOn(card) || (window.ArtCards && ArtCards.studyOn && ArtCards.studyOn(S))) return false;
+      return back || ((item || {}).dir === 'nr' && S.mode === 'flip');
+    },
+    /** machine translation of one sentence into the view's language: text · undefined = not (yet) there */
+    tvMt(s, lang) {
+      if (lang === 'uk') { const v = this.exCache()['s:uk:' + s]; return v !== undefined ? v : Translators.cached(s, 'no', 'uk'); }
+      return this.sentTr(s);
+    },
+    /** this sentence was already sent to the translator (into this language) in this session */
+    tvTried(s, lang) { return !!(this._tvTried && this._tvTried.has(lang + '|' + s)); },
+    tvSentRu(d, j, s) { return d.sentRu ? d.sentRu[j] : this.tvMt(s, d.lang); },
+    tvParaRu(d, i) {
+      if (d.rParas) return d.rParas[i];
+      let k = 0;
+      for (let q = 0; q < i; q++) k += d.paras[q].sents.length;
+      const parts = d.paras[i].sents.map((s, x) => this.tvSentRu(d, k + x, s));
+      if (parts.some((t, x) => t === undefined && !this.tvTried(d.paras[i].sents[x], d.lang))) return undefined;
+      return parts.filter(Boolean).join(' ');
+    },
+    /** sentences this view still needs from the translator */
+    tvNeed(card, v) {
+      const d = this.tvData(card);
+      if (v === 'word' || d.sentRu || (v === 'full' && d.full) || (v === 'para' && d.rParas)) return [];
+      const out = [];
+      d.paras.forEach(p => p.sents.forEach(s => { if (this.tvMt(s, d.lang) === undefined) out.push(s); }));
+      return out;
+    },
+    /** the view uses the translator (→ the «кто переводит» badge next to the switch) */
+    tvUsesMt(card, v) { const d = this.tvData(card); return v !== 'word' && !d.sentRu && !(v === 'full' && d.full) && !(v === 'para' && d.rParas); },
+    tvHtml(card, face) {
+      const v = this.tvMode(), d = this.tvData(card), esc = U.esc;
+      const flag = d.lang === 'uk' ? '🇺🇦 Українська' : '🇷🇺 Русский';
+      let miss = false;
+      const ruBox = (t, sents, lines, cls = 'tv-ru', attrs = '') => {
+        if (t) return `<div class="${cls}" lang="${d.lang}" ${attrs}>${esc(t)}</div>`;
+        if (t === '' || sents.every(s => this.tvTried(s, d.lang))) { miss = true; return `<div class="${cls} tv-miss">перевод не пришёл</div>`; }
+        return `<div class="${cls} tv-wait" role="status" aria-label="Перевожу…">${'<span class="tv-shim"></span>'.repeat(lines)}</div>`;
+      };
+      let body = '', j = 0;
+      if (v === 'word') {
+        const tr = this.tr(card).trim();
+        const wf = this.trLang() === 'uk' && !this.trRuOnly(card) ? '🇺🇦 Українська' : this.trLang() === 'both' && this.ukOf(card) ? '🇷🇺 Русский · 🇺🇦 Українська' : '🇷🇺 Русский';
+        body = this.wordHtml(card.no) + (face === 'back' && tr ? `<div class="tv-h">${wf}</div>${this.trHtml(card)}` : '');
+      } else if (v === 'sent') {
+        body = d.paras.map(p => `<div class="tv-para">${p.sents.map(s => { const k = j++; return `<div class="tv-pair" data-tvb><div class="tv-no" lang="nb">${esc(s)}</div>${ruBox(this.tvSentRu(d, k, s), [s], 1)}</div>`; }).join('')}</div>`).join('');
+      } else if (v === 'para') {
+        body = d.paras.map((p, i) => `<div class="tv-pair tv-pp" data-tvb><div class="tv-no" lang="nb">${esc(p.no)}</div>${ruBox(this.tvParaRu(d, i), p.sents, Math.min(4, p.sents.length))}</div>`).join('');
+      } else {
+        const ru = d.full ? d.ownParas.map(t => `<div class="tv-p tv-ru" lang="${d.lang}" data-tvb>${esc(t)}</div>`).join('')
+          : d.paras.map((p, i) => ruBox(this.tvParaRu(d, i), p.sents, Math.min(4, p.sents.length), 'tv-p tv-ru', 'data-tvb')).join('');
+        body = `<div class="tv-h">🇳🇴 Norsk</div><div class="tv-blk">${d.paras.map(p => `<div class="tv-p tv-no" lang="nb" data-tvb>${esc(p.no)}</div>`).join('')}</div>
+          <div class="tv-h">${flag}</div><div class="tv-blk">${ru}</div>`;
+      }
+      const bar = `<div class="tv-top"><div class="seg-mini tv-bar" role="group" aria-label="Как показать текст">${this.TVM.map(([id, l, sh, t]) =>
+        `<button type="button" class="${v === id ? 'active' : ''}" data-act="tv" data-v="${id}" aria-pressed="${v === id}" aria-label="${l}" title="${t}"><span class="tv-l">${l}</span><span class="tv-s" aria-hidden="true">${sh}</span></button>`).join('')}</div>`
+        + `${miss ? '<button type="button" class="btn sm tv-retry" data-act="tv-retry" title="Перевод не пришёл — попробовать ещё раз">🔄 Перевести ещё раз</button>' : ''}<span class="tv-trb" data-tv-trb></span></div>`;
+      return `<div class="tv tv-${v}" data-tv="${face}" data-cid="${esc(card.id)}">${bar}<div class="tv-body">${body}</div></div>`;
+    },
+    /** what is read aloud from a face in the chosen view (sentences on lines of their own: ⏪ / ⏩ step by sentence) */
+    tvReadText(card, face) {
+      const v = this.tvMode(), d = this.tvData(card);
+      if (v === 'word') return face === 'front' ? String(card.no || '') : [card.no, this.tr(card)].filter(Boolean).join('\n');
+      const lines = [], ruS = t => this.splitSent(t);
+      let j = 0;
+      if (v === 'sent') d.paras.forEach(p => p.sents.forEach(s => { const r = this.tvSentRu(d, j++, s); lines.push(s); if (r) lines.push(r); }));
+      else if (v === 'para') d.paras.forEach((p, i) => { lines.push(...p.sents); const r = this.tvParaRu(d, i); if (r) lines.push(...ruS(r)); });
+      else {
+        d.paras.forEach(p => lines.push(...p.sents));
+        (d.full ? d.ownParas : d.paras.map((p, i) => this.tvParaRu(d, i) || '')).forEach(t => { if (t) lines.push(...ruS(t)); });
+      }
+      return lines.join('\n');
+    },
+    /** after the card is drawn: the translation the view needs (once), the «кто переводит» badge, the reading controls */
+    tvAfter(card) {
+      const area = document.querySelector('[data-area]');
+      if (!area || !card) return;
+      this.tvpPlace();
+      if (!area.querySelector('[data-tv]')) return;
+      const v = this.tvMode();
+      this.tvBadge(card);
+      area.querySelectorAll('.face').forEach(f => {
+        if (f._tvUser) return;
+        f._tvUser = 1;
+        const mark = () => { f._tvUser = Date.now(); };
+        f.addEventListener('wheel', mark, { passive: true }); f.addEventListener('touchmove', mark, { passive: true });
+      });
+      const lang = this.tvData(card).lang;
+      const fresh = this.tvNeed(card, v).filter(s => !this.tvTried(s, lang));
+      if (fresh.length) this.tvFill(card, fresh);
+    },
+    tvBadge(card) {
+      if (!window.TrBadge) return;
+      (this._tvHosts || []).forEach(h => { if (!h.isConnected) try { TrBadge.unmount(h); } catch (e) { /* gone */ } });
+      this._tvHosts = (this._tvHosts || []).filter(h => h.isConnected);
+      if (!this.tvUsesMt(card, this.tvMode())) return;
+      document.querySelectorAll('[data-area] [data-tv-trb]').forEach(el => {
+        try { TrBadge.mount(el, { place: 'study' }); if (!this._tvHosts.includes(el)) this._tvHosts.push(el); } catch (e) { /* the badge is extra */ }
+      });
+    },
+    /** translate the sentences of the view (shimmer meanwhile; lines appear as they come) */
+    async tvFill(card, sents) {
+      if (this._tvBusy) { this._tvAgain = true; return; }
+      this._tvBusy = true;
+      const d = this.tvData(card), id = card.id;
+      let t = null;
+      const own = !Translators.onPut;
+      if (own) Translators.onPut = () => { if (t) return; t = setTimeout(() => { t = null; this.tvRedraw(id); }, 450); };
+      try {
+        if (d.lang === 'uk') {
+          const res = await Translators.translateMany(sents, 'no', 'uk', { quiet: true });
+          const c = this.exCache();
+          sents.forEach((s, i) => { if (res && res.out && res.out[i]) c['s:uk:' + s] = String(res.out[i]).trim(); });
+          this.exSave();
+        } else await this.translateUnits(sents, [], { quiet: true });
+      } catch (e) { console.warn('text view: translation', e); }
+      finally {
+        if (own) Translators.onPut = null;
+        clearTimeout(t);
+        this._tvBusy = false;
+      }
+      const T = this._tvTried || (this._tvTried = new Set());
+      sents.forEach(s => T.add(d.lang + '|' + s));
+      this.tvRedraw(id);
+      if (this._tvAgain) {
+        this._tvAgain = false;
+        const cur = this.current(), c2 = cur && (Store.card(cur.card.id) || cur.card);
+        if (c2 && document.querySelector('[data-area] [data-tv]')) { const l2 = this.tvData(c2).lang, more = this.tvNeed(c2, this.tvMode()).filter(s => !this.tvTried(s, l2)); if (more.length) this.tvFill(c2, more); }
+      }
+    },
+    /** the views on the card drawn again (a translation came, another view) — the scroll place stays */
+    tvRedraw(cardId) {
+      const cur = S && this.current();
+      if (!cur || cur.card.id !== cardId) return;
+      const card = Store.card(cardId) || cur.card;
+      document.querySelectorAll('[data-area] [data-tv]').forEach(el => {
+        const f = el.closest('.face'), top = f ? f.scrollTop : 0;
+        const tmp = document.createElement('div');
+        tmp.innerHTML = this.tvHtml(card, el.dataset.tv);
+        el.replaceWith(tmp.firstElementChild);
+        if (f) f.scrollTop = top;
+      });
+      this.tvBadge(card);
+      if (TTS.state() !== 'idle') this.tvPaint(this._tvWi);
+    },
+
+    /* ---------- ⏯ reading: which piece is said now, the word lit up, ⏪ / ⏩ by sentence ---------- */
+    /** read one face of the current card (karaoke on a text view; frac: start at about this part of the text) */
+    readSide(back, mode, opts = {}, frac = 0) {
+      const cur = this.current();
+      if (!cur) return;
+      const text = this.sideText(cur, back);
+      const tv = this.tvFaceOn(cur.card, back, cur.item);
+      const who = tv ? { face: back ? 'back' : 'front', cid: cur.card.id, view: this.tvMode() } : null;
+      if (tv) opts = Object.assign({}, opts, { onWord: (i, a, b, info) => this.tvWord(i, info) });
+      if (!frac) { this._tvNext = who; TTS.speakText(text, mode, opts); if (this._tvNext === who) this._tvNext = null; return; }
+      opts = TTS.placed(opts);
+      const segs = TTS.segments(text, mode);
+      if (!segs.length) return;
+      const F = Object.assign({ segs, last: { text, mode, opts } }, who || { face: '', cid: '', view: '' });
+      const want = Math.min(segs.length - 1, Math.floor(frac * segs.length));
+      const st = this.tvStarts(F);
+      this.tvPlayFrom(F, [...st].reverse().find(k => k <= want) || 0);
+    },
+    /** index of the piece being read in the whole reading (⏪ / ⏩ restart the voice at a later piece) */
+    tvG() { const p = TTS.player; return p ? (this._tvSeek && this._tvSeek.p === p ? this._tvSeek.off : 0) + p.i : -1; },
+    tvRoot(F) { return F && F.face ? document.querySelector(`[data-area] [data-tv="${F.face}"][data-cid="${CSS.escape(F.cid)}"]`) : null; },
+    /** the words of every piece found in the text on the face (in order) → [start, end] in the face's flat text */
+    tvMap(root, F) {
+      const c = this._tvm;
+      if (c && c.root === root && c.F === F) return c;
+      const parts = [];
+      let flat = '', blk = null;
+      const skip = '.tv-top, .tv-h, .tv-miss, .tv-wait, button';
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.parentElement && n.parentElement.closest(skip) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+      for (let n = w.nextNode(); n; n = w.nextNode()) {
+        const b = n.parentElement.closest('[data-tvb], .tv-no, .tv-ru, .word') || root;
+        if (b !== blk) { flat += '\n'; blk = b; }
+        parts.push({ n, a: flat.length });
+        flat += n.data;
+      }
+      const low = flat.toLowerCase(), isW = ch => !!ch && /[\p{L}\p{N}]/u.test(ch);
+      let cur = 0;
+      const segs = F.segs.map(s => {
+        const ws = TTS.wordsOf(s.text), win = cur + Math.max(240, s.text.length * 2 + 80), words = [];
+        let c0, hit;
+        const find = (lim, need) => {
+          c0 = cur; hit = 0; words.length = 0;
+          ws.forEach(x => {
+            const q = x.w.toLowerCase();
+            let i = low.indexOf(q, c0);
+            while (i >= 0 && i < lim && (isW(low[i - 1]) || isW(low[i + q.length]))) i = low.indexOf(q, i + 1);
+            if (i >= 0 && i < lim) { words.push([i, i + q.length]); c0 = i + q.length; hit++; } else words.push(null);
+          });
+          return ws.length && hit >= Math.max(1, ws.length * need);
+        };
+        // near the last piece first; then further on (only the translation is read: the Norwegian block is skipped)
+        if (!find(win, 0.5) && !(ws.length >= 2 && find(Infinity, 0.8))) return null;
+        cur = c0;
+        const f = words.find(Boolean), l = [...words].reverse().find(Boolean);
+        return { s: f[0], e: l[1], words };
+      });
+      return (this._tvm = { root, F, parts, flat, segs });
+    },
+    tvPos(map, x) {
+      const ps = map.parts;
+      let lo = 0, hi = ps.length - 1;
+      while (lo < hi) { const m = (lo + hi + 1) >> 1; if (ps[m].a <= x) lo = m; else hi = m - 1; }
+      const p = ps[lo];
+      return p ? [p.n, Math.max(0, Math.min(p.n.data.length, x - p.a))] : null;
+    },
+    /** where a sentence begins (⏪ / ⏩): after . ! ? … — in «По словам» found in the text itself (the glosses hide the dots) */
+    tvStarts(F) {
+      if (!F) return [];
+      const root = this.tvRoot(F), map = root ? this.tvMap(root, F) : null;
+      if (F._st && F._stRoot === root) return F._st;
+      const out = [];
+      F.segs.forEach((s, k) => {
+        // «По предложениям»: a sentence and its translation are one step
+        if (k && F.view === 'sent' && s.lang !== 'no' && F.segs[k - 1].lang === 'no') return;
+        if (!k || /[.!?…:]["»”)]?\s*$/.test(F.segs[k - 1].text)) { out.push(k); return; }
+        const a = map && map.segs[k - 1], b = map && map.segs[k];
+        if (!a || !b || /[.!?…\n]/.test(map.flat.slice(a.e, b.s))) out.push(k);
+      });
+      F._st = out; F._stRoot = root;
+      return out;
+    },
+    tvHl() {
+      if (this._tvHl !== undefined) return this._tvHl;
+      try { if (window.CSS && CSS.highlights && typeof window.Highlight === 'function') { const h = new Highlight(); CSS.highlights.set('tv-say', h); return (this._tvHl = h); } } catch (e) { /* old browser: the frame only */ }
+      return (this._tvHl = null);
+    },
+    tvKarClear() {
+      const h = this.tvHl();
+      if (h) try { h.clear(); } catch (e) { /* ignore */ }
+      document.querySelectorAll('[data-area] .tv-now').forEach(x => x.classList.remove('tv-now'));
+    },
+    tvWord(i, info) {
+      if (info && info.done) { this.tvPaint(-1); return; }
+      this._tvWi = i;
+      this.tvPaint(i);
+    },
+    /** light the piece being read (frame) and word i of it; the face follows the voice unless you scroll it yourself */
+    tvPaint(i) {
+      const F = this._tvFull, root = F && TTS.player && this.tvRoot(F);
+      if (!root) { this.tvKarClear(); return; }
+      const map = this.tvMap(root, F), m = map.segs[this.tvG()];
+      const at = m && this.tvPos(map, m.s);
+      const u = at && at[0].parentElement && at[0].parentElement.closest('[data-tvb]');
+      root.querySelectorAll('.tv-now').forEach(x => { if (x !== u) x.classList.remove('tv-now'); });
+      if (u) u.classList.add('tv-now');
+      const h = this.tvHl();
+      if (h) try { h.clear(); } catch (e) { /* ignore */ }
+      const w = m && i != null && i >= 0 ? m.words[i] : null;
+      let rect = null;
+      if (w && h) {
+        const a = this.tvPos(map, w[0]), b = this.tvPos(map, w[1]);
+        try { const r = document.createRange(); r.setStart(a[0], a[1]); r.setEnd(b[0], b[1]); h.add(r); rect = r.getBoundingClientRect(); } catch (e) { rect = null; }
+      }
+      if (!rect && u) rect = u.getBoundingClientRect();
+      const face = root.closest('.face');
+      if (!rect || !face || !rect.height || Date.now() - (face._tvUser || 0) < 4000) return;
+      const fr = face.getBoundingClientRect();
+      if (rect.top >= fr.top + 36 && rect.bottom <= fr.bottom - 80) return;
+      const top = Math.max(0, face.scrollTop + rect.top - fr.top - fr.height * 0.3);
+      try { face.scrollTo({ top, behavior: TTS.motionOk && TTS.motionOk() ? 'smooth' : 'auto' }); } catch (e) { face.scrollTop = top; }
+    },
+    /** ⏪ (dir −1) / ⏩ (dir 1): the start of this / the previous / the next sentence */
+    tvJump(dir) {
+      const F = this._tvFull;
+      if (!F || !TTS.player) return;
+      const g = this.tvG(), st = this.tvStarts(F);
+      let t;
+      if (dir > 0) t = st.find(k => k > g);
+      else {
+        const here = [...st].reverse().find(k => k <= g);
+        t = here === undefined ? 0 : g === here && (this._tvWi || 0) < 2 ? [...st].reverse().find(k => k < here) : here;
+        if (t === undefined) t = 0;
+      }
+      if (t === undefined) return;
+      this.tvPlayFrom(F, t);
+    },
+    /** say the reading from piece t on (⏮ «Сначала» still starts at the very beginning) */
+    tvPlayFrom(F, t) {
+      t = Math.max(0, Math.min(F.segs.length - 1, t | 0));
+      this._tvSeeking = true;
+      // 🎭 a dialogue keeps its speakers (and their voices) when the reading goes on from the middle
+      const rest = F.segs.slice(t), roster = [];
+      F.segs.forEach(s => { if (s.who != null && !roster.includes(s.who)) roster.push(s.who); });
+      const ro = roster.length ? Object.assign({}, F.last.opts, { roleWho: rest.map(s => (s.who != null ? s.who : null)), roleRoster: roster }) : F.last.opts;
+      try { TTS.speakText(rest.map(s => s.text).join('\n'), 'all', ro); } finally { this._tvSeeking = false; }
+      if (!TTS.player) { this.tvState(); return; }
+      TTS.last = F.last;
+      this._tvFull = F; this._tvSeek = { p: TTS.player, off: t }; this._tvP = TTS.player; this._tvWi = 0; this._tvG0 = -1;
+      this.tvState();
+    },
+    /** the player changed (tts-state): a new reading, the next piece, pause, the end */
+    tvState() {
+      if (this._tvSeeking) return;
+      const p = TTS.player, st = TTS.state();
+      if (p && p !== this._tvP) {
+        this._tvP = p;
+        if (!(this._tvSeek && this._tvSeek.p === p)) {
+          const nx = this._tvNext, prev = this._tvFull;
+          this._tvNext = null;
+          const again = !nx && prev && TTS.last && prev.last && TTS.last.text === prev.last.text; // ⏮ «Сначала»
+          const from = nx || (again ? prev : { face: '', cid: '', view: '' });
+          this._tvFull = { segs: p.segs, last: TTS.last, face: from.face, cid: from.cid, view: from.view };
+          this._tvSeek = null; this._tvG0 = -1;
+        }
+      }
+      const box = document.querySelector('[data-area] [data-tvp]');
+      const on = st !== 'idle' && !!p;
+      if (box) {
+        const was = box.classList.contains('on');
+        box.classList.toggle('on', on);
+        const t = box.querySelector('[data-act="tts-toggle"]');
+        if (t) t.setAttribute('aria-label', st === 'paused' ? 'Продолжить' : 'Пауза');
+        const g = this.tvG(), sts = on ? this.tvStarts(this._tvFull) : [];
+        const pv = box.querySelector('[data-act="tv-prev"]'), nx = box.querySelector('[data-act="tv-next"]');
+        if (pv) pv.disabled = !on;
+        if (nx) nx.disabled = !on || !sts.some(k => k > g);
+        if (was !== on || on) this.tvpPlace();
+      }
+      if (!on) { this.tvKarClear(); this._tvP = null; return; }
+      const g = this.tvG();
+      if (g !== this._tvG0) { this._tvG0 = g; this._tvWi = 0; this.tvPaint(-1); }
+    },
+    /** ⏮ ⏪ ⏯ ⏩ ⏹ inside the card (not inside a face: it never scrolls away and never turns over with the card) */
+    tvpHtml() {
+      const b = (act, ic, label, cls = '') => `<button type="button" class="media-btn ${cls}" data-act="${act}" aria-label="${label}" title="${label}">${ic}</button>`;
+      const svg = d => `<svg class="ico" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+      return `<div class="tvp" data-tvp data-tts-ctl role="group" aria-label="Чтение вслух">
+        ${b('tts-restart', UI.icon('restart', 18), 'Сначала')}
+        ${b('tv-prev', svg('M11.5 18.5 3.5 12l8-6.5zM20.5 18.5 12.5 12l8-6.5z'), 'Предыдущее предложение')}
+        ${b('tts-toggle', UI.icon('pause', 22), 'Пауза', 'main')}
+        ${b('tv-next', svg('M12.5 18.5 20.5 12l-8-6.5zM3.5 18.5 11.5 12l-8-6.5z'), 'Следующее предложение')}
+        ${b('tts-stop', UI.icon('stop', 16), 'Стоп')}
+      </div>`;
+    },
+    /** the controls sit in the empty left strip of the card, under the AI tiles; no room under them → a row along the
+     *  bottom, after the tiles (the face gets room at the bottom); on a phone — a small pill at the card's bottom */
+    tvpPlace() {
+      const fc = document.querySelector('[data-area] .flashcard'), box = fc && fc.querySelector('[data-tvp]');
+      if (!box) return;
+      const on = box.classList.contains('on');
+      const phone = document.documentElement.classList.contains('m-phone') && !!fc.closest('.study.m-focus');
+      box.classList.remove('row'); box.style.left = '';
+      fc.classList.remove('tvp-gut', 'tvp-row', 'tvp-ph', 'tvp-art');
+      if (!on) return;
+      if (phone) { fc.classList.add('tvp-ph'); return; }
+      if (fc.closest('.ac-stage')) { fc.classList.add('tvp-art'); return; } // 🎨 the art card stays as it is: the controls stand beside it
+      const face = fc.querySelector(S && S.flipped ? '.face.back' : '.face.front');
+      const rail = face && [...face.querySelectorAll('.card-rail.left')].find(r => r.offsetHeight);
+      // the tiles themselves (the rail's box may reach the card's bottom although it holds one tile)
+      // (offsets, not screen boxes: the card may still be turning)
+      const tiles = rail ? [...rail.children].filter(c => c.offsetWidth) : [];
+      const railB = tiles.length ? rail.offsetTop + Math.max(...tiles.map(c => c.offsetTop + c.offsetHeight)) : 0;
+      const railR = tiles.length ? rail.offsetLeft + Math.max(...tiles.map(c => c.offsetLeft + c.offsetWidth)) : 0;
+      if (tiles.length && railB + 8 > fc.clientHeight - 10 - box.offsetHeight) {
+        box.classList.add('row');
+        box.style.left = Math.round(railR + 8) + 'px';
+        fc.classList.add('tvp-row');
+      } else fc.classList.add('tvp-gut');
+    },
+    /** 🖼 the picture control on the card: «Заменить фото» over a picture, «Добавить фото» where a picture could be */
+    // 📌 «Галерея» (the in-app Pinterest-like wall, Norway by default) comes first, always; 🖼 = every other source
+    picBtn(has) {
+      const l = has ? 'Заменить фото' : 'Добавить фото';
+      return `<div class="pic-btns ${has ? 'on-img' : ''}">`
+        + `<button type="button" class="pic-btn pic-pin ${has ? 'on-img' : ''}" data-act="pin" aria-label="Галерея картинок, как в Pinterest" title="📌 Галерея картинок, как в Pinterest: фото по слову и норвежским темам — прямо здесь"><span aria-hidden="true">📌</span><span class="pic-l">Галерея</span></button>`
+        + `<button type="button" class="pic-btn ${has ? 'on-img' : 'pic-add'}" data-act="pic" aria-label="${l}" title="${l}: галерея, Wikimedia, нейросеть, исторические фото, с устройства…"><span aria-hidden="true">🖼</span><span class="pic-l">${l}</span></button>`
+        // 🎚 «Настроить фото» — only over a picture (js/photofx.js, loaded on first use)
+        + (has ? '<button type="button" class="pic-btn on-img pic-fx" data-act="fx" style="width:44px;padding:0" aria-label="Настроить фото" title="🎚 Настроить фото: кадр, поворот, яркость, цвет, готовые стили"><span aria-hidden="true">🎚</span></button>' : '')
+        + '</div>';
+    },
+    /** 🗣 the voice of this side right on the card (js/voices.js opens the chooser on any [data-voices-open]; the card doesn't flip) */
+    voiceBtn(side) {
+      if (!(window.Voices && Voices.openChooser)) return '';
+      const l = side === 'no' ? 'no' : (this.trLang() === 'uk' ? 'uk' : 'ru');
+      return `<button type="button" class="icon-btn sm card-voice" data-voices-open="${l}" data-voices-place="cards" aria-label="Голос для карточек — выбрать" title="Голос для карточек: ${l === 'no' ? 'норвежский' : l === 'uk' ? 'украинский' : 'русский'} — выбрать">🗣</button>`;
+    },
+    /** ✏️ the editor right on the card (the same as «✏️ Редактировать» in the side panel and the E key) */
+    editBtn() { return '<button type="button" class="icon-btn sm card-edit" data-act="edit" aria-label="Редактировать карточку" title="Редактировать карточку (E)">✏️</button>'; },
     imgHtml(card, show) {
       if (!show) return '';
-      if (card.image && !Images.isRemoteAI(card.image)) return `<img class="card-img" src="${U.esc(card.image)}" alt="" onerror="this.style.display='none'">` +
+      // 🎚 the photo settings (PhotoFxCore above) — without them the picture is drawn exactly as always
+      const fx = card.image && card.imageFx ? PhotoFxCore.of(card) : null;
+      if (fx && !Images.isRemoteAI(card.image)) return `<div class="card-img-wrap pfx-pic" style="${PhotoFxCore.wrapStyle()}">${PhotoFxCore.studyInner(card, fx)}${this.picBtn(true)}</div>` +
         (card.imageCredit ? `<div class="tiny muted img-credit">${/^https:\/\//i.test(card.imageCreditUrl || '') ? `<a href="${U.esc(card.imageCreditUrl)}" target="_blank" rel="noopener">${U.esc(card.imageCredit)}</a>` : U.esc(card.imageCredit)}</div>` : '');
-      if (Images.skip && Images.skip(card)) return '';
-      if (Store.settings.autoImages && Store.settings.imageProvider !== 'off' && !UI.isLong(card.no)) return '<div class="img-skel" data-img-wait>🎨 рисую…</div>';
-      return '';
+      if (card.image && !Images.isRemoteAI(card.image)) return `<div class="card-img-wrap"><img class="card-img" src="${U.esc(card.image)}" alt="" onerror="this.style.display='none';this.parentNode.classList.add('img-broken')">${this.picBtn(true)}</div>` +
+        (card.imageCredit ? `<div class="tiny muted img-credit">${/^https:\/\//i.test(card.imageCreditUrl || '') ? `<a href="${U.esc(card.imageCreditUrl)}" target="_blank" rel="noopener">${U.esc(card.imageCredit)}</a>` : U.esc(card.imageCredit)}</div>` : '');
+      if (Images.skip && Images.skip(card)) return this.picBtn(false);
+      if (Store.settings.autoImages && Store.settings.imageProvider !== 'off' && !UI.isLong(card.no)) return '<div class="card-img-wrap"><div class="img-skel" data-img-wait>🎨 рисую…</div></div>';
+      return this.picBtn(false);
+    },
+    /** the same card drawn again after a change (picture, edit) — the side that was showing stays */
+    redrawCard() {
+      if (!S || !this.current()) return;
+      const f = S.flipped;
+      this.renderCard(false);
+      if (f) this.flip(true);
+    },
+    /** a new picture was stored on the card: the card (normal or art view) and the gallery tiles show it at once */
+    picChanged(id) {
+      if (window.ArtCards && ArtCards.afterEdit) ArtCards.afterEdit(id);
+      else { const cur = this.current(); if (cur && cur.card.id === id) this.redrawCard(); }
     },
     renderCard(animate) {
       const { item, card } = this.current();
       const st = Store.settings;
+      this.tvCss();
       const area = document.querySelector('[data-area]');
       const promptSide = item.dir === 'nr' ? 'no' : 'ru';
       const answerSide = promptSide === 'no' ? 'ru' : 'no';
@@ -193,10 +810,11 @@
       const imgBack = ['back', 'both'].includes(st.imageSide);
       const status = Store.status(card, item.dir);
       const listen = S.mode === 'listen';
+      const tvF = this.tvFaceOn(card, false, item), tvB = this.tvFaceOn(card, true, item); // 📄 a text card: the 4 views
       const front = listen
         ? `<div class="word" style="font-size:64px">🎧</div><div class="hint">Послушайте и вспомните слово и перевод</div>
            <button class="btn" data-act="speak-front">🔊 Ещё раз</button>`
-        : `${this.imgHtml(card, imgFront)}${promptSide === 'no' ? this.wordHtml(card.no) : this.trHtml(card)}
+        : `${this.imgHtml(card, imgFront)}${promptSide === 'no' ? (tvF ? this.tvHtml(card, 'front') : this.wordHtml(card.no)) : this.trHtml(card)}
            ${hints && promptSide === 'ru' && card.wordClass ? `<div class="hint">${window.Gram ? Gram.pos(card.wordClass) : U.esc(card.wordClass)}</div>` : ''}`;
       const ans = this.faceText(card, answerSide);
       const back = `
@@ -205,14 +823,11 @@
           ${this.imgHtml(card, imgBack || imgFront || listen)}
           ${this.viewBarHtml(card)}
           ${window.Gram && !listen ? Gram.badges(card) : ''}
-          ${card.description ? `<div class="desc ${UI.isLong(card.description) ? 'longtext' : ''}" data-desc-box>${this.descHtml(card)}</div>` : ''}
-          ${this.formsHtml(card)}
-          ${this.synonymsHtml(card)}
-          ${this.examplesHtml(card)}
+          ${this.extrasHtml(card)}
           ${card.example ? `<div class="example">${UI.rich(card.example)} <button class="icon-btn sm" data-act="speak-ex" title="Прослушать пример">🔊</button>${card.exampleRu ? `<span class="tr">${UI.rich(card.exampleRu)}</span>` : ''}</div>` : ''}
         </div>`;
       const longFront = !listen && this.isText(this.faceText(card, promptSide));
-      const longBack = UI.isLong(ans) || String(card.description || '').length > 200 || (card.forms || []).length > 0 || (card.examples || []).length > 0 || (card.synonyms || []).length > 0;
+      const longBack = tvB || UI.isLong(ans) || String(card.description || '').length > 200 || (card.forms || []).length > 0 || (card.examples || []).length > 0 || (card.synonyms || []).length > 0;
       const fb = st.fourButtons;
       const prev = FSRS.preview(card.srs[item.dir], st.retention);
       const lbl = g => `<span class="kbd">${U.fmtInterval(prev[g])}</span>`;
@@ -243,21 +858,22 @@
           ${S.queue.length > 2 ? '<div class="stack-shadow s2"></div>' : ''}${S.queue.length > 1 ? '<div class="stack-shadow"></div>' : ''}
           <div class="flashcard ${animate ? 'enter' : ''}" data-card>
             <div class="inner">
-              <div class="face front ${longFront ? 'long' : ''} ${hints && Object.keys(Translators.activity(card)).length ? 'has-rail' : ''}">
-                <div class="lang-tag">${listen ? '🎧 АУДИРОВАНИЕ' : flag(promptSide)} ${UI.statusChip(status)}${hints ? Prov.badges(card, 17, ['manual', 'import'], true) : ''}</div>
+              <div class="face front ${longFront ? 'long' : ''}${tvF ? ' tv-face' : ''} ${hints && Object.keys(Translators.activity(card)).length ? 'has-rail' : ''}">
+                <div class="lang-tag">${listen ? '🎧 АУДИРОВАНИЕ' : flag(promptSide)} ${UI.statusChip(status)}${hints ? Prov.badges(card, 17, ['manual', 'import'], true) : ''}${!listen && window.AIHub ? AIHub.markHtml(card, promptSide === 'no' ? 'no' : 'tr', { cls: 'aim-study' }) : ''}</div>
                 ${hints ? Translators.activeRailsHtml(card) : ''}
-                <div class="corner">${window.Subs && promptSide === 'no' ? Subs.audioBtnHtml(card) : ''}<button class="icon-btn sm" data-act="speak-front" title="Прослушать (S)">🔊</button></div>
+                <div class="corner">${listen ? '' : this.editBtn()}${window.Subs && promptSide === 'no' ? Subs.audioBtnHtml(card) : ''}${this.voiceBtn(promptSide)}<button class="icon-btn sm" data-act="speak-front" title="Прослушать (S)">🔊</button></div>
                 ${front}
                 ${(S.mode === 'flip' || listen) && hints ? `<div class="tap-hint">${this.hintText()}</div>` : ''}
               </div>
-              <div class="face back has-rail ${longBack ? 'long' : ''}">
-                <div class="lang-tag">${flag(answerSide)}${Prov.badges(card, 17, ['manual', 'import'], true)}</div>
-                <div class="corner">${window.Subs ? Subs.audioBtnHtml(card) : ''}<button class="icon-btn sm" data-act="grammar" title="📐 Грамматика к этому слову (grammatikk.com)">📐</button><button class="icon-btn sm" data-act="youtube" title="Видео про это слово на YouTube">${YouTube.YT_SVG(16)}</button><button class="icon-btn sm" data-act="copy-card" title="Скопировать весь текст карточки">📋</button><button class="icon-btn sm" data-act="speak-back" title="Прочитать эту сторону (S)">🔊</button></div>
+              <div class="face back has-rail ${longBack ? 'long' : ''}${tvB ? ' tv-face' : ''}">
+                <div class="lang-tag">${flag(answerSide)}${Prov.badges(card, 17, ['manual', 'import'], true)}${window.AIHub ? AIHub.markHtml(card, answerSide === 'no' ? 'no' : 'tr', { cls: 'aim-study' }) : ''}</div>
+                <div class="corner">${this.editBtn()}${window.Subs ? Subs.audioBtnHtml(card) : ''}<button class="icon-btn sm" data-act="grammar" title="📐 Грамматика к этому слову (grammatikk.com)">📐</button><button class="icon-btn sm" data-act="youtube" title="Видео про это слово на YouTube">${YouTube.YT_SVG(16)}</button><button class="icon-btn sm" data-act="copy-card" title="Скопировать весь текст карточки">📋</button>${this.voiceBtn(answerSide)}<button class="icon-btn sm" data-act="speak-back" title="Прочитать эту сторону (S)">🔊</button></div>
                 ${Translators.aiRailHtml('vertical card-rail left', card)}
                 ${Translators.railHtml('vertical card-rail right', card)}
                 ${back}
               </div>
             </div>
+            ${listen ? '' : this.tvpHtml()}
           </div>
         </div>
         ${controls}
@@ -269,6 +885,7 @@
           ${[['all', '🔊 Читать всё'], ['no', '🇳🇴 Только норвежский'], ['ru', '🇷🇺 Только русский']].map(([m, l]) =>
             `<button class="btn sm ${st.readMode === m ? 'primary' : ''}" data-act="read" data-mode="${m}" title="Прочитать видимую сторону карточки">${l}</button>`).join('')}
           <button class="btn sm listen-btn listen-cta" data-act="listen-deck" data-listen-btn data-label="Слушать колоду" title="🎧 Слушать всю колоду вслух — через динамик или в наушниках"></button>
+          ${window.Voices && Voices.langButtons ? Voices.langButtons('cards') : ''}
           <button class="btn sm" data-speech-pron="${U.esc(String(card.no).split('\n')[0].slice(0, 300))}" data-ru="${U.esc(String(card.ru).split('\n')[0].slice(0, 300))}" title="Скажите это вслух — приложение распознает речь прямо на устройстве и покажет, какие слова прозвучали верно">🗣 Произношение</button>
           <button class="btn sm" data-act="native" title="Слово голосом настоящего носителя языка (запись Lingua Libre, если она есть), а дальше — вся карточка синтезированным голосом. Пауза / стоп / сначала — кнопками ниже">🎙 Живой голос</button>
           <div class="speed-seg" data-speed-seg title="Скорость озвучки">
@@ -290,18 +907,25 @@
           <button class="btn sm" data-act="social" title="Подкасты с расшифровкой, ВКонтакте, TikTok, Instagram, Pinterest, Reddit — по этому слову">🌐 Ещё источники</button>
           <button class="btn sm yt-btn" data-act="youtube" title="Видео про это слово / выражение: поиск на YouTube и на каналах учителей норвежского">${YouTube.YT_SVG(18)} YouTube</button>
           <button class="btn sm lib-btn" data-act="library" title="Библиотека устойчивых выражений — создать колоду выражений из открытых источников">${Library.CARDS_SVG(18)} Выражения</button>
+          <button class="btn sm" data-act="pic" title="Все источники картинки: поиск фото, Pinterest, нейросеть, исторические фото, с устройства, без фото">🖼 ${card.image ? 'Заменить фото' : 'Добавить фото'}</button>
+          <button class="btn sm pin-btn" data-act="pin" title="Галерея картинок, как в Pinterest, — прямо здесь: фото по слову и норвежским темам">📌 Галерея картинок</button>
           <button class="btn sm" data-act="redraw" title="Нарисовать новую картинку по смыслу">🎨 Перерисовать</button>
           <button class="btn sm ai" data-act="enrich" data-kind="forms" title="Все формы слова, у каждой — свой перевод">📚 Формы слова</button>
           <button class="btn sm ai" data-act="enrich" data-kind="examples" title="Примеры на каждую форму/время с переводом и подсказкой, когда так говорят">💬 Примеры по формам</button>
           <button class="btn sm ai" data-act="enrich" data-kind="synonyms" title="Синонимы с переводом и объяснением разницы (без нейросети — из словаря Ordbøkene)">🔁 Синонимы</button>
           <button class="btn sm ai" data-act="add-explain" title="Нейросеть допишет в карточку формы, примеры и выражения — перевод в скобках">➕ Добавить объяснение</button>
-          <button class="btn sm ai" data-act="explain">${AI.icon(AI.current(), 14) || '🤖'} Объяснить</button>
-          <button class="btn sm ai" data-act="ai-check">${AI.icon(AI.current(), 14) || '🤖'} Проверить карту (${U.esc(AI.name())})</button>
+          <button class="btn sm ai" data-act="explain">${AI.icon(AI.current(), 14) || BOT(14)} Объяснить</button>
+          <button class="btn sm ai" data-act="ai-check">${AI.icon(AI.current(), 14) || (window.AIHub ? AIHub.bot(true) : '')} Проверить карту (${U.esc(AI.name())})</button>
           <button class="btn sm" data-act="ordbok">📖 Ordbøkene</button>
         </aside>
       </div>`;
+      // 🎨 art style (js/artcards.js): the same card, flip and buttons — only the faces become art cards
+      if (window.ArtCards && ArtCards.studyOn(S)) { try { ArtCards.decorateStudy(area, card, item, S); } catch (e) { console.warn('art card', e); } }
       this.bindSwipe(area.querySelector('[data-card]'));
+      this.markSources(area); // «Подробнее» blocks: the source numbers on their tiles
+      if (Translators.fitRails) Translators.fitRails(area); // service tiles: the edge column full to the card's bottom, the rest beside it
       setTimeout(() => TTS.emit(), 0); // sync pause/stop buttons with the player
+      this.tvAfter(card); // 📄 the text views: translation once, the «кто переводит» badge · ⏯ on the card
       this.fillExamples(card); // sentence / word translations for the chosen view of the examples
       const inp = area.querySelector('[data-type]');
       if (inp) { setTimeout(() => inp.focus(), 60); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); S.answeredType ? this.typeNext() : this.checkTyped(); } }); }
@@ -313,14 +937,14 @@
         Images.ensure(card).then(url => {
           const cur = this.current();
           if (!url || !cur || cur.card.id !== card.id) return;
-          area.querySelectorAll('[data-img-wait]').forEach(el => { el.outerHTML = `<img class="card-img" src="${U.esc(url)}" alt="">`; });
-        }).catch(() => area.querySelectorAll('[data-img-wait]').forEach(el => el.remove()));
+          area.querySelectorAll('[data-img-wait]').forEach(el => { el.outerHTML = `<img class="card-img" src="${U.esc(url)}" alt="">${this.picBtn(true)}`; });
+        }).catch(() => area.querySelectorAll('[data-img-wait]').forEach(el => { const w = el.closest('.card-img-wrap'); (w || el).outerHTML = this.picBtn(false); }));
       }
     },
 
     /** who made the forms/examples (last history entry of that kind) */
     madeBy(card, action) {
-      const h = (card.history || []).filter(x => x.a === action).pop();
+      const h = (card.history || []).filter(x => x.a === action || (x.f && x.f[action] && String(x.f[action].new || '').trim())).pop();
       return h ? `<button class="prov-b" data-prov="${U.esc(h.by)}" data-card="${card.id}" title="${U.esc(Prov.name(h.by))}">${Prov.icon(h.by, 14)}</button>` : '';
     },
     /** the Norwegian part of a description line (no bullets / numbering / Russian in brackets), or '' */
@@ -360,14 +984,14 @@
         const own = this.ruPart(l), mine = no ? this.userSent(no) : undefined;
         const ru = mine || own || (v === 'word' && no ? this.sentTr(no) || '' : '');
         if (no && v === 'word') {
-          return `${pre}<div class="desc-line wbw-line">${U.esc(this.leadPart(l))}${this.glossHtml(no, mine || own || undefined)}${say}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}${this.trFixHtml(no)}</div>` : ''}</div>`;
+          return `${pre}<div class="desc-line wbw-line">${U.esc(this.leadPart(l))}${this.glossHtml(no, mine || own || undefined)}${say}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}${this.trFixHtml(no)}</div>` : ''}${this.litHtml([[no, mine || own || undefined]])}</div>`;
         }
         if (no && v === 'sent' && (!own || mine)) {
           const tr = this.sentTr(no);
           return `${pre}<div class="desc-line">${UI.rich(own ? l.replace(/\(([^()]*[а-яё][^()]*)\)[\s.:;,]*$/i, '') : l)} <span class="ex-ru-in">(${tr ? U.esc(tr) : tr === '' ? '—' : '…'})</span>${say}${tr ? this.sayRu(tr) + this.trFixHtml(no) : ''}</div>`;
         }
         return `${pre}<div class="desc-line">${l.trim() ? UI.rich(l) : '&nbsp;'}${say}${no && ru && v !== 'asis' ? this.sayRu(ru) : ''}</div>`;
-      }).join('');
+      }).join('') + (this.reglossWhere(card) === 'desc' ? this.reglossHtml(card) : '');
       return warn && !placed ? note() + html : html;
     },
     /** «   • Han sier at… (Он говорит…)» → «Он говорит…» */
@@ -404,7 +1028,9 @@
     /** in a line of words a gloss is short: «быть (вспомогательный глагол)» → «быть» (the note goes to the tooltip) */
     shortGloss(g) {
       if (!g) return g;
-      const s = String(g).replace(/\s*\((?:[^()]|\([^()]*\))*\)\s*/g, ' ').replace(/\s+/g, ' ').trim();
+      // balanced notes «(…)» go, and so does a note left unclosed («быть (вспомогательный глагол» — a cut-off dictionary line)
+      // …but an ending glued to the word stays: «был(а)», «рад(а)» (v231)
+      const s = String(g).replace(/(\p{L}?)(\s*)\((?:[^()]|\([^()]*\))*\)\s*/gu, (m, a, sp) => a && !sp && /^\(\p{Ll}{1,3}\)/u.test(m.slice(1).trim()) ? m : (a ? a + ' ' : ' ')).replace(/\s*\([^()]*$/, '').replace(/\s+/g, ' ').trim();
       return s || String(g);
     },
     /** how a gloss is shown after the word in a line: short, without «som — » (the word repeated), small letter
@@ -431,8 +1057,9 @@
      *   sent — sentence by sentence: each Norwegian sentence with its own translation under it;
      *   word — every Norwegian word followed by its Russian in brackets, the card's translation under it.
      */
-    mainNo(card) { const s = String(card.no || '').trim(); return !s.includes('\n') && s.replace(/^(en|ei|et|å)\s+/i, '').split(/\s+/).length >= 2 && s.length <= 400 ? s : ''; }, // «en bil», «å kjøre» = one word
+    mainNo(card) { if (S && this.tvFaceOn(card, true)) return ''; const s = String(card.no || '').trim(); return !s.includes('\n') && s.replace(/^(en|ei|et|å)\s+/i, '').split(/\s+/).length >= 2 && s.length <= 400 ? s : ''; }, // «en bil», «å kjøre» = one word
     mainInner(card, promptSide) {
+      if (this.tvFaceOn(card, true)) return this.tvHtml(card, 'back') + this.checkedHtml(card); // 📄 a text card: the 4 views
       const answerSide = promptSide === 'no' ? 'ru' : 'no';
       const q = String(this.faceText(card, promptSide)).split('\n')[0].slice(0, 120);
       const plain = `<div class="hint">${U.esc(q)}</div>${answerSide === 'no' ? this.wordHtml(card.no) : this.trHtml(card)}`;
@@ -446,10 +1073,70 @@
           <div class="mv-ru">${tr ? U.esc(tr) + this.trFixHtml(s) : tr === '' ? '—' : '<span class="spinner sm"></span>'}</div></div>`; }).join('')}
           <div class="mv-full small muted">Перевод карточки: ${UI.rich(this.tr(card) || '')}</div></div>${this.checkedHtml(card)}`;
       }
-      // word by word
+      // word by word; «Дословно: …» (the literal translation, when it differs) under the meaning translation
+      const lit = this.litHtml(sents.map(s => [s, this.mainRu(card, s, sents.length)]));
       return `${promptSide === 'ru' ? `<div class="hint">${U.esc(q)}</div>` : ''}
         <div class="mv mv-word">${sents.map(s => `<div class="mv-line wbw-line">${this.glossHtml(s, this.mainRu(card, s, sents.length))}${say(s)}</div>`).join('')}</div>
-        ${promptSide === 'no' ? this.trHtml(card) : ''}${this.checkedHtml(card)}`;
+        ${promptSide === 'no' ? this.trHtml(card) : ''}${lit}${this.reglossWhere(card) === 'main' ? this.reglossHtml(card) : ''}${this.checkedHtml(card)}`;
+    },
+    /**
+     * 🔄 «Подписать заново» (word view): the neural network glosses every sentence of THIS card again, whatever is cached
+     * (an old answer like var «(вспом. глагол)» → «была»). One small button per card: under its own sentence, else under
+     * the examples, else under the explanation. The old glosses stay on the screen until the new ones come.
+     */
+    reglossWhere(card) {
+      if (!card || (Store.settings.exView || 'asis') !== 'word') return '';
+      if (this.mainNo(card)) return 'main';
+      if ((card.examples || []).length) return 'ex';
+      return this.descUnits(card).length ? 'desc' : '';
+    },
+    reglossHtml(card) {
+      const ico = window.NavIcons && NavIcons.icon ? NavIcons.icon('refresh', 15) : '';
+      return `<div class="gl-redo-row"><button type="button" class="btn sm ghost gl-redo" data-regloss data-cid="${U.esc(card.id)}" title="Нейросеть заново подпишет перевод под каждым словом этой карточки — по смыслу предложения (прежние подписи не используются)">${ico}<span>Подписать заново</span></button></div>`;
+    },
+    /** every sentence of the card's word view: [{ s, ru }] (the same list fillExamples glosses) */
+    glossSents(card) {
+      const out = [];
+      if (!card) return out;
+      const main = this.mainNo(card);
+      if (main) { const ss = this.splitSent(main).filter(s => /\p{L}/u.test(s)); ss.forEach(s => out.push({ s, ru: this.mainRu(card, s, ss.length) })); }
+      (card.examples || []).forEach(x => this.exPairs(x).forEach(p => out.push({ s: p.no, ru: this.exWordRu(x, p) })));
+      this.descUnits(card).forEach(u => out.push({ s: u.no, ru: this.userSent(u.no) || u.ru || undefined }));
+      return out;
+    },
+    /** the card's AI glosses are out of date (its text was checked / changed, or «Подписать заново»): they stay on the
+     *  screen, but every sentence is glossed again the next time the card is shown in the word view → the number of them */
+    glossStale(cardId) {
+      const card = Store.card(cardId); if (!card) return 0;
+      const c = this.exCache();
+      let n = 0;
+      this.glossSents(card).forEach(({ s }) => { const g = c['g:' + s]; if (g && !Array.isArray(g) && g.pv !== 0) { c['g:' + s] = Object.assign({}, g, { pv: 0 }); n++; } });
+      if (n) this.exSave();
+      return n;
+    },
+    /** the button: mark stale → gloss now (the quiet note says who works); a viewer window is redrawn in place */
+    async regloss(cardId, btn) {
+      const card = Store.card(cardId); if (!card) return;
+      if (!(window.AI && AI.available())) {
+        if (window.Guides && Guides.needAI) Guides.needAI('Подписать заново'); else UI.toast('Подключите нейросеть — она подпишет каждое слово по смыслу', '', 5000);
+        return;
+      }
+      if (btn && btn.classList.contains('busy')) return;
+      this.glossStale(cardId);
+      // asked by hand: the session's limit of tries (3 per sentence, v231) starts again for this card
+      if (this._glTry) this.glossSents(card).forEach(({ s }) => this._glTry.delete(s));
+      // a run for this card that started before the click does not hold the new one back
+      if (this._exBusy && this._exBusy.id === cardId) this._exBusy = false;
+      const root = btn && btn.closest('[data-cv], [data-sheet]');
+      const onStudy = !root && window.App && App.view && App.view.name === 'study' && this.current() && this.current().card.id === cardId;
+      if (btn) { btn.classList.add('busy'); btn.disabled = true; }
+      try {
+        if (onStudy) await this.fillExamples(card);
+        else await this.fillExamples(card, () => { const x = Store.card(cardId); if (x && root && root.isConnected) this.redrawIn(root, x); });
+      } finally { if (btn && btn.isConnected) { btn.classList.remove('busy'); btn.disabled = false; } }
+      const c = this.exCache();
+      const still = this.glossSents(Store.card(cardId) || card).filter(it => { const g = c['g:' + it.s]; return g && !Array.isArray(g) && g.pv === 0; });
+      if (still.length) UI.toast(`${AI.name()} сейчас не ответила — подписи остались прежними. Попробуйте ещё раз чуть позже`, 'warn', 5000);
     },
     /** the translation one sentence of the card's own text is glossed against: yours ✓, the card's (one sentence), the machine one */
     mainRu(card, s, n) { return this.userSent(s) || (n === 1 && card.ru ? String(card.ru) : undefined); },
@@ -583,7 +1270,7 @@
           Перепроверьте перевод: ${AI.available() ? `нейросеть (${U.esc(AI.name())}) проверит каждую строку — кнопка ниже` : 'подключите нейросеть (бесплатно: Gemini или Groq в Настройках) — она проверит каждую строку'},
           или сверьтесь с более точными источниками — DeepL, словари NAOB, LEXIN, Glosbe (значок 📚 справа).</div>
         <div class="mt-note-actions">
-          <button class="btn sm ${AI.available() ? 'ai' : ''}" data-act="${act}">${AI.available() ? `${AI.icon(AI.current(), 14)} Перепроверить нейросетью` : act === 'ai-check' ? '🤖 Проверить нейросетью' : '📖 Открыть статью заново'}</button>
+          <button class="btn sm ${AI.available() ? 'ai' : ''}" data-act="${act}">${AI.available() ? `${AI.icon(AI.current(), 14)} Перепроверить нейросетью` : act === 'ai-check' ? `${window.AIHub ? AIHub.bot(true) : ''} Проверить нейросетью` : '📖 Открыть статью заново'}</button>
           <button class="btn sm" data-act="mt-ok" title="Вы сверили перевод сами — предупреждение исчезнет">✓ Я проверил — скрыть</button>
         </div>
         <span class="mt-more">подробнее ▾</span></div>`;
@@ -592,7 +1279,7 @@
     cardText(card) {
       const out = [card.no, card.ru, this.ukOf(card) ? `🇺🇦 ${this.ukOf(card)}` : ''].filter(Boolean);
       if (card.description) out.push('', card.description);
-      if ((card.forms || []).length) out.push('', 'Формы слова:', ...card.forms.map(f => { const tr = this.trLangs().map(l => (l === 'uk' ? this.formMeta(card, f).uk : f.ru)).filter(Boolean).join(' / '); return `${f.label}: ${f.no}${tr ? ` (${tr})` : ''}`; }));
+      if ((card.forms || []).length) out.push('', 'Формы слова:', ...card.forms.map(f => { const tr = this.trLangs().map(l => (l === 'uk' ? this.formMeta(card, f).uk : f.ru)).filter(Boolean).join(' / '); return `${this.formLabelText(f)} — ${f.no}${tr ? ` — ${tr}` : ''}`; }));
       if ((card.synonyms || []).length) out.push('', 'Синонимы:', ...card.synonyms.map(s => `${s.no}${s.ru ? ` (${s.ru})` : ''}${s.note ? ' — ' + s.note : ''}`));
       if ((card.examples || []).length) out.push('', 'Примеры:', ...card.examples.map(x => `${x.label ? x.label + ': ' : ''}${x.no}${x.ru ? ` (${x.ru})` : ''}`));
       if (card.example) out.push('', card.example + (card.exampleRu ? ` (${card.exampleRu})` : ''));
@@ -610,14 +1297,28 @@
       const f = card.forms || [];
       if (!f.length) return '';
       const busy = !!(this._ffBusy && this._ffBusy.has(card.id));
-      const html = `<div class="forms-box" data-forms-box data-cid="${U.esc(card.id)}"><div class="fb-title">📚 Формы слова ${this.madeBy(card, 'forms')}</div>
-        ${f.map((x, i) => `<div class="fg-row" data-fi="${i}"><span class="fg-label">${window.Gram ? Gram.label(x.label) : U.esc(x.label)}</span><span class="fg-no">${UI.rich(x.no)}</span>${this.formTrCell(card, x, i, busy)}
+      this.tvCss(); // the forms layout lives in css/studyx.css
+      const html = `<div class="forms-box fg-v2" data-forms-box data-cid="${U.esc(card.id)}"><div class="fb-title">📚 Формы слова ${this.madeBy(card, 'forms')}</div>${this.formGenderHtml(card)}
+        ${f.map((x, i) => `<div class="fg-row" data-fi="${i}"><span class="fg-label">${this.formLabelHtml(x)}</span><span class="fg-no" lang="nb">${UI.rich(x.no)}</span><span class="fg-dash" aria-hidden="true">—</span>${this.formTrCell(card, x, i, busy)}
           <span class="fg-btns"><button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">🔊</button><button class="icon-btn sm fg-edit" data-ffix="${i}" title="Исправить перевод этой формы" aria-label="Исправить перевод формы ${U.esc(x.no)}">✎</button></span></div>`).join('')}</div>`;
       // translations that are still missing are made once, when the table is really in front of the user
       if (!busy && this.formsNeed(card).length && !(this._ffTried && this._ffTried.has(card.id + '|' + this.trLang()))) this.formsSoon(card.id);
       return html;
     },
 
+    /** «presens · настоящее время» (Ukrainian names when the translation language is uk) — the one table is AI.FORM_TAGS */
+    formLabelHtml(f) {
+      if (window.AI && AI.formLabelHtml) return AI.formLabelHtml(f, this.trLang() === 'uk' ? 'uk' : 'ru');
+      return window.Gram ? Gram.label(f.label) : U.esc(f.label || '');
+    },
+    formLabelText(f) { return window.AI && AI.formLabelText ? AI.formLabelText(f, this.trLang() === 'uk' ? 'uk' : 'ru') : String(f.label || ''); },
+    /** a noun's kjønn above its forms: «kjønn: hankjønn (en) · мужской род» */
+    formGenderHtml(card) {
+      if (!window.AI || !AI.genderInfo || this.formPos(card) !== 'substantiv') return '';
+      const g = AI.genderInfo(card, this.trLang() === 'uk' ? 'uk' : 'ru');
+      if (!g) return '';
+      return `<div class="fg-gender fg-g-${g.key}"><span class="fl-no" lang="nb">kjønn: ${U.esc(g.no)} (${U.esc(g.art)})</span><span class="fl-dot" aria-hidden="true"> · </span><span class="fl-ru">${U.esc(g.name)}</span></div>`;
+    },
     /* ---------- 📚 every form with ITS OWN translation (å komme — приходить · kom — пришёл, приехал (прошедшее)) ----------
      * card.forms[i] = { label, no, ru, uk?, trBy?, trByUk? }  trBy: 'rule' | 'ai:<id>' | 'tr:<id>' | 'user' (none = came with the card).
      * A copy of the extra fields lives in card.formsTr['f:' + no] = { ru, by, uk, byUk } (kept even where the form list
@@ -648,7 +1349,7 @@
         const t = l === 'uk' ? m.uk : f.ru, by = l === 'uk' ? m.byUk : m.by;
         if (!t) return '';
         const auto = by && by !== 'user';
-        const tag = auto ? `<span class="fg-auto" title="${U.esc(this.autoTitle(by))}" aria-label="${U.esc(this.autoTitle(by))}">${by.startsWith('ai:') ? '🤖' : '⚙︎'}</span>` : '';
+        const tag = auto ? `<span class="fg-auto" title="${U.esc(this.autoTitle(by))}" aria-label="${U.esc(this.autoTitle(by))}">${by.startsWith('ai:') ? BOT() : '⚙︎'}</span>` : '';
         return `<span class="fg-t" lang="${l}">${langs.length > 1 ? `<small class="fg-lang">${l.toUpperCase()}</small>` : ''}${UI.rich(t)}${tag}</span>`;
       }).filter(Boolean);
       if (parts.length) return `<button type="button" class="fg-ru fg-tr" data-ffix="${i}" title="Нажмите, чтобы исправить перевод">${parts.join('')}</button>`;
@@ -657,6 +1358,7 @@
     },
     /** which form slot this row is: inf / pres / pret / perf / … / ue / be / uf / bf / adjmf / adjn / adjpl / komp / sup … */
     formSlot(f) {
+      if (window.AI && AI.formTag) return AI.formTag(f);
       const t = window.Gram && Gram.term ? Gram.term(f.label) : null;
       const MAP = { infinitiv: 'inf', presens: 'pres', preteritum: 'pret', perfektum: 'perf', perfpart: 'perfpart', prespart: 'prespart', futurum: 'fut', pluskv: 'pluskv', imperativ: 'imp', passiv: 'passiv',
         ue: 'ue', be: 'be', uf: 'uf', bf: 'bf', entall: 'ue', flertall: 'uf', komparativ: 'komp', superlativ: 'sup', adjmf: 'adjmf', adjn: 'adjn', adjpl: 'adjpl', positiv: 'positiv' };
@@ -707,22 +1409,22 @@
       if (pos === 'substantiv') {
         // Russian / Ukrainian gender by the ending (for «эта / этот / это»); unknown → a neutral note
         const g = /мя$/.test(low) ? 'n' : /[ая]$/.test(low) ? 'f' : /[оеё]$/.test(low) ? 'n' : /[бвгджзклмнпрстфхцчшщй]$/.test(low) ? 'm' : '';
-        const DEF = ru ? { f: 'эта, определённая', m: 'этот, определённый', n: 'это, определённое', '': 'определённая форма' } : { f: 'ця, означена', m: 'цей, означений', n: 'це, означене', '': 'означена форма' };
-        const DEFPL = ru ? 'эти, определённые' : 'ці, означені';
+        // the form's name («bestemt entall · ед. ч., определённая») is shown next to it: here only «(эта) машина»
+        const DEF = ru ? { f: 'эта', m: 'этот', n: 'это', '': '' } : { f: 'ця', m: 'цей', n: 'це', '': '' };
+        const DEFPL = ru ? 'эти' : 'ці';
         if (slot === 'ue') return { t: main, sure: true };
-        if (slot === 'be') return { t: `${one} (${DEF[single ? g : '']})`, sure: true };
+        if (slot === 'be') { const d = DEF[single ? g : '']; return { t: d ? `(${d}) ${one}` : one, sure: true }; }
         if ((slot === 'uf' || slot === 'bf') && ru && single) {
           const pl = this.ruPlural(low), t = pl.t;
           if (!t) return null;
-          return { t: slot === 'bf' ? `${t} (${DEFPL})` : t, sure: pl.sure };
+          return { t: slot === 'bf' ? `(${DEFPL}) ${t}` : t, sure: pl.sure };
         }
         return null;
       }
       if (pos === 'adjektiv' && single) {
         const a = ru ? this.ruAdj(low) : this.ukAdj(low);
         if (!a) return null;
-        const t = { adjmf: one, positiv: one, adjn: `${a.n} (${ru ? 'ср. род' : 'сер. рід'})`, adjpl: `${a.pl} (${ru ? 'мн. ч. / опр. форма' : 'мн. / означена форма'})`, adjdef: `${one} (${ru ? 'опр. форма' : 'означена форма'})`,
-          komp: a.cmp, sup: a.sup, supdef: `${a.sup} (${ru ? 'опр. форма' : 'означена форма'})` }[slot];
+        const t = { adjmf: one, positiv: one, adjn: a.n, adjpl: a.pl, adjdef: one, komp: a.cmp, sup: a.sup, supdef: a.sup }[slot];
         return t ? { t, sure: true } : null;
       }
       return null;
@@ -783,10 +1485,8 @@
       if (['pres', 'pret', 'fut'].includes(slot)) return 'jeg ' + no;
       return no;
     },
-    FORM_HINT: {
-      ru: { pres: 'настоящее', pret: 'прошедшее', perf: 'перфект: результат важен сейчас', perfpart: 'перфект: результат важен сейчас', pluskv: 'предпрошедшее', fut: 'будущее', imp: 'повелительное' },
-      uk: { pres: 'теперішній час', pret: 'минулий час', perf: 'перфект: результат важливий зараз', perfpart: 'перфект: результат важливий зараз', pluskv: 'давноминулий', fut: 'майбутній час', imp: 'наказовий спосіб' },
-    },
+    // the form's name is shown next to it («perfektum · перфект («уже»)»): only the little «уже» stays in the translation
+    FORM_HINT: { ru: { perf: 'уже', pluskv: 'уже' }, uk: { perf: 'вже', pluskv: 'вже' } },
     /** a translation of a pronoun phrase → the form alone, lower-case, with the tense hint */
     tidyFormTr(t, q, slot, lang) {
       let s = String(t || '').replace(/\s+/g, ' ').trim();
@@ -809,10 +1509,11 @@
         const ask = [...new Set(left().map(x => x.n))];
         const user = `Norwegian Bokmål word «${String(card.no).split('\n')[0].slice(0, 120)}»${pos ? ` (${pos})` : ''}; Russian meaning: «${String(card.ru || '').split('\n')[0].slice(0, 120)}»${card.uk ? `; Ukrainian: «${String(card.uk).split('\n')[0].slice(0, 120)}»` : ''}.
 Translate EACH grammatical form below into Russian ("ru") and Ukrainian ("uk"): short and natural, the way a learner's dictionary shows it, keeping person, tense, number and definiteness of THAT form, in the meaning of the card.
-Verbs: add a very short tense hint in brackets, e.g. kommer → "прихожу / приходит (настоящее)", kom → "пришёл, приехал (прошедшее)", har kommet → "пришёл, приехал (перфект: результат важен сейчас)".
-Nouns: bil → "машина", bilen → "машина (эта, определённая)", biler → "машины", bilene → "машины (эти, определённые)". Adjectives: stort → "большое (ср. род)", større → "больше", størst → "самый большой".
+The form's grammatical name is shown next to it, so do NOT add grammar names in brackets. Natural Russian, never a word-for-word calque.
+Verbs: håper → "надеюсь / надеешься / надеется", håpet → "надеялся", har håpet → "надеялся (уже)", skal håpe → "буду надеяться", håp! → "надейся!".
+Nouns: bil → "машина", bilen → "(эта) машина", biler → "машины", bilene → "(эти) машины". Adjectives: stort → "большое", større → "больше", størst → "самый большой".
 Return ONLY JSON: {"forms":[{"no":"...","ru":"...","uk":"..."}]} — the same forms, the same order.
-Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? Gram.labelText(n.f.label) : n.f.label) || '', no: n.f.no })))}`;
+Forms: ${JSON.stringify(ask.map(n => ({ label: (window.AI && AI.formLabelText ? AI.formLabelText(n.f, 'ru') : n.f.label) || '', no: n.f.no })))}`;
         try {
           const r = AI.parseJSON(await AI.call({ system: 'You are an expert Norwegian–Russian–Ukrainian lexicographer. Answer with JSON only.', user, maxTokens: 200 + ask.length * 90, temperature: 0.1, quiet: true }));
           const arr = Array.isArray(r && r.forms) ? r.forms : Array.isArray(r) ? r : [];
@@ -912,7 +1613,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
       const autos = langs.map(l => (l === 'uk' ? m.byUk : m.by)).filter(by => by && by !== 'user');
       const ed = document.createElement('span');
       ed.className = 'fg-ru fg-editing';
-      ed.innerHTML = `${autos.length ? `<small class="fg-note">${autos[0].startsWith('ai:') ? '🤖' : '⚙︎'} ${U.esc(this.autoTitle(autos[0]))}</small>` : ''}
+      ed.innerHTML = `${autos.length ? `<small class="fg-note">${autos[0].startsWith('ai:') ? BOT() : '⚙︎'} ${U.esc(this.autoTitle(autos[0]))}</small>` : ''}
         ${langs.map(l => `<input class="input fg-in" data-l="${l}" lang="${l}" value="${U.esc(l === 'uk' ? m.uk : f.ru || '')}" placeholder="${l === 'uk' ? 'переклад українською' : 'перевод на русский'}" aria-label="Перевод формы ${U.esc(f.no)} (${l.toUpperCase()})" autocomplete="off">`).join('')}
         <span class="fg-ed-act"><button type="button" class="btn sm primary" data-ffsave>✓ Сохранить</button><button type="button" class="btn sm" data-ffcancel>Отмена</button></span>`;
       cell.replaceWith(ed);
@@ -966,8 +1667,49 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
         Object.keys(this._exc).forEach(k => { if (k.startsWith('w:')) delete this._exc[k]; }); // old single-word garbage
         // failed translations used to be saved as empty for good — they are tried again
         if (!localStorage.getItem('nk-extr-v2')) { Object.keys(this._exc).forEach(k => { if (this._exc[k] === '') delete this._exc[k]; }); try { localStorage.setItem('nk-extr-v2', '1'); } catch (e) { /* full */ } }
+        if (!localStorage.getItem('nk-extr-gg1') && window.GlossGuard) { try { this.glMigrate(this._exc); localStorage.setItem('nk-extr-gg1', '1'); } catch (e) { console.warn('gloss migrate', e); } }
       }
       return this._exc;
+    },
+    /** v231, once: grammar labels that are not true («var (вспом. глагол)», «som (относит. слово)») go out of every stored
+     *  gloss; such a sentence gets pv 0 — glossed again the next time it is on the screen */
+    glMigrate(c) {
+      let n = 0;
+      Object.keys(c).forEach(key => {
+        if (!key.startsWith('g:')) return;
+        const e = c[key], s = key.slice(2);
+        const arr = Array.isArray(e) ? e : e && Array.isArray(e.g) ? e.g : null;
+        if (!arr) return;
+        const r = this.glGuard(s, arr);
+        if (!r) return;
+        if (r.blanked.length || r.stripped.length) {
+          n++;
+          if (Array.isArray(e)) c[key] = r.g; else { e.g = r.g; e.pv = 0; e.gv = this.GUARD_V; }
+        } else if (!Array.isArray(e)) e.gv = this.GUARD_V;
+      });
+      if (n) { try { localStorage.setItem('nk-extr', JSON.stringify(c)); } catch (e) { /* full: the display filter still hides them */ } }
+      return n;
+    },
+    /** the guard (js/glossguard.js) over the glosses of one sentence → { g, blanked, stripped, bad, content } or null */
+    glGuard(s, arr) {
+      if (!window.GlossGuard || !Array.isArray(arr)) return null;
+      const lex = window.Lexicon && Lexicon.peek ? w => { try { return Lexicon.peek(w); } catch (e) { return null; } } : null;
+      return GlossGuard.check(this.glossToks(s), arr, { isName: (w, k) => this.isName(w, k), lex });
+    },
+    /** v231: the version of the guard an AI answer went through when it was saved (gv); older ones are filtered when shown */
+    GUARD_V: 1,
+    /** the glosses of a stored AI answer as they may be shown: an answer saved before the guard is filtered on the fly
+     *  (a stale «(вспом. глагол)» never shows, even when the new answer never comes) */
+    glShown(s, e) {
+      const arr = Array.isArray(e) ? e : e && e.g;
+      if (!Array.isArray(arr)) return [];
+      if (!Array.isArray(e) && (e.gv || 0) >= this.GUARD_V) return arr;
+      const m = this._glShownM || (this._glShownM = new WeakMap()), ver = this._glVer || 0;
+      const hit = m.get(e);
+      if (hit && hit.v === ver) return hit.g;
+      const r = this.glGuard(s, arr), g = r ? r.g : arr;
+      m.set(e, { v: ver, g });
+      return g;
     },
     exSave() {
       const c = this.exCache(), k = Object.keys(c);
@@ -1112,10 +1854,10 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
       if (w === undefined) return { g: undefined, how: 'wait' };
       if (this.isName(w, k) || !/\p{L}/u.test(w)) return { g: '', how: 'skip' };
       const ai = this.exCache()['g:' + sent];
-      if (ai && !Array.isArray(ai) && ru && ai.h === this.ruHash(ru) && Array.isArray(ai.g) && ai.g[k]) return { g: ai.g[k], how: 'ai' };
+      if (ai && !Array.isArray(ai) && ru && ai.h === this.ruHash(ru) && Array.isArray(ai.g) && ai.g[k]) { const gk = this.glShown(sent, ai)[k]; if (gk) return { g: gk, how: 'ai' }; }
       const r = this.alignOf(sent, ru)[k] || { g: undefined, how: 'wait' };
       // glosses an older version made with AI (without the translation): better than a bare guess
-      if (r.how !== 'align' && r.how !== 'dict' && Array.isArray(ai) && ai[k] && !Align.echoes(w, ai[k])) return { g: ai[k], how: 'ai' };
+      if (r.how !== 'align' && r.how !== 'dict' && Array.isArray(ai) && ai[k]) { const gk = this.glShown(sent, ai)[k]; if (gk && !Align.echoes(w, gk)) return { g: gk, how: 'ai' }; }
       return r;
     },
     /** gloss text only (older callers): '' = name / nothing, undefined = still coming */
@@ -1154,7 +1896,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
           const xr = this.userSent(x.no) || x.ru;
           // no translation of its own: the sentence translation(s) the words follow are shown under them (with ✎)
           const mtRu = !xr ? pairs.filter(p => p.ru).map(p => `${U.esc(p.ru)}${this.trFixHtml(p.no)}`).join(' ') : '';
-          return `<div class="ex-no wbw-line">${words} ${say(x.no, 'no')}</div>${xr ? `<div class="ex-ru">${UI.rich(xr)} ${say(xr, 'ru')}${this.trFixHtml(x.no)}</div>` : mtRu ? `<div class="ex-ru">${mtRu}</div>` : ''}`;
+          return `<div class="ex-no wbw-line">${words} ${say(x.no, 'no')}</div>${xr ? `<div class="ex-ru">${UI.rich(xr)} ${say(xr, 'ru')}${this.trFixHtml(x.no)}</div>` : mtRu ? `<div class="ex-ru">${mtRu}</div>` : ''}${this.litHtml(pairs.map(p => [p.no, this.exWordRu(x, p)]))}`;
         }
         const xr = this.userSent(x.no) || x.ru;
         return `<div class="ex-no">${UI.rich(x.no)} ${say(x.no, 'no')}</div>${xr ? `<div class="ex-ru">${UI.rich(xr)} ${say(xr, 'ru')}${this.trFixHtml(x.no)}</div>` : ''}`;
@@ -1165,7 +1907,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
           ${x.note ? `<div class="ex-note">💡 ${U.esc(x.note)}</div>` : ''}</div></div>`).join('');
       const by = this._exBy && this._exBy.length ? this._exBy.map(id => id === 'ai' ? AI.name(Translators.lastAI) : (Translators.LIST[id] || {}).name || id).join(' + ') : '';
       return `<div class="forms-box ex-box"><div class="fb-title">💬 Примеры по формам ${this.madeBy(card, 'examples')}</div>
-        ${rows}
+        ${rows}${this.reglossWhere(card) === 'ex' ? this.reglossHtml(card) : ''}
         ${mt ? `<div class="tiny muted ex-mt">⚠️ ${v === 'word'
           ? `Перевод слов — по смыслу: ${(this._exBy || []).includes('ai') ? `${U.esc(AI.name(Translators.lastAI))} разложил перевод предложения по словам` : `слово берётся из перевода всего предложения${by ? ' (' + U.esc(by) + ')' : ''}; слово с «?» в переводе не нашлось — это перевод без контекста, он может не совпадать по смыслу. Подключите нейросеть — она разложит смысл предложения по каждому слову`}. Нажмите на перевод слова, чтобы исправить его.`
           : `Перевод предложений — машинный${by ? ' (' + U.esc(by) + ')' : ''}, перепроверяйте.`}</div>` : ''}</div>`;
@@ -1197,7 +1939,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
       const v = Store.settings.exView || 'asis';
       const units = card ? this.descUnits(card) : [];
       const main = card ? this.mainNo(card) : '';
-      if (v === 'asis' || !card || (!(card.examples || []).length && !units.length && !main) || this._exBusy) return;
+      if (v === 'asis' || !card || (!(card.examples || []).length && !units.length && !main) || (this._exBusy && this._exBusy.id === card.id && this._exBusy.v === v)) return;
       const sentNeed = [], wordSents = [];
       // the card's own Norwegian text: its sentences (sentence view) or its words (word view)
       if (main) {
@@ -1213,14 +1955,90 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
       // description lines (grammar, Ordbøkene, explanations): a line without its own translation also gets the whole
       // sentence translated (shown under the words); in the word view every line is glossed
       units.forEach(u => { if (!u.ru) sentNeed.push(u.no); if (v === 'word') wordSents.push({ s: u.no, ru: this.userSent(u.no) || u.ru || undefined }); });
-      this._exBusy = true;
+      const run = this._exBusy = { id: card.id, v }; // the next card may start its own run while an old answer is still awaited
       // lines appear one by one while the translation runs
       let t = null;
-      Translators.onPut = () => { if (t) return; t = setTimeout(() => { t = null; if (onDone) onDone(); else this.redrawExamples(card.id); }, 500); };
-      try { await this.translateUnits(sentNeed, wordSents); } finally { Translators.onPut = null; clearTimeout(t); }
-      this._exBusy = false;
+      const put = Translators.onPut = () => { if (t) return; t = setTimeout(() => { t = null; if (gone()) return; if (onDone) onDone(); else this.redrawExamples(card.id); }, 500); };
+      // the person left this card (another card, the home screen…): the rest is not asked for — and the note goes away
+      let left = false; // once left, this run stays stopped (the card may come again later: it then starts its own run)
+      const gone = () => { if (onDone) return false; if (left) return true; const cur = this.current(); return (left = !(window.App && App.view && App.view.name === 'study') || !cur || !cur.card || cur.card.id !== card.id); };
+      // in the background: no «Подождите» window over the card — a small note at the bottom says who signs the words;
+      // the card can be studied meanwhile, the glosses appear as they come (and are kept: each sentence only once)
+      const note = this.glNote(!!onDone); // a viewer window (onDone) → the pill above it
+      const watch = setInterval(() => { if (gone()) { note.close(); if (this._exBusy === run) this._exBusy = false; } }, 400);
+      const failAt = (this._glFail && this._glFail.at) || 0;
+      let failed = false;
+      try {
+        await this.translateUnits(sentNeed, wordSents, { quiet: true, cancel: gone, onProgress: (d, n, ph) => { if (!gone()) note.set(d, n, ph); } });
+        failed = !!(this._glFail && this._glFail.at > failAt) && !gone();
+      } finally {
+        if (Translators.onPut === put) Translators.onPut = null; clearTimeout(t); clearInterval(watch);
+        // v231: never a technical error here — a short, calm line in the same chip, then it goes
+        if (failed) note.flash('не удалось подписать — попробую ещё раз'); else note.close();
+        // a stuck run must never hold the next one (_exBusy is always released)
+        if (this._exBusy === run) this._exBusy = false;
+      }
+      if (gone()) return; // the glosses are kept in the cache: they show when this card comes again
       if (onDone) onDone(); else this.redrawExamples(card.id);
+      // the failed sentences are asked again while the card is still on the screen (20 s, 1 min, 3 min; 3 tries a session)
+      if (failed && !onDone) {
+        const wait = this.glRetryIn(wordSents.map(x => x.s));
+        if (wait >= 0) { clearTimeout(this._glRetryT); this._glRetryT = setTimeout(() => { const cur = this.current(); if (cur && cur.card && cur.card.id === card.id && window.App && App.view && App.view.name === 'study') this.fillExamples(Store.card(card.id) || card); }, wait + 300); }
+      }
       if (this._lastFail) this.failModal(() => this.fillExamples(Store.card(card.id) || card, onDone));
+    },
+    /** the quiet note while the words of a card are being signed: «🤖 Gemini подписывает слова · 1 из 4 — учить можно уже сейчас» */
+    glNote(float) {
+      let el = null, last = null, tick = 0;
+      // where it goes — never over the card (art cards, «Картинкой» and «Текстом» fill the whole frame down to the buttons):
+      // the study screen → a chip in the counters line above the card («✓ знаю · ✗ не знаю · осталось»);
+      // the phone (focus mode hides that line) → a small line under the progress bar in the top bar;
+      // elsewhere (viewer windows) → the small pill at the bottom of the screen
+      const hostOf = () => {
+        if (float) return null;
+        if (document.documentElement.classList.contains('m-phone')) return document.querySelector('#view .study > .m-study-head .m-prog');
+        const hc = document.querySelector('#view .counters'); return hc && hc.offsetParent !== null ? hc : null;
+      };
+      const close = () => { clearInterval(tick); tick = 0; last = null; if (el) { const e = el; el = null; e.classList.add('out'); setTimeout(() => e.remove(), 300); } };
+      const draw = () => {
+        if (!last) return;
+        const { d, n, ph } = last, host = hostOf();
+        const cls = host ? (host.classList.contains('m-prog') ? 'gl-note gl-inline gl-head' : 'gl-note gl-inline') : 'gl-note';
+        if (!el || el.parentNode !== (host || document.body)) {
+          document.querySelectorAll('.gl-note').forEach(x => { if (x !== el) x.remove(); });
+          if (!el) { el = document.createElement('span'); el.setAttribute('role', 'status'); el.innerHTML = '<span class="gl-note-i" aria-hidden="true"></span><span class="gl-note-t"></span>'; }
+          (host || document.body).appendChild(el);
+        }
+        el.className = cls;
+        const ai = ph === 'ai', who = ai && window.AI ? AI.name() : 'Переводчик';
+        if (ai && window.App && App.aiLogo && window.AI) { const i = el.querySelector('.gl-note-i'); if (i._k !== AI.current()) { i._k = AI.current(); try { i.innerHTML = App.aiLogo(AI.current()); } catch (e) { i.textContent = '🤖'; } } }
+        const what = ai ? 'подписывает перевод под каждым словом' : ph === 'words' ? 'ищет значения слов' : 'переводит предложения';
+        // the count moves only when a whole request comes back (up to 8 sentences each): while the first one is still
+        // awaited «0 из 4» would look stuck — «…» says «working»; afterwards the honest «8 из 20»
+        const cnt = d > 0 ? ` · ${d} из ${n}` : '…';
+        const full = `${who} ${what}${cnt} — учить можно уже сейчас`;
+        el.title = d > 0 ? full : `${who} ${what} (${n}) — учить можно уже сейчас`;
+        el.querySelector('.gl-note-t').textContent = host ? `${who} ${ai ? 'подписывает слова' : ph === 'words' ? 'ищет значения' : 'переводит'}${cnt}` : full;
+      };
+      const set = (d, n, ph) => {
+        if (!n) return;
+        last = { d, n, ph };
+        // the phone's top bar is built right after the study screen is drawn: a moment later, not the pill in between
+        if (!el && !hostOf() && document.documentElement.classList.contains('m-phone') && document.querySelector('#view .study')) setTimeout(draw, 0); else draw();
+        // the place may change meanwhile (phone turned, the top bar redrawn): follow it
+        if (!tick) tick = setInterval(() => { if (el && el.parentNode !== (hostOf() || document.body)) draw(); }, 400);
+      };
+      /** a short calm line in the same place («не удалось подписать — попробую ещё раз»), then the note goes */
+      const flash = text => {
+        if (!last) last = { d: 0, n: 1, ph: 'ai' };
+        draw();
+        if (!el) return;
+        clearInterval(tick); tick = 0;
+        const tt = el.querySelector('.gl-note-t'); if (tt) tt.textContent = text;
+        el.title = text; el.classList.add('gl-fail');
+        const me = el; setTimeout(() => { if (el === me) close(); }, 3500);
+      };
+      return { set, close, flash };
     },
     /**
      * shared by cards, the card viewer and the textbook reader: translate these sentences (cache 's:') and gloss every
@@ -1247,12 +2065,12 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
         // a program on the Mac (Ollama) needs no key, so «configured» is always true — it counts only once it was chosen
         const ok = AI.configured(id) && (!p.noKey || AI.current() === id);
         const why = ok ? '✓ подключена — переводит по смыслу, без ограничений Google'
-          : id === 'claude' ? (AI.bridge && AI.bridge.up ? '🔐 войдите в Claude Code (в Терминале: claude → /login)' : '🖥 нужен мост на Mac и подписка Claude')
+          : id === 'claude' ? (AI.bridge && AI.bridge.up ? '🔐 войдите в Claude Code (в Терминале: claude → /login)' : (AI.onMac && AI.onMac() ? '🖥 нужен мост на Mac и подписка Claude' : '🖥 только в приложении на Mac'))
           : p.noKey ? '🖥 установите программу на Mac' : `🔑 нужен ключ${p.free ? ' — бесплатный' : ''}${p.limits ? ' · ' + p.limits : ''}${p.proxyOnly ? '' : ''}`;
         return [id, p.name, why, ok];
       }).sort((a, b) => b[3] - a[3]);
       const item = (kind, [id, name, why, ok]) => `<button class="tr-pick ${ok ? 'ok' : 'need'} ${(kind === 'tr' && id === cur) || (kind === 'ai' && cur === 'ai' && id === AI.current()) ? 'cur' : ''}" data-pick="${kind}:${id}">
-          <span class="tr-pick-ico">${kind === 'tr' ? Translators.icon(id, 22) : (AI.icon(id, 22) || '🤖')}</span>
+          <span class="tr-pick-ico">${kind === 'tr' ? Translators.icon(id, 22) : (AI.icon(id, 22) || BOT(22))}</span>
           <span class="tr-pick-txt"><b>${U.esc(name)}</b><small>${U.esc(why)}</small></span>
           <span class="tr-pick-go">${ok ? 'Выбрать' : kind === 'tr' && id === 'google' ? 'Повторить' : 'Подключить'}</span></button>`;
       const m = UI.modal({
@@ -1265,7 +2083,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
           </div>
           <div class="tr-pick-title">🔁 Переводчики</div>
           <div class="tr-pick-list">${TR.map(x => item('tr', x)).join('')}</div>
-          <div class="tr-pick-title">🤖 Нейросети — точнее всего (переводят по смыслу предложения)</div>
+          <div class="tr-pick-title">${BOT()} Нейросети — точнее всего (переводят по смыслу предложения)</div>
           <div class="tr-pick-list">${AIs.map(x => item('ai', x)).join('')}</div>
           <p class="tiny muted">Выбор сохраняется (Настройки → «Переводчик для статей словарей»). Если выбранный не ответит — приложение само попробует следующий.</p>`,
         foot: '<button class="btn ghost" data-x>Закрыть</button>',
@@ -1282,7 +2100,7 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
           Store.setSetting('dictTranslator', id);
           UI.toast(`Теперь переводит: ${Translators.LIST[id].name}`, 'good');
         } else {
-          if (!b.classList.contains('ok')) { toSettings(id === 'claude' ? 'Claude: запустите мост и войдите в Claude Code (claude → /login), затем выберите его вверху' : AI.PROVIDERS[id].noKey ? `${AI.PROVIDERS[id].short}: установите программу на Mac, затем выберите её в Настройках → «Нейросети»` : `${AI.PROVIDERS[id].name}: впишите ключ в Настройках → «Нейросети»`); return; }
+          if (!b.classList.contains('ok')) { toSettings(id === 'claude' ? (AI.onMac && AI.onMac() ? 'Claude: запустите мост и войдите в Claude Code (claude → /login), затем выберите его вверху' : 'Claude по подписке работает только в приложении на Mac — выберите другую нейросеть (Gemini или Groq — бесплатно)') : AI.PROVIDERS[id].noKey ? `${AI.PROVIDERS[id].short}: установите программу на Mac, затем выберите её в Настройках → «Нейросети»` : `${AI.PROVIDERS[id].name}: впишите ключ в Настройках → «Нейросети»`); return; }
           Store.setSetting('aiProvider', id); Store.setSetting('dictTranslator', 'ai'); App.updateBadge();
           UI.toast(`Теперь переводит нейросеть: ${AI.PROVIDERS[id].name}`, 'good');
         }
@@ -1327,19 +2145,35 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
         // dictionary forms (ønska → ønske) help to find the meaning; the word list is loaded once (offline afterwards)
         if (window.Lexicon && !Lexicon.loaded()) { try { await Lexicon.ready(); this._glVer = (this._glVer || 0) + 1; } catch (e) { /* forms only */ } }
         if (AI.available()) await this.aiGloss(items, opts);
-        const left = items.filter(it => !this.aiDone(it));
+        // the word fallback (dictionary + single words + the sentence translation) for every sentence the AI did not settle:
+        // no answer, an old / failed («stale») one, or one whose wrong labels the guard blanked (v231 — before, an old
+        // answer counted as done and «var» stayed without any meaning)
+        const left = items.filter(it => !this.aiDone(it, true) || this.glHoles(it));
         if (left.length && !(opts.cancel && opts.cancel())) await this.wordCands(left, opts);
         this.exSave();
       } catch (e) { if (!quiet) UI.toast('Перевод: ' + e.message, 'warn'); }
     },
-    /** this sentence has AI glosses made from its current translation (or all its words are yours) */
-    aiDone(it) {
+    /** the version of the gloss prompt: an AI answer made with an older prompt (no «pv», or a smaller one) is still shown,
+     *  but the sentence is glossed again the next time it is on the screen (v226: honest glosses + «Дословно») */
+    GLOSS_PV: 2,
+    /** this sentence has AI glosses made from its current translation (or all its words are yours).
+     *  strict: and made with the current prompt (older answers stay on the screen until the new one comes) */
+    aiDone(it, strict) {
       const g = this.exCache()['g:' + it.s];
-      if (g && !Array.isArray(g) && it.ru && g.h === this.ruHash(it.ru)) return true;
+      if (g && !Array.isArray(g) && it.ru && g.h === this.ruHash(it.ru) && (!strict || ((g.pv == null ? 1 : g.pv) >= this.GLOSS_PV && !g.stale))) return true;
       const toks = this.glossToks(it.s);
       return toks.length > 0 && toks.every((w, k) => this.userGloss(it.s, k) !== undefined || this.isName(w, k));
     },
-    /** the AI answer for one sentence → clean glosses (1:1 with the words), or null when it does not fit */
+    /** the AI answer of this sentence has words without a meaning (blanked by the guard): they need the word fallback */
+    glHoles(it) {
+      const e = this.exCache()['g:' + it.s];
+      if (!e) return false;
+      const g = this.glShown(it.s, e), toks = this.glossToks(it.s);
+      return toks.some((w, k) => !g[k] && !this.isName(w, k) && this.userGloss(it.s, k) === undefined && /\p{L}/u.test(w));
+    },
+    /** the AI answer for one sentence → clean glosses (1:1 with the words), or null when it does not fit.
+     *  v231: the guard (js/glossguard.js) blanks grammar labels that are not true; more than 30 % of the content words
+     *  blanked → the whole answer is rejected (it._rej: the next AI is asked once) */
     aiValid(it, arr) {
       const toks = this.glossToks(it.s);
       if (!Array.isArray(arr) || arr.length !== toks.length) return null;
@@ -1353,12 +2187,134 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
         filled++;
         return t;
       });
-      return want && filled >= Math.ceil(want / 2) ? g : null;
+      if (!(want && filled >= Math.ceil(want / 2))) return null;
+      const r = this.glGuard(it.s, g);
+      if (!r) return g;
+      if (window.GlossGuard && GlossGuard.reject(r)) { it._rej = true; return null; }
+      const left = r.g.filter((x, k) => x && !this.isName(toks[k], k)).length;
+      return left >= Math.ceil(want / 2) ? r.g : (it._rej = true, null);
+    },
+    /** a broken AI answer (cut off at max_tokens): the complete items before the cut, or [] */
+    aiSalvage(text) {
+      const t = String(text || ''), out = [];
+      const a = t.indexOf('[');
+      if (a < 0) return out;
+      let depth = 0, str = false, esc = false, from = -1;
+      for (let i = a + 1; i < t.length; i++) {
+        const ch = t[i];
+        if (str) { if (esc) esc = false; else if (ch === '\\') esc = true; else if (ch === '"') str = false; continue; }
+        if (ch === '"') { str = true; continue; }
+        if (ch === '{' || ch === '[') { if (depth === 0) from = i; depth++; }
+        else if (ch === '}' || ch === ']') {
+          if (depth === 0) break; // the end of the outer list
+          depth--;
+          if (depth === 0 && from >= 0) { try { out.push(JSON.parse(t.slice(from, i + 1))); } catch (e) { return out; } from = -1; }
+        }
+      }
+      return out;
+    },
+    /** the AI answer → its JSON; a cut-off list keeps its complete items */
+    aiParse(text) {
+      try { return AI.parseJSON(text); } catch (e) { const s = this.aiSalvage(text); if (s.length) return s; throw e; }
+    },
+    /** tokens for one gloss request: ≈ 600 + 24 per word + 2 per character of every sentence (the glosses AND «Дословно»
+     *  come back; Gemini's thinking is counted inside max_tokens too) — v226 asked for half of that and the answer was cut */
+    glossBudget(part) {
+      const n = part.reduce((a, p) => a + 24 * this.glossToks(p.s).length + 2 * String(p.s).length + 2 * String(p.ru || '').length, 0);
+      return Math.min(8192, 600 + n);
+    },
+    /* ---------- a gloss request that failed: kept on the screen, asked again later (v231) ----------
+     * per session: at most 3 tries per sentence, the next one after 20 s, 1 min, 3 min */
+    GL_BACKOFF: [20e3, 60e3, 180e3],
+    glMayTry(s) { const r = (this._glTry || (this._glTry = new Map())).get(s); return !r || (r.n < 3 && Date.now() >= r.next); },
+    glFailed(s, provider, reason) {
+      const m = this._glTry || (this._glTry = new Map()), r = m.get(s) || { n: 0, next: 0 };
+      r.n++; r.next = Date.now() + this.GL_BACKOFF[Math.min(r.n, this.GL_BACKOFF.length) - 1];
+      m.set(s, r);
+      const e = this.exCache()['g:' + s];
+      if (e && !Array.isArray(e)) e.stale = Date.now(); // the old answer stays on the screen (filtered) but is not «done»
+      this._glFail = { at: Date.now(), provider, reason };
+    },
+    /** when the next failed sentence of these may be asked again (ms from now), or -1: none left to try this session */
+    glRetryIn(sents) {
+      const m = this._glTry; if (!m) return -1;
+      let best = -1;
+      sents.forEach(s => { const r = m.get(s); if (r && r.n < 3) { const d = Math.max(0, r.next - Date.now()); if (best < 0 || d < best) best = d; } });
+      return best;
+    },
+    /** one item of the AI answer: { gloss: [...], literal: '…' } (v226) or the plain list of glosses (older prompt) */
+    aiItem(x) {
+      if (Array.isArray(x)) return { gloss: x, literal: '' };
+      if (x && typeof x === 'object') {
+        const gl = Array.isArray(x.gloss) ? x.gloss : Array.isArray(x.glosses) ? x.glosses : Array.isArray(x.words) ? x.words : null;
+        return { gloss: gl, literal: typeof x.literal === 'string' ? x.literal : typeof x.lit === 'string' ? x.lit : '' };
+      }
+      return { gloss: null, literal: '' };
+    },
+    /** the whole AI answer → the list of items (a bare array, or { items: [...] } from a network that only answers objects) */
+    aiItems(ans) {
+      if (Array.isArray(ans)) return ans;
+      if (ans && typeof ans === 'object') { const k = ['items', 'sentences', 'result', 'results', 'glosses'].find(n => Array.isArray(ans[n])); if (k) return ans[k]; }
+      return [];
+    },
+    /** «Дословно»: the literal rendering, only when it really differs from the free translation the reader sees */
+    litClean(lit, ru) {
+      const t = Store.Safe.text(typeof lit === 'string' ? lit : '', 300).replace(/\s+/g, ' ').trim();
+      if (!t || !/[а-яё]/i.test(t)) return '';
+      const norm = x => String(x || '').toLowerCase().replace(/ё/g, 'е').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+      return norm(t) === norm(ru) ? '' : t;
+    },
+    /** the literal translation of a sentence (made by the AI together with its glosses, from THIS translation), or '' */
+    litOf(s, ru) {
+      if (ru === undefined) ru = this.sentTr(s);
+      const ai = this.exCache()['g:' + s];
+      if (!ai || Array.isArray(ai) || !ru || ai.h !== this.ruHash(ru) || !ai.lit) return '';
+      return this.litClean(ai.lit, ru);
+    },
+    /** «Дословно: …» — a small muted line under the meaning translation (word view); '' when there is none.
+     *  pairs: [[sentence, translation], …] (one line for all of them); tag: 'div' or 'span' (inside a sentence span) */
+    litHtml(pairs, tag = 'div') {
+      const t = (pairs || []).map(([s, ru]) => this.litOf(s, ru)).filter(Boolean).join(' ');
+      if (!t) return '';
+      return `<${tag} class="gl-lit" title="Дословный перевод: слово за словом, в порядке норвежского предложения">Дословно: <span class="gl-lit-t">${U.esc(t)}</span> ${this.sayRu(t)}</${tag}>`;
+    },
+    /**
+     * the gloss prompt (v226). Before it, a word whose counterpart the free translation had «moved away» got a grammar
+     * label: «Og det var min mormor som har brodert den» → var «(вспом. глагол)», som «(относит. слово)» — wrong, «var»
+     * is the main verb there («была»). Now every content word gets its real meaning; brackets only for pure function words;
+     * the same answer also brings the literal translation («Дословно»). items: [{ no, ru, words }]
+     */
+    glossPrompt(items) {
+      return `Each item has a Norwegian sentence ("no"), its free Russian translation ("ru") and the list of its words ("words").
+First understand the whole sentence: its grammar (V2 word order, cleft and presentative constructions, particle verbs, compound tenses, passive) and its meaning.
+
+1) "gloss" — for EVERY word, in order, the Russian word(s) that give its real meaning in THIS sentence.
+- Every CONTENT word ALWAYS gets Russian words, never a grammar label: verbs (also være/ha/bli/få when they are the main verb of their clause), nouns, adjectives, adverbs, pronouns, numerals, prepositions and conjunctions that carry meaning, relative «som».
+- Take the Russian word(s) from the free translation, in the same form it uses, when it has a counterpart ("ønska" → "хотел" when the translation says "хотел"; "skurringa" → "треск").
+- When the free translation was restructured and has no counterpart for the word, give the word's literal meaning in this context, agreeing with the subject when it is clear (var → "была" / "был" / "было").
+- A short note in brackets ONLY for a pure function word without lexical meaning in this sentence:
+  • an article → "(артикль)";
+  • the infinitive marker «å» → "(частица инфинитива)";
+  • «seg» when Russian has no separate word for it → "(-ся)";
+  • ha / være / bli / få / skulle / ville / kunne / måtte ONLY when they form a compound tense, the passive or a modal construction together with another verb of the same clause → "(вспом. глагол)" (e.g. "har brodert": har → "(вспом. глагол)", brodert → "вышила"); when the translation does have a word for it, that word with the note ("ble skrevet" → «была написана»: ble → "была (вспом. глагол)", skrevet → "написана");
+  • «det» as an empty formal subject ("Det regner": det → "(формальное подлежащее)", regner → "идёт дождь").
+  A verb that is the only verb of its clause is NEVER "(вспом. глагол)".
+- Constructions:
+  • cleft «det er/var X som …» (it is/was X who …): det → "это", er → "есть", var → "был" / "была" / "было" (the main verb, agreeing with X), som → "кто" / "который" / "которая" / "что". "Og det var min mormor som har brodert den": og "а", det "это", var "была", min "моя", mormor "бабушка", som "которая", har "(вспом. глагол)", brodert "вышила", den "его".
+  • presentative «det er / det var / det står / det ligger …» (there is): det → "(формальное подлежащее)", the verb → its meaning ("есть", "был", "стоит", "лежит").
+  • particle (phrasal) verbs — ta på seg, gi opp, komme fram, legge seg: the verb gets the meaning of the whole unit in this sentence, the particle a note naming the unit ("Hun tok på seg jakka": tok "надела", på "(часть «ta på seg»)", seg "на себя", jakka "куртку").
+  • V2 inversion (the verb before the subject): every word keeps its own meaning ("Så har jeg en kyse": så "вот", har "есть", jeg "у меня").
+- Never transliterate a Norwegian word into Cyrillic letters. Names of people and places: "".
+
+2) "literal" — a literal Russian translation of the whole sentence that follows the Norwegian word order and structure word by word, as readable as possible ("И это была моя бабушка, которая вышила его."). Return "" when it would be practically the same as the free translation.
+
+Return ONLY a JSON array with one object per item, in the same order: {"gloss": [exactly as many strings as the item has words], "literal": "..."}.
+${JSON.stringify(items)}`;
     },
     /** 🤖 the neural network distributes each sentence's translation over its words — all sentences, in batches */
     async aiGloss(items, opts = {}) {
       const c = this.exCache();
-      const todo = items.filter(it => it.ru && !this.aiDone(it));
+      const todo = items.filter(it => it.ru && !this.aiDone(it, true) && this.glMayTry(it.s));
       if (!todo.length) return;
       const quiet = !!opts.quiet;
       const busy = quiet ? null : UI.busy(`Подождите — ${AI.name()} переводит каждое слово по смыслу…`);
@@ -1368,30 +2324,73 @@ Forms: ${JSON.stringify(ask.map(n => ({ label: (window.Gram && Gram.labelText ? 
       prog();
       const parts = []; for (let i = 0; i < todo.length; i += 8) parts.push(todo.slice(i, i + 8));
       const system = 'You are a Norwegian–Russian teacher making interlinear glosses for learners. You answer with JSON only.';
-      const prompt = part => `Each item has a Norwegian sentence ("no"), its Russian translation ("ru") and the list of its words ("words").
-First understand the whole sentence by its meaning. Then for EVERY word write the Russian word(s) that express THIS word's meaning in THIS Russian translation, copied in the same form the translation uses (e.g. "ønska" → "хотел" when the translation says "хотел"; "skurringa" → "треск" when it says "треск").
-A word that has no separate counterpart in the translation (article, «seg», «å», auxiliary verb, particle): its meaning in this sentence in 1–3 Russian words, or a short note in brackets such as "(артикль)" or "(вспом. глагол)".
-Never transliterate a Norwegian word into Cyrillic letters. Names of people and places: "".
-Return ONLY a JSON array with one array of strings per item, in the same order, each with exactly as many strings as the item has words.
-${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) })))}`;
+      const prompt = part => this.glossPrompt(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) })));
       let k = 0, fails = 0, stop = false;
-      const one = async part => {
-        for (let attempt = 0; attempt < 3 && !stop; attempt++) {
+      // one request for a part of the sentences. forced: the AI to ask (the next one after an answer the guard rejected).
+      // Never silent (v231): every failure is logged (console.warn('gloss', provider, reason)); a sentence that got no
+      // usable answer keeps its old glosses on the screen (filtered), is marked «stale» and asked again later
+      const one = async (part, forced) => {
+        let lastWho = forced || AI.current(), lastWhy = '', tried = false;
+        for (let attempt = 0; attempt < (forced ? 1 : 3) && !stop; attempt++) {
+          const args = { system, user: prompt(part), maxTokens: this.glossBudget(part), temperature: 0, quiet: true, think: 'low' };
+          if (forced) args.provider = forced;
+          tried = true;
           try {
-            const arr = AI.parseJSON(await AI.call({ system, user: prompt(part), maxTokens: 300 + part.reduce((n, p) => n + this.glossToks(p.s).length, 0) * 16, temperature: 0, quiet: true }));
+            // an AI that never answers must not hold the words (or a «Подождите» window) forever: 60 s, then the next try
+            let to = 0;
+            const ans = await Promise.race([
+              AI.call(args),
+              new Promise((_, rej) => { to = setTimeout(() => rej(new Error('нейросеть не ответила за 60 с')), 60000); }),
+            ]).finally(() => clearTimeout(to));
+            const by = args.answeredBy || AI.lastProvider || lastWho;
+            lastWho = by;
+            // an answer that came after the person left is still kept (cache): the card shows it when it comes again
+            let parsed;
+            try { parsed = this.aiParse(ans); } catch (e) { throw Object.assign(new Error(args.cut ? 'answer cut at max_tokens (' + args.maxTokens + ')' : 'bad JSON: ' + String(ans || '').slice(0, 80)), { parse: true }); }
+            const arr = this.aiItems(parsed);
             let ok = 0;
-            part.forEach((p, j) => { const g = this.aiValid(p, Array.isArray(arr) ? arr[j] : null); if (g) { c['g:' + p.s] = { h: this.ruHash(p.ru), g }; ok++; } });
-            if (!ok) throw new Error('ответ не подошёл');
-            this._exBy = [...new Set([...(this._exBy || []), 'ai'])]; Translators.lastAI = AI.lastProvider;
-            this._glVer = (this._glVer || 0) + 1;
-            fails = 0;
+            const rej = [], miss = [];
+            part.forEach((p, j) => {
+              p._rej = false;
+              const x = this.aiItem(arr[j]), g = this.aiValid(p, x.gloss);
+              // a valid answer replaces the older one (made with an older prompt); a bad one leaves it on the screen
+              if (g) { c['g:' + p.s] = { h: this.ruHash(p.ru), g, lit: this.litClean(x.literal, p.ru), pv: this.GLOSS_PV, gv: this.GUARD_V, by }; ok++; if (this._glTry) this._glTry.delete(p.s); }
+              else if (p._rej) rej.push(p); else miss.push(p);
+            });
+            if (ok) {
+              this._exBy = [...new Set([...(this._exBy || []), 'ai'])]; Translators.lastAI = by;
+              this._glVer = (this._glVer || 0) + 1;
+              fails = 0;
+            }
+            // the answer repeated grammar labels instead of meanings (>30 % of the words): the next AI once
+            if (rej.length) {
+              console.warn('gloss', by, `rejected by the guard: ${rej.length} of ${part.length} sentences`);
+              const ch = AI.chain(), next = forced ? null : ch[ch.indexOf(by) + 1];
+              if (next) await one(rej, next); else rej.forEach(p => this.glFailed(p.s, by, 'labels instead of meanings'));
+            }
+            if (!ok && !rej.length) throw Object.assign(new Error(args.cut ? 'answer cut at max_tokens (' + args.maxTokens + ')' : 'answer does not fit the words'), { parse: true });
+            if (miss.length) { console.warn('gloss', by, `no usable glosses for ${miss.length} of ${part.length} sentences${args.cut ? ' (cut at max_tokens)' : ''}`); miss.forEach(p => this.glFailed(p.s, by, 'incomplete answer')); }
             return;
           } catch (e) {
-            // a limit / a bad answer: wait a little longer each time; four in a row — the rest goes word by word
-            if (++fails >= 4) { stop = true; return; }
+            lastWho = args.answeredBy || lastWho; lastWhy = (e && e.message) || String(e);
+            console.warn('gloss', lastWho, lastWhy);
+            if (opts.cancel && opts.cancel()) { stop = true; break; }
+            // a cut / broken answer: the same request would be cut again — several sentences are asked in two halves
+            // (smaller answers), a single one is left for later (stale, asked again with a backoff)
+            if (e && e.parse) {
+              if (part.length > 1) { const h = Math.ceil(part.length / 2); await one(part.slice(0, h), forced); if (!stop) await one(part.slice(h), forced); return; }
+              if (++fails >= 4) stop = true;
+              break;
+            }
+            // a limit / no answer: wait a little longer each time; four in a row — the rest goes word by word
+            if (forced || ++fails >= 4 || (opts.cancel && opts.cancel())) { stop = stop || !forced; break; }
             await U.sleep(1200 * (attempt + 1) * fails);
+            if (opts.cancel && opts.cancel()) { stop = true; break; }
           }
         }
+        // no usable answer for this part: the old glosses stay (filtered), the sentence is tried again later
+        // (not when the person left the card meanwhile: that is no failure, the card asks again when it comes back)
+        if (tried && !(opts.cancel && opts.cancel())) part.forEach(p => this.glFailed(p.s, lastWho, lastWhy || 'no answer'));
       };
       const worker = async () => {
         while (!stop && k < parts.length) {
@@ -1488,8 +2487,9 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
     /** full text of one side of the current card (what the user sees) */
     sideText(cur, back) {
       const { item, card } = cur;
-      if (!back) return S.mode === 'listen' ? card.no : (item.dir === 'nr' ? card.no : card.ru);
-      const answer = S.mode === 'listen' ? card.no + '\n' + card.ru : (item.dir === 'nr' ? card.ru : card.no);
+      const tv = this.tvFaceOn(card, back, item); // 📄 a text card: read in the chosen view
+      if (!back) return tv ? this.tvReadText(card, 'front') : S.mode === 'listen' ? card.no : (item.dir === 'nr' ? card.no : card.ru);
+      const answer = tv ? this.tvReadText(card, 'back') : S.mode === 'listen' ? card.no + '\n' + card.ru : (item.dir === 'nr' ? card.ru : card.no);
       return [answer, Prov.listText(card.forms), (card.synonyms || []).map(s => `${s.no}\n${s.ru || ''}`).join('\n'), card.description,
         // examples: Norwegian sentence → its translation → next sentence (when the pairs are known)
         (card.examples || []).map(x => { const p = this.exPairs(x); return p.length && p.every(s => s.ru) ? p.map(s => `${s.no}\n${s.ru}`).join('\n') : `${x.no}\n${x.ru || ''}`; }).join('\n'),
@@ -1501,7 +2501,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       if (!cur) return;
       const back = S.flipped;
       const mode = !back && S.mode === 'listen' ? 'no' : (Store.settings.readMode || 'all');
-      TTS.speakText(this.sideText(cur, back), mode, opts);
+      this.readSide(back, mode, opts);
     },
 
     quizOptions(card, side) {
@@ -1530,6 +2530,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       const { item, card } = this.current();
       if (S.flipped && Store.settings.autoSpeak && item.dir === 'rn' && String(card.no).length < 200) TTS.speak(card.no, 'no');
       if (S.flipped && (card.forms || []).length) this.formsSoon(card.id); // 📚 missing form translations: now that they are seen
+      this.tvpPlace(); // ⏯ on the card: under the AI tiles of the side now in front
     },
 
     /* ---------- answering ---------- */
@@ -1710,7 +2711,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       // scrolling the card while pressing cancels the tap and the long press
       el.querySelectorAll('.face').forEach(f => f.addEventListener('scroll', () => { if (down) { moved = true; clearTimeout(lpTimer); } }, { passive: true }));
       el.addEventListener('pointerdown', e => {
-        if (e.target.closest('button, a, input, textarea, .mt-note, [data-glfix], .gt-badge, .fg-label .gt')) return; // a tap on a (translation) corrects it; on a grammar label — explains it
+        if (e.target.closest('button, a, input, textarea, summary, .mt-note, [data-glfix], .gt-badge, .fg-label .gt, .tvp, .tv-top')) return; // a tap on a (translation) corrects it; on a grammar label — explains it
         if (onScrollbar(e)) { down = false; clearTimeout(lpTimer); return; }
         // a click that only clears an existing selection must not flip the card
         if (window.getSelection && String(window.getSelection())) { down = false; clearTimeout(lpTimer); return; }
@@ -1858,7 +2859,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       const cur = this.current(); if (!cur) return;
       const card = cur.card;
       const text = Translators.prepare(card.no, 'no');
-      if (kind === 'ai' && id === 'add') { App.go('settings'); return; }
+      if (kind === 'ai' && id === 'add') { App.goAsk('settings'); return; } // a session in progress asks «Закончить занятие?» first
       if (kind === 'tr' && id === 'telegram') { Telegram.open(Store.card(card.id) || card); return; }
       if (kind === 'tr' && id === 'grammatikk') { Grammar.open(Store.card(card.id) || card); return; }
       if (kind === 'tr' && id === 'ordbok') { this.ordbokBubble(card, btn); return; }
@@ -1869,6 +2870,8 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
           wid => Views.pasteFromDict(wid, Store.card(card.id) || card, { onDone: () => { const c2 = this.current(); if (c2 && c2.card.id === card.id) { this.renderCard(false); this.flip(true); } } }));
         return;
       }
+      // 🤖 an AI tile: the teacher's check — fixes at once (or asks), all forms of the word, «↶ Вернуть» (js/aihub.js)
+      if (kind === 'ai' && id !== 'compare' && window.AIHub && AIHub.checkOne) { this.aiCheckCard(id, btn); return; }
       if (id === 'compare') { Translators.compareDialog(text, 'no', 'ru', (res, tid) => this.addVariant(card, tid === 'ai' ? 'ai:' + (Translators.lastAI || AI.current()) : 'tr:' + tid, res)); return; }
       if (kind === 'tr' && !Translators.inline(id)) {
         const t = Translators.LIST[id];
@@ -1918,14 +2921,14 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
         const uname = Translators.provNames([used]);
         const agree = Translators.agrees(got, card.ru);
         Prov.log(card.id, Prov.entry(by, 'verify', null, `NO→RU: «${got}» — ${agree ? 'совпадает с карточкой' : 'отличается от карточки'}`));
-        this.showBubble({ by, name: uname, res: got, agree, alts: [], text, note: used !== (kind === 'ai' ? 'ai' : id) ? `${name} не ответил (${err.message}) — перевёл ${uname}` : '',
-          icon: used === 'ai' ? (AI.icon(Translators.lastAI || AI.current(), 24) || '🤖') : Translators.icon(used, 24) });
+        this.showBubble({ by, name: uname, res: got, agree, alts: [], text, note: used !== (kind === 'ai' ? 'ai' : id) ? `${name} не ответил (${U.niceErr(err, '', true)}) — перевёл ${uname}` : '',
+          icon: used === 'ai' ? (AI.icon(Translators.lastAI || AI.current(), 24) || BOT(24)) : Translators.icon(used, 24) });
         this.refreshBadges();
         document.querySelectorAll('.card-rail:not(.front-rail)').forEach(r => Translators.light(r, Store.card(card.id), [], by));
         return;
       }
-      this._lastFail = { missing: 1, error: (res && res.error) || err.message };
-      this.errBubble({ icon: kind === 'ai' ? AI.icon(id, 22) : Translators.icon(id, 22), name, msg: `${name} не ответил: ${err.message}. Другие переводчики тоже сейчас не ответили.`,
+      this._lastFail = { missing: 1, error: (res && res.error) || U.niceErr(err) };
+      this.errBubble({ icon: kind === 'ai' ? AI.icon(id, 22) : Translators.icon(id, 22), name, msg: `${name} не ответил: ${U.niceErr(err, '', true)}. Другие переводчики тоже сейчас не ответили.`,
         retry: `data-act="tr-retry" data-kind="${kind}" data-id="${U.esc(id)}"`, url: kind === 'tr' ? Translators.webUrl(id, text, 'no', 'ru') : '', pick: true });
     },
     /** a source failed: the reason right on the card, ⟳ retry, other translators, the website only on request */
@@ -2001,7 +3004,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
         UI.toast(n ? `${AI.name(AI.lastProvider)}: исправлено строк — ${n}. «Добавить статью» сохранит их в карточку` : `${AI.name(AI.lastProvider)}: перевод верный ✓`, 'good', 4500);
       } catch (e) {
         if (!auto) UI.toast(e.message, 'warn', 5000);
-        if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = '🤖 Уточнить перевод'; }
+        if (btn && btn.isConnected) { btn.disabled = false; btn.innerHTML = `${AI.icon(AI.current(), 14) || BOT(14)} Уточнить перевод`; }
       }
     },
     /** warning under machine translations: they must be double-checked */
@@ -2010,7 +3013,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
         const stage = document.querySelector('.stage'); if (!stage) return;
         // the same three views as everywhere: as is (Russian under the line) / sentence (перевод) / word (перевод)
         const v = Store.settings.exView || 'asis';
-        const p = (no, ru) => v === 'word' ? `${this.glossHtml(no, ru || undefined)}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}</div>` : ''}`
+        const p = (no, ru) => v === 'word' ? `${this.glossHtml(no, ru || undefined)}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}</div>` : ''}${this.litHtml([[no, ru || undefined]])}`
           : v === 'sent' ? `${UI.rich(no)}${ru ? ` <span class="ex-ru-in">(${U.esc(ru)})</span>` : ''}`
           : `${UI.rich(no)}${ru ? `<div class="ex-ru">${UI.rich(ru)} ${this.sayRu(ru)}</div>` : ''}`;
         const say = no => `<button class="icon-btn sm" data-act="say" data-say="${U.esc(no)}" title="Произнести">🔊</button>`;
@@ -2027,12 +3030,12 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
           <ol class="ob-defs">${r.definitions.map(d => `<li>${d.no ? `<div class="ob-def">${p(d.no, d.ru)} ${say(d.no)}</div>` : ''}
             ${d.examples.map(x => `<div class="ob-ex">• ${p(x.no, x.ru)} ${say(x.no)}</div>`).join('')}</li>`).join('')}</ol>
           ${r.expressions.length ? `<div class="small muted">Выражения (uttrykk):</div>${r.expressions.map(x => `<div class="ob-ex">• ${p(x.no, x.ru)} ${say(x.no)}</div>`).join('')}` : ''}
-          ${this._bubble.forms.length ? `<div class="tr-forms"><div class="small muted" style="margin:6px 0 4px">📚 Формы слова:</div>${this._bubble.forms.map(f => `<div class="fg-row"><span class="fg-label">${U.esc(f.label)}</span><span class="fg-no">${UI.rich(f.no)}</span><span class="fg-ru">${UI.rich(f.ru)}</span>
+          ${this._bubble.forms.length ? `<div class="tr-forms"><div class="small muted" style="margin:6px 0 4px">📚 Формы слова:</div>${this._bubble.forms.map(f => `<div class="fg-row fg-v2r"><span class="fg-label">${this.formLabelHtml(f)}</span><span class="fg-no" lang="nb">${UI.rich(f.no)}</span><span class="fg-dash" aria-hidden="true">—</span><span class="fg-ru">${UI.rich(f.ru)}</span>
             <button class="icon-btn sm" data-act="say" data-say="${U.esc(f.no)}">🔊</button></div>`).join('')}</div>` : ''}
           <div class="row" style="gap:8px">
             <button class="btn sm primary" data-act="ob-add">➕ Добавить статью в карточку</button>
             ${this._bubble.forms.length ? '<button class="btn sm ai" data-act="tr-save-forms">📚 Формы → в карточку</button>' : ''}
-            ${aiOn ? `<button class="btn sm ai" data-act="ob-ai" title="Нейросеть проверит перевод каждой строки, особенно выражений — машинные переводчики переводят их дословно">${AI.icon(AI.current(), 14) || '🤖'} Уточнить перевод (${U.esc(AI.name())})</button>` : ''}
+            ${aiOn ? `<button class="btn sm ai" data-act="ob-ai" title="Нейросеть проверит перевод каждой строки, особенно выражений — машинные переводчики переводят их дословно">${AI.icon(AI.current(), 14) || BOT(14)} Уточнить перевод (${U.esc(AI.name())})</button>` : ''}
             <button class="btn sm" data-act="ob-copy">📋 Копировать</button>
             ${Listen.hereBtn('.ob-bubble', 'Ordbøkene · ' + r.lemma, 'Слушать статью')}
             <button class="btn sm" data-act="ob-open">↗ Открыть на сайте</button>
@@ -2077,8 +3080,9 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       const box = document.querySelector('[data-bforms]'); if (!box) return;
       if (!f || !f.items.length) { box.innerHTML = ''; return; }
       this._bubble.forms = f.items;
+      this.tvCss();
       box.innerHTML = `<div class="small muted" style="margin-bottom:4px">📚 Формы слова с переводом:</div>
-        ${f.items.map(x => `<div class="fg-row"><span class="fg-label">${window.Gram ? Gram.label(x.label) : U.esc(x.label)}</span><span class="fg-no">${UI.rich(x.no)}</span><span class="fg-ru">${UI.rich(x.ru)}</span>
+        ${f.items.map(x => `<div class="fg-row fg-v2r"><span class="fg-label">${this.formLabelHtml(x)}</span><span class="fg-no" lang="nb">${UI.rich(x.no)}</span><span class="fg-dash" aria-hidden="true">—</span><span class="fg-ru">${UI.rich(x.ru)}</span>
           <button class="icon-btn sm" data-act="say" data-say="${U.esc(x.no)}" title="Произнести">🔊</button></div>`).join('')}`;
       document.querySelector('[data-bactions]').insertAdjacentHTML('beforeend', '<button class="btn sm ai" data-act="tr-save-forms">📚 Сохранить формы в карточку</button>');
     },
@@ -2091,6 +3095,281 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       const cur = this.current();
       if (cur && cur.card.id === card.id) { this.renderCard(false); this.flip(true); }
     },
+    /* ---------- ✅ the AI tile / «Проверить карту»: the teacher's check right on the card (js/aihub.js does the work) ----------
+     * The AI's verdict: ✓ верно (green) · ≠ другой вариант (added as a second variant) · ✎ ошибка (replaced at once).
+     * All forms of the word go to the back; «↶ Вернуть» puts the whole card back. «Исправления: сначала спрашивать»
+     * (⚙️ Настройки) → the popup asks first. 👀 «Проверить эту карточку вживую»: the card flips, the AI reads,
+     * the old translation is struck out, the new one and the forms are written in. */
+    aiLiveOn() { try { return localStorage.getItem('nk-study-ailive') === '1'; } catch (e) { return false; } },
+    aiLiveSet(on) { try { localStorage.setItem('nk-study-ailive', on ? '1' : '0'); } catch (e) { /* private mode */ } },
+    async aiCheckCard(pid, btn, o = {}) {
+      const cur = this.current(); if (!cur) return;
+      if (!window.AIHub || !AIHub.checkOne) { Views.runAiCheck([cur.card], { onDone: () => this.renderCard(false) }); return; }
+      if (!AI.available()) { if (AI.bridge && AI.bridge.auth === 'bad' && AIHub.authHelp) AIHub.authHelp(); else Guides.needAI('Проверить карточку'); return; }
+      const card = Store.card(cur.card.id) || cur.card;
+      if (this._aiRun && this._aiRun.id === card.id) { if (o.live && !this._aiRun.live) { this._aiRun.live = true; this.aiLiveStart(this._aiRun); } return; }
+      const prov = pid && AI.PROVIDERS[pid] && AI.configured(pid) ? pid : undefined;
+      const run = { id: card.id, pid: prov || AI.current(), live: o.live != null ? !!o.live : this.aiLiveOn(), res: null, t0: Date.now() };
+      this._aiRun = run;
+      if (btn) btn.classList.add('busy');
+      if (run.live) this.aiLiveStart(run); else this.aiBubble(run);
+      try {
+        try { run.res = await AIHub.checkOne(card, { provider: prov }); }
+        catch (e) {
+          // the chosen AI did not answer: another connected one checks (the popup says who)
+          if (!prov || AI.chain().filter(x => x !== prov).length === 0) throw e;
+          run.note = `${AI.name(prov)} не ответил (${U.niceErr(e, '', true)}) — проверил другой`;
+          run.res = await AIHub.checkOne(Store.card(card.id) || card, {});
+        }
+      } catch (e) { run.err = e; } finally { if (btn) btn.classList.remove('busy'); if (this._aiRun === run) this._aiRun = null; }
+      const here = !!(this.current() && this.current().card.id === card.id);
+      if (run.err) {
+        this.aiLiveStop();
+        if (here) this.errBubble({ icon: AIHub.workLogo(run.pid, { size: 22 }), name: AI.name(run.pid), msg: U.niceErr(run.err, 'Проверка нейросетью'), retry: `data-act="aif-retry" data-id="${U.esc(run.pid)}"`, pick: false });
+        else UI.toast(U.niceErr(run.err, 'Проверка нейросетью'), 'warn', 6000);
+        return;
+      }
+      this._aiRes = run.res;
+      const onUndo = () => this.aiUndone(run.res);
+      if (!here) { if (run.res.applied) AIHub.fixToast(run.res, onUndo); return; } // moved on: the toast says what changed (with «↶ Вернуть»)
+      if (run.live) await this.aiLiveShow(run.res, run);
+      else { this.aiRedraw(run.res); this.aiResultBubble(run.res, run.note); }
+      if (run.res.applied && !run.live) AIHub.fixToast(run.res, onUndo);
+    },
+    /** the card shows the new text (on the back, where the forms are) */
+    aiRedraw(res) {
+      const cur = this.current();
+      if (!cur || cur.card.id !== res.cardId) return;
+      this.renderCard(false); this.flip(true);
+      this.refreshBadges();
+    },
+    aiUndone(res) {
+      const cur = this.current();
+      if (cur && cur.card.id === res.cardId) { this.renderCard(false); this.flip(true); }
+      document.querySelectorAll('.aif-bubble, .aif-cap').forEach(b => b.remove());
+    },
+    aiHead(pid, chip) {
+      return `<div class="tr-bubble-head">${AIHub.workLogo(pid, { size: 24, on: !chip })} <b>${U.esc(AI.name(pid))}</b>${chip || ''}</div>`;
+    },
+    /** the popup while the AI works: «👀 Проверить эту карточку вживую» switches this very check to the live view */
+    aiBubble(run) {
+      const stage = document.querySelector('.stage'); if (!stage) return;
+      stage.querySelectorAll('.tr-bubble').forEach(b => b.remove());
+      const deep = AIHub.depthOf() === 'card';
+      stage.insertAdjacentHTML('beforeend', `<div class="tr-bubble aif-bubble" role="status">
+        <button class="tr-bubble-x" data-act="bubble-close" title="Закрыть" aria-label="Закрыть">✕</button>
+        ${this.aiHead(run.pid, '<span class="chip">проверяет…</span>')}
+        <div class="aif-load"><span class="spinner sm"></span> Сверяет перевод${deep ? ' и всю карточку' : ''}, пишет все формы слова</div>
+        <div class="row aif-acts"><button class="btn sm" data-act="aif-live">👀 Проверить эту карточку вживую</button></div></div>`);
+    },
+    /** the popup with the verdict: ✓ / ≠ / ✎, the reason, what was added; «↶ Вернуть», «👀 Показать вживую» (or ✓ / ＋ / «Оставить» when asking) */
+    aiResultBubble(res, note) {
+      const stage = document.querySelector('.stage'); if (!stage) return;
+      stage.querySelectorAll('.tr-bubble').forEach(b => b.remove());
+      const it = res.item, f = it.f || {}, ru = f.ru, ask = res.mode === 'ask' && !res.applied && res.main.length;
+      const ok = !ru && !f.no && (res.r.ok || res.r.verdict === 'correct');
+      const alt = ru && ru.kind === 'alt';
+      const chip = ok ? '<span class="chip learned">✓ перевод верный</span>'
+        : alt ? `<span class="chip due">≠ другой вариант${ask ? '' : ' · добавлен'}</span>`
+        : `<span class="chip due aif-chip-fix">${ask ? '✎ нашла ошибку' : '✎ исправлено'}</span>`;
+      const first = s => String(s || '').split('\n')[0];
+      const main = alt ? `<div class="tr-bubble-res">${UI.rich(res.r.alt || '')}</div>`
+        : ru ? `<div class="aif-swap"><s>${UI.rich(first(ru.old))}</s><span aria-hidden="true">→</span><b>${UI.rich(first(ru.new))}</b></div>`
+        : f.no ? `<div class="aif-swap"><s>${U.esc(first(f.no.old))}</s><span aria-hidden="true">→</span><b>${U.esc(first(f.no.new))}</b></div>`
+        : `<div class="tr-bubble-res">${UI.rich(first(Store.card(res.cardId) ? Store.card(res.cardId).ru : it.ru))}</div>`;
+      const reason = it.reason || (!res.r.ok && (it.issues || [])[0]) || '';
+      const extra = [];
+      if (f.forms) extra.push(`📚 ${f.forms.oldArr && f.forms.oldArr.length ? 'Формы слова исправлены' : 'Формы слова'}: ${(f.forms.arr || []).length}${ask ? '' : ' — на обороте'}`);
+      if (f.example && !f.example.old) extra.push('💬 Пример с переводом');
+      Object.keys(f).filter(k => ['uk', 'description', 'examples', 'synonyms'].includes(k) || (k === 'wordClass' && f.wordClass.old) || ((k === 'example' || k === 'exampleRu') && f.example && f.example.old) || (k === 'exampleRu' && !f.example)).forEach(k => {
+        // was the field empty? Then the AI added it (examples per form, synonyms, Ukrainian…) — «исправлено» only for a real change
+        const x = f[k] || {}, added = !String(x.old || '').trim() && !(x.oldArr || []).length;
+        extra.push(`${AIHub.FNAME[k] || k}: ${ask ? (added ? 'предлагает добавить' : 'предлагает исправить') : added ? 'добавлено' : 'исправлено'}`);
+      });
+      const done = !!res.applied;
+      stage.insertAdjacentHTML('beforeend', `<div class="tr-bubble aif-bubble ${ok ? 'ok' : 'diff'}">
+        <button class="tr-bubble-x" data-act="bubble-close" title="Закрыть" aria-label="Закрыть">✕</button>
+        ${this.aiHead(res.by, chip)}
+        ${note ? `<div class="small muted" style="margin:2px 0 4px">ℹ️ ${U.esc(note)}</div>` : ''}
+        ${main}
+        ${reason ? `<div class="aif-reason">${U.esc(reason)}</div>` : ''}
+        ${extra.length ? `<ul class="aif-list">${extra.map(x => `<li>${U.esc(x)}</li>`).join('')}</ul>` : ''}
+        <div class="row aif-acts">
+          ${ask ? `<button class="btn sm primary" data-act="aif-accept">${alt ? '＋ Добавить вариант в карточку' : '✓ Исправить'}</button><button class="btn sm" data-act="aif-keep">Оставить как было</button>` : ''}
+          ${done ? '<button class="btn sm" data-act="aif-undo">↶ Вернуть</button>' : ''}
+          ${done ? '<button class="btn sm" data-act="aif-replay">👀 Показать вживую</button>' : ''}
+        </div></div>`);
+    },
+    /* ---------- 👀 live on the study card ---------- */
+    aiWait(ms) { return new Promise(r => { if (this._aifSkip || !ms) { r(); return; } const t = setTimeout(r, ms); this._aifWake = () => { clearTimeout(t); r(); }; }); },
+    aiReduced() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } },
+    /** the caption under the card: who, what it does now, ⏩ / ⚡ / the result with «↶ Вернуть» */
+    aiCap(html, acts) {
+      const stage = document.querySelector('.stage'); if (!stage) return;
+      let cap = document.querySelector('.aif-cap');
+      if (!cap) { cap = document.createElement('div'); cap.className = 'aif-cap'; cap.setAttribute('role', 'status'); cap.setAttribute('aria-live', 'polite'); stage.after(cap); }
+      cap.innerHTML = `<span class="aif-cap-t">${html}</span><span class="aif-cap-a">${acts || ''}</span>`;
+    },
+    aiLiveStart(run) {
+      const fc = document.querySelector('[data-card]'); if (!fc) return;
+      this._aifSkip = false;
+      document.querySelectorAll('.stage .tr-bubble').forEach(b => b.remove());
+      fc.classList.add('aif-live', 'aif-reading');
+      this.aiSee();
+      const card = Store.card(run.id) || {};
+      const word = U.esc(String(card.no || '').split('\n')[0].slice(0, 60));
+      const nm = U.esc(AI.name(run.pid));
+      const acts = '<button class="btn sm ghost" data-act="aif-fast" title="Без анимации — сразу результат">⚡ Быстро</button>';
+      this.aiCap(`${AIHub.workLogo(run.pid, { size: 26, on: true })}<span><b>${nm}</b> читает «${word}»…</span>`, acts);
+      clearTimeout(this._aifT);
+      // it reads the Norwegian side, then turns the card over to compare the translation (only while the answer is on its way)
+      if (S.flipped) this.flip(false);
+      this._aifT = setTimeout(() => {
+        if (!fc.isConnected || !fc.classList.contains('aif-reading')) return;
+        this.flip(true);
+        this.aiCap(`${AIHub.workLogo(run.pid, { size: 26, on: true })}<span><b>${nm}</b> сравнивает перевод${AIHub.depthOf() === 'card' ? ', проверяет всю карточку' : ''} и пишет формы слова…</span>`, acts);
+      }, this.aiReduced() ? 400 : 1500);
+    },
+    /** the card (and the caption under it) in view */
+    aiSee() {
+      const st = document.querySelector('.stage'); if (!st) return;
+      const r = st.getBoundingClientRect();
+      if (r.top < 60 || r.top > innerHeight * 0.4) { try { window.scrollBy({ top: r.top - 70, behavior: this.aiReduced() ? 'auto' : 'smooth' }); } catch (e) { /* old browser */ } }
+    },
+    aiLiveStop() {
+      clearTimeout(this._aifT);
+      document.querySelectorAll('[data-card].aif-live').forEach(fc => fc.classList.remove('aif-live', 'aif-reading'));
+      document.querySelectorAll('.aif-cap').forEach(c => c.remove());
+    },
+    /** the answer came (or «👀 Показать вживую» again): the old text is struck out, the new one and the forms are written in */
+    async aiLiveShow(res, run) {
+      clearTimeout(this._aifT);
+      this._aifSkip = false;
+      const cur = this.current(); if (!cur || cur.card.id !== res.cardId) return;
+      document.querySelectorAll('.stage .tr-bubble').forEach(b => b.remove());
+      const f = res.item.f || {}, ask = res.mode === 'ask' && !res.applied && res.main.length;
+      const nm = U.esc(AI.name(res.by));
+      const logo = AIHub.workLogo(res.by, { size: 26, on: true });
+      const skip = '<button class="btn sm ghost" data-act="aif-skip" title="Сразу показать результат">⏩ Быстрее</button>';
+      this.aiCap(`${logo}<span><b>${nm}</b> ${res.r.ok && !res.keys.length ? 'проверила: всё верно' : ask ? 'нашла, что поправить' : 'исправляет карточку'}</span>`, skip);
+      // the card with its new text, flipped before the person's eyes
+      this.renderCard(false);
+      this.aiCap(`${logo}<span><b>${nm}</b> ${res.r.ok && !res.keys.length ? 'проверила: всё верно' : ask ? 'нашла, что поправить' : 'исправляет карточку'}</span>`, skip);
+      const fc = document.querySelector('[data-card]'); if (!fc) return;
+      fc.classList.add('aif-live');
+      if (f.forms) fc.querySelectorAll('.face.back [data-forms-box] .fg-row').forEach(r => r.classList.add('aif-pre')); // written in below, row by row
+      this.aiSee();
+      await this.aiWait(this.aiReduced() ? 150 : 350);
+      this.flip(true);
+      await this.aiWait(this.aiReduced() ? 200 : 700);
+      const back = fc.querySelector('.face.back') || fc;
+      // 1) the translation: the old one lights up and is struck out, the new one is typed in
+      const ru = f.ru && (res.applied ? f.ru.st === 'applied' || f.ru.st === 'accepted' : true) ? f.ru : null;
+      if (ru) {
+        const el = [...fc.querySelectorAll('.word[lang="ru"]')].find(x => x.closest('.face.back')) || fc.querySelector('.word[lang="ru"]');
+        if (el) {
+          const keep = el.innerHTML, first = s => String(s || '').split('\n')[0];
+          const oldT = first(ru.old), newT = first(ru.new);
+          const alt = ru.kind === 'alt', add = alt && newT.startsWith(oldT) ? newT.slice(oldT.length) : newT;
+          el.classList.add('aif-typing-host');
+          el.innerHTML = `<span class="aif-old">${U.esc(oldT)}</span>${alt ? '' : ' '}<span class="aif-new"></span>`;
+          this.aiCap(`${logo}<span><b>${nm}</b> ${alt ? 'добавляет второй вариант перевода' : ask ? 'предлагает перевод' : 'исправляет перевод'}${res.item.reason ? ` — ${U.esc(res.item.reason)}` : ''}</span>`, skip);
+          await this.aiWait(this.aiReduced() ? 200 : 700);
+          if (!alt) el.querySelector('.aif-old').classList.add('gone');
+          const nb = el.querySelector('.aif-new');
+          if (this.aiReduced() || this._aifSkip) nb.textContent = add;
+          else { const ch = Array.from(add), step = Math.max(28, Math.min(80, 1100 / Math.max(1, ch.length))); for (let i = 0; i < ch.length && !this._aifSkip; i++) { nb.textContent += ch[i]; await this.aiWait(step); } nb.textContent = add; }
+          await this.aiWait(this.aiReduced() ? 300 : 900);
+          if (!ask) { el.innerHTML = keep; el.classList.remove('aif-typing-host'); el.classList.add('aif-flash'); }
+        }
+      }
+      // 2) the forms (and the new example), row by row on the back
+      const fb = back.querySelector('[data-forms-box]');
+      if (f.forms && fb) {
+        const dt = fb.closest('details'); if (dt) dt.open = true;
+        const rows = [...fb.querySelectorAll('.fg-row')];
+        rows.forEach(r => r.classList.add('aif-pre'));
+        // the long back scrolls inside the card: bring the forms up there (not the whole page)
+        const face = fb.closest('.face');
+        if (face && face.scrollHeight > face.clientHeight) { try { face.scrollTo({ top: Math.max(0, fb.offsetTop - 60), behavior: this.aiReduced() ? 'auto' : 'smooth' }); } catch (e) { face.scrollTop = Math.max(0, fb.offsetTop - 60); } }
+        this.aiCap(`${logo}<span><b>${nm}</b> пишет формы слова на обороте…</span>`, skip);
+        for (const r of rows) { r.classList.remove('aif-pre'); r.classList.add('aif-in'); await this.aiWait(this.aiReduced() ? 0 : 240); }
+      }
+      if (f.example && !f.example.old) { const ex = back.querySelector('.example'); if (ex) { ex.classList.add('aif-in'); await this.aiWait(this.aiReduced() ? 0 : 500); } }
+      // 3) the ✓ mark of the AI on both sides
+      fc.querySelectorAll('.aim').forEach(m => m.classList.add('aim-pop'));
+      fc.classList.remove('aif-live', 'aif-reading');
+      this._aifSkip = false;
+      this.aiCap(`${AIHub.workLogo(res.by, { size: 26 })}<span>${U.esc(AIHub.fixLine(res))}</span>`,
+        `${ask ? '<button class="btn sm primary" data-act="aif-accept">✓ Исправить</button><button class="btn sm" data-act="aif-keep">Оставить как было</button>' : ''}${res.applied ? '<button class="btn sm" data-act="aif-undo">↶ Вернуть</button>' : ''}<button class="icon-btn sm" data-act="aif-cap-x" title="Закрыть" aria-label="Закрыть">✕</button>`);
+    },
+    /* ---------- «Подробнее»: the extra info on the back (explanation, forms, synonyms, examples) in blocks that open and close,
+     * each with where it came from (Claude / ChatGPT / Gemini…, Ordbøkene, Tatoeba, «добавлено вами») and when.
+     * A short card (no forms / synonyms / examples, a short explanation) is drawn exactly as before — no new chrome.
+     * Every outside source gets a number; the same number shows on its tile on the card (Translators.markUsed). ---------- */
+    MORE: { desc: ['📝 Объяснение', true], forms: ['📚 Формы слова', true], synonyms: ['🔁 Синонимы', false], examples: ['💬 Примеры', false] },
+    moreOpen(kind) {
+      let m = null;
+      try { m = JSON.parse(localStorage.getItem('nk-more-open') || 'null'); } catch (e) { /* private mode */ }
+      return m && typeof m[kind] === 'boolean' ? m[kind] : this.MORE[kind][1];
+    },
+    moreRemember(kind, open) {
+      try { const m = JSON.parse(localStorage.getItem('nk-more-open') || '{}') || {}; m[kind] = !!open; localStorage.setItem('nk-more-open', JSON.stringify(m)); } catch (e) { /* private mode */ }
+    },
+    extrasHtml(card) {
+      const desc = card.description ? `<div class="desc ${UI.isLong(card.description) ? 'longtext' : ''}" data-desc-box>${this.descHtml(card)}</div>` : '';
+      const forms = this.formsHtml(card), syn = this.synonymsHtml(card), ex = this.examplesHtml(card);
+      const rich = (card.forms || []).length || (card.synonyms || []).length || (card.examples || []).length || String(card.description || '').length > 200;
+      this._srcNums = {};
+      if (!rich) return desc + forms + syn + ex; // a short card: exactly as before
+      return this.moreBlock(card, 'desc', desc) + this.moreBlock(card, 'forms', forms) + this.moreBlock(card, 'synonyms', syn) + this.moreBlock(card, 'examples', ex);
+    },
+    /** who added this part of the card, and when: the last history entry about it; else the import / you */
+    srcOf(card, kind) {
+      const field = kind === 'desc' ? 'description' : kind;
+      const acts = { desc: ['explain'], forms: ['forms'], synonyms: ['synonyms'], examples: ['examples'] }[kind] || [];
+      const h = [...(card.history || [])].reverse().find(x => acts.includes(x.a) || (x.f && x.f[field] && String(x.f[field].new || '').trim()));
+      if (h) return { by: h.by, t: h.t };
+      const imp = (card.history || []).find(x => x.by === 'import');
+      return imp ? { by: 'import', t: imp.t } : { by: 'manual', t: card.created || 0 };
+    },
+    srcName(by) {
+      if (by === 'manual') return 'добавлено вами';
+      if (by === 'import') return 'из импорта';
+      const [k, id] = String(by).split(':');
+      if (k === 'ai' && AI.PROVIDERS[id]) return AI.PROVIDERS[id].short || AI.PROVIDERS[id].name;
+      if (k === 'tr' && Translators.LIST[id]) return Translators.LIST[id].name;
+      return Prov.name(by);
+    },
+    moreBlock(card, kind, html) {
+      if (!html) return '';
+      const [title] = this.MORE[kind];
+      const s = this.srcOf(card, kind);
+      const ext = /^(ai|tr):/.test(s.by);
+      let n = 0;
+      if (ext) { n = this._srcNums[s.by] || (Object.keys(this._srcNums).length + 1); this._srcNums[s.by] = n; }
+      let day = '';
+      try { day = s.t ? new Date(s.t).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) : ''; } catch (e) { /* old browser */ }
+      const name = this.srcName(s.by);
+      const tip = `Откуда: ${name}${day ? ', ' + day : ''} — нажмите, чтобы увидеть историю карточки`;
+      return `<details class="sx-more" data-more="${kind}" ${this.moreOpen(kind) ? 'open' : ''}>
+        <summary><span class="sxm-t">${title}</span>
+          <span class="sxm-src" data-prov="${U.esc(s.by)}" data-card="${U.esc(card.id)}" title="${U.esc(tip)}" aria-label="${U.esc(tip)}">${n ? `<sup class="sxm-n">${n}</sup>` : ''}${ext ? (/^ai:/.test(s.by) && window.AIHub ? AIHub.workLogo(s.by.slice(3), { size: 16 }) : Prov.icon(s.by, 14)) : ''}<span>${U.esc(name)}${day ? ' · ' + U.esc(day) : ''}</span></span>
+          <span class="sxm-more" aria-hidden="true"><span class="sxm-o">Подробнее</span><span class="sxm-c">Свернуть</span><svg viewBox="0 0 12 12" width="12" height="12"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        ${html}</details>`;
+    },
+    /** the numbers of the sources on their tiles (back rails by data-rk, front tiles by data-prov) */
+    markSources(root) {
+      const nums = this._srcNums || {};
+      root.querySelectorAll('.card-rail').forEach(r => {
+        r.querySelectorAll('.tool-btn[data-used]').forEach(b => { delete b.dataset.used; const s = b.querySelector('.tool-badge'); if (s) s.textContent = ''; });
+        Object.entries(nums).forEach(([k, n]) => {
+          Translators.markUsed(r, k, n);
+          r.querySelectorAll(`.tool-btn[data-prov="${k}"]`).forEach(b => { const s = b.querySelector('.tool-badge'); if (s) { b.dataset.used = n; s.textContent = n; } });
+        });
+      });
+      root.querySelectorAll('details.sx-more').forEach(d => { if (!d._sxm) { d._sxm = true; d.addEventListener('toggle', () => this.moreRemember(d.dataset.more, d.open)); } });
+    },
     /** re-draw the glowing "who worked on it" icons on the front side */
     refreshBadges() {
       const cur = this.current(); if (!cur) return;
@@ -2098,6 +3377,7 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       const front = document.querySelector('.face.front'); if (!front) return;
       front.querySelectorAll('.front-rail').forEach(r => r.remove());
       front.insertAdjacentHTML('beforeend', Translators.activeRailsHtml(card));
+      if (Translators.fitRails) Translators.fitRails(front.parentElement || front);
       front.classList.toggle('has-rail', Object.keys(Translators.activity(card)).length > 0);
     },
 
@@ -2118,8 +3398,8 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
         case 'ins': { const i = document.querySelector('[data-type]'); if (i && !i.readOnly) { i.setRangeText(a.dataset.ch, i.selectionStart, i.selectionEnd, 'end'); i.focus(); } break; }
         case 'quiz': this.quizAnswer(a); break;
         case 'quiz-next': this.quizNext(); break;
-        case 'speak-front': if (card) TTS.speakText(this.sideText(cur, false), S.mode === 'listen' ? 'no' : Store.settings.readMode); break;
-        case 'speak-back': if (card) TTS.speakText(this.sideText(cur, true), Store.settings.readMode); break;
+        case 'speak-front': if (card) this.readSide(false, S.mode === 'listen' ? 'no' : Store.settings.readMode); break;
+        case 'speak-back': if (card) this.readSide(true, Store.settings.readMode); break;
         case 'speak-no': if (card) TTS.speakText(card.no, 'no'); break;
         case 'speak-ex': if (card) TTS.speakText(card.example + '\n' + (Store.settings.readMode === 'no' ? '' : card.exampleRu || ''), Store.settings.readMode); break;
         case 'read':
@@ -2140,10 +3420,27 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
         case 'stop-tts': case 'tts-stop': TTS.stop(); break;
         case 'tts-toggle': if (TTS.state() === 'idle') this.readVisible(); else TTS.toggle(); break;
         case 'tts-restart': TTS.restart(); break;
+        case 'tv-prev': this.tvJump(-1); break;
+        case 'tv-next': this.tvJump(1); break;
+        case 'tv-retry': if (card) { const T = this._tvTried, l = this.tvData(card).lang; if (T) this.tvNeed(card, this.tvMode()).forEach(s => T.delete(l + '|' + s)); this.tvRedraw(card.id); this.tvAfter(Store.card(card.id) || card); } break;
+        case 'tv': {
+          // 📄 another view of the text (remembered for every text card); a reading goes on at about the same place
+          const v = a.dataset.v;
+          if (!card || v === this.tvMode()) break;
+          const F = this._tvFull, reading = TTS.state() !== 'idle' && F && F.face && F.cid === card.id;
+          const playing = reading && TTS.state() === 'playing', frac = reading ? Math.max(0, this.tvG()) / Math.max(1, F.segs.length) : 0;
+          Store.setSetting('textView', v);
+          this.tvRedraw(card.id);
+          this.tvAfter(Store.card(card.id) || card);
+          if (playing) this.readSide(F.face === 'back', F.last.mode, {}, frac || 0.0001);
+          else if (reading) TTS.stop();
+          const nb = document.querySelector(`[data-area] [data-tv] [data-act="tv"][data-v="${v}"]`); if (nb) try { nb.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+          break;
+        }
         case 'redraw': {
           if (!card) return;
           a.disabled = true; a.innerHTML = '<span class="spinner sm"></span> Рисую…';
-          document.querySelectorAll('.card-img').forEach(img => { img.style.opacity = '.35'; });
+          document.querySelectorAll('.card-img, .pfx-img').forEach(img => { img.style.opacity = '.35'; });
           try {
             // every press = another variant: 1st the article photo, then photos of related articles (another car…)
             S.redrawN = S.redrawn === card.id ? (S.redrawN || 0) + 1 : 1;
@@ -2156,11 +3453,12 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
             const cur2 = this.current();
             if (cur2 && cur2.card.id === card.id) {
               const imgs = document.querySelectorAll('.card-img, [data-img-wait]');
-              if (imgs.length) imgs.forEach(el => { el.outerHTML = `<img class="card-img" src="${U.esc(url)}" alt="">`; });
-              else this.renderCard(false);
+              document.querySelectorAll('.card-img-wrap.pfx-pic').forEach(w => { w.classList.remove('pfx-pic'); w.removeAttribute('style'); w.querySelectorAll('.pfx-r, .pfx-cast, .pfx-vig').forEach(x => x.remove()); }); // 🎚 a new picture starts clean
+              if (imgs.length) imgs.forEach(el => { const w = el.closest('.card-img-wrap'); el.outerHTML = `<img class="card-img" src="${U.esc(url)}" alt="">`; if (w) { w.classList.remove('img-broken'); if (!w.querySelector('.pic-btn')) w.insertAdjacentHTML('beforeend', this.picBtn(true)); } });
+              else this.redrawCard();
               if (!S.flipped && !['front', 'both'].includes(Store.settings.imageSide)) this.flip(true);
             }
-          } catch (err) { UI.toast(err.message, 'bad'); document.querySelectorAll('.card-img').forEach(img => { img.style.opacity = ''; }); }
+          } catch (err) { UI.toast(err.message, 'bad'); document.querySelectorAll('.card-img, .pfx-img').forEach(img => { img.style.opacity = ''; }); }
           a.disabled = false; a.innerHTML = '🎨 Перерисовать';
           break;
         }
@@ -2255,8 +3553,27 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
           this.renderCard(false); this.flip(true);
           break;
         }
-        case 'edit': if (card) Views.editCard(card.id, card.deckId, saved => { if (!saved) { S.queue.shift(); S.done++; this.next(true); } else this.renderCard(false); }); break;
-        case 'ai-check': if (card) Views.runAiCheck([card], { onDone: () => this.renderCard(false) }); break;
+        case 'edit': if (card) Views.editCard(card.id, card.deckId, saved => { if (!S) return; if (!saved) { S.queue.shift(); S.done++; this.next(true); } else { const cur2 = this.current(); if (cur2 && cur2.card.id === card.id) this.redrawCard(); } }); break;
+        // 🖼 every picture source (js/views.js) — the card changes in place, the session goes on
+        case 'pic': if (card) Views.pickCardImage(Store.card(card.id) || card, () => this.picChanged(card.id)); break;
+        // 🎚 the photo settings: frame, rotation, light, colour, styles (on an art card — its frame, the art editor's one)
+        case 'fx': {
+          if (!card) return;
+          const media = a.closest('.ac-card') && a.closest('.ac-card').querySelector('.ac-media'), r = media && media.getBoundingClientRect();
+          PhotoFxCore.open(card.id, { art: !!media, ar: r && r.width && r.height ? r.width / r.height : 0, onSaved: () => this.picChanged(card.id) });
+          break;
+        }
+        case 'pin': {
+          if (!card) return;
+          const id = card.id;
+          // 📌 the in-app gallery (Pinterest-like, Norwegian themes on top); real Pinterest is its second tab
+          Views.picSource('feed', Store.card(id) || card, { onPick: patch => {
+            Views.picApply(id, patch, patch.imageSrc === 'pinterest' ? '📌 Картинка из Pinterest на карточке' : '📌 Фото из галереи на карточке', () => this.picChanged(id));
+            this.picChanged(id);
+          } });
+          break;
+        }
+        case 'ai-check': if (card) { if (window.AIHub && AIHub.checkOne) this.aiCheckCard(AI.current(), a); else Views.runAiCheck([card], { onDone: () => this.renderCard(false) }); } break;
         case 'explain': {
           if (!card) return;
           const box = document.querySelector('[data-explain]');
@@ -2371,6 +3688,21 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
           break;
         }
         case 'bubble-close': document.querySelectorAll('.tr-bubble').forEach(b => b.remove()); break;
+        /* ✅ the AI check on the card (aiCheckCard) */
+        case 'aif-live':
+          this.aiLiveSet(true);
+          if (this._aiRun && card && this._aiRun.id === card.id) { this._aiRun.live = true; this.aiLiveStart(this._aiRun); }
+          else if (this._aiRes && card && this._aiRes.cardId === card.id) this.aiLiveShow(this._aiRes);
+          else if (card) this.aiCheckCard(AI.current(), null, { live: true });
+          break;
+        case 'aif-replay': if (this._aiRes && card && this._aiRes.cardId === card.id) this.aiLiveShow(this._aiRes); break;
+        case 'aif-fast': this.aiLiveSet(false); if (this._aiRun) { this._aiRun.live = false; this.aiLiveStop(); this.aiBubble(this._aiRun); } break;
+        case 'aif-skip': this._aifSkip = true; if (this._aifWake) this._aifWake(); break;
+        case 'aif-undo': if (this._aiRes && AIHub.undoOne(this._aiRes)) { UI.toast('Вернула карточку, как была ✓', 'good', 2500); this.aiUndone(this._aiRes); } break;
+        case 'aif-accept': if (this._aiRes && !this._aiRes.applied) { const r = this._aiRes; AIHub.acceptOne(r); this.aiRedraw(r); this.aiResultBubble(r); AIHub.fixToast(r, () => this.aiUndone(r)); document.querySelectorAll('.aif-cap').forEach(c => c.remove()); } break;
+        case 'aif-keep': if (this._aiRes) { AIHub.rejectOne(this._aiRes); document.querySelectorAll('.tr-bubble, .aif-cap').forEach(b => b.remove()); this.renderCard(false); this.flip(true); UI.toast('Оставлено как было', '', 2000); } break;
+        case 'aif-cap-x': document.querySelectorAll('.aif-cap').forEach(c => c.remove()); break;
+        case 'aif-retry': if (card) { document.querySelectorAll('.tr-bubble').forEach(b => b.remove()); this.aiCheckCard(a.dataset.id, null); } break;
         case 'add-explain': {
           if (!card) return;
           const ok = await Views.addExplanation(card, a);
@@ -2489,6 +3821,9 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
     }
     const t = e.target.closest && e.target.closest('[data-trfix]');
     if (t) { e.preventDefault(); e.stopPropagation(); Study.fixSent(t.dataset.s); return; }
+    // 🔄 «Подписать заново» (word view)
+    const rg = e.target.closest && e.target.closest('[data-regloss]');
+    if (rg) { e.preventDefault(); e.stopPropagation(); Study.regloss(rg.dataset.cid, rg); return; }
     // 📚 forms table: ✎ / a tap on a form's translation corrects it · «перевести» makes a missing one
     const ff = e.target.closest && e.target.closest('[data-forms-box] [data-ffix], [data-forms-box] [data-fftr]');
     if (ff) {
@@ -2497,6 +3832,9 @@ ${JSON.stringify(part.map(p => ({ no: p.s, ru: p.ru, words: this.glossToks(p.s) 
       else Study.editFormTr(ff);
     }
   }, true);
+  // ⏯ the reading controls on the study card + the word being read (📄 text views) follow the player
+  document.addEventListener('tts-state', () => { try { if (window.Study && Study.tvState) Study.tvState(); } catch (e) { console.warn('study: reading controls', e); } });
+  window.addEventListener('resize', () => { if (window.Study && Study.tvpPlace) Study.tvpPlace(); });
   // Esc in a form-translation editor closes only the editor (windows close on Esc in the capture phase of document)
   window.addEventListener('keydown', e => {
     const ed = e.key === 'Escape' && e.target && e.target.closest && e.target.closest('.fg-editing');

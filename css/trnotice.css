@@ -39,3 +39,73 @@
 .tn-modal .modal-foot { flex-wrap: wrap; }
 @media (max-width: 480px) { .tn-keyrow { flex-direction: column; } .tn-keyrow .btn { width: 100%; } .tn-modal .modal-foot .btn { width: 100%; } }
 @media (pointer: coarse) { .tn-keyrow .input { font-size: 16px; } .tn-head { min-height: 52px; } }
+
+/* 🌐 TrBadge — ONE «Кто переводит» badge at the top of a window (js/trnotice.js): the brand tile of whoever translates now */
+.trb-wrap { position: relative; display: inline-flex; flex: none; max-width: 100%; }
+.trb { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; max-width: 100%; padding: 4px 12px 4px 7px; border-radius: 999px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; font-size: 14px; line-height: 1.2; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; }
+.trb:hover, .trb-wrap.open .trb { border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.trb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.trb.none { border-color: color-mix(in srgb, #f5a524 50%, var(--panel-border)); }
+.trb-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trb-lab { color: var(--muted); }
+.trb-name { font-weight: 700; }
+.trb-car { display: inline-flex; color: var(--muted); transition: transform .2s; }
+.trb-wrap.open .trb-car { transform: rotate(180deg); }
+.trb-ico { position: relative; flex: none; width: 28px; height: 28px; }
+.trb-t { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .32s ease, transform .36s cubic-bezier(.2, 1.3, .4, 1); }
+.trb-t.out { opacity: 0; transform: scale(.5) rotate(-28deg); pointer-events: none; }
+.trb-t.pre { opacity: 0; transform: scale(.5) rotate(28deg); transition: none; }
+.trb .tool-chip, .trb-pop .tool-chip { position: relative; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 52%), var(--chip-bg, #8b80ff);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 3px 8px -5px rgba(0, 0, 0, .6); }
+.trb .tool-chip.light, .trb-pop .tool-chip.light { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 3px 8px -5px rgba(0, 0, 0, .5); }
+.trb .tool-chip svg, .trb-pop .tool-chip svg { width: var(--gs, 60%); height: var(--gs, 60%); display: block; overflow: visible; }
+.trb .aib-i.tool-chip, .trb-pop .aib-i.tool-chip { background: linear-gradient(180deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, 0) 52%), var(--c, #8b80ff); }
+.trb .aib-i.tool-chip svg, .trb-pop .aib-i.tool-chip svg { width: 96%; height: 96%; }
+.trb .tool-emoji, .trb-pop .tool-emoji { font-size: 16px; line-height: 1; }
+/* translating right now: a soft ring around the tile */
+.trb-ring { position: absolute; inset: -3px; border-radius: 11px; border: 2px solid transparent; pointer-events: none; transition: border-color .3s; }
+.trb-wrap.busy .trb-ring { border-color: color-mix(in srgb, var(--accent) 70%, transparent); animation: trbPulse 1.6s ease-in-out infinite; }
+@keyframes trbPulse { 50% { border-color: color-mix(in srgb, var(--accent) 20%, transparent); } }
+.trb-wrap.swap .trb-ico { animation: trbPop .45s cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes trbPop { 40% { transform: scale(1.12); } }
+/* the caption of a switch (~3 s) and the popover: bubbles under the badge, over the content (nothing below moves) */
+.trb-cap { position: absolute; top: calc(100% + 6px); left: 0; z-index: 31; width: max-content; max-width: min(380px, calc(100vw - 32px)); padding: 9px 13px; border-radius: 12px;
+  background: var(--panel-solid); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--panel-border)); box-shadow: 0 14px 34px -16px rgba(0, 0, 0, .6);
+  font-size: 13.5px; line-height: 1.4; color: var(--text); pointer-events: none; opacity: 0; transform: translateY(-4px); transition: opacity .22s, transform .22s; }
+.trb-cap.on { opacity: 1; transform: none; }
+.trb-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 32; width: min(380px, calc(100vw - 32px)); max-height: min(70vh, 560px); overflow: auto; padding: 12px 12px 10px;
+  border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--panel-border); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, .7); font-size: 14px; text-align: left; }
+.trb-pop-h { font-weight: 700; margin: 0 2px 6px; }
+.trb-pop-h2 { font-weight: 700; margin: 12px 2px 6px; font-size: 13.5px; }
+.trb-chain { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.trb-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 5px 8px; border-radius: 10px; }
+.trb-row.s-work { background: color-mix(in srgb, var(--good, #22c55e) 11%, transparent); }
+.trb-row.s-rest, .trb-row.s-limit, .trb-row.s-key { opacity: .78; }
+.trb-n { flex: none; width: 14px; text-align: right; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.trb-rt-ico { flex: none; display: inline-flex; }
+.trb-rt { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; }
+.trb-rt small { width: 100%; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.trb-row.s-work .trb-rt small { color: var(--good, #22c55e); font-weight: 600; }
+.trb-kind { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.trb-key { flex: none; min-height: 44px; }
+.trb-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.trb-pick { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 5px 12px 5px 7px; border-radius: 999px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; font-size: 13.5px; cursor: pointer; transition: background .15s, border-color .15s; }
+.trb-pick[data-trb-pick="auto"] { padding-left: 12px; }
+.trb-pick:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--panel-border)); }
+.trb-pick.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); font-weight: 600; }
+.trb-pick-ico .tool-chip { width: 24px; height: 24px; border-radius: 7px; }
+.trb-keynote { margin-top: 10px; padding: 9px 11px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 9%, var(--panel)); font-size: 13px; line-height: 1.45; }
+.trb-keynote .btn { margin-top: 6px; min-height: 44px; }
+.trb-pop-foot { margin: 10px 2px 0; }
+/* in a window's title row: next to the title; on a narrow screen — its own row under the title (fixed height, nothing jumps) */
+.modal-head.trb-head { flex-wrap: wrap; row-gap: 6px; }
+@media (max-width: 560px) { .modal-head.trb-head > .trb-wrap { order: 9; flex: 1 0 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .trb-t, .trb-cap, .trb-car, .trb-ring { transition: none; }
+  .trb-wrap.busy .trb-ring, .trb-wrap.swap .trb-ico { animation: none; }
+}
+.trb-still .trb-t, .trb-still .trb-cap, .trb-still .trb-car, .trb-still .trb-ring { transition: none; }
+.trb-still.busy .trb-ring, .trb-still.swap .trb-ico { animation: none; }
+.trb-up { z-index: 60 !important; }
+.trb-wrap.trb-up { z-index: 60; }

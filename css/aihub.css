@@ -1,0 +1,861 @@
+/* ============ 🤖 Центр нейросети, проверка колод, отчёт (js/aihub.js) ============
+ * Colours come from the app's variables (dark / light / themes). Every button ≥ 44 px, hover on everything clickable,
+ * 320 → 2560 px; modals become bottom sheets on phones (styles.css). The pill floats below the windows (z 90).
+ */
+.aih-bot { display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; vertical-align: -6px; }
+.aih-bot .aib-g { width: 100%; height: 100%; }
+.aih-title { display: inline-flex; align-items: center; gap: 10px; }
+.aih-title .aih-bot { width: 30px; height: 30px; }
+.aib-i.aih-logo { width: var(--s, 26px); height: var(--s, 26px); display: inline-grid; vertical-align: middle; box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent); }
+.aih-logo-e { font-size: 22px; line-height: 1; }
+.aih-logo-e.big { font-size: 34px; }
+.aih-modal .btn, .aihr-modal .btn, .aih-run-modal .btn, .aih-start-modal .btn { min-height: 44px; }
+.aih-modal .modal-head h2 .aih-bot { margin-right: 0; }
+.aih-modal .muted, .aihr-modal .muted, .aih-run-modal .muted, .aih-start-modal .muted { color: var(--muted); }
+.aih-label, .aihr-label { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 6px 0 0; }
+.aih-modal .good:not(.btn), .aihr-modal .good:not(.btn) { color: var(--good); }
+.aih-modal .pend:not(.btn), .aihr-modal .pend:not(.btn) { color: var(--warn); }
+
+/* ---------- progress bar (shared) ---------- */
+.aih-bar { --p: 0; height: 10px; border-radius: 99px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
+.aih-bar i { display: block; height: 100%; width: calc(var(--p) * 1%); border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .6s cubic-bezier(.2, .8, .2, 1); }
+
+/* ---------- the hub ---------- */
+.aih-welcome { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 16px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--good) 18%, transparent), color-mix(in srgb, var(--accent2) 14%, transparent));
+  border: 1px solid color-mix(in srgb, var(--good) 40%, transparent); animation: aihPop .5s cubic-bezier(.2, 1.3, .4, 1) both; }
+.aih-welcome > div { display: flex; flex-direction: column; gap: 2px; }
+.aih-welcome b { font-size: 17px; }
+.aih-party { font-size: 32px; line-height: 1; animation: aihWiggle 1.6s ease-in-out .3s 2; }
+.aih-status { display: grid; grid-template-columns: minmax(200px, auto) 1fr; gap: 14px 22px; align-items: center; padding: 14px 16px; border-radius: 16px;
+  background: var(--panel); border: 1px solid var(--panel-border); }
+.aih-who-big { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.aih-who-big > div { display: flex; flex-direction: column; min-width: 0; }
+.aih-who-big small { color: var(--muted); font-size: 12px; }
+.aih-who-big b { font-size: 16px; overflow-wrap: anywhere; }
+.aih-link { align-self: flex-start; display: inline-flex; align-items: center; background: none; border: 0; padding: 0 2px; margin: -8px 0 -10px; color: var(--accent2); font: inherit; font-size: 13px; cursor: pointer; min-height: 44px; text-decoration: underline dotted; }
+.aih-link:hover { color: var(--text); }
+.aih-progress { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.aih-plabel { display: flex; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; font-size: 14px; }
+.aih-runcard { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; border-radius: 16px; cursor: pointer; text-align: left;
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel-solid)); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); color: var(--text); font: inherit;
+  transition: transform .15s, box-shadow .2s, background .2s; }
+.aih-runcard:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -14px var(--accent); background: color-mix(in srgb, var(--accent) 22%, var(--panel-solid)); }
+.aih-runcard > span:nth-child(2) { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.aih-runcard small { color: var(--muted); }
+.aih-go { font-size: 24px; color: var(--muted); }
+.aih-connect { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 16px; border: 1px dashed color-mix(in srgb, var(--warn) 60%, transparent);
+  background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.aih-connect p { margin: 0; }
+.aih-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.aih-actions.off .aih-tile { opacity: .62; }
+.aih-tile { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); cursor: pointer;
+  transition: transform .15s, border-color .2s, box-shadow .2s; min-width: 0; animation: aihPop .4s both; }
+.aih-tile:nth-child(2) { animation-delay: 40ms; } .aih-tile:nth-child(3) { animation-delay: 80ms; } .aih-tile:nth-child(4) { animation-delay: 120ms; }
+.aih-tile:nth-child(5) { animation-delay: 160ms; } .aih-tile:nth-child(6) { animation-delay: 200ms; }
+.aih-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 14px 30px -20px var(--accent); }
+.aih-tile.main { grid-column: 1 / -1; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, var(--panel-solid)), color-mix(in srgb, var(--accent2) 10%, var(--panel-solid)));
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.aih-tile-h { display: flex; align-items: center; gap: 10px; }
+.aih-tile-h b { font-size: 16px; }
+.aih-tile-i { width: 40px; height: 40px; flex: none; display: grid; place-items: center; font-size: 21px; border-radius: 12px; background: color-mix(in srgb, var(--text) 8%, transparent); }
+.aih-tile p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; flex: 1; }
+.aih-tile p b { color: var(--text); }
+.aih-tile .btn { white-space: normal; text-align: center; }
+.aih-cta { align-self: flex-start; max-width: 100%; }
+.aih-tile.main .aih-cta { min-height: 52px; font-size: 17px; }
+.aih-sw { min-height: 44px; }
+.aih-sw input:disabled + .track { opacity: .5; }
+.aih-more { border: 1px solid var(--panel-border); border-radius: 14px; padding: 0 14px; background: var(--panel); }
+.aih-more > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; list-style: none; }
+.aih-more > summary::-webkit-details-marker { display: none; }
+.aih-more > summary::after { content: "›"; margin-left: auto; font-size: 20px; color: var(--muted); transition: transform .2s; }
+.aih-more[open] > summary::after { transform: rotate(90deg); }
+.aih-more > summary:hover { color: var(--accent2); }
+.aih-honest { margin: 0 0 10px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.45; }
+.aih-tip { margin: 0 0 14px; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.45; background: color-mix(in srgb, var(--accent2) 12%, transparent); }
+.aih-nore { margin: 0; }
+.aih-foot { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+.aih-back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px 0 6px; margin-left: -6px; border: 0; border-radius: 12px; background: none; color: var(--text);
+  font: inherit; font-size: 18px; font-weight: 700; cursor: pointer; text-align: left; }
+.aih-back:hover { background: var(--panel); }
+
+/* deck pickers */
+.aih-decks { display: flex; flex-direction: column; gap: 8px; }
+.aih-drow { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); transition: border-color .2s; }
+.aih-drow:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.aih-dinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.aih-dinfo b { overflow-wrap: anywhere; }
+.aih-dinfo small { color: var(--muted); }
+.aih-dinfo small b { color: var(--text); }
+.aih-dbar, .aihr-dbar { --p: 0; display: block; height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; max-width: 360px; }
+.aih-dbar i, .aihr-dbar i { display: block; height: 100%; width: calc(var(--p) * 1%); background: var(--good); border-radius: inherit; }
+.aih-ok { width: 44px; text-align: center; color: var(--good); font-size: 20px; }
+
+/* one card: where */
+.aih-how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.aih-how li { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); }
+.aih-how li > div { display: flex; flex-direction: column; gap: 4px; line-height: 1.5; }
+.aih-how-i { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--accent) 16%, transparent); font-size: 18px; }
+.aih-fake { display: inline-block; padding: 2px 9px; border-radius: 9px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.aih-fake.ai { background: linear-gradient(135deg, #d97757, #b9583c); color: #fff; }
+
+/* past reports */
+.aih-reps { display: flex; flex-direction: column; gap: 8px; }
+.aih-rep { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 14px; text-align: left; cursor: pointer; border-radius: 14px; font: inherit; color: var(--text);
+  background: var(--panel); border: 1px solid var(--panel-border); transition: transform .15s, border-color .2s; }
+.aih-rep:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.aih-rep-i { font-size: 22px; }
+.aih-rep-t { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.aih-rep-t small { color: var(--muted); }
+
+/* ---------- the start window ---------- */
+.aih-start-modal { width: min(620px, 100%); }
+.aih-start-sum { display: flex; gap: 16px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--panel-border); }
+.aih-sum-big { display: flex; flex-direction: column; align-items: center; min-width: 78px; }
+.aih-sum-big b { font-size: 34px; line-height: 1; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.aih-sum-big span { font-size: 12px; color: var(--muted); }
+.aih-sum-txt { line-height: 1.5; font-size: 14.5px; min-width: 0; }
+/* the option cards size to their own text, always: a column of blocks (no grid rows that could keep an older height),
+ * no fixed / animated height — only colours and a 1 px lift are animated */
+.aih-opts { display: flex; flex-direction: column; gap: 10px; }
+.aih-opt { display: flex; flex: none; gap: 12px; align-items: flex-start; width: 100%; height: auto; min-height: 64px; padding: 12px 14px; text-align: left; cursor: pointer; border-radius: 16px; font: inherit; color: var(--text);
+  background: var(--panel); border: 2px solid var(--panel-border); transition: border-color .2s, background-color .2s, transform .15s; }
+.aih-opt:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-1px); }
+.aih-opt > span:last-child { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1 1 auto; }
+.aih-opt small { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+.aih-opt-i { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; font-size: 20px; background: color-mix(in srgb, var(--text) 8%, transparent); position: relative; }
+.aih-opt.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel-solid)); }
+.aih-opt.on .aih-opt-i::after { content: "✓"; position: absolute; right: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  color: #fff; background: var(--accent); box-shadow: 0 0 0 2px var(--panel-solid); }
+/* «Какие карточки проверить» — first in the sheet; «Все карточки уже проверены — проверим заново» under it */
+.aih-start-modal .aih-scope-h { margin-top: 0; }
+.aih-seg > button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.aih-scope-note { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; padding: 9px 12px; border-radius: 12px;
+  background: color-mix(in srgb, var(--good) 10%, var(--panel)); border: 1px solid color-mix(in srgb, var(--good) 35%, var(--panel-border)); }
+.aih-scope-note:empty { display: none; }
+.aih-scope-note .ico { flex: none; margin-top: 2px; color: var(--good); }
+/* the width of the sheet's text never jumps after it opens (a scroll bar coming or going would re-wrap every line) */
+.aih-start-modal .modal-body { scrollbar-gutter: stable; }
+.aih-who { display: flex; gap: 10px; align-items: center; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.aih-who b { color: var(--text); }
+
+/* ---------- the progress window ---------- */
+.aih-run-modal { width: min(640px, 100%); }
+.aih-run-modal .modal-head h2 { display: flex; align-items: center; gap: 10px; }
+.aih-run-top { display: flex; gap: 18px; align-items: center; }
+.aih-ring { --p: 0; width: 96px; height: 96px; flex: none; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), color-mix(in srgb, var(--text) 10%, transparent) 0); transition: background .4s; }
+.aih-ring::after { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: var(--panel-solid); }
+.aih-ring b { position: relative; z-index: 1; font-size: 24px; }
+.aih-run-top.limit .aih-ring { background: conic-gradient(var(--warn) calc(var(--p) * 1%), color-mix(in srgb, var(--text) 10%, transparent) 0); }
+.aih-run-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
+.aih-run-state { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.aih-run-line { font-size: 14px; overflow-wrap: anywhere; }
+.aih-why { padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--warn) 12%, transparent); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); }
+.aih-why p { margin: 6px 0 0; line-height: 1.5; font-size: 14px; }
+.aih-why .btn { margin: 2px 2px; }
+.aih-run-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.aih-num { display: flex; flex-direction: column; align-items: center; padding: 10px 6px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); text-align: center; }
+.aih-num b { font-size: 24px; }
+.aih-num small { color: var(--muted); font-size: 12px; }
+.aih-num.good b { color: var(--good); }
+.aih-num.fix b { color: var(--accent2); }
+.aih-run-note { margin: 0; line-height: 1.5; }
+.aih-run-modal .aih-bar { margin: 2px 0; }
+.aih-run-foot { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+
+/* ---------- the floating pill ---------- */
+.aih-pill { position: fixed; z-index: 90; left: 18px; bottom: 18px; display: flex; align-items: center; gap: 4px; padding: 4px 6px 4px 4px; max-width: min(360px, calc(100vw - 24px));
+  border-radius: 999px; background: var(--panel-solid); border: 1px solid var(--panel-border); box-shadow: var(--shadow); color: var(--text);
+  animation: aihPillIn .4s cubic-bezier(.2, 1.3, .4, 1) both; overflow: hidden; }
+.aih-pill-main { display: flex; align-items: center; gap: 10px; min-height: 48px; min-width: 0; padding: 0 8px 0 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: left; border-radius: 999px; }
+.aih-pill-main:hover .aih-pill-t b { color: var(--accent2); }
+.aih-pill-ring { --p: 0; width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), color-mix(in srgb, var(--text) 12%, transparent) 0); }
+.aih-pill .aih-pill-ring { --p: inherit; }
+.aih-pill-ring::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--panel-solid); }
+.aih-pill-bot { position: relative; z-index: 1; width: 26px; height: 26px; display: grid; place-items: center; }
+.aih-pill-bot .aih-bot { width: 26px; height: 26px; vertical-align: 0; }
+.aih-pill.run .aih-pill-bot { animation: aihBob 1.6s ease-in-out infinite; }
+.aih-pill.limit .aih-pill-ring { background: conic-gradient(var(--warn) calc(var(--p) * 1%), color-mix(in srgb, var(--text) 12%, transparent) 0); }
+.aih-pill-t { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.aih-pill-t b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .2s; }
+.aih-pill-t small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aih-pill-b { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font-size: 17px; cursor: pointer;
+  display: grid; place-items: center; transition: background .2s, transform .15s; }
+.aih-pill-b:hover { background: color-mix(in srgb, var(--accent) 22%, var(--panel-solid)); transform: scale(1.06); }
+.aih-pill-b.go { background: linear-gradient(135deg, var(--accent), #5b8cff); color: #fff; border-color: transparent; }
+.aih-pill-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: transparent; }
+.aih-pill-bar i { display: block; height: 100%; width: calc(var(--p) * 1%); background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .6s; }
+.aih-pill.done { border-color: color-mix(in srgb, var(--good) 50%, transparent); padding-left: 8px; }
+.aih-pill-ico { width: 36px; height: 36px; display: grid; place-items: center; font-size: 22px; }
+.aih-menu-hub small { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.aih-menu-run { color: var(--accent2); }
+@media (max-width: 720px) {
+  /* the thumb zone, just above the tab bar (toasts may sit over it for a moment) */
+  .aih-pill { left: 10px; bottom: calc(78px + env(safe-area-inset-bottom)); max-width: calc(100vw - 20px); }
+  /* learning: only the ring, above the answer buttons */
+  body[data-view="study"] .aih-pill { left: auto; right: 10px; bottom: calc(150px + env(safe-area-inset-bottom)); padding: 3px; }
+  body[data-view="study"] .aih-pill .aih-pill-t, body[data-view="study"] .aih-pill .aih-pill-b, body[data-view="study"] .aih-pill-bar { display: none; }
+  body[data-view="study"] .aih-pill .aih-pill-main { padding: 0; }
+}
+
+/* ---------- the report ---------- */
+.aihr-meta { font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.aihr-meta .aib-i { width: 18px; height: 18px; }
+.aihr-live { color: var(--accent2); display: inline-flex; gap: 6px; align-items: center; }
+.aihr-big { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.aihr-n { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 14px 8px; border-radius: 18px; text-align: center;
+  background: var(--panel); border: 1px solid var(--panel-border); animation: aihPop .45s both; }
+.aihr-n:nth-child(2) { animation-delay: 60ms; } .aihr-n:nth-child(3) { animation-delay: 120ms; } .aihr-n:nth-child(4) { animation-delay: 180ms; }
+.aihr-n b { font-size: clamp(30px, 6vw, 42px); line-height: 1.05; }
+.aihr-n small { color: var(--muted); font-size: 13px; }
+.aihr-n.fix b { color: var(--accent2); }
+.aihr-n.good b { color: var(--good); }
+.aihr-n.skip b { color: var(--warn); }
+.aihr-pending { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; line-height: 1.5; font-size: 14px;
+  background: color-mix(in srgb, var(--warn) 12%, transparent); border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); }
+.aihr-decks-min { display: flex; flex-direction: column; gap: 8px; }
+.aihr-drow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(60px, 1fr) auto 18px; gap: 12px; align-items: center; width: 100%; min-height: 52px; padding: 8px 14px;
+  border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color .2s, transform .15s; }
+.aihr-drow:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-1px); }
+.aihr-dname { font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+.aihr-dnums { display: inline-flex; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 600; justify-content: flex-end; }
+.aihr-dnums small { color: var(--muted); font-weight: 400; }
+.aihr-chev { font-size: 22px; color: var(--muted); transition: transform .2s; }
+.aihr-more-btn { align-self: center; white-space: normal; }
+.aihr-tools { display: flex; flex-direction: column; gap: 10px; position: sticky; top: -8px; z-index: 1; padding: 8px 0; background: var(--panel-solid); }
+.aihr-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; min-height: 44px; border-radius: 12px; background: var(--panel); border: 1px solid var(--panel-border); }
+.aihr-search:focus-within { border-color: var(--accent); }
+.aihr-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 15px; min-height: 42px; }
+.aihr-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.aihr-chip { flex: none; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--panel-border); background: var(--panel); color: var(--text); font: inherit; font-size: 13.5px;
+  font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .2s, border-color .2s; }
+.aihr-chip:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.aihr-chip.on { background: linear-gradient(135deg, var(--accent), #5b8cff); color: #fff; border-color: transparent; }
+.aihr-decks { display: flex; flex-direction: column; gap: 10px; }
+.aihr-deck { border: 1px solid var(--panel-border); border-radius: 16px; background: var(--panel); scroll-margin-top: 150px; }
+.aihr-deck > summary { list-style: none; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 14px; cursor: pointer; border-radius: 16px; }
+.aihr-deck > summary::-webkit-details-marker { display: none; }
+.aihr-deck > summary:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
+.aihr-deck > summary .aihr-dname { flex: 1; }
+.aihr-deck[open] > summary .aihr-chev { transform: rotate(90deg); }
+.aihr-dbody { display: flex; flex-direction: column; gap: 10px; padding: 4px 12px 14px; }
+.aihr-dact { display: flex; gap: 8px; flex-wrap: wrap; }
+.aihr-dact .btn, .aihr-iact .btn, .aihr-fact .btn { white-space: normal; }
+.aihr-item { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px; background: var(--panel-solid); border: 1px solid var(--panel-border); }
+.aihr-item.bad { border-left: 4px solid var(--warn); }
+.aihr-item.gone { opacity: .6; }
+.aihr-ihead { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.aihr-word { min-width: 0; overflow-wrap: anywhere; font-size: 15.5px; }
+.aihr-ru { color: var(--ru); }
+.aihr-issues { font-size: 14px; line-height: 1.45; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 9%, transparent); }
+.aihr-ilabel { font-weight: 700; }
+.aihr-issues ul { margin: 4px 0 0; padding-left: 20px; }
+.aihr-f { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; padding: 6px 0; border-top: 1px dashed var(--panel-border); }
+.aihr-check { width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 12px; }
+.aihr-check:hover { background: var(--panel); }
+.aihr-check input { width: 22px; height: 22px; accent-color: var(--good); cursor: pointer; }
+.aihr-check span { display: none; }
+.aihr-check-sp { width: 44px; }
+.aihr-fbody { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.aihr-fn { font-size: 12.5px; font-weight: 700; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.aihr-st { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--panel); white-space: nowrap; }
+.aihr-st.pend { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.aihr-st.ok { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.aihr-st.no { color: var(--muted); }
+.aihr-st.back { color: var(--accent2); background: color-mix(in srgb, var(--accent2) 12%, transparent); }
+.aihr-vals { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; font-size: 14.5px; line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; }
+.aihr-old { color: var(--bad); text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .85; }
+.aihr-empty { color: var(--muted); font-style: italic; font-size: 13px; }
+.aihr-arrow { color: var(--muted); }
+.aihr-new { color: var(--good); font-weight: 600; }
+.aihr-f.st-rejected .aihr-new, .aihr-f.st-undone .aihr-new { color: var(--muted); font-weight: 400; text-decoration: line-through; }
+.aihr-f.st-undone .aihr-old, .aihr-f.st-rejected .aihr-old { text-decoration: none; color: var(--text); opacity: 1; }
+.aihr-fact { display: flex; }
+.aihr-iact { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.aihr-foot { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+@media (max-width: 720px) {
+  .aih-status { grid-template-columns: 1fr; }
+  .aih-run-top { gap: 12px; }
+  .aih-ring { width: 78px; height: 78px; }
+  .aih-ring b { font-size: 20px; }
+  .aih-drow { flex-wrap: wrap; }
+  .aih-drow .btn { flex: 1 1 100%; }
+  .aihr-drow { grid-template-columns: minmax(0, 1fr) auto 14px; }
+  .aihr-drow .aihr-dbar { display: none; }
+  .aihr-f { grid-template-columns: 44px minmax(0, 1fr); }
+  .aihr-fact { grid-column: 2; }
+  .aihr-iact .btn, .aihr-dact .btn { flex: 1 1 auto; }
+  .aihr-ihead { flex-wrap: wrap; }
+  .aihr-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .aihr-deck { scroll-margin-top: 120px; }
+  .aih-start-sum { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .aih-sum-big { flex-direction: row; gap: 8px; align-items: baseline; min-width: 0; }
+}
+@media (max-width: 720px) {
+  .aihr-big { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .aihr-n { padding: 10px 4px; }
+  .aihr-n small { font-size: 12px; line-height: 1.25; }
+  .aihr-n.skip { grid-column: 1 / -1; }
+  .aih-num small { font-size: 11.5px; line-height: 1.25; }
+}
+@media (max-width: 340px) {
+  .aih-run-top { flex-direction: column; align-items: flex-start; }
+  .aih-num b, .aihr-n b { font-size: 22px; }
+}
+
+/* ---------- the help demo (js/helpanim.js mini screen: our scenes) ---------- */
+.hd .aihd-bot { cursor: default; }
+.hd .aihd-menu { position: absolute; right: 8px; top: 34px; display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: 10px; background: var(--panel-solid);
+  border: 1px solid var(--panel-border); box-shadow: var(--shadow); opacity: 0; transform: translateY(-6px) scale(.96); transition: opacity .25s, transform .25s; z-index: 2; min-width: 58%; }
+.hd .aihd-menu.on { opacity: 1; transform: none; }
+.hd .aihd-mi { font-size: 10.5px; padding: 5px 7px; border-radius: 7px; white-space: nowrap; }
+.hd .aihd-mi.aihd-hub { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.hd .aihd-mi.done { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+.hd .aihd-stat { display: flex; flex-direction: column; gap: 4px; font-size: 10.5px; margin-bottom: 6px; }
+.hd .aihd-bar { display: block; height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--text) 12%, transparent); overflow: hidden; }
+.hd .aihd-bar i { display: block; height: 100%; width: var(--p, 35%); border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1.8s ease-in-out; }
+.hd .aihd-bar.big { height: 8px; margin: 8px 0; }
+.hd .aihd-bar.go i { width: 74%; }
+.hd .aihd-opt { display: flex; flex-direction: column; gap: 1px; padding: 7px 9px; margin-bottom: 6px; border-radius: 10px; border: 1.5px solid var(--panel-border); background: var(--panel); font-size: 11px; transition: border-color .25s, background .25s; }
+.hd .aihd-opt small { color: var(--muted); font-size: 9.5px; }
+.hd .aihd-opt.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.hd .aihd-run { display: flex; gap: 10px; align-items: center; }
+.hd .aihd-ring { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; border: 4px solid var(--accent); border-right-color: color-mix(in srgb, var(--text) 12%, transparent); font-size: 11px; }
+.hd .aihd-run:not(.paused) .aihd-ring { animation: aihSpin 2.4s linear infinite; }
+.hd .aihd-run:not(.paused) .aihd-ring b { animation: aihSpin 2.4s linear infinite reverse; }
+.hd .aihd-lines { display: flex; flex-direction: column; font-size: 11px; }
+.hd .aihd-lines small { color: var(--muted); font-size: 9.5px; }
+.hd .aihd-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 6px; }
+.hd .aihd-nums span { display: flex; flex-direction: column; align-items: center; padding: 4px; border-radius: 8px; background: var(--panel); font-size: 9px; color: var(--muted); }
+.hd .aihd-nums b { font-size: 15px; color: var(--text); }
+.hd .aihd-nums .fix b { color: var(--accent2); }
+.hd .aihd-nums .ok b { color: var(--good); }
+.hd .aihd-ch { display: flex; flex-direction: column; gap: 4px; padding: 7px 8px; border-radius: 10px; border: 1px solid var(--panel-border); background: var(--panel); font-size: 11px; transition: border-color .3s; }
+.hd .aihd-ch small { color: var(--muted); font-size: 9.5px; }
+.hd .aihd-ch s { color: var(--bad); }
+.hd .aihd-ch b { color: var(--good); }
+.hd .aihd-ch.done { border-color: var(--good); }
+
+@keyframes aihPop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes aihWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-14deg); } 75% { transform: rotate(14deg); } }
+@keyframes aihPillIn { from { opacity: 0; transform: translateY(14px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes aihBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes aihSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .aih-welcome, .aih-tile, .aihr-n, .aih-pill, .aih-party, .aih-pill.run .aih-pill-bot, .hd .aihd-ring, .hd .aihd-ring b { animation: none !important; }
+  .aih-bar i, .aih-pill-bar i, .hd .aihd-bar i { transition: none; }
+}
+
+/* =====================================================================
+ * 🌀 Living logos (AIHub.workLogo): the coin + a flowing halo in the brand colours (--g1 --g2 --g3).
+ * Claude: its filled spark slowly turning and gently pulsing, with a soft warm glow. Every other AI / translator: its own motion.
+ * ===================================================================== */
+.aiw { --s: 26px; position: relative; display: inline-grid; place-items: center; width: var(--s); height: var(--s); flex: none; vertical-align: middle; isolation: isolate; }
+.aiw .aiw-coin { width: 100%; height: 100%; display: grid; box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent); }
+.aiw .aiw-coin svg { overflow: visible; }
+.aiw-halo { position: absolute; inset: -3px; border-radius: 50%; z-index: -1; opacity: 0; transition: opacity .3s;
+  background: conic-gradient(from 0deg, var(--g1), var(--g2), var(--g3), var(--g1));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); }
+.aiw-halo::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; background: inherit; filter: blur(5px); opacity: .7; }
+.aiw.on .aiw-halo { opacity: 1; animation: aiwSpin 2.6s linear infinite; }
+.aiw.on .aiw-coin { box-shadow: 0 0 calc(var(--s) * .45) calc(var(--s) * -.12) var(--g1); }
+/* Claude: the filled spark turns slowly (outer group) and pulses gently (inner group), a soft warm glow around it */
+.aiw .aiw-spark, .aiw .aiw-spark-p { transform-box: view-box; transform-origin: 12px 12px; }
+.aiw.on .aiw-spark { animation: aiwSpin 14s linear infinite; }
+.aiw.on .aiw-spark-p { animation: aiwSparkPulse 2.2s ease-in-out infinite; }
+.aiw-p-claude.on .aiw-coin svg, .aiw-p-anthropic.on .aiw-coin svg { filter: drop-shadow(0 0 calc(var(--s) * .07) #ffe6d6); }
+.aiw-p-claude.on .aiw-halo, .aiw-p-anthropic.on .aiw-halo { animation-duration: 3.4s; }
+/* the others: each its own little motion */
+.aiw-p-openai.on .aiw-coin svg { animation: aiwSpin 3.2s linear infinite; }
+.aiw-p-gemini.on .aiw-coin svg { animation: aiwTwinkle 1.8s ease-in-out infinite; }
+.aiw-p-deepseek.on .aiw-coin svg { animation: aiwSwim 1.6s ease-in-out infinite; }
+.aiw-p-groq.on .aiw-halo { animation-duration: .9s; }
+.aiw-p-groq.on .aiw-coin svg { animation: aiwSpin 1.2s cubic-bezier(.6, 0, .4, 1) infinite; }
+.aiw-p-mistral.on .aiw-coin svg { animation: aiwBlink 1s steps(2, jump-none) infinite; }
+.aiw-p-nvidia.on .aiw-coin svg, .aiw-p-ollama.on .aiw-coin svg, .aiw-p-cohere.on .aiw-coin svg { animation: aiwBreath 1.6s ease-in-out infinite; }
+.aiw-p-openrouter.on .aiw-coin svg, .aiw-p-zai.on .aiw-coin svg, .aiw-p-xai.on .aiw-coin svg { animation: aiwNudge 1.4s ease-in-out infinite; }
+.aiw-p-pollinations.on .aiw-coin svg, .aiw-p-custom.on .aiw-coin svg { animation: aiwSpin 4s linear infinite; }
+/* translators: the letter pulses, the halo flows */
+.aiw-p-google.on .aiw-coin svg, .aiw-p-deepl.on .aiw-coin svg, .aiw-p-microsoft.on .aiw-coin svg, .aiw-p-mymemory.on .aiw-coin svg, .aiw-p-mozhi.on .aiw-coin svg { animation: aiwBreath 1.3s ease-in-out infinite; }
+@keyframes aiwSpin { to { transform: rotate(360deg); } }
+@keyframes aiwSparkPulse { 0%, 100% { transform: scale(.9); } 50% { transform: scale(1.05); } }
+@keyframes aiwTwinkle { 0%, 100% { transform: scale(.82) rotate(0); } 50% { transform: scale(1.08) rotate(45deg); } }
+@keyframes aiwSwim { 0%, 100% { transform: translate(0, 0) rotate(-4deg); } 50% { transform: translate(1px, -1.5px) rotate(4deg); } }
+@keyframes aiwBlink { 0% { opacity: 1; } 50% { opacity: .55; } }
+@keyframes aiwBreath { 0%, 100% { transform: scale(.88); } 50% { transform: scale(1.06); } }
+@keyframes aiwNudge { 0%, 100% { transform: translateX(-1px); } 50% { transform: translateX(1.5px); } }
+
+/* the robot in the top bar while an AI or a translator works: a flowing ring in their colours, eyes that read */
+.claude-badge.aiw-busy .aib-glyph::before { content: ""; position: absolute; inset: -4px; border-radius: 50%; z-index: -1;
+  background: conic-gradient(from 0deg, var(--g1, #8b80ff), var(--g2, #29c7ff), var(--g3, #8b80ff), var(--g1, #8b80ff));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+  animation: aiwSpin 1.8s linear infinite; }
+.claude-badge.aiw-busy .aib-glyph::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; z-index: -2; background: radial-gradient(circle, color-mix(in srgb, var(--g1, #8b80ff) 45%, transparent), transparent 70%); animation: aiwBreath 1.6s ease-in-out infinite; }
+.claude-badge.aiw-busy .aib-eyes { animation: aiwRead 1.4s ease-in-out infinite; }
+.claude-badge.aiw-busy .aib-stack .aib-i { box-shadow: 0 0 0 1.5px var(--panel-solid), 0 0 0 3px var(--g1, var(--good)), 0 0 12px -1px var(--g1, var(--good)); }
+@keyframes aiwRead { 0%, 100% { transform: translateX(-1px); } 50% { transform: translateX(1px); } }
+
+/* who translates the subtitles (js/subs.js: the line under the player, the TV bar, the «send to TV» steps) */
+.aiw-live { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; font-size: 13px; color: var(--muted); }
+.aiw-live[hidden] { display: none; }
+.aiw-live.on { color: var(--text); font-weight: 600; }
+.aiw-live .aiw-lab { white-space: nowrap; }
+.subs-aiw { margin-left: 4px; padding: 2px 10px 2px 4px; border-radius: 99px; background: color-mix(in srgb, var(--g1, var(--accent)) 10%, transparent); }
+.subs-aiw.on { background: color-mix(in srgb, var(--g1, var(--accent)) 18%, transparent); box-shadow: 0 0 14px -6px var(--g1, var(--accent)); }
+.cast-aiw { padding: 2px 10px 2px 4px; border-radius: 99px; background: color-mix(in srgb, var(--g1, var(--accent)) 16%, var(--panel)); }
+.tv-prep .tv-hourglass[data-aiw-live] { font-size: 0; width: 38px; height: 38px; display: grid; place-items: center; animation: none !important; }
+.aiw-tv { display: grid; place-items: center; color: var(--accent2); animation: aiwBreath 1.8s ease-in-out infinite; }
+
+/* =====================================================================
+ * ✓ marks on cards (AIHub.markHtml): the AI's logo + a small green ✓; the hit area is 44 px, the look stays small
+ * ===================================================================== */
+.aim { position: relative; display: inline-flex; align-items: center; flex: none; padding: 0; margin: 0 0 0 6px; border: 0; background: none; cursor: pointer; color: inherit; font: inherit;
+  vertical-align: middle; border-radius: 99px; -webkit-tap-highlight-color: transparent; transition: transform .15s; }
+.aim::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(44px, 100%); height: 44px; transform: translate(-50%, -50%); border-radius: 22px; }
+.aim .aiw { --s: 18px; }
+.aim .aiw-coin { box-shadow: 0 0 0 1.5px var(--panel-solid); }
+.aim-ok { position: relative; width: 13px; height: 13px; margin-left: -5px; margin-top: 9px; border-radius: 50%; display: grid; place-items: center; background: var(--good);
+  box-shadow: 0 0 0 1.5px var(--panel-solid); z-index: 1; }
+.aim-ok svg { width: 10px; height: 10px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.aim:hover { transform: scale(1.15); }
+.aim:hover .aiw-coin { box-shadow: 0 0 0 1.5px var(--panel-solid), 0 0 10px -1px var(--good); }
+.aim:focus-visible { outline: 2px solid var(--good); outline-offset: 3px; }
+.aim.aim-pop { animation: aimPop .55s cubic-bezier(.2, 1.5, .4, 1) both; }
+@keyframes aimPop { 0% { transform: scale(.2); opacity: 0; } 60% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); } }
+/* the deck list: the mark sits right after the text, the text gets the «…» */
+.mini-card .no.has-aim, .mini-card .ru.has-aim { display: flex; align-items: center; min-width: 0; }
+.mini-card .mc-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-card .aim-list .aiw { --s: 16px; }
+.mini-card .aim-list .aim-ok { width: 12px; height: 12px; margin-top: 8px; }
+/* study: small and quiet in the corner label */
+.aim-study { margin-left: 2px; opacity: .92; }
+.aim-study .aiw { --s: 19px; }
+/* the card viewer */
+.aim-view .aiw { --s: 20px; }
+.aim-float { float: right; margin: 2px 0 4px 10px; }
+/* art cards: a little glass coin at the top, left of «i» */
+.aim-art { position: absolute; top: 14px; right: 52px; z-index: 5; margin: 0; padding: 3px; border-radius: 99px; background: rgba(10, 12, 28, .42); box-shadow: 0 0 0 1px rgba(255, 255, 255, .38) inset;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.aim-art .aiw { --s: 20px; }
+.aim-art .aim-ok { box-shadow: 0 0 0 1.5px rgba(10, 12, 28, .7); }
+.aim-pair { position: absolute; top: 14px; right: 52px; z-index: 5; display: flex; gap: 4px; }
+.aim-pair .aim-art { position: relative; top: auto; right: auto; }
+.aim-tile .aiw { --s: 16px; }
+/* the stage card */
+.aim-stage { margin: 0; }
+.aim-stage .aiw { --s: 26px; }
+.aim-stage .aim-ok { width: 16px; height: 16px; margin-top: 12px; }
+.aim-stage .aim-ok svg { width: 12px; height: 12px; }
+/* the «why» window */
+.aim-modal .modal-body { display: flex; flex-direction: column; gap: 12px; }
+.aim-who { display: flex; gap: 14px; align-items: center; }
+.aim-who p { margin: 0; font-weight: 700; line-height: 1.45; }
+.aim-word { font-size: 15px; padding: 10px 12px; border-radius: 12px; background: var(--panel); overflow-wrap: anywhere; }
+.aim-word span { color: var(--ru, var(--text)); }
+.aim-row { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--good) 35%, var(--panel-border)); background: color-mix(in srgb, var(--good) 7%, transparent); font-size: 14.5px; line-height: 1.45; }
+.aim-row.fx { border-color: color-mix(in srgb, var(--accent2) 40%, var(--panel-border)); background: color-mix(in srgb, var(--accent2) 8%, transparent); }
+.aim-row.off { border-style: dashed; border-color: var(--panel-border); background: none; color: var(--muted); }
+.aim-row.off b { color: var(--text); }
+.aim-fx { overflow-wrap: anywhere; }
+.aim-fx s { color: var(--bad); }
+.aim-fx b { color: var(--good); }
+.aim-note { margin: 0; }
+.aim-modal .btn { min-height: 44px; }
+
+/* =====================================================================
+ * 👀 The live view on the deck page (.aiv): the card being checked in a glowing, flowing frame of the AI's colours
+ * ===================================================================== */
+.aiv { --g1: #8b80ff; --g2: #29c7ff; --g3: #b4acff; margin: 16px 0 18px; padding: 16px; border-radius: 22px; position: relative; scroll-margin-top: calc(var(--topbar-h, 64px) + 10px);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--g1) 10%, var(--panel-solid)), var(--panel-solid) 55%, color-mix(in srgb, var(--g2) 8%, var(--panel-solid)));
+  border: 1px solid color-mix(in srgb, var(--g1) 35%, var(--panel-border)); box-shadow: 0 18px 40px -26px var(--g1); display: flex; flex-direction: column; gap: 12px; animation: aihPop .4s both; }
+.aiv-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.aiv-logo { display: grid; place-items: center; width: 52px; height: 52px; flex: none; }
+.aiv-title { display: flex; flex-direction: column; gap: 3px; flex: 1 1 220px; min-width: 0; }
+.aiv-title b { font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+.aiv-title small { font-size: 14px; color: var(--muted); line-height: 1.4; min-height: 1.4em; }
+.aiv[data-st="limit"] .aiv-title small { color: var(--warn); }
+.aiv-ctl { display: flex; gap: 8px; flex-wrap: wrap; }
+.aiv-ctl .btn, .aiv .btn { min-height: 44px; }
+.aiv-prog { display: flex; align-items: center; gap: 12px; }
+.aiv-bar { flex: 1; height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
+.aiv-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--g1), var(--g2), var(--g3)); background-size: 200% 100%; transition: width .6s cubic-bezier(.2, .8, .2, 1); }
+.aiv[data-st="run"] .aiv-bar i { animation: aivFlow 2.4s linear infinite; }
+.aiv-prog small { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.aiv-main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(220px, .65fr); gap: 16px; align-items: start; }
+.aiv-left { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* the frame: a slowly turning conic gradient seen through a 3 px ring, and a soft blurred glow around it */
+.aiv-cardwrap { position: relative; border-radius: 22px; perspective: 1400px; }
+.aiv-ring, .aiv-blur { position: absolute; border-radius: 24px; overflow: hidden; pointer-events: none; }
+.aiv-ring { inset: -3px; }
+/* the card's own place stays dark while it turns (the turning frame shows only as the 3 px ring) */
+.aiv-ring::after { content: ""; position: absolute; inset: 3px; border-radius: 20px; background: var(--panel-solid); }
+.aiv-blur { inset: -12px; filter: blur(16px); opacity: .55; border-radius: 34px; }
+.aiv-ring::before, .aiv-blur::before { content: ""; position: absolute; left: 50%; top: 50%; width: 160%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(0);
+  background: conic-gradient(from 0deg, var(--g1), var(--g2), var(--g3), var(--g1), var(--g2), var(--g1)); }
+.aiv[data-st="run"] .aiv-ring::before, .aiv[data-st="run"] .aiv-blur::before, .aiv[data-st="pausing"] .aiv-ring::before { animation: aivTurn 3.6s linear infinite; }
+.aiv[data-st="paused"] .aiv-blur, .aiv[data-st="limit"] .aiv-blur { opacity: .18; }
+.aiv[data-st="done"] .aiv-ring::before, .aiv[data-st="done"] .aiv-blur::before { background: conic-gradient(var(--good), color-mix(in srgb, var(--good) 50%, #fff), var(--good)); }
+.aiv-card { position: relative; height: clamp(190px, 30vh, 270px); border-radius: 20px; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .9, .3, 1); }
+.aiv-card.flipped { transform: rotateY(180deg); }
+.aiv-face { position: absolute; inset: 0; border-radius: 20px; padding: 40px 22px 18px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; text-align: center; overflow: hidden;
+  background: var(--panel-solid); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.aiv-face.back { transform: rotateY(180deg); }
+.aiv-tag { position: absolute; top: 12px; left: 16px; font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.aiv-stamp { position: absolute; top: 6px; right: 8px; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.aiv-f { max-width: 100%; overflow-wrap: anywhere; line-height: 1.3; }
+.aiv-f[hidden] { display: none; }
+.aiv-f.big { font-size: clamp(22px, 3.2vw, 34px); font-weight: 800; }
+.aiv-face.back .aiv-f.big { color: var(--ru, var(--text)); }
+.aiv-f.small { font-size: 15px; color: var(--muted); }
+.aiv-f.desc { font-size: 13.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* a fix: the old text lights up and is crossed out, the new one is typed in under it */
+.aiv-f.changed { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.aiv-old { position: relative; border-radius: 6px; padding: 0 4px; transition: background .4s, color .4s, font-size .4s, opacity .4s; }
+.aiv-old.hl { background: color-mix(in srgb, var(--warn) 32%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--warn) 55%, transparent); }
+.aiv-old.gone { background: none; box-shadow: none; text-decoration: line-through; text-decoration-color: var(--bad); text-decoration-thickness: 2px; color: var(--muted); font-size: max(12.5px, .66em); opacity: .9; }
+.aiv-new { color: var(--good); min-height: 1em; }
+.aiv-new.typing::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: var(--g1); animation: aivCaret .8s steps(2, jump-none) infinite; }
+.aiv-f.offer .aiv-new { color: var(--accent2); border-bottom: 2px dashed color-mix(in srgb, var(--accent2) 60%, transparent); }
+.aiv-f.kept .aiv-old { text-decoration: none; color: var(--text); font-size: 1em; opacity: 1; }
+.aiv-f.kept .aiv-new { color: var(--muted); text-decoration: line-through; font-size: .6em; border: 0; }
+/* the reading line */
+.aiv-scan { position: absolute; left: 6%; right: 6%; top: 12%; height: 3px; border-radius: 3px; opacity: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--g1), var(--g2), var(--g1), transparent); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--g1) 60%, transparent); }
+.aiv-card.scan:not(.flipped) .front .aiv-scan, .aiv-card.scan.flipped .back .aiv-scan { animation: aivScan 1.1s ease-in-out 1 both; }
+.aiv.reading .aiv-card .front .aiv-scan { animation: aivScan 1.5s ease-in-out infinite; }
+.aiv-extra { display: flex; flex-direction: column; gap: 8px; }
+.aiv-extra:empty { display: none; }
+.aiv-issue, .aiv-oth { font-size: 14px; line-height: 1.45; padding: 8px 12px; border-radius: 12px; background: var(--panel); overflow-wrap: anywhere; }
+.aiv-oth small { color: var(--muted); font-weight: 700; }
+.aiv-oth s { color: var(--bad); }
+.aiv-oth b { color: var(--good); }
+.aiv-oth em { color: var(--muted); font-size: 12.5px; }
+.aiv-decide { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--accent2) 45%, var(--panel-border));
+  background: color-mix(in srgb, var(--accent2) 10%, var(--panel-solid)); animation: aihPop .3s both; }
+.aiv-decide p { margin: 0; }
+.aiv-dbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.aiv-dbtns .btn { flex: 1 1 auto; }
+.aiv-count { display: block; height: 4px; border-radius: 4px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
+.aiv-count i { display: block; height: 100%; width: 100%; background: var(--accent2); transform-origin: left; animation: aivCount var(--t, 20s) linear both; }
+/* this portion: the cards that are with the AI right now */
+.aiv-side { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.aiv-side-h { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.aiv-strip { display: flex; flex-direction: column; gap: 6px; max-height: clamp(190px, 34vh, 300px); overflow: auto; padding: 2px; scrollbar-width: thin; }
+.aiv-chip { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--panel-border); font-size: 14px; transition: background .3s, border-color .3s, transform .3s; flex: none; }
+.aiv-chip-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aiv-chip-s { flex: none; width: 22px; text-align: center; font-weight: 800; }
+.aiv-chip.st-read { position: relative; overflow: hidden; }
+.aiv-chip.st-read::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--g1) 22%, transparent), transparent 70%); background-size: 250% 100%; animation: aivShimmer 1.8s linear infinite; }
+.aiv-chip.peek, .aiv-chip.st-now { border-color: var(--g1); background: color-mix(in srgb, var(--g1) 14%, var(--panel-solid)); transform: translateX(-3px); box-shadow: 0 0 16px -6px var(--g1); }
+.aiv-chip.st-ok .aiv-chip-s, .aiv-chip.st-kept .aiv-chip-s { color: var(--good); }
+.aiv-chip.st-fix .aiv-chip-s { color: var(--accent2); }
+.aiv-chip.st-add .aiv-chip-s { color: var(--good); font-size: .92em; letter-spacing: -.02em; }
+.aiv-chip.st-wait .aiv-chip-s { color: var(--warn); }
+.aiv-chip.st-skip { opacity: .6; }
+/* the same card in the list under the stage */
+#view .mini-card.aiv-row-now { border-color: var(--g1, var(--accent)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--g1, var(--accent)) 60%, transparent), 0 0 22px -6px var(--g1, var(--accent)); }
+#view .mini-card.aiv-row-read { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g1, var(--accent)) 45%, transparent); animation: aivRow 1.8s ease-in-out infinite; }
+#view .ac-tile.aiv-row-now { box-shadow: 0 0 0 3px var(--g1, var(--accent)), 0 0 26px -4px var(--g1, var(--accent)); }
+/* the deck's «🤖 Проверить всё» while it checks this deck */
+.btn.aiw-btn { display: inline-flex; align-items: center; gap: 8px; }
+@keyframes aivTurn { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes aivFlow { to { background-position: -200% 0; } }
+@keyframes aivScan { 0% { top: 14%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 88%; opacity: 0; } }
+@keyframes aivCaret { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes aivCount { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes aivShimmer { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+@keyframes aivRow { 0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--g1, var(--accent)) 30%, transparent); } 50% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--g1, var(--accent)) 60%, transparent), 0 0 14px -6px var(--g1, var(--accent)); } }
+@media (max-width: 700px) {
+  .aiv { padding: 12px; margin: 12px 0 14px; border-radius: 18px; }
+  .aiv-main { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .aiv-ctl { width: 100%; }
+  .aiv-ctl .btn { flex: 1 1 auto; }
+  .aiv-strip { flex-direction: row; max-height: none; overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; }
+  .aiv-chip { max-width: 180px; }
+  .aiv-chip.peek, .aiv-chip.st-now { transform: translateY(-2px); }
+  .aiv-logo { width: 46px; height: 46px; }
+  .aiv-title b { font-size: 16px; }
+  .aiv-face { padding: 36px 14px 14px; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  .aiv { padding: 10px 12px; gap: 8px; margin: 10px 0 12px; }
+  .aiv-logo { width: 40px; height: 40px; }
+  .aiv-logo .aiw { --s: 36px !important; }
+  .aiv-title b { font-size: 15px; }
+  .aiv-title small { font-size: 12.5px; }
+  .aiv-card { height: 150px; }
+  .aiv-f.big { font-size: 22px; }
+  .aiv-strip { max-height: 160px; }
+  .aiv-face { padding: 30px 14px 10px; gap: 4px; }
+  .aiv-side-h { display: none; }
+}
+@media (min-width: 1700px) { .aiv-card { height: 300px; } .aiv-strip { max-height: 320px; } }
+/* calm still versions: no turning, no typing, no flying line — a soft steady glow and a crossfade instead of the flip */
+@media (prefers-reduced-motion: reduce) {
+  .aiw.on .aiw-halo, .aiw.on .aiw-spark, .aiw.on .aiw-spark-p, .aiw.on .aiw-coin svg, .claude-badge.aiw-busy .aib-glyph::before, .claude-badge.aiw-busy .aib-glyph::after,
+  .claude-badge.aiw-busy .aib-eyes, .aiw-tv, .aim.aim-pop, .aiv, .aiv-bar i, .aiv-ring::before, .aiv-blur::before, .aiv-chip.st-read::after,
+  #view .mini-card.aiv-row-read, .aiv-count i, .aiv-new.typing::after, .aiv-decide { animation: none !important; }
+  .aiv-card { transition: none; transform: none !important; }
+  .aiv-face { transition: opacity .35s; }
+  .aiv-face.back { transform: none; opacity: 0; }
+  .aiv-card.flipped .aiv-face.front { opacity: 0; }
+  .aiv-card.flipped .aiv-face.back { opacity: 1; }
+  .aiv-face.front { z-index: 1; } .aiv-card.flipped .aiv-face.back { z-index: 2; }
+  .aiv-scan { animation: none !important; top: 0; bottom: 0; height: auto; left: 0; right: 0; border-radius: 20px; opacity: 0; box-shadow: none; background: color-mix(in srgb, var(--g1) 9%, transparent); transition: opacity .4s; }
+  .aiv.reading .aiv-card .front .aiv-scan, .aiv-card.scan:not(.flipped) .front .aiv-scan, .aiv-card.scan.flipped .back .aiv-scan { opacity: 1; }
+  .aiv-count { display: none; }
+  .aiv-old, .aiv-chip { transition: none; }
+}
+/* «Claude думает…»: the living logo, the seconds and three soft dots under the card while the portion is with the AI */
+.aiv-think { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; min-height: 52px;
+  background: color-mix(in srgb, var(--g1) 10%, var(--panel-solid)); border: 1px solid color-mix(in srgb, var(--g1) 40%, var(--panel-border)); animation: aihPop .3s both; }
+.aiv-think[hidden] { display: none; }
+.aiv-think-logo { display: grid; place-items: center; flex: none; }
+.aiv-think-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.aiv-think-t b { font-size: 15.5px; }
+.aiv-think-t small { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.aiv-dots { display: inline-flex; gap: 5px; flex: none; }
+.aiv-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--g1); opacity: .35; animation: aivDot 1.2s ease-in-out infinite; }
+.aiv-dots i:nth-child(2) { animation-delay: .2s; background: var(--g2); }
+.aiv-dots i:nth-child(3) { animation-delay: .4s; background: var(--g3); }
+@keyframes aivDot { 0%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-4px); } }
+/* both sides at a glance after each card */
+.aiv-verdict { display: flex; gap: 8px; flex-wrap: wrap; animation: aihPop .3s both; }
+.aiv-vd { flex: 1 1 200px; font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 12px; line-height: 1.35; border: 1px solid var(--panel-border); background: var(--panel); }
+.aiv-vd.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, var(--panel-border)); background: color-mix(in srgb, var(--good) 9%, var(--panel-solid)); }
+.aiv-vd.fix { color: var(--accent2); border-color: color-mix(in srgb, var(--accent2) 40%, var(--panel-border)); }
+.aiv-vd.wait { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--panel-border)); }
+/* ⏸ waiting for «▶ Продолжить» (also right after a reload): the card says where the check goes on */
+.aiv.placeholder .aiv-face.front .aiv-f.big { font-size: clamp(20px, 2.6vw, 28px); color: var(--text); }
+.aiv.placeholder .aiv-face.front .aiv-f.small { font-size: 15.5px; color: var(--text); opacity: .8; }
+.aiv-chip.st-next .aiv-chip-s { color: var(--muted); font-weight: 600; }
+.aiv-help[hidden], .aiv-main[hidden] { display: none; }
+/* 🔑 «Claude просит войти ещё раз» — one calm panel (stage, progress window, its own window) */
+.aih-auth { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 18px; text-align: left;
+  background: color-mix(in srgb, #d97757 8%, var(--panel-solid)); border: 1px solid color-mix(in srgb, #d97757 40%, var(--panel-border)); animation: aihPop .35s both; }
+.aih-auth-h { display: flex; gap: 14px; align-items: flex-start; }
+.aih-auth-h > div { min-width: 0; }
+.aih-auth-h b { font-size: 18px; line-height: 1.3; }
+.aih-auth-h p { margin: 6px 0 0; line-height: 1.5; font-size: 14.5px; color: var(--text); opacity: .9; }
+.aih-auth-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.aih-auth-step { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); }
+.aih-auth-step.rec { border-color: color-mix(in srgb, var(--good) 45%, var(--panel-border)); background: color-mix(in srgb, var(--good) 7%, var(--panel-solid)); }
+.aih-auth-step > b { font-size: 15.5px; }
+.aih-auth-step > span { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.aih-cmd { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+.aih-cmd code { flex: 1 1 260px; min-width: 0; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 9px 11px; border-radius: 10px; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all;
+  background: color-mix(in srgb, var(--text) 8%, var(--panel-solid)); border: 1px solid var(--panel-border); color: var(--text); }
+.aih-cmd .btn { min-height: 44px; flex: none; }
+.aih-auth-act { display: flex; gap: 8px; flex-wrap: wrap; }
+.aih-auth-act .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.aih-auth-msg { margin: 0; font-size: 14px; line-height: 1.45; min-height: 0; }
+.aih-auth-msg:empty { display: none; }
+.aih-auth-msg.good { color: var(--good); font-weight: 600; }
+.aih-auth-msg.bad { color: var(--warn); }
+.aih-auth-more { font-size: 14px; }
+.aih-auth-more summary { cursor: pointer; color: var(--muted); min-height: 32px; display: flex; align-items: center; }
+.aih-auth-more p { margin: 6px 0; line-height: 1.5; }
+.aih-auth-modal { width: min(680px, 100%); }
+.aih-auth-modal .aih-auth { border: 0; padding: 0; background: none; animation: none; }
+.aih-auth-modal .aih-auth-h b { display: none; }
+.aih-auth-modal .aih-auth-h p { margin: 0; }
+@media (max-width: 560px) {
+  .aih-auth { padding: 12px; }
+  .aih-auth-h b { font-size: 16.5px; }
+  .aih-cmd .btn, .aih-auth-act .btn { flex: 1 1 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .aiv-think, .aiv-dots i, .aiv-verdict, .aih-auth { animation: none !important; } .aiv-dots i { opacity: .7; } }
+/* the «please wait» card (UI.busy): the living logo of whoever works instead of the hourglass */
+.busy-card .hourglass.aiw-host { font-size: 0; animation: none !important; display: grid; place-items: center; width: 40px; height: 40px; flex: none; }
+
+/* ===== ✅ AI check: the choice sheet rows, ⚙️ settings rows, the fix toast, the forms on the live stage ===== */
+/* «Проверять» / «Исправления нейросети»: two big halves, the chosen one lit */
+.aih-seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.aih-seg > button { flex: 1 1 calc(50% - 4px); min-width: 0; height: auto; min-height: 56px; padding: 9px 12px; border-radius: 14px; font: inherit; color: var(--text); text-align: left; cursor: pointer; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  background: var(--panel); border: 1.5px solid var(--panel-border); transition: border-color .15s, background .15s, transform .15s; }
+.aih-seg > button b { font-size: 14.5px; line-height: 1.25; }
+.aih-seg > button small { font-size: 12.5px; color: var(--muted); line-height: 1.3; }
+.aih-seg > button:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); transform: translateY(-1px); }
+.aih-seg > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.aih-seg > button.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, var(--panel-solid)); }
+.aih-seg > button.on b::before { content: "◉ "; color: var(--accent); }
+.aih-seg > button:not(.on) b::before { content: "○ "; color: var(--muted); }
+.aih-start-modal .aih-label { margin-top: 12px; }
+.aih-start-modal .modal-head h2 .aih-bot, .aif-set-h .aih-bot { width: 30px; height: 30px; vertical-align: -8px; }
+.aih-start-modal .modal-head:hover .aib-g, .aif-set-h:hover .aib-g, .aif-bot:hover .aib-g, .dk-ai:hover .aif-bot .aib-g { transform: rotate(-9deg) scale(1.1); }
+.dk-ai-i.aif-bot { display: inline-grid; place-items: center; }
+.dk-ai-i.aif-bot .aih-bot { width: 28px; height: 28px; vertical-align: 0; }
+.aif-set { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 6px; }
+.aif-set-h { display: flex; gap: 10px; align-items: center; }
+.aif-set-h > div { display: flex; flex-direction: column; gap: 2px; }
+.aif-set-h small { color: var(--muted); font-size: 13px; }
+/* the toast «Claude исправил: … · ↶ Вернуть» */
+.aif-toast .aif-tlogo { display: inline-grid; place-items: center; width: 28px; height: 28px; flex: none; }
+.aif-toast .btn { min-height: 44px; white-space: nowrap; }
+.aif-ask-modal .aif-reason { margin: 6px 0 10px; color: var(--muted); }
+.aif-ask-modal .aihr-word { font-size: 17px; }
+/* 👀 the live stage: the forms of the word are written on the back */
+.aiv-card:has(.aiv-forms:not([hidden])) { height: clamp(300px, 46vh, 400px); }
+.aiv-forms { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 3px; text-align: left; font-size: 13.5px; }
+.aiv-forms[hidden] { display: none; }
+.aiv-forms-h { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .03em; }
+.aiv-form { display: grid; grid-template-columns: minmax(70px, .9fr) minmax(0, 1fr) minmax(0, 1.2fr); gap: 8px; align-items: baseline; padding: 2px 6px; border-radius: 8px; animation: aifRow .45s ease both; }
+.aiv-form small { color: var(--muted); font-size: 11.5px; }
+.aiv-form b { font-weight: 700; }
+.aiv-form > span { color: var(--ru, var(--text)); }
+.aiv-form small .fl-no { color: var(--text); font-weight: 650; }
+.aiv-form small .fl-dot, .aiv-form small .fl-note { opacity: .7; }
+.aiv-form.more { display: block; color: var(--muted); font-size: 12px; }
+.aiv-forms.offer .aiv-form { outline: 1.5px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+/* 💬 examples per tense: typed in under the card, sentence by sentence */
+.aiv-exs { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-radius: 12px; background: var(--panel); text-align: left; }
+.aiv-exs em { font-style: normal; font-weight: 500; }
+.aiv-ex { display: flex; flex-direction: column; gap: 1px; padding: 3px 6px; border-radius: 8px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; animation: aifRow .45s ease both; }
+.aiv-ex small { color: var(--muted); font-size: 11.5px; font-weight: 650; }
+.aiv-ex b { font-weight: 650; }
+.aiv-ex > span { color: var(--ru, var(--muted)); }
+.aiv-exs.offer .aiv-ex { outline: 1.5px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+/* «📚 Добавлять все формы и примеры по временам» — in the check sheet and ⚙️ Настройки → 🤖 Нейросети */
+.aih-full { min-height: 44px; margin-top: 4px; align-items: flex-start; }
+.aih-full .track { margin-top: 2px; }
+.aih-full > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.aih-full b { font-size: 14.5px; line-height: 1.3; }
+.aih-full small { font-size: 12.5px; line-height: 1.35; color: var(--muted); }
+@keyframes aifRow { from { opacity: 0; transform: translateX(-8px); background: color-mix(in srgb, var(--good) 22%, transparent); } to { opacity: 1; transform: none; background: transparent; } }
+@media (max-width: 560px) {
+  .aih-seg > button { flex-basis: 100%; }
+  /* phone: the form's name on its own line, the word and its translation under it */
+  .aiv-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 8px; padding: 1px 6px; }
+  .aiv-form small { grid-column: 1 / -1; font-size: 11px; line-height: 1.2; }
+  .aiv-card:has(.aiv-forms:not([hidden])) { height: clamp(340px, 56vh, 470px); }
+}
+@media (prefers-reduced-motion: reduce) { .aiv-form, .aiv-ex { animation: none; } .aih-seg > button, .aih-seg > button:hover { transform: none; } .aih-start-modal .modal-head:hover .aib-g, .aif-set-h:hover .aib-g, .aif-bot:hover .aib-g, .dk-ai:hover .aif-bot .aib-g { transform: none; } }
+/* 👀 «Порциями» / «По одной карточке» on the stage — can be switched while the check goes */
+.aiv-pace { display: flex; gap: 6px; flex-wrap: wrap; }
+.aiv-pace[hidden] { display: none; }
+.aiv-pace > button { flex: 1 1 200px; min-height: 44px; padding: 6px 12px; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 650; color: var(--text); cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: var(--panel); border: 1.5px solid var(--panel-border); transition: border-color .15s, background .15s; }
+.aiv-pace > button small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.aiv-pace > button:hover { border-color: color-mix(in srgb, var(--g1) 55%, transparent); }
+.aiv-pace > button:focus-visible { outline: 2px solid var(--g1); outline-offset: 2px; }
+.aiv-pace > button.on { border-color: var(--g1); background: color-mix(in srgb, var(--g1) 13%, var(--panel-solid)); }
+.aiv-pace > button.on::before { content: "◉"; color: var(--g1); }
+.aiv-pace > button:not(.on)::before { content: "○"; color: var(--muted); }
+.aiv[data-st="done"] .aiv-pace { display: none; }
+.aiv-chip.st-alt .aiv-chip-s { color: var(--good); }
+/* the reading pass: the card being read is lit in the list as well */
+.aiv.reading .aiv-chip.peek { border-color: var(--g1); }
+#view .mini-card.aiv-row-read { scroll-margin: 90px; }
+@media (max-width: 560px) { .aiv-pace > button { flex: 1 1 0; justify-content: center; font-size: 13.5px; padding: 6px 8px; } .aiv-pace > button small { display: none; } }
+/* the card grows and shrinks while it is shown (forms on the back): the page must not creep away under the person (scroll anchoring off while the stage is up) */
+html:has(.aiv:not([data-st="done"])) { overflow-anchor: none; }
+
+/* ===== 🔁 truthful provider, ⏳ auto-resume, 🎬 show pace, ⚡ circuit traces, 🔢 tokens ===== */
+/* «Ollama не ответила — проверяет Gemini»: a short caption under the stage title */
+.aiv-sw { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; margin-top: 2px; padding: 3px 10px; border-radius: 99px; font-size: 13px; font-weight: 600; line-height: 1.35;
+  color: var(--text); background: color-mix(in srgb, var(--warn) 16%, var(--panel-solid)); border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--panel-border)); }
+.aiv-sw[hidden] { display: none; }
+.aiv-sw::before { content: "⇄"; color: var(--warn); font-weight: 800; }
+.aiv-sw.aiv-sw-in { animation: aivSw .45s cubic-bezier(.2, .9, .3, 1.2) both; }
+@keyframes aivSw { from { opacity: 0; transform: translateY(-4px) scale(.96); } to { opacity: 1; transform: none; } }
+/* 🔢 tokens so far */
+.aiv-tok { font-size: 13px; color: var(--muted); line-height: 1.4; overflow-wrap: anywhere; }
+.aiv-tok[hidden] { display: none; }
+/* 🎬 «Скорость показа: спокойно · обычно · быстро» — only the animation */
+.aiv-speed { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+.aiv-speed[hidden] { display: none; }
+.aiv-speed-l { font-size: 13px; font-weight: 700; color: var(--muted); }
+.aiv-speed-b { display: inline-flex; border-radius: 12px; border: 1.5px solid var(--panel-border); background: var(--panel); overflow: hidden; }
+.aiv-speed-b > button { min-height: 44px; min-width: 44px; padding: 4px 14px; font: inherit; font-size: 14px; font-weight: 600; color: var(--text); background: none; border: 0; cursor: pointer; transition: background .15s, color .15s; }
+.aiv-speed-b > button + button { border-left: 1px solid var(--panel-border); }
+.aiv-speed-b > button:hover { background: color-mix(in srgb, var(--g1) 10%, transparent); }
+.aiv-speed-b > button:focus-visible { outline: 2px solid var(--g1); outline-offset: -2px; }
+.aiv-speed-b > button.on { background: color-mix(in srgb, var(--g1) 18%, var(--panel-solid)); color: var(--text); box-shadow: inset 0 -2px 0 var(--g1); }
+.aiv-speed small { font-size: 12.5px; color: var(--muted); }
+.aiv[data-st="done"] .aiv-speed { display: none; }
+@media (max-width: 560px) { .aiv-speed-b { flex: 1 1 100%; } .aiv-speed-b > button { flex: 1 1 0; padding: 4px 6px; } }
+/* ⏳ everyone rests: the stage is calm, the title says when it goes on by itself */
+.aiv.waking .aiv-title b { color: var(--warn); }
+.aiv.waking .aiv-card { opacity: .82; }
+/* the card's edge looked cut while it turned: with a wide card and a short perspective the near half grew ~40 % past the
+ * glowing frame (and was clipped by whatever was around). A longer perspective and a small dip in size during the turn
+ * keep the whole card inside its frame. */
+@media (prefers-reduced-motion: no-preference) {
+  .aiv-cardwrap { perspective: 2600px; }
+  .aiv-card.turning { animation: aivDip .7s ease-in-out; }
+}
+@keyframes aivDip { 18%, 72% { scale: .87; } }
+/* ⚡ «circuit board»: thin traces from the logo to the card along the stage's left edge */
+.aiv > :not(.aiv-traces) { position: relative; z-index: 1; }
+.aiv-traces { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
+.aiv-tr { fill: none; stroke: color-mix(in srgb, var(--g1) 55%, var(--panel-border)); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; opacity: .38; transition: opacity .4s; }
+.aiv-tr-pad { fill: var(--panel-solid); stroke: color-mix(in srgb, var(--g1) 70%, transparent); stroke-width: 1.2; opacity: .55; }
+.aiv-tr-p { fill: none; stroke: var(--g2); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 9 100; stroke-dashoffset: 9; opacity: 0;
+  filter: drop-shadow(0 0 3px var(--g2)); }
+.aiv[data-st="run"] .aiv-tr { opacity: .55; }
+.aiv.reading .aiv-tr-p { opacity: .95; animation: aivTrace 1.7s linear infinite; animation-delay: var(--d, 0s); }
+.aiv.reading .aiv-tr-pad { animation: aivPad 1.7s ease-in-out infinite; }
+.aiv[data-st="done"] .aiv-tr, .aiv[data-st="paused"] .aiv-tr, .aiv[data-st="limit"] .aiv-tr { opacity: .2; }
+/* «Отчёт»: the drawn bars of «Статистика» (top bar) — lightly filled so they read on a bright button */
+.rep-ico .nav-svg .f { fill: currentColor; fill-opacity: .28; }
+.btn .rep-ico, .aih-pill-b .rep-ico, .aih-rep-i .rep-ico { margin: 0; } /* .btn is flex with gap: 8px — that is the gap before «Отчёт» */
+.modal-head h2 .rep-ico, .modal-head h2 .rep-ico .nav-svg { width: 24px; height: 24px; }
+.modal-head h2 .rep-ico { margin-right: 8px; }
+/* ➡ the traces on the right, from the card into the row being checked: a pulse runs along them all the time the AI works */
+.aiv[data-st="run"] .aiv-tr-pr { opacity: .95; animation: aivTrace 1.7s linear infinite; animation-delay: var(--d, 0s); }
+.aiv[data-st="run"] .aiv-tr-end { animation: aivPad 1.7s ease-in-out infinite; }
+@keyframes aivTrace { from { stroke-dashoffset: 9; } to { stroke-dashoffset: -100; } }
+@keyframes aivPad { 0%, 100% { opacity: .55; } 50% { opacity: 1; fill: color-mix(in srgb, var(--g2) 60%, var(--panel-solid)); } }
+@media (prefers-reduced-motion: reduce) {
+  .aiv.reading .aiv-tr-p, .aiv.reading .aiv-tr-pad, .aiv-sw.aiv-sw-in, .aiv .aiv-tr-pr, .aiv .aiv-tr-end { animation: none !important; }
+  .aiv .aiv-tr-pr { opacity: 0 !important; }
+  .aiv[data-st="run"] .aiv-tr-r { opacity: .8; stroke: var(--g2); }
+  /* static: the traces simply glow a little brighter while the AI thinks */
+  .aiv.reading .aiv-tr-p { opacity: 0; }
+  .aiv.reading .aiv-tr { opacity: .8; stroke: var(--g2); }
+}
+@media (forced-colors: active) { .aiv-traces { display: none; } }
+/* ⚖️ the sheet: «Порциями» vs «По одной» — pros and cons with the tokens */
+.aih-pc { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--panel-border); margin-top: 8px; }
+.aih-pc:empty { display: none; }
+.aih-pc-h { font-size: 13px; font-weight: 700; color: var(--muted); }
+.aih-pc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.aih-pc-c { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 12px; border: 1px solid transparent; font-size: 13.5px; line-height: 1.4; }
+.aih-pc-c.on { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.aih-pc-c ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.aih-pc-c li { padding-left: 18px; position: relative; }
+.aih-pc-c li.pro::before { content: "+"; position: absolute; left: 2px; color: var(--good); font-weight: 800; }
+.aih-pc-c li.con::before { content: "−"; position: absolute; left: 2px; color: var(--warn); font-weight: 800; }
+.aih-pc-c small { color: var(--muted); font-size: 12.5px; }
+.aih-pc-note { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+@media (max-width: 560px) { .aih-pc-cols { grid-template-columns: 1fr; } }
+/* 🔁 «Если нейросеть не отвечает…»: four choices and «Мой порядок» with ↑ ↓ */
+.aih-strat { grid-template-columns: 1fr 1fr; }
+.aih-order { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.aih-order[hidden] { display: none; }
+.aih-ord { display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--panel-border); }
+.aih-ord-n { width: 22px; text-align: center; font-weight: 800; color: var(--muted); flex: none; }
+.aih-ord-t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.aih-ord-t b { font-size: 14px; overflow-wrap: anywhere; }
+.aih-ord-t small { font-size: 12px; color: var(--muted); }
+.aih-ord .btn { min-width: 44px; min-height: 44px; padding: 0; font-size: 18px; flex: none; }
+.aih-ord .btn:disabled { opacity: .35; }
+.aih-ord-empty { color: var(--muted); font-size: 13.5px; }
+/* «Выбрать другую нейросеть» */
+.aih-picks { display: flex; flex-direction: column; gap: 8px; }
+.aih-pick { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border-radius: 14px; text-align: left; cursor: pointer; font: inherit; color: var(--text);
+  background: var(--panel); border: 1.5px solid var(--panel-border); transition: border-color .15s, transform .15s; }
+.aih-pick > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.aih-pick small { color: var(--muted); font-size: 12.5px; }
+.aih-pick:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); transform: translateY(-1px); }
+.aih-pick:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.aih-pick.rest { opacity: .7; }
+.aih-pick-modal .btn { min-height: 44px; }
+/* 🔢 the report: tokens and cost */
+.aihr-tok { display: flex; flex-direction: column; gap: 3px; margin: 10px 0 4px; padding: 8px 12px; border-radius: 12px; background: var(--panel); font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.aihr-tok small { color: var(--muted); font-size: 12.5px; }
+@media (prefers-reduced-motion: reduce) { .aih-pick, .aih-pick:hover { transition: none; transform: none; } }
+.aih-who-why { display: block; margin-top: 2px; color: var(--warn); font-size: 12.5px; }

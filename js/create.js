@@ -19,40 +19,52 @@
     return out.replace(/\n{3,}/g, '\n\n');
   }
 
-  /* ---- every way to get cards — shown in «Новая колода» ----
+  /* ---- every way to get cards: «➕ Создать карточки» (grouped) and «Новая колода» ----
    * into: true  -> the cards go straight into the deck being created
-   * into: false -> a whole section opens (it makes its own deck or lets you pick one) */
+   * into: false -> a whole section opens (it makes its own deck or lets you pick one)
+   * g: the group in «Создать карточки» — quick · ready · media · adv («Для продвинутых», folded)
+   * when: shown only when it is available (e.g. the textbook decks — only on the owner's Mac) */
   const SOURCES = [
-    { k: 'manual', i: '✍️', t: 'Вручную', d: 'пустая колода — добавлю сам', into: true },
-    { k: 'photo', i: '📷', t: 'Фото / скан', d: 'страница, тетрадь, карточки — с переводом или без', into: true },
-    { k: 'paste', i: '📋', t: 'Вставить текст', d: 'список «norsk – русский» или просто норвежские слова', into: true },
-    { k: 'file', i: '📄', t: 'Файл', d: 'PDF, Word, Excel, Anki, CSV, TXT', into: true },
-    { k: 'telegram', i: () => Telegram.TG_SVG(22), t: 'Telegram', d: 'каналы и группы о норвежском', into: true },
-    { k: 'library', i: '🃏', t: 'Устойчивые выражения', d: 'идиомы и фразы с переводом', into: true },
-    { k: 'ai', i: '✨', t: 'Нейросеть по теме', d: '«у врача», «на складе»…', into: true },
-    { k: 'textbook', i: '📘', t: 'Мой учебник', d: 'страница или новые слова → карточки', into: false },
-    { k: 'books', i: '📚', t: 'Книги', d: 'читаете — выделили — карточка', into: false },
-    { k: 'news', i: '📰', t: 'Новости', d: 'Klar Tale, NRK — слово → карточка', into: false },
-    { k: 'subs', i: '🎬', t: 'Субтитры', d: 'видео + .srt → карточки со звуком', into: false },
-    { k: 'youtube', i: () => YouTube.YT_SVG(22), t: 'YouTube', d: 'видео учителей с субтитрами → слово в карточку', into: false },
-    { k: 'nrk', i: '📺', t: 'NRK TV', d: 'передачи с субтитрами → слово в карточку', into: false },
-    { k: 'nrkradio', i: '📻', t: 'NRK Радио и подкасты', d: 'эфир и подкасты — субтитры создаст приложение', into: false },
-    { k: 'social', i: '🌐', t: 'Подкасты, ВК, TikTok', d: 'ссылка → текст → карточки', into: false },
-    { k: 'genders', i: '🌳👦👧', t: 'По родам', d: 'en · ei · et — с формами', into: false },
-    { k: 'freq', i: '🏋️', t: 'Частые слова A1–B2', d: 'следующие 20 по частоте', into: false },
-    { k: 'levels', i: '🪜', t: 'Лестница уровней', d: 'Колоды A1 → C2 по темам · тест «Где я сейчас?»', into: false },
+    { k: 'manual', i: '✍️', t: 'Вручную', d: 'по одной карточке — пустая колода', into: true, g: 'quick' },
+    { k: 'paste', i: '📋', t: 'Вставить список', d: '«hus – дом» или только норвежские слова — переведу сам', into: true, g: 'quick' },
+    { k: 'photo', i: '📷', t: 'Фото или скан', d: 'страница, тетрадь, карточки — с переводом или без', into: true, g: 'quick' },
+    { k: 'file', i: '📄', t: 'Из файла', d: 'PDF, EPUB, Word, Excel, Anki, CSV, TXT', into: true, g: 'quick' },
+    { k: 'ai', i: '✨', t: 'Колода по теме', d: 'сделает нейросеть: «у врача», «на складе»…', into: true, g: 'quick' },
+    { k: 'levels', i: '🪜', t: 'По уровням A1–C2', d: 'колоды по темам и тест «Где я сейчас?»', into: false, g: 'ready' },
+    { k: 'library', i: '🃏', t: 'Устойчивые выражения', d: 'идиомы и фразы с переводом', into: true, g: 'ready' },
+    { k: 'freq', i: '🏋️', t: 'Частые слова', d: 'следующие 20 по частоте, A1–B2', into: false, g: 'ready' },
+    { k: 'grammar', i: '🧩', t: 'Грамматика', d: 'модальные глаголы, глаголы с å и другие таблицы', into: false, g: 'ready' },
+    { k: 'life', i: '🧭', t: 'Норвежский для жизни', d: 'работа, врач, NAV, жильё, школа, транспорт', into: false, g: 'ready' },
+    { k: 'themes', i: '🎨', t: 'Культура', d: 'викинги, тролли, фьорды, 17 мая, Рождество — с оформлением карточек', into: false, g: 'ready' },
+    { k: 'textbook', i: '📘', t: 'Мой учебник', d: 'страница или новые слова → карточки', into: false, g: 'media' },
+    { k: 'books', i: '📚', t: 'Книги', d: 'читаете — выделили — карточка', into: false, g: 'media' },
+    { k: 'news', i: '📰', t: 'Новости', d: 'Klar Tale, NRK — слово → карточка', into: false, g: 'media' },
+    { k: 'subs', i: '🎬', t: 'Видео с субтитрами', d: 'своё видео + .srt — карточки с живым звуком', into: false, g: 'media' },
+    { k: 'youtube', i: () => YouTube.YT_SVG(22), t: 'YouTube', d: 'видео учителей с субтитрами → слово в карточку', into: false, g: 'media' },
+    { k: 'nrk', i: '📺', t: 'NRK TV', d: 'передачи с субтитрами → слово в карточку', into: false, g: 'media' },
+    { k: 'nrkradio', i: '📻', t: 'NRK Радио и подкасты', d: 'эфир и подкасты — субтитры создаст приложение', into: false, g: 'media' },
+    { k: 'social', i: '🌐', t: 'Подкасты, ВК, TikTok', d: 'ссылка → текст → карточки', into: false, g: 'media' },
+    { k: 'genders', i: '🌳👦👧', t: 'Колоды по родам', d: 'en · ei · et — мужской, женский, средний, с формами', into: false, g: 'adv' },
+    { k: 'telegram', i: () => Telegram.TG_SVG(22), t: 'Телеграм → карточки', d: 'ваши каналы и группы, видео авторов (через мост на Mac)', into: true, g: 'adv' },
+    { k: 'mycourse', i: '🗂', t: 'Колоды моих учебников', d: 'God i norsk, På vei — только на этом Mac', into: false, g: 'adv', when: () => !!(window.MyCourse && MyCourse.available && MyCourse.available()) },
   ];
+  const GROUPS = [['quick', 'Быстро'], ['ready', 'Готовые колоды'], ['media', 'Из того, что читаете и смотрите'], ['adv', 'Для продвинутых']];
+  const avail = s => !s.when || s.when();
   const icon = s => typeof s.i === 'function' ? s.i() : s.i;
 
   const Create = {
     SOURCES,
-    /** tiles for the «Новая колода» window */
+    GROUPS,
+    /** tiles for the «Новая колода» window: the three most common ways, the rest under «Другие способы…» */
     sourcesHtml(sel) {
       const tile = s => `<button type="button" class="src-tile ${sel === s.k ? 'active' : ''}" data-src="${s.k}"><span class="src-ico">${icon(s)}</span><b>${U.esc(s.t)}</b><small>${U.esc(s.d)}</small></button>`;
-      return `<div class="src-head">Из чего сделать карточки?</div>
-        <div class="src-grid">${SOURCES.filter(s => s.into).map(tile).join('')}</div>
-        <div class="src-head small">Или откройте раздел — там колода создастся сама (или выберете эту):</div>
-        <div class="src-grid">${SOURCES.filter(s => !s.into).map(tile).join('')}</div>`;
+      const top = ['manual', 'paste', 'photo'], all = SOURCES.filter(avail);
+      return `<div class="src-head">Как заполнить</div>
+        <div class="src-grid">${top.map(k => all.find(s => s.k === k)).map(tile).join('')}</div>
+        <details class="src-more-d"${top.includes(sel) || !sel ? '' : ' open'}><summary class="src-more-s">➕ Другие способы… <small>весь список «Создать карточки»</small></summary>
+          <div class="src-grid">${all.filter(s => s.into && !top.includes(s.k)).map(tile).join('')}</div>
+          <div class="src-head small">Или откройте раздел — там колода создастся сама (или выберете эту):</div>
+          <div class="src-grid">${all.filter(s => !s.into).map(tile).join('')}</div></details>`;
     },
     /** a deck made a moment ago by «Новая колода» and still empty — removed when the user cancels the source (no empty decks left behind) */
     dropIfEmpty(deckId) {
@@ -75,6 +87,8 @@
         ai: () => (AI.available() ? Views.generateDeckDialog(deckId) : Guides.needAI('Колода по теме')),
         textbook: () => Textbook.open(), books: () => Books.open(), news: () => News.open(), subs: () => Subs.open(), nrk: () => NrkTV.open(), nrkradio: () => NrkRadio.open(),
         youtube: () => YouTube.open(), social: () => Social.open(null, 'link'), genders: () => Genders.open(), freq: () => Drills.next20(), levels: () => Levels.open(),
+        grammar: () => OrdTrainer.open('decks'), mycourse: () => MyCourse.open(),
+        life: () => OrdTrainer.open('decks', { focus: 'life' }), themes: () => OrdTrainer.open('decks', { focus: 'themes' }),
       }[k];
       if (run) run();
     },
@@ -132,36 +146,41 @@
     },
 
     open(deckId) {
+      const row = s => `<button type="button" class="m-row sx-row src-row" data-src="${s.k}"><span class="m-place-i sx-i" aria-hidden="true">${icon(s)}</span><span class="m-row-t"><b>${U.esc(s.t)}</b><small>${U.esc(s.d)}</small></span><svg class="ico sx-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>`;
+      const group = ([g, title]) => {
+        const list = SOURCES.filter(s => s.g === g && avail(s)); if (!list.length) return '';
+        const rows = `<div class="m-list sx-list sx-two">${list.map(row).join('')}</div>`;
+        return g === 'adv'
+          ? `<details class="cr-adv"><summary><span aria-hidden="true">🧰</span> Для продвинутых <small>особые колоды и инструменты</small></summary>${rows}</details>`
+          : `<div class="m-sec-t sx-gt">${title}</div>${rows}`;
+      };
       const m = UI.modal({
-        title: '💬 Что вы хотите выучить?', cls: 'wide create-modal',
-        body: `<div class="create-hero"><div class="create-ico">🃏</div><h2>Назовите тему — я создам карточки</h2><p class="muted">Или вставьте список слов, добавьте фото страницы, PDF или EPUB.</p></div>
-          <div class="create-box">
-            <textarea class="input" data-q rows="3" placeholder="Например: «слова для работы на складе», «у врача», «фразы со словом tørst» — или вставьте список «norsk – русский»"></textarea>
+        title: '➕ Создать карточки', cls: 'wide create-modal',
+        body: `<div class="create-box">
+            <textarea class="input" data-q rows="3" aria-label="Тема или список слов" placeholder="Напишите тему («у врача», «на складе») или вставьте список слов «norsk – русский»…"></textarea>
             <div class="row create-actions">
-              <label class="btn sm" title="Фото страницы учебника, карточки-картинки, скриншот">📷 Добавить фото<input type="file" accept="image/*" multiple data-photo hidden></label>
-              <label class="btn sm" title="PDF, EPUB, Word, Excel, Anki, CSV, TXT">📄 PDF / EPUB / файл<input type="file" accept=".pdf,.epub,.docx,.doc,.xlsx,.xls,.csv,.tsv,.txt,.md,.json,.apkg,.colpkg" data-file hidden></label>
+              <label class="btn sm" title="Фото страницы учебника, карточки-картинки, скриншот">📷 Фото<input type="file" accept="image/*" multiple data-photo hidden></label>
+              <label class="btn sm" title="PDF, EPUB, Word, Excel, Anki, CSV, TXT">📄 Файл<input type="file" accept=".pdf,.epub,.docx,.doc,.xlsx,.xls,.csv,.tsv,.txt,.md,.json,.apkg,.colpkg" data-file hidden></label>
               <span class="grow"></span>
-              <button class="btn primary create-send" data-go title="Создать">↑</button>
+              <button class="btn primary create-send" data-go title="Создать" aria-label="Создать карточки">↑</button>
             </div>
           </div>
           <div class="create-tips">
             ${['🍳 Кухня и еда', '🏥 У врача', '🧹 Работа: уборка', '🏛 NAV и документы', '💬 Разговорные фразы', '🚌 Транспорт'].map(t => `<button class="chip" data-topic="${U.esc(t.replace(/^\S+\s/, ''))}">${U.esc(t)}</button>`).join('')}
           </div>
-          <section class="tgc-mini" data-tgchan-mini aria-label="Норвежские каналы в Телеграме"></section>
-          <div class="lib-intro" style="margin-top:6px">🧭 <span>Ещё источники: <a href="#" data-more="levels">🪜 колоды по уровням A1–C2</a> · <a href="#" data-more="library">🃏 устойчивые выражения</a> · <a href="#" data-more="genders">🌳👦👧 по родам</a> · <a href="#" data-klokka-open>🕐 время по-норвежски</a> · <a href="#" data-ordtr="decks" data-ordtr-close>📚 грамматика: готовые колоды</a> · <a href="#" data-more="books">📚 книги</a> · <a href="#" data-more="telegram">✈️ Telegram</a> · <a href="#" data-more="social">🌐 подкасты, ВК, TikTok, Instagram</a></span></div>
-          ${AI.available() ? '' : '<div class="mt-warn">💡 <span>Чтобы создавать колоды по теме, подключите нейросеть (бесплатно: Gemini или Groq в Настройках). Списки слов, фото, PDF и EPUB работают и без неё.</span></div>'}`,
+          ${AI.available() ? '' : '<div class="mt-warn">💡 <span>Чтобы создавать колоды по теме, подключите нейросеть (бесплатно: Gemini или Groq в Настройках). Списки слов, фото, PDF и EPUB работают и без неё.</span></div>'}
+          <div class="cr-groups">${GROUPS.map(group).join('')}</div>`,
       });
       const q = m.$('[data-q]');
       setTimeout(() => q.focus(), 60);
-      // 📢 Norwegian Telegram channels (js/tgchan.js): a few cards + «all channels» → the Telegram window
-      if (window.TgChan) TgChan.mini(m.$('[data-tgchan-mini]'), () => { m.close(); Telegram.open(null, 'channels'); });
-      else m.$('[data-tgchan-mini]').remove();
       m.el.addEventListener('click', e => {
         const t = e.target.closest('[data-topic]'); if (t) { q.value = t.dataset.topic; q.focus(); return; }
-        const mo = e.target.closest('[data-more]');
-        if (mo) {
-          e.preventDefault(); m.close();
-          ({ levels: () => Levels.open(), library: () => Library.open(deckId), genders: () => Genders.open(), books: () => Books.open(), telegram: () => Telegram.open(null, 'vocab'), social: () => Social.open(null, 'link') })[mo.dataset.more]();
+        const r = e.target.closest('[data-src]');
+        if (r) {
+          const k = r.dataset.src;
+          m.close();
+          if (k === 'manual') { if (deckId) Views.editCard(null, deckId, () => App.render()); else Views.deckEditor(null, d => App.go('deck', { id: d.id })); return; }
+          this.launch(k, deckId || null);
         }
       });
       const go = async () => {

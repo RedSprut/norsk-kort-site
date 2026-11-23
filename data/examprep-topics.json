@@ -1,0 +1,1054 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "attribution": "Банк тем для устной части — собственный материал Norsk Kort: слова, вопросы и образцы ответов A2 / B1 / B2 написаны заново, перевод на русский (слова — и на украинский). Образцы — для разбора, а не для заучивания: на экзамене заученный текст считается нарушением.",
+ "soon": [
+  "likestilling",
+  "innvandring og språk",
+  "tradisjoner",
+  "teknologi",
+  "hverdagsøkonomi"
+ ],
+ "topics": [
+  {
+   "id": "bolig",
+   "icon": "🏠",
+   "no": "Bolig",
+   "ru": "Жильё",
+   "uk": "Житло",
+   "words": [
+    {
+     "no": "en leilighet",
+     "ru": "квартира",
+     "uk": "квартира"
+    },
+    {
+     "no": "et hus",
+     "ru": "дом",
+     "uk": "будинок"
+    },
+    {
+     "no": "et rom",
+     "ru": "комната",
+     "uk": "кімната"
+    },
+    {
+     "no": "ei husleie",
+     "ru": "квартплата, аренда",
+     "uk": "орендна плата"
+    },
+    {
+     "no": "en utleier",
+     "ru": "арендодатель",
+     "uk": "орендодавець"
+    },
+    {
+     "no": "et depositum",
+     "ru": "залог",
+     "uk": "застава"
+    },
+    {
+     "no": "å leie",
+     "ru": "снимать, арендовать",
+     "uk": "орендувати"
+    },
+    {
+     "no": "å flytte",
+     "ru": "переезжать",
+     "uk": "переїжджати"
+    },
+    {
+     "no": "en nabo",
+     "ru": "сосед",
+     "uk": "сусід"
+    },
+    {
+     "no": "en balkong",
+     "ru": "балкон",
+     "uk": "балкон"
+    },
+    {
+     "no": "et borettslag",
+     "ru": "жилищный кооператив",
+     "uk": "житловий кооператив"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hvordan bor du nå?",
+     "ru": "Как вы сейчас живёте?"
+    },
+    {
+     "no": "Hva er viktig for deg når du skal finne en bolig?",
+     "ru": "Что для вас важно, когда ищете жильё?"
+    },
+    {
+     "no": "Er det bedre å leie eller å eie bolig?",
+     "ru": "Что лучше — снимать жильё или иметь своё?"
+    },
+    {
+     "no": "Hvordan er naboene dine?",
+     "ru": "Какие у вас соседи?"
+    },
+    {
+     "no": "Hva liker du best med boligen din?",
+     "ru": "Что вам больше всего нравится в вашем жилье?"
+    },
+    {
+     "no": "Hvordan bor folk i hjemlandet ditt, sammenlignet med Norge?",
+     "ru": "Как живут люди у вас на родине по сравнению с Норвегией?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg bor i en leilighet i Fredrikstad. Leiligheten har to soverom, en stue og et lite kjøkken. Jeg bor der sammen med mannen min og sønnen vår. Vi leier leiligheten. Den er ikke stor, men den er lys og varm. Jeg liker balkongen best.",
+     "ru": "Я живу в квартире во Фредрикстаде. В квартире две спальни, гостиная и маленькая кухня. Живу там с мужем и сыном. Квартиру мы снимаем. Она небольшая, но светлая и тёплая. Больше всего мне нравится балкон."
+    },
+    "B1": {
+     "no": "Nå bor jeg i en treromsleilighet i et borettslag i Fredrikstad. Vi har leid den i snart to år. Leiligheten ligger i tredje etasje, og fra balkongen kan vi se elva. Det er kort vei til skolen og butikken, og det passer bra for familien. Det eneste problemet er at husleia er ganske høy, så vi vil gjerne kjøpe vår egen bolig etter hvert.",
+     "ru": "Сейчас я живу в трёхкомнатной квартире в жилищном кооперативе во Фредрикстаде. Снимаем её уже почти два года. Квартира на третьем этаже, и с балкона видно реку. До школы и магазина недалеко — для семьи это удобно. Единственная проблема — довольно высокая арендная плата, так что со временем мы хотим купить своё жильё."
+    },
+    "B2": {
+     "no": "For tiden leier vi en treromsleilighet i et borettslag litt utenfor sentrum av Fredrikstad. Da vi kom til Norge, bodde vi først i en kommunal bolig, men den var både trang og fuktig, så vi var glade da vi fant noe bedre. Nå har vi god plass, hyggelige naboer og kort vei til både skole og jobb. Ulempen er at husleia tar nesten en tredjedel av inntekten vår. Derfor sparer vi til egenkapital, fordi vi på sikt ønsker å eie vår egen bolig i stedet for å betale til en utleier.",
+     "ru": "Сейчас мы снимаем трёхкомнатную квартиру в кооперативе недалеко от центра Фредрикстада. Когда мы приехали в Норвегию, сначала жили в муниципальной квартире, но она была тесной и сырой, так что мы обрадовались, когда нашли что-то получше. Теперь у нас достаточно места, приятные соседи, и до школы и работы недалеко. Минус в том, что аренда съедает почти треть нашего дохода. Поэтому мы копим на первый взнос: в перспективе хотим своё жильё, а не платить арендодателю."
+    }
+   }
+  },
+  {
+   "id": "helse",
+   "icon": "🩺",
+   "no": "Helse",
+   "ru": "Здоровье",
+   "uk": "Здоров’я",
+   "words": [
+    {
+     "no": "en fastlege",
+     "ru": "семейный (участковый) врач",
+     "uk": "сімейний лікар"
+    },
+    {
+     "no": "en time",
+     "ru": "приём, запись к врачу",
+     "uk": "запис на прийом"
+    },
+    {
+     "no": "å bestille time",
+     "ru": "записаться на приём",
+     "uk": "записатися на прийом"
+    },
+    {
+     "no": "en resept",
+     "ru": "рецепт",
+     "uk": "рецепт"
+    },
+    {
+     "no": "et apotek",
+     "ru": "аптека",
+     "uk": "аптека"
+    },
+    {
+     "no": "å ha vondt i",
+     "ru": "болеть (о части тела)",
+     "uk": "боліти (про частину тіла)"
+    },
+    {
+     "no": "en sykemelding",
+     "ru": "больничный",
+     "uk": "лікарняний"
+    },
+    {
+     "no": "en legevakt",
+     "ru": "неотложная помощь",
+     "uk": "невідкладна допомога"
+    },
+    {
+     "no": "å trene",
+     "ru": "тренироваться",
+     "uk": "тренуватися"
+    },
+    {
+     "no": "et kosthold",
+     "ru": "питание, рацион",
+     "uk": "харчування, раціон"
+    },
+    {
+     "no": "å holde seg frisk",
+     "ru": "оставаться здоровым",
+     "uk": "залишатися здоровим"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hva gjør du for å holde deg frisk?",
+     "ru": "Что вы делаете, чтобы оставаться здоровым?"
+    },
+    {
+     "no": "Hvordan bestiller man time hos legen i Norge?",
+     "ru": "Как в Норвегии записаться к врачу?"
+    },
+    {
+     "no": "Hva er forskjellen på helsevesenet i Norge og i hjemlandet ditt?",
+     "ru": "Чем отличается здравоохранение в Норвегии и у вас на родине?"
+    },
+    {
+     "no": "Hvor ofte trener du?",
+     "ru": "Как часто вы занимаетесь спортом?"
+    },
+    {
+     "no": "Hva gjør du når du er syk?",
+     "ru": "Что вы делаете, когда болеете?"
+    },
+    {
+     "no": "Hvorfor er søvn viktig?",
+     "ru": "Почему сон важен?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg prøver å leve sunt. Jeg går tur hver dag, og to ganger i uka går jeg på trening. Jeg spiser mye grønnsaker og fisk. Jeg drikker ikke mye kaffe. Om kvelden legger jeg meg tidlig, fordi søvn er viktig.",
+     "ru": "Я стараюсь вести здоровый образ жизни. Каждый день гуляю, а два раза в неделю хожу на тренировку. Ем много овощей и рыбы. Кофе пью немного. Вечером ложусь рано, потому что сон важен."
+    },
+    "B1": {
+     "no": "For å holde meg frisk prøver jeg å bevege meg litt hver dag. Jeg sykler til jobben når det ikke regner, og i helgene går vi ofte på tur i skogen. Jeg har også begynt å lage mer mat fra bunnen av, fordi ferdigmat inneholder mye salt og sukker. Det vanskeligste for meg er å få nok søvn, fordi jeg jobber skift. Men jeg prøver å legge bort telefonen en time før jeg skal sove.",
+     "ru": "Чтобы оставаться здоровой, я стараюсь каждый день хоть немного двигаться. Езжу на работу на велосипеде, если нет дождя, а по выходным мы часто гуляем в лесу. Ещё я стала больше готовить сама, потому что в полуфабрикатах много соли и сахара. Труднее всего — высыпаться: я работаю посменно. Но стараюсь откладывать телефон за час до сна."
+    },
+    "B2": {
+     "no": "Jeg mener at god helse handler om mer enn trening. Selvfølgelig prøver jeg å være i aktivitet: jeg sykler til jobben og går på tur i helgene. Men like viktig er søvn, mat og det å ha folk rundt seg. Etter at jeg flyttet til Norge, merket jeg hvor mye ensomhet påvirker humøret, særlig i den mørke tida. Derfor har jeg meldt meg inn i et turlag, der jeg både får frisk luft og nye venner. Jeg tror at slike små vaner betyr mer enn store nyttårsforsetter.",
+     "ru": "Я считаю, что здоровье — это не только спорт. Конечно, я стараюсь двигаться: езжу на работу на велосипеде и по выходным хожу в походы. Но не менее важны сон, еда и люди рядом. После переезда в Норвегию я заметила, как сильно одиночество влияет на настроение, особенно в тёмное время года. Поэтому я записалась в клуб любителей пеших прогулок — там и свежий воздух, и новые друзья. Думаю, такие маленькие привычки значат больше, чем громкие новогодние обещания."
+    }
+   }
+  },
+  {
+   "id": "jobb",
+   "icon": "💼",
+   "no": "Jobb",
+   "ru": "Работа",
+   "uk": "Робота",
+   "words": [
+    {
+     "no": "en arbeidsplass",
+     "ru": "место работы",
+     "uk": "місце роботи"
+    },
+    {
+     "no": "en kollega",
+     "ru": "коллега",
+     "uk": "колега"
+    },
+    {
+     "no": "en sjef",
+     "ru": "начальник",
+     "uk": "керівник"
+    },
+    {
+     "no": "en lønn",
+     "ru": "зарплата",
+     "uk": "зарплата"
+    },
+    {
+     "no": "en søknad",
+     "ru": "заявление, отклик на вакансию",
+     "uk": "заява, відгук на вакансію"
+    },
+    {
+     "no": "en arbeidsavtale",
+     "ru": "трудовой договор",
+     "uk": "трудовий договір"
+    },
+    {
+     "no": "å søke jobb",
+     "ru": "искать работу (подавать заявку)",
+     "uk": "шукати роботу (подавати заявку)"
+    },
+    {
+     "no": "et intervju",
+     "ru": "собеседование",
+     "uk": "співбесіда"
+    },
+    {
+     "no": "et skift",
+     "ru": "смена",
+     "uk": "зміна"
+    },
+    {
+     "no": "en heltidsstilling",
+     "ru": "работа на полную ставку",
+     "uk": "повна ставка"
+    },
+    {
+     "no": "en erfaring",
+     "ru": "опыт",
+     "uk": "досвід"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hva jobber du med, eller hva vil du jobbe med?",
+     "ru": "Кем вы работаете или кем хотите работать?"
+    },
+    {
+     "no": "Hva er viktig for deg på en arbeidsplass?",
+     "ru": "Что для вас важно на работе?"
+    },
+    {
+     "no": "Hvordan kan man finne jobb i Norge?",
+     "ru": "Как найти работу в Норвегии?"
+    },
+    {
+     "no": "Hva er forskjellen på arbeidslivet i Norge og i hjemlandet ditt?",
+     "ru": "Чем отличается работа в Норвегии и у вас на родине?"
+    },
+    {
+     "no": "Liker du best å jobbe alene eller i team?",
+     "ru": "Вам больше нравится работать одному или в команде?"
+    },
+    {
+     "no": "Hvordan ser en vanlig arbeidsdag ut for deg?",
+     "ru": "Как выглядит ваш обычный рабочий день?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Nå jobber jeg i en barnehage. Jeg jobber fra klokka sju til tre. Jeg leker med barna og hjelper dem med maten. Kollegaene mine er hyggelige. Før jobbet jeg som lærer i Polen. I framtiden vil jeg jobbe på en skole igjen.",
+     "ru": "Сейчас я работаю в детском саду, с семи до трёх. Играю с детьми и помогаю им во время еды. Коллеги у меня приятные. Раньше я работала учительницей в Польше. В будущем хочу снова работать в школе."
+    },
+    "B1": {
+     "no": "Jeg jobber som assistent i en barnehage i Asker. Jobben passer meg godt, fordi jeg liker barn og får snakke mye norsk hver dag. I hjemlandet mitt var jeg lærer i engelsk, og jeg håper å få jobbe som lærer her også. Men da må jeg først få godkjent utdanningen min og ta norskprøven på B2-nivå. Derfor går jeg på kveldskurs to ganger i uka.",
+     "ru": "Я работаю помощником воспитателя в детском саду в Аскере. Работа мне подходит: я люблю детей и каждый день много говорю по-норвежски. На родине я была учительницей английского и надеюсь работать учителем и здесь. Но для этого сначала нужно подтвердить диплом и сдать норвежский на уровень B2. Поэтому два раза в неделю хожу на вечерние курсы."
+    },
+    "B2": {
+     "no": "I dag jobber jeg som assistent i en barnehage, men egentlig er jeg utdannet lærer. Det var et bevisst valg å begynne i barnehagen: jeg ville lære språket i praksis og bli kjent med hvordan norske arbeidsplasser fungerer. Det som overrasket meg mest, var hvor flat strukturen er. Alle sier hva de mener, også til styreren, og beslutninger tas ofte i fellesskap. Målet mitt er å få godkjent lærerutdanningen min, slik at jeg kan undervise på en ungdomsskole om et par år.",
+     "ru": "Сейчас я работаю помощником в детском саду, хотя по образованию я учитель. Это был осознанный выбор: я хотела выучить язык на практике и понять, как устроены норвежские рабочие места. Больше всего меня удивило, насколько здесь плоская иерархия. Все говорят, что думают, даже заведующей, а решения часто принимают вместе. Моя цель — подтвердить педагогический диплом, чтобы через пару лет преподавать в средней школе."
+    }
+   }
+  },
+  {
+   "id": "familie",
+   "icon": "👨‍👩‍👧",
+   "no": "Familie og venner",
+   "ru": "Семья и друзья",
+   "uk": "Родина й друзі",
+   "words": [
+    {
+     "no": "foreldre",
+     "ru": "родители",
+     "uk": "батьки"
+    },
+    {
+     "no": "søsken",
+     "ru": "братья и сёстры",
+     "uk": "брати й сестри"
+    },
+    {
+     "no": "ei bestemor",
+     "ru": "бабушка",
+     "uk": "бабуся"
+    },
+    {
+     "no": "en venn",
+     "ru": "друг",
+     "uk": "друг"
+    },
+    {
+     "no": "ei venninne",
+     "ru": "подруга",
+     "uk": "подруга"
+    },
+    {
+     "no": "å bli kjent med",
+     "ru": "познакомиться с",
+     "uk": "познайомитися з"
+    },
+    {
+     "no": "å savne",
+     "ru": "скучать по",
+     "uk": "сумувати за"
+    },
+    {
+     "no": "å besøke",
+     "ru": "навещать, ходить в гости",
+     "uk": "відвідувати, ходити в гості"
+    },
+    {
+     "no": "å holde kontakt",
+     "ru": "поддерживать связь",
+     "uk": "підтримувати зв’язок"
+    },
+    {
+     "no": "ensom",
+     "ru": "одинокий",
+     "uk": "самотній"
+    },
+    {
+     "no": "en bursdag",
+     "ru": "день рождения",
+     "uk": "день народження"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Fortell om familien din.",
+     "ru": "Расскажите о своей семье."
+    },
+    {
+     "no": "Hvordan holder du kontakt med familie og venner i hjemlandet?",
+     "ru": "Как вы поддерживаете связь с семьёй и друзьями на родине?"
+    },
+    {
+     "no": "Er det lett å få norske venner? Hvorfor eller hvorfor ikke?",
+     "ru": "Легко ли подружиться с норвежцами? Почему?"
+    },
+    {
+     "no": "Hva gjør du sammen med vennene dine?",
+     "ru": "Что вы делаете вместе с друзьями?"
+    },
+    {
+     "no": "Hvordan feirer dere bursdager i familien din?",
+     "ru": "Как в вашей семье празднуют дни рождения?"
+    },
+    {
+     "no": "Hvem er den viktigste personen i livet ditt?",
+     "ru": "Кто самый важный человек в вашей жизни?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Familien min er ikke så stor. Jeg har en mann og to barn. Sønnen min er ti år, og datteren min er seks. Foreldrene mine bor i Lviv. Jeg savner dem mye. Vi snakker sammen på video nesten hver dag.",
+     "ru": "Семья у меня небольшая. У меня муж и двое детей. Сыну десять лет, дочке шесть. Мои родители живут во Львове. Я очень по ним скучаю. Мы созваниваемся по видео почти каждый день."
+    },
+    "B1": {
+     "no": "Jeg bor sammen med mannen min og de to barna våre i Tromsø. Sønnen vår går i femte klasse, og datteren vår har nettopp begynt på skolen. Resten av familien bor fortsatt i Ukraina, så vi snakker med dem på video flere ganger i uka. Det er vanskelig å være langt fra foreldrene mine, særlig når noen er syke. Men vi har fått gode venner her, og de har blitt en slags familie for oss.",
+     "ru": "Я живу в Тромсё с мужем и двумя детьми. Сын учится в пятом классе, а дочка только пошла в школу. Остальные родственники по-прежнему в Украине, так что мы созваниваемся по видео несколько раз в неделю. Тяжело быть далеко от родителей, особенно когда кто-то болеет. Но здесь у нас появились хорошие друзья, и они стали нам почти семьёй."
+    },
+    "B2": {
+     "no": "Familien vår er spredt over tre land. Mannen min, barna og jeg bor i Tromsø, søsteren min bor i Polen, og foreldrene mine er fortsatt i Ukraina. Teknologien gjør det mulig å se hverandre hver dag på skjermen, men det erstatter ikke en klem. Samtidig har vi bygd opp et nettverk her: naboer som henter barna når vi jobber sent, og venner vi feirer jul og bursdager sammen med. Jeg tror at familie i dag ikke bare handler om slekt, men om mennesker man kan stole på.",
+     "ru": "Наша семья разбросана по трём странам. Мы с мужем и детьми живём в Тромсё, сестра — в Польше, а родители всё ещё в Украине. Благодаря технологиям мы видимся на экране каждый день, но объятия это не заменит. При этом здесь у нас появился свой круг: соседи, которые забирают детей, когда мы допоздна на работе, и друзья, с которыми мы празднуем Рождество и дни рождения. Думаю, семья сегодня — это не только родство, но и люди, на которых можно положиться."
+    }
+   }
+  },
+  {
+   "id": "fritid",
+   "icon": "⚽",
+   "no": "Fritid",
+   "ru": "Свободное время",
+   "uk": "Вільний час",
+   "words": [
+    {
+     "no": "en hobby",
+     "ru": "хобби",
+     "uk": "хобі"
+    },
+    {
+     "no": "en fritidsaktivitet",
+     "ru": "занятие в свободное время, кружок",
+     "uk": "дозвілля, гурток"
+    },
+    {
+     "no": "å gå på tur",
+     "ru": "гулять на природе, ходить в поход",
+     "uk": "гуляти на природі, ходити в похід"
+    },
+    {
+     "no": "å gå på ski",
+     "ru": "кататься на лыжах",
+     "uk": "кататися на лижах"
+    },
+    {
+     "no": "ei hytte",
+     "ru": "загородный домик",
+     "uk": "заміський будиночок"
+    },
+    {
+     "no": "ei helg",
+     "ru": "выходные",
+     "uk": "вихідні"
+    },
+    {
+     "no": "et kor",
+     "ru": "хор",
+     "uk": "хор"
+    },
+    {
+     "no": "en dugnad",
+     "ru": "совместная работа соседей (субботник)",
+     "uk": "спільна робота сусідів (толока)"
+    },
+    {
+     "no": "å slappe av",
+     "ru": "отдыхать, расслабляться",
+     "uk": "відпочивати, розслаблятися"
+    },
+    {
+     "no": "å jobbe frivillig",
+     "ru": "работать волонтёром",
+     "uk": "працювати волонтером"
+    },
+    {
+     "no": "et treningssenter",
+     "ru": "спортзал, фитнес-клуб",
+     "uk": "спортзал, фітнес-клуб"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hva liker du å gjøre i fritiden?",
+     "ru": "Что вы любите делать в свободное время?"
+    },
+    {
+     "no": "Hva gjorde du forrige helg?",
+     "ru": "Что вы делали в прошлые выходные?"
+    },
+    {
+     "no": "Hvorfor er det viktig å ha en hobby?",
+     "ru": "Почему важно иметь хобби?"
+    },
+    {
+     "no": "Hva gjør nordmenn ofte i fritiden?",
+     "ru": "Чем норвежцы часто занимаются в свободное время?"
+    },
+    {
+     "no": "Har du prøvd å gå på ski?",
+     "ru": "Вы пробовали кататься на лыжах?"
+    },
+    {
+     "no": "Er det dyrt å ha fritidsaktiviteter i Norge?",
+     "ru": "Дорого ли в Норвегии заниматься хобби?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "I fritiden liker jeg å lese og gå tur. Om sommeren går jeg ofte til stranda. Om vinteren er jeg mest hjemme, men jeg har begynt å gå på ski. Det er vanskelig, men gøy! I helgene lager jeg mat sammen med barna.",
+     "ru": "В свободное время я люблю читать и гулять. Летом часто хожу на пляж. Зимой чаще сижу дома, но начал кататься на лыжах. Это трудно, но весело! По выходным готовлю вместе с детьми."
+    },
+    "B1": {
+     "no": "Fritiden min er ganske travel, fordi jeg har både jobb og norskkurs. Men jeg prøver alltid å finne tid til å gå tur, særlig om høsten når skogen er så fin. Siden i fjor synger jeg også i et kor. Der har jeg lært mange nye ord, og jeg har blitt kjent med hyggelige folk. Forrige helg hadde vi konsert i kirken, og det var en flott opplevelse.",
+     "ru": "Свободного времени у меня немного: работа и курсы норвежского. Но я всегда стараюсь находить время для прогулок, особенно осенью, когда лес такой красивый. С прошлого года я ещё пою в хоре. Там я выучила много новых слов и познакомилась с приятными людьми. В прошлые выходные у нас был концерт в церкви — замечательное впечатление."
+    },
+    "B2": {
+     "no": "Jeg har lært at fritiden i Norge ofte handler om å være ute, uansett vær. Først syntes jeg det var rart at kollegaene mine gikk på tur i regn og sludd, men nå har jeg selv blitt en av dem. I tillegg synger jeg i et kor og jobber frivillig på en kafé for nyankomne. Disse aktivitetene gir meg energi, men de har også hjulpet meg med språket: man lærer mye mer når man gjør noe sammen med andre enn når man sitter alene med en lærebok.",
+     "ru": "Я поняла, что свободное время в Норвегии часто означает быть на улице в любую погоду. Сначала мне казалось странным, что коллеги ходят в походы под дождём со снегом, а теперь я сама стала такой же. Кроме того, я пою в хоре и работаю волонтёром в кафе для недавно приехавших. Всё это даёт мне силы и помогает с языком: когда делаешь что-то вместе с другими, учишься гораздо больше, чем сидя в одиночку с учебником."
+    }
+   }
+  },
+  {
+   "id": "sosiale",
+   "icon": "📱",
+   "no": "Sosiale medier",
+   "ru": "Соцсети",
+   "uk": "Соцмережі",
+   "words": [
+    {
+     "no": "sosiale medier",
+     "ru": "соцсети",
+     "uk": "соцмережі"
+    },
+    {
+     "no": "et innlegg",
+     "ru": "пост, публикация",
+     "uk": "допис, публікація"
+    },
+    {
+     "no": "å dele",
+     "ru": "делиться, публиковать",
+     "uk": "ділитися, публікувати"
+    },
+    {
+     "no": "å følge",
+     "ru": "подписываться, следить за",
+     "uk": "підписуватися, стежити за"
+    },
+    {
+     "no": "en kommentar",
+     "ru": "комментарий",
+     "uk": "коментар"
+    },
+    {
+     "no": "en skjerm",
+     "ru": "экран",
+     "uk": "екран"
+    },
+    {
+     "no": "å være avhengig av",
+     "ru": "зависеть от",
+     "uk": "залежати від"
+    },
+    {
+     "no": "personvern",
+     "ru": "защита личных данных",
+     "uk": "захист персональних даних"
+    },
+    {
+     "no": "falske nyheter",
+     "ru": "фейковые новости",
+     "uk": "фейкові новини"
+    },
+    {
+     "no": "en kilde",
+     "ru": "источник",
+     "uk": "джерело"
+    },
+    {
+     "no": "et varsel",
+     "ru": "уведомление",
+     "uk": "сповіщення"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hvordan bruker du sosiale medier?",
+     "ru": "Как вы пользуетесь соцсетями?"
+    },
+    {
+     "no": "Hva er fordeler og ulemper med sosiale medier?",
+     "ru": "Какие у соцсетей плюсы и минусы?"
+    },
+    {
+     "no": "Bør barn under 13 år ha profil på sosiale medier?",
+     "ru": "Стоит ли детям младше 13 лет заводить профиль в соцсетях?"
+    },
+    {
+     "no": "Hvordan kan man kjenne igjen falske nyheter?",
+     "ru": "Как распознать фейковые новости?"
+    },
+    {
+     "no": "Bruker du for mye tid på mobilen?",
+     "ru": "Вы проводите слишком много времени в телефоне?"
+    },
+    {
+     "no": "Hvordan har sosiale medier forandret kontakten mellom mennesker?",
+     "ru": "Как соцсети изменили общение между людьми?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg bruker sosiale medier hver dag. Jeg ser på bilder og videoer, og jeg skriver med familien min. Jeg følger også noen norske kanaler, fordi jeg vil lære norsk. Men jeg bruker mobilen litt for mye, tror jeg.",
+     "ru": "Я пользуюсь соцсетями каждый день. Смотрю фото и видео, переписываюсь с семьёй. Ещё подписан на несколько норвежских каналов, потому что хочу выучить норвежский. Но, кажется, я слишком много сижу в телефоне."
+    },
+    "B1": {
+     "no": "Jeg bruker sosiale medier mest for å holde kontakt med familien i hjemlandet. Vi har en gruppe der vi deler bilder av barna og forteller om hverdagen. I tillegg følger jeg noen norske kontoer som forklarer ord og uttrykk, og det er nyttig for språket. Ulempen er at det er lett å bli sittende for lenge med telefonen. Derfor har jeg skrudd av varslene om kvelden.",
+     "ru": "Соцсетями я пользуюсь в основном, чтобы быть на связи с семьёй на родине. У нас есть группа, где мы делимся фотографиями детей и рассказываем о жизни. Кроме того, я подписан на несколько норвежских аккаунтов, где объясняют слова и выражения, — это полезно для языка. Минус в том, что легко засидеться в телефоне. Поэтому по вечерам я выключаю уведомления."
+    },
+    "B2": {
+     "no": "For meg er sosiale medier et tveegget sverd. På den ene siden har de gjort det mulig å holde tett kontakt med familien min, selv om vi bor i forskjellige land. Jeg bruker dem også bevisst til å lære norsk, for eksempel ved å følge lokale nyheter og debatter. På den andre siden merker jeg at algoritmene styrer oppmerksomheten min, og at det er lett å havne i en boble der alle mener det samme. Derfor prøver jeg å sjekke kildene og begrense skjermtida, særlig før jeg legger meg.",
+     "ru": "Для меня соцсети — палка о двух концах. С одной стороны, благодаря им я тесно общаюсь с семьёй, хотя мы живём в разных странах. И я сознательно использую их для норвежского — например, слежу за местными новостями и дискуссиями. С другой стороны, я замечаю, что алгоритмы управляют моим вниманием и что легко оказаться в «пузыре», где все думают одинаково. Поэтому я стараюсь проверять источники и ограничивать время у экрана, особенно перед сном."
+    }
+   }
+  },
+  {
+   "id": "miljo",
+   "icon": "🌱",
+   "no": "Miljø og klima",
+   "ru": "Экология и климат",
+   "uk": "Довкілля й клімат",
+   "words": [
+    {
+     "no": "et miljø",
+     "ru": "окружающая среда",
+     "uk": "довкілля"
+    },
+    {
+     "no": "et klima",
+     "ru": "климат",
+     "uk": "клімат"
+    },
+    {
+     "no": "å kildesortere",
+     "ru": "сортировать мусор",
+     "uk": "сортувати сміття"
+    },
+    {
+     "no": "søppel",
+     "ru": "мусор",
+     "uk": "сміття"
+    },
+    {
+     "no": "å pante",
+     "ru": "сдавать бутылки за залог",
+     "uk": "здавати пляшки за заставу"
+    },
+    {
+     "no": "å resirkulere",
+     "ru": "перерабатывать",
+     "uk": "переробляти"
+    },
+    {
+     "no": "en elbil",
+     "ru": "электромобиль",
+     "uk": "електромобіль"
+    },
+    {
+     "no": "en forurensning",
+     "ru": "загрязнение",
+     "uk": "забруднення"
+    },
+    {
+     "no": "å spare strøm",
+     "ru": "экономить электричество",
+     "uk": "заощаджувати електроенергію"
+    },
+    {
+     "no": "brukt",
+     "ru": "подержанный, б/у",
+     "uk": "вживаний"
+    },
+    {
+     "no": "miljøvennlig",
+     "ru": "экологичный",
+     "uk": "екологічний"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hva gjør du for miljøet i hverdagen?",
+     "ru": "Что вы делаете для экологии в повседневной жизни?"
+    },
+    {
+     "no": "Er det lett å kildesortere i Norge?",
+     "ru": "Легко ли в Норвегии сортировать мусор?"
+    },
+    {
+     "no": "Bør vi kjøpe færre klær?",
+     "ru": "Стоит ли нам покупать меньше одежды?"
+    },
+    {
+     "no": "Hvem har størst ansvar for klimaet — politikerne eller hver enkelt av oss?",
+     "ru": "Кто больше отвечает за климат — политики или каждый из нас?"
+    },
+    {
+     "no": "Er elbiler en god løsning?",
+     "ru": "Электромобили — хорошее решение?"
+    },
+    {
+     "no": "Hvordan var holdningen til miljø i hjemlandet ditt?",
+     "ru": "Как относились к экологии у вас на родине?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg kildesorterer søppel hjemme. Vi har egne poser for plast, papir og mat. Jeg tar bussen til jobben, og jeg kjøper ofte brukte klær. Det er bra for miljøet, og det er billig også.",
+     "ru": "Дома я сортирую мусор. У нас отдельные пакеты для пластика, бумаги и пищевых отходов. На работу езжу на автобусе и часто покупаю одежду б/у. Это хорошо для природы — и к тому же дёшево."
+    },
+    "B1": {
+     "no": "I hverdagen prøver jeg å gjøre små ting for miljøet. Vi kildesorterer alt søppel, og barna synes det er gøy å pante flasker i butikken. Jeg har ikke bil, så jeg tar bussen eller sykler. Dessuten kjøper jeg ofte brukte klær og møbler på nettet. Da jeg kom til Norge, syntes jeg kildesorteringen var komplisert, men nå har det blitt en vane.",
+     "ru": "В повседневной жизни я стараюсь делать для экологии мелочи. Мы сортируем весь мусор, а детям нравится сдавать бутылки в магазине. Машины у меня нет, так что езжу на автобусе или велосипеде. Ещё я часто покупаю подержанную одежду и мебель в интернете. Когда я приехала в Норвегию, сортировка мусора казалась сложной, а теперь это привычка."
+    },
+    "B2": {
+     "no": "Jeg tror at både politikerne og hver enkelt av oss har ansvar, men på ulike måter. Hjemme kildesorterer vi, vi kjøper brukt når det er mulig, og vi har sluttet å fly på ferie innenlands. Likevel er jeg klar over at slike vaner betyr lite hvis de store systemene ikke endres. Derfor synes jeg det er riktig at staten gjør det billigere å velge miljøvennlig, for eksempel gjennom billigere kollektivtransport. Da blir det lettere for alle å ta gode valg, også for dem som ikke har god råd.",
+     "ru": "Я думаю, что отвечают и политики, и каждый из нас, но по-разному. Дома мы сортируем мусор, по возможности покупаем вещи б/у и перестали летать в отпуск внутри страны. И всё же я понимаю, что такие привычки мало что значат, если не меняются большие системы. Поэтому считаю правильным, что государство делает экологичный выбор дешевле — например, удешевляет общественный транспорт. Тогда правильно поступать легче всем, в том числе тем, у кого мало денег."
+    }
+   }
+  },
+  {
+   "id": "transport",
+   "icon": "🚆",
+   "no": "Transport",
+   "ru": "Транспорт",
+   "uk": "Транспорт",
+   "words": [
+    {
+     "no": "et tog",
+     "ru": "поезд, электричка",
+     "uk": "потяг, електричка"
+    },
+    {
+     "no": "en trikk",
+     "ru": "трамвай",
+     "uk": "трамвай"
+    },
+    {
+     "no": "en T-bane",
+     "ru": "метро",
+     "uk": "метро"
+    },
+    {
+     "no": "en billett",
+     "ru": "билет",
+     "uk": "квиток"
+    },
+    {
+     "no": "et månedskort",
+     "ru": "проездной на месяц",
+     "uk": "місячний проїзний"
+    },
+    {
+     "no": "et førerkort",
+     "ru": "водительские права",
+     "uk": "посвідчення водія"
+    },
+    {
+     "no": "en holdeplass",
+     "ru": "остановка",
+     "uk": "зупинка"
+    },
+    {
+     "no": "forsinket",
+     "ru": "с опозданием",
+     "uk": "із запізненням"
+    },
+    {
+     "no": "å bytte",
+     "ru": "пересаживаться; менять",
+     "uk": "пересідати; міняти"
+    },
+    {
+     "no": "å pendle",
+     "ru": "ездить на работу из другого города",
+     "uk": "їздити на роботу з іншого міста"
+    },
+    {
+     "no": "bompenger",
+     "ru": "плата за въезд (дорожный сбор)",
+     "uk": "плата за в’їзд (дорожній збір)"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hvordan kommer du deg til jobb eller skole?",
+     "ru": "Как вы добираетесь до работы или учёбы?"
+    },
+    {
+     "no": "Hva er fordeler og ulemper med å ha bil?",
+     "ru": "Какие плюсы и минусы у собственной машины?"
+    },
+    {
+     "no": "Er kollektivtransporten god der du bor?",
+     "ru": "Хороший ли общественный транспорт там, где вы живёте?"
+    },
+    {
+     "no": "Hvordan var det å ta førerkort i Norge?",
+     "ru": "Каково было получать права в Норвегии?"
+    },
+    {
+     "no": "Bør det være gratis buss i byene?",
+     "ru": "Должен ли автобус в городах быть бесплатным?"
+    },
+    {
+     "no": "Hvordan reiser du på ferie?",
+     "ru": "Как вы ездите в отпуск?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg tar bussen til norskkurset. Bussen går hvert tiende minutt, og turen tar tjue minutter. Jeg har månedskort. Om sommeren sykler jeg, fordi det er fint vær. Jeg har ikke bil.",
+     "ru": "На курсы норвежского я езжу на автобусе. Он ходит каждые десять минут, дорога занимает двадцать минут. У меня проездной на месяц. Летом езжу на велосипеде, потому что хорошая погода. Машины у меня нет."
+    },
+    "B1": {
+     "no": "Til vanlig tar jeg toget til jobben. Det tar omtrent førti minutter fra Ski til Oslo, og på toget kan jeg lese eller høre på norske podkaster. Om vinteren er toget dessverre ofte forsinket, og da kommer jeg for sent. Vi har en bil i familien, men vi bruker den mest i helgene, fordi det koster mye med bompenger og parkering i byen.",
+     "ru": "Обычно я езжу на работу на поезде. Из Ски до Осло примерно сорок минут, и в поезде можно читать или слушать норвежские подкасты. Зимой, к сожалению, поезд часто опаздывает, и тогда я опаздываю тоже. Машина в семье есть, но пользуемся мы ею в основном по выходным: въезд в город и парковка стоят дорого."
+    },
+    "B2": {
+     "no": "Jeg pendler med tog fra Ski til Oslo, og jeg har blitt ganske glad i det. Reisen gir meg førti minutter for meg selv, som jeg ofte bruker på å lese eller lytte til podkaster på norsk. Det er selvfølgelig frustrerende når toget blir innstilt på grunn av signalfeil, noe som skjer altfor ofte om vinteren. Likevel ville jeg ikke ha byttet det ut med bil: da hadde jeg måttet sitte i kø, betale bompenger og lete etter parkering. Kollektivtransport er rett og slett det mest fornuftige valget for meg.",
+     "ru": "Я езжу на работу на поезде из Ски в Осло, и мне это даже нравится. Дорога дарит мне сорок минут для себя: я читаю или слушаю подкасты на норвежском. Конечно, раздражает, когда поезд отменяют из-за сбоя сигнализации, а зимой это случается слишком часто. И всё же на машину я бы это не променял: пришлось бы стоять в пробках, платить за въезд и искать парковку. Общественный транспорт для меня — просто самый разумный выбор."
+    }
+   }
+  },
+  {
+   "id": "skole",
+   "icon": "🎓",
+   "no": "Skole og utdanning",
+   "ru": "Школа и образование",
+   "uk": "Школа й освіта",
+   "words": [
+    {
+     "no": "en utdanning",
+     "ru": "образование",
+     "uk": "освіта"
+    },
+    {
+     "no": "en barneskole",
+     "ru": "начальная школа (1–7 классы)",
+     "uk": "початкова школа (1–7 класи)"
+    },
+    {
+     "no": "en ungdomsskole",
+     "ru": "средняя школа (8–10 классы)",
+     "uk": "середня школа (8–10 класи)"
+    },
+    {
+     "no": "en videregående skole",
+     "ru": "старшая школа (после 10 класса)",
+     "uk": "старша школа (після 10 класу)"
+    },
+    {
+     "no": "ei lekse",
+     "ru": "домашнее задание",
+     "uk": "домашнє завдання"
+    },
+    {
+     "no": "en lærer",
+     "ru": "учитель",
+     "uk": "учитель"
+    },
+    {
+     "no": "et kurs",
+     "ru": "курс, курсы",
+     "uk": "курс, курси"
+    },
+    {
+     "no": "å studere",
+     "ru": "учиться (в вузе)",
+     "uk": "навчатися (у виші)"
+    },
+    {
+     "no": "et vitnemål",
+     "ru": "аттестат, диплом",
+     "uk": "атестат, диплом"
+    },
+    {
+     "no": "å godkjenne",
+     "ru": "признать, подтвердить (диплом)",
+     "uk": "визнати, підтвердити (диплом)"
+    },
+    {
+     "no": "et foreldremøte",
+     "ru": "родительское собрание",
+     "uk": "батьківські збори"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Fortell om skolegangen din.",
+     "ru": "Расскажите, где и как вы учились."
+    },
+    {
+     "no": "Hva er forskjellen på norsk skole og skolen i hjemlandet ditt?",
+     "ru": "Чем норвежская школа отличается от школы у вас на родине?"
+    },
+    {
+     "no": "Bør elever få lekser?",
+     "ru": "Нужно ли задавать ученикам домашние задания?"
+    },
+    {
+     "no": "Hvorfor er det viktig å fortsette å lære som voksen?",
+     "ru": "Почему важно продолжать учиться и во взрослом возрасте?"
+    },
+    {
+     "no": "Hvordan lærer du norsk best?",
+     "ru": "Как вам лучше всего учить норвежский?"
+    },
+    {
+     "no": "Bør utdanning være gratis for alle?",
+     "ru": "Должно ли образование быть бесплатным для всех?"
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Jeg gikk på skole i elleve år i Kyiv. Etterpå studerte jeg økonomi på universitetet. Nå går jeg på norskkurs. Jeg liker kurset, fordi læreren er flink og klassen er hyggelig.",
+     "ru": "Я одиннадцать лет учился в школе в Киеве. Потом изучал экономику в университете. Сейчас хожу на курсы норвежского. Курсы мне нравятся: преподаватель хороший, а группа дружная."
+    },
+    "B1": {
+     "no": "Jeg gikk på skolen i Kyiv i elleve år, og etterpå studerte jeg økonomi i fem år. Skolen i Ukraina var ganske streng: vi fikk mange lekser og karakterer fra første klasse. Nå går barna mine på skole i Norge, og jeg ser at det er mer lek og samarbeid her. Selv går jeg på norskkurs, og jeg vil gjerne ta en mastergrad i Norge senere.",
+     "ru": "Я одиннадцать лет училась в школе в Киеве, а потом пять лет изучала экономику. Школа в Украине была довольно строгой: много домашних заданий и оценки с первого класса. Теперь мои дети учатся в Норвегии, и я вижу, что здесь больше игры и работы в группах. Сама я хожу на курсы норвежского, а позже хочу получить здесь магистерскую степень."
+    },
+    "B2": {
+     "no": "Jeg har opplevd to helt ulike skolesystemer: først som elev i Ukraina og nå som mor til to skolebarn i Norge. Den ukrainske skolen jeg gikk på, la stor vekt på fakta og disiplin, mens den norske legger mer vekt på samarbeid og selvstendighet. I begynnelsen var jeg bekymret for at barna lærte for lite, men nå ser jeg at de er flinke til å stille spørsmål og presentere egne meninger. Selv tok jeg en mastergrad i økonomi før jeg kom hit, og nå jobber jeg med å få den godkjent.",
+     "ru": "Я знаю две совершенно разные школьные системы: сначала как ученица в Украине, теперь как мама двух школьников в Норвегии. В украинской школе, где я училась, делали упор на факты и дисциплину, а в норвежской — на сотрудничество и самостоятельность. Сначала я боялась, что дети учатся слишком мало, но теперь вижу, что они умеют задавать вопросы и отстаивать своё мнение. Сама я получила магистра по экономике ещё до переезда, а сейчас занимаюсь признанием диплома."
+    }
+   }
+  },
+  {
+   "id": "mat",
+   "icon": "🍲",
+   "no": "Mat og matvaner",
+   "ru": "Еда и привычки в еде",
+   "uk": "Їжа й харчові звички",
+   "words": [
+    {
+     "no": "en matpakke",
+     "ru": "бутерброды с собой (обед в контейнере)",
+     "uk": "бутерброди з собою (обід у контейнері)"
+    },
+    {
+     "no": "en frokost",
+     "ru": "завтрак",
+     "uk": "сніданок"
+    },
+    {
+     "no": "en middag",
+     "ru": "ужин (главная горячая еда дня)",
+     "uk": "вечеря (головна гаряча їжа дня)"
+    },
+    {
+     "no": "ei brødskive",
+     "ru": "ломтик хлеба, бутерброд",
+     "uk": "скибка хліба, бутерброд"
+    },
+    {
+     "no": "et pålegg",
+     "ru": "то, что кладут на хлеб",
+     "uk": "те, що кладуть на хліб"
+    },
+    {
+     "no": "å lage mat",
+     "ru": "готовить еду",
+     "uk": "готувати їжу"
+    },
+    {
+     "no": "en oppskrift",
+     "ru": "рецепт (блюда)",
+     "uk": "рецепт (страви)"
+    },
+    {
+     "no": "sunn",
+     "ru": "полезный (о еде)",
+     "uk": "корисний (про їжу)"
+    },
+    {
+     "no": "ferdigmat",
+     "ru": "полуфабрикаты, готовая еда",
+     "uk": "напівфабрикати, готова їжа"
+    },
+    {
+     "no": "å smake",
+     "ru": "пробовать на вкус",
+     "uk": "куштувати"
+    },
+    {
+     "no": "en brunost",
+     "ru": "бурый сыр",
+     "uk": "брунуст (коричневий сир)"
+    }
+   ],
+   "questions": [
+    {
+     "no": "Hva spiser du til vanlig i løpet av en dag?",
+     "ru": "Что вы обычно едите в течение дня?"
+    },
+    {
+     "no": "Hva er forskjellen på norsk mat og mat fra hjemlandet ditt?",
+     "ru": "Чем норвежская еда отличается от еды у вас на родине?"
+    },
+    {
+     "no": "Hvorfor tar nordmenn med seg matpakke?",
+     "ru": "Почему норвежцы берут с собой бутерброды?"
+    },
+    {
+     "no": "Liker du å lage mat?",
+     "ru": "Вы любите готовить?"
+    },
+    {
+     "no": "Er det dyrt å spise sunt i Norge?",
+     "ru": "Дорого ли в Норвегии правильно питаться?"
+    },
+    {
+     "no": "Fortell om en tradisjonsrett fra hjemlandet ditt.",
+     "ru": "Расскажите о традиционном блюде вашей страны."
+    }
+   ],
+   "models": {
+    "A2": {
+     "no": "Til frokost spiser jeg brød med ost og drikker te. Til lunsj har jeg matpakke. Til middag lager jeg ofte suppe eller fisk. Om kvelden spiser jeg litt frukt. Jeg liker norsk laks veldig godt.",
+     "ru": "На завтрак ем хлеб с сыром и пью чай. На обед — бутерброды из дома. На ужин часто готовлю суп или рыбу. Вечером ем немного фруктов. Норвежский лосось мне очень нравится."
+    },
+    "B1": {
+     "no": "En vanlig dag spiser jeg frokost hjemme, som regel havregrøt eller brødskiver. På jobben spiser jeg matpakke klokka halv tolv, akkurat som de norske kollegaene mine. Middagen er det viktigste måltidet for oss, og den spiser vi sammen rundt klokka fem. Da lager jeg ofte mat fra hjemlandet, for eksempel borsjtsj, men barna vil helst ha taco på fredager!",
+     "ru": "В обычный день я завтракаю дома, как правило овсянкой или бутербродами. На работе в половине двенадцатого ем бутерброды, как и мои норвежские коллеги. Ужин для нас — главная еда, и мы едим его вместе около пяти. Тогда я часто готовлю блюда с родины, например борщ, но дети по пятницам больше всего хотят тако!"
+    },
+    "B2": {
+     "no": "Matvanene mine har forandret seg mye etter at jeg flyttet til Norge. Hjemme spiste vi et varmt måltid midt på dagen, mens jeg nå har matpakke som alle andre. Først syntes jeg at brødskiver med brunost var en trist lunsj, men nå setter jeg pris på hvor enkelt og praktisk det er. Middagen spiser vi tidlig, og den er familiens viktigste samlingspunkt. Der prøver jeg å kombinere det beste fra to kulturer: ukrainske supper og norsk fisk. Det eneste jeg savner, er tid til å lage mat slik bestemoren min gjorde.",
+     "ru": "После переезда в Норвегию мои привычки в еде сильно изменились. Дома мы ели горячее в середине дня, а теперь я, как все, беру с собой бутерброды. Сначала хлеб с бурым сыром казался мне унылым обедом, но теперь я ценю, насколько это просто и удобно. Ужинаем мы рано, и ужин — главное время, когда собирается вся семья. Тут я стараюсь соединить лучшее из двух культур: украинские супы и норвежскую рыбу. Не хватает мне только времени готовить так, как готовила бабушка."
+    }
+   }
+  }
+ ]
+}

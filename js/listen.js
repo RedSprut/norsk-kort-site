@@ -46,15 +46,44 @@
     const tl = lang === 'no' ? 'no' : lang === 'uk' ? 'uk' : 'ru';
     return parts.map(p => `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${tl}&ttsspeed=${rate < 0.8 ? '0.24' : '1'}&q=${encodeURIComponent(p)}`);
   }
-  /** text -> audio URL(s): a clip downloaded for offline first (⬇ «Скачать озвучку колоды»), then the cloud voice blob
-   *  if set up, otherwise the free Google voice */
-  async function speechUrls(text, lang, rate) {
-    if (window.ListenX) { try { const u = await ListenX.cache.url(text, lang, rate); if (u) return [u]; } catch (e) { /* not cached */ } }
-    const eng = st().ttsEngine;
-    if (window.Voices && Voices.isCloud(eng) && Voices.ready(eng)) {
-      try { return [await Voices.synth(eng, text, lang, rate)]; } catch (e) { Voices.warn(eng, e); }
+  /** 📍 the voices of «Слушать» (🔊 Голоса → «Где какой голос»: its own voice per language, or «как везде») */
+  const PLACE = 'listen';
+  /** text -> audio clip(s) [{ url, marks?, k0?, k1? }]: a clip downloaded for offline first (⬇ «Скачать озвучку колоды»),
+   *  then the cloud voice (with its word times when it has them — Edge, ElevenLabs), otherwise the free Google voice
+   *  (≤200 characters a clip: k0 / k1 = which words of the phrase each clip says) */
+  async function speechClips(text, lang, rate, vid) {
+    // 🎭 a dialogue: the second (third…) speaker's own voice (vid — js/voices.js Voices.speakerVoice); if it cannot
+    // speak now, the usual voice below says the line
+    const rv = vid && window.Voices ? Voices.parse(vid) : null;
+    if (rv && rv.engine !== 'gtr' && Voices.AUDIO.includes(rv.engine)) {
+      try {
+        if (!Voices.avail(vid, lang).ok) throw new Error('голос отдыхает');
+        const key = rv.key + (rv.spk ? '#' + rv.spk : '');
+        if (Voices.clip) { const c = await Voices.clip(rv.engine, text, lang, rate, key); return [{ url: c.url, marks: c.marks || null, eng: rv.engine }]; }
+        return [{ url: await Voices.synth(rv.engine, text, lang, rate, key), eng: rv.engine }];
+      } catch (e) { if (Voices.roleFailed) Voices.roleFailed(vid); }
     }
-    return googleUrls(text, lang, rate);
+    const gtr = !!(rv && rv.engine === 'gtr'); // the speaker's voice is the Google voice: straight to it
+    if (!gtr && window.ListenX) { try { const u = await ListenX.cache.url(text, lang, rate); if (u) return [{ url: u }]; } catch (e) { /* not cached */ } }
+    // the voice chosen for this language (🔊 Голоса) when it makes audio files
+    const eng = window.Voices && !gtr ? Voices.audioEngine(lang, PLACE) : '';
+    if (eng) {
+      try {
+        const voice = Voices.voice(eng, lang, PLACE);
+        if (Voices.clip) { const c = await Voices.clip(eng, text, lang, rate, voice); return [{ url: c.url, marks: c.marks || null, eng }]; }
+        return [{ url: await Voices.synth(eng, text, lang, rate, voice), eng }];
+      } catch (e) { Voices.warn(eng, e); }
+    }
+    const urls = googleUrls(text, lang, rate);
+    if (urls.length < 2) return urls.map(url => ({ url }));
+    // which words each clip says (the parts are the phrase cut at its punctuation, in order)
+    let k = 0;
+    return urls.map(url => {
+      const part = decodeURIComponent((/[?&]q=([^&]*)/.exec(url) || [])[1] || '');
+      const n = TTS.wordsOf ? TTS.wordsOf(part).length : 0, k0 = k;
+      k += n;
+      return { url, k0, k1: Math.max(k0, k - 1) };
+    });
   }
   /** only words are read: no links, hashtags, code symbols ( \ / | * # _ { } [ ] < > = ~ ^ ` @ ), arrows, bullets, emoji, "...";
    *  punctuation stays only as pauses */
@@ -108,7 +137,7 @@
     /** playlist items for one card: [{lang, text, after?}] according to the options (after = seconds of silence after it) */
     cardItems(c, o) {
       // a piece of any text (Telegram post, book page): read as it is, each language with its own voice
-      if (c.raw) return TTS.segments(c.raw, o.dir === 'no' ? 'no' : 'all').slice(0, 80).map(s => ({ lang: s.lang, text: clean(s.text) })).filter(s => s.text);
+      if (c.raw) return this.rawItems(c.raw, o);
       const no = clean(String(c.no).split('\n')[0]);
       const trs = this.trPieces(c).map(([lang, t]) => ({ lang, text: clean(t) })).filter(x => x.text);
       let items = [];
@@ -135,6 +164,47 @@
       }
       return items;
     },
+    /**
+     * 📖 a piece of any text (a book page, a post) → the phrases the voice says: [{ lang, text, after }].
+     * NEVER by visual line: lines of one sentence are joined first (util.js PageText.joinSentences — «…ручку для» +
+     * «тяпки.» is one phrase), then neighbours in the same language become one utterance of whole sentences (≤ 300
+     * characters) — the voice makes its own natural pauses between sentences, nothing is added inside a language;
+     * a short pause only where the language changes (🇷🇺 → 🇳🇴).
+     */
+    rawItems(raw, o) {
+      const txt = window.PageText && PageText.joinSentences ? PageText.joinSentences(raw) : String(raw || '');
+      // 🎭 a dialogue (TTS.segments → who): a speaker's line is an utterance of its own, said with that speaker's voice
+      const segs = TTS.segments(txt, o.dir === 'no' ? 'no' : 'all').map(s => ({ lang: s.lang, text: clean(s.text), who: s.who != null ? s.who : null })).filter(s => s.text);
+      // runs of one language (and one speaker), then cut ONLY between sentences into utterances of ≤ ~300 characters
+      const runs = [];
+      segs.forEach(s => {
+        const last = runs[runs.length - 1];
+        if (last && last.lang === s.lang && last.who === s.who) last.text += (/[.!?…:;,]$/.test(last.text) ? ' ' : '. ') + s.text;
+        else runs.push({ lang: s.lang, text: s.text, who: s.who });
+      });
+      const out = [];
+      const put = (r, text) => out.push(r.who != null ? { lang: r.lang, text, who: r.who } : { lang: r.lang, text });
+      runs.forEach(r => {
+        let cur = '';
+        r.text.split(/(?<=[.!?…]["»”’)]?)\s+(?=\S)/).forEach(sent => {
+          if (cur && (cur + ' ' + sent).length > 300) { put(r, cur); cur = sent; } else cur = cur ? cur + ' ' + sent : sent;
+        });
+        if (cur) put(r, cur);
+      });
+      // a short pause where the language or the speaker changes
+      out.forEach((it, k) => { const nx = out[k + 1]; it.after = !nx ? 0 : nx.lang !== it.lang ? Math.min(0.6, +o.pause || 0.6) : nx.who !== it.who ? 0.35 : 0; });
+      return out.slice(0, 80);
+    },
+    /** 🎭 the voice of a dialogue speaker's phrase ('' = the usual voice): the speakers of the session in the order they
+     *  appear (a card's speakers are noted first, so the same speaker keeps the same voice); audio: a voice that makes files */
+    roleVoice(p, items, it, audio = true) {
+      if (!p || !it || it.who == null || !window.Voices || !Voices.speakerVoice) return '';
+      try {
+        const R = p.roles || (p.roles = []);
+        (items || []).forEach(x => { if (x && x.who != null) Voices.roleIndex(R, x.who); });
+        return Voices.speakerVoice(it.lang, it.who, R, PLACE, { audio });
+      } catch (e) { return ''; }
+    },
     cards(o) {
       let cards = Store.cards(o.deckId || null).filter(c => this.hasTr(c));
       const now = Date.now();
@@ -151,8 +221,7 @@
       const o = this.opts();
       if (deckId) o.deckId = deckId;
       const decks = Store.decks();
-      const eng = st().ttsEngine;
-      const cloud = window.Voices && Voices.isCloud(eng) && Voices.ready(eng);
+      const cloud = !!(window.Voices && Voices.audioEngine('no', PLACE));
       const seg = (k, opts) => `<div class="seg-mini" data-lk="${k}">${opts.map(([v, l]) => `<button class="${String(o[k]) === String(v) ? 'active' : ''}" data-v="${v}">${l}</button>`).join('')}</div>`;
       const m = UI.modal({
         title: `${HEADPHONES(26, true)} Слушать вслух`, cls: 'wide listen-modal',
@@ -170,7 +239,7 @@
             <div><div class="lbl">Порядок</div>${seg('order', [['seq', 'По порядку'], ['shuffle', 'Вперемешку']])}</div>
           </div>
           <div class="row" style="gap:18px;flex-wrap:wrap;margin-top:6px">${UI.switchHtml('l-loop', o.loop, '🔁 По кругу (когда закончится — заново)')}<span data-lrecall>${UI.switchHtml('l-rrep', o.recallRepeat, '🧠 Повторить ответ ещё раз')}</span>${UI.switchHtml('l-dark', o.dark, '🌑 Тёмный экран (экран не гаснет, но чёрный и заблокирован от касаний)')}</div>
-          <div class="small muted" style="margin-top:6px">Голос: ${cloud ? `<b>${U.esc(Voices.ENGINES[eng].name)}</b>` : '<b>Google</b> (бесплатно, нужен интернет)'} · скорость — как в панели озвучки · <a href="#" data-lvoices>выбрать голос ›</a>
+          <div class="small muted" style="margin-top:6px">Голос: ${cloud ? `<b>${U.esc(Voices.label('no', '', PLACE))}</b>` : '<b>Google</b> (бесплатно, нужен интернет)'} · скорость — как в панели озвучки · <a href="#" data-voices-open="no" data-voices-place="listen">🔊 голос для «Слушать» ›</a>
             <br>${this.canRender() ? '✅ Колода собирается в аудиофайлы: первые 10 карточек звучат через несколько секунд, остальное готовится, пока вы слушаете — надёжно и с выключенным экраном.'
               : '💡 Системный голос телефона замолкает при выключенном экране, поэтому звучит голос Google. На iPhone для кармана откройте приложение <b>во вкладке Safari</b> (в приложении на экране «Домой» iOS может ставить паузу) — или подключите облачный голос (Azure бесплатно 500 000 символов в месяц): тогда колода собирается в аудиофайлы и работает надёжнее.'}</div>
           <details class="small listen-tips"><summary>📱 Чтобы звук не прерывался с выключенным экраном</summary>
@@ -189,7 +258,6 @@
       m.el.addEventListener('click', e => {
         const b = e.target.closest('[data-lk] button');
         if (b) { b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); count(); return; }
-        if (e.target.closest('[data-lvoices]')) { e.preventDefault(); m.close(); App.go('settings'); }
       });
       m.el.addEventListener('change', count);
       count();
@@ -208,9 +276,16 @@
      * listen to ANY texts (Telegram posts, a book…): pieces = [{ title, text }]. Same player: screen off, loop, headphone buttons.
      */
     startText(title, pieces, extra = {}) {
+      // 📄 no page numbers, running headers / footers, «. . .» separators — neither read nor shown (util.js PageText);
+      // pages of a book (a PDF, «стр. N») get the page rules, other texts only the unmistakable ones
+      if (window.PageText) {
+        const book = !!(extra.totalPages || extra.bookUrl || extra.book) || (pieces || []).some(x => x && x.page)
+          || ((pieces || []).length > 1 && (pieces || []).every(x => x && /стр\.\s*\d+\s*$/.test(x.title || '')));
+        try { pieces = PageText.cleanPieces(pieces, { book }); } catch (e) { /* the text as it is */ }
+      }
       const list = pieces.filter(x => x && String(x.text || '').trim()).map((x, i) => ({ id: 'raw' + i, no: (x.title || String(x.text).slice(0, 60)), ru: '', raw: String(x.text).slice(0, 4000), page: x.page || 0 }));
       if (!list.length) { UI.toast('Здесь нечего читать', 'warn'); return; }
-      const o = Object.assign({}, this.opts(), { deckId: '', content: 'word', pause: 1, gap: 2, repeat: 1, order: 'seq', loop: true, noRender: true }, extra, { srcTitle: title });
+      const o = Object.assign({}, this.opts(), { deckId: '', content: 'word', pause: 1, gap: 1, repeat: 1, order: 'seq', loop: true, noRender: true }, extra, { srcTitle: title });
       if (o.dir === 'recall' || o.dir === 'rn') o.dir = 'nr'; // a text is read as it is
       this.start(list, o);
       this.p.deck = { name: title };
@@ -261,11 +336,11 @@
      * 10 → 20 → 40 cards, so with the screen off the track changes only every few minutes). Any deck size, loops.
      * Needs speech as audio data: a cloud voice (Azure / Google Cloud / ElevenLabs / Edge) or the Mac bridge (Google voice). */
     canRender(o) {
-      const eng = st().ttsEngine;
       // a deck whose voice is downloaded (⬇ offline) is made from the saved clips — no network, no cloud voice needed
       if (o && window.ListenX && ListenX.cache.complete(o.deckId)) return true;
-      // Piper speaks only Norwegian: the Russian parts need the Google voice through the bridge — without it, no single file
-      return !!(window.Voices && Voices.isCloud(eng) && Voices.ready(eng) && (eng !== 'piper' || (window.AI && AI.bridge.up))) || !!(window.AI && AI.bridge.up);
+      // every language of the deck needs a voice that makes audio (🔊 Голоса) — or the Google voice through the bridge
+      const tl = st().transLang === 'both' ? ['ru', 'uk'] : [st().transLang === 'uk' ? 'uk' : 'ru'];
+      return !!(window.Voices && ['no'].concat(tl).every(l => Voices.audioEngine(l, PLACE))) || !!(window.AI && AI.bridge.up);
     },
     audioCtx() {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -273,12 +348,18 @@
     },
     /** one phrase as PCM samples (cloud voice, otherwise the Google voice through the bridge); every request ≤ 8 s */
     async clipPcm(p, it, rate) {
-      const eng = st().ttsEngine;
+      const eng = window.Voices ? Voices.audioEngine(it.lang, PLACE) : '';
       const dec = async ab => (await timeout(p.ctx.decodeAudioData(ab), CLIP_MS)).getChannelData(0);
+      // 🎭 a dialogue speaker's own voice first (it.vid, see renderPart)
+      const rv = it.vid && window.Voices ? Voices.parse(it.vid) : null;
+      if (rv && rv.engine !== 'gtr' && Voices.AUDIO.includes(rv.engine) && Voices.avail(it.vid, it.lang).ok) {
+        try { return await dec(await (await fetch(await timeout(Voices.synth(rv.engine, it.text, it.lang, rate, rv.key + (rv.spk ? '#' + rv.spk : '')), CLIP_MS))).arrayBuffer()); }
+        catch (e) { if (Voices.roleFailed) Voices.roleFailed(it.vid); }
+      }
       // ⬇ downloaded for offline: no request at all
       if (window.ListenX) { const b = await ListenX.cache.get(it.text, it.lang, rate).catch(() => null); if (b) return dec(await b.arrayBuffer()); }
-      if (window.Voices && Voices.isCloud(eng) && Voices.ready(eng)) {
-        try { return await dec(await (await fetch(await timeout(Voices.synth(eng, it.text, it.lang, rate), CLIP_MS))).arrayBuffer()); } catch (e) { /* the Google voice below */ }
+      if (eng) {
+        try { return await dec(await (await fetch(await timeout(Voices.synth(eng, it.text, it.lang, rate, Voices.voice(eng, it.lang, PLACE)), CLIP_MS))).arrayBuffer()); } catch (e) { /* the Google voice below */ }
       }
       if (!(window.AI && AI.bridge.up)) throw new Error('голос не ответил');
       const out = [];
@@ -297,6 +378,7 @@
     async renderPart(p, part) {
       const o = p.o, ctx = p.ctx || (p.ctx = this.audioCtx()), sr = ctx.sampleRate, rate = TTS.currentRate();
       const plan = p.cards.slice(part.start, part.end).map(c => this.cardItems(c, o));
+      plan.forEach(items => items.forEach(it => { const v = this.roleVoice(p, items, it); if (v) it.vid = v; }));
       const flat = [].concat(...plan);
       let ok = 0, bad = 0, done = 0;
       const pcm = await pool(4, flat.map(it => async () => {
@@ -544,13 +626,14 @@
       audio.preload = 'auto';
       audio.loop = false;
       const deck = o.deckId ? Store.deck(o.deckId) : null;
-      const p = this.p = { cards, o, i: Math.min(at, cards.length - 1), k: 0, queue: [], pre: {}, audio, playing: true, userPaused: false, deck, rate: TTS.currentRate(), heard: 0, streak: 0, token: 0, selfUntil: 0 };
+      const p = this.p = { cards, o, i: Math.min(at, cards.length - 1), k: 0, queue: [], pre: {}, audio, playing: true, userPaused: false, deck, rate: TTS.currentRate(), heard: 0, streak: 0, token: 0, selfUntil: 0, vsig: this.voiceSig() };
       this.mediaSession();
       this.wire(p);
       // only the end of OUR current clip moves on (not the primed silence, not a clip replaced a moment ago)
       audio.addEventListener('ended', () => {
         if (this.p !== p || !p.started || p.voice || !p.cur || audio.src !== p.curSrc) return;
         if (!p.cur.silent) p.streak = 0;
+        if (p.wc && !p.cur.silent) { try { if (p.cur.k1 == null || p.cur.k1 >= TTS.wordsOf(p.cur.label).length - 1) p.wc.end(true); else p.wc.halt(); } catch (e) { /* ignore */ } }
         this.step();
       });
       /* Safari (WebKit) never fires 'ended' for the Google voice stream (no length, duration = Infinity):
@@ -589,21 +672,33 @@
     started(p) {
       if (window.ListenX) { try { ListenX.onStart(p); } catch (e) { console.warn('listen extras', e); } }
     },
-    /** the playlist of one card: [{url, label, lang} | {url: silence, silent}] (cloud voices: 4 requests at a time) */
-    async buildQueue(p, c) {
+    /**
+     * the playlist of one card (from its phrase `from`): [{ slot, it, n } | { url: silence, silent, ms }]. Returned AT
+     * ONCE: the clips are made in order, 4 at a time, and each slot turns into its clip(s) when its turn comes (step) —
+     * the card starts the moment its FIRST phrase is ready, the next phrases are made while it plays (⏩ prefetch: no
+     * wait between phrases), q.allReady = every clip of the card is made (then the next card is made).
+     */
+    buildQueue(p, c, from = 0) {
       const items = this.cardItems(c, p.o);
-      const urls = await pool(4, items.map(it => async () => {
-        const us = await speechUrls(it.text, it.lang, p.rate);
-        // iPhone: audio.volume is ignored — a clip of our own (cloud voice / downloaded) gets the volume baked in
-        return window.ListenX ? Promise.all(us.map(u => ListenX.scaleUrl(u))) : us;
-      }));
-      const q = [];
+      const q = [], slots = [];
       items.forEach((it, n) => {
-        (urls[n] || []).forEach(u => q.push({ url: u, label: it.text, lang: it.lang }));
+        if (n < from) return;
+        const sl = { slot: true, it, n, clips: null };
+        sl.ready = new Promise(r => { sl.done = r; });
+        q.push(sl); slots.push(sl);
         const ms = (it.after != null ? it.after : items[n + 1] && items[n + 1].lang !== it.lang ? p.o.pause : 0.8) * 1000;
-        q.push({ url: silence(ms), silent: true, ms });
+        if (ms > 0) q.push({ url: silence(ms), silent: true, ms });
       });
-      q.push({ url: silence(p.o.gap * 1000), silent: true, ms: p.o.gap * 1000 });
+      if (p.o.gap > 0) q.push({ url: silence(p.o.gap * 1000), silent: true, ms: p.o.gap * 1000 });
+      q.allReady = pool(4, slots.map(sl => async () => {
+        try {
+          if (this.p !== p) throw new Error('стоп');
+          const us = await speechClips(sl.it.text, sl.it.lang, p.rate, this.roleVoice(p, items, sl.it));
+          // iPhone: audio.volume is ignored — a clip of our own (cloud voice / downloaded) gets the volume baked in
+          sl.clips = window.ListenX ? await Promise.all(us.map(async u => Object.assign({}, u, { url: await ListenX.scaleUrl(u.url) }))) : us;
+        } catch (e) { sl.clips = []; }
+        sl.done();
+      }));
       return q;
     },
     /** the playlist of card idx — made once (the next card is made while the current one plays) */
@@ -622,8 +717,8 @@
         else { e.q = one(c.media); e.promise = Promise.resolve(e.q); }
         return e;
       }
-      e = p.pre[idx] = { card: c, q: null };
-      e.promise = this.buildQueue(p, c).catch(() => [{ url: silence(p.o.gap * 1000), silent: true, ms: p.o.gap * 1000 }]).then(q => (e.q = q));
+      e = p.pre[idx] = { card: c, q: this.buildQueue(p, c) };
+      e.promise = Promise.resolve(e.q);
       const keep = [idx, p.i, (p.i + 1) % p.cards.length];
       Object.keys(p.pre).forEach(k => { if (!keep.includes(+k)) delete p.pre[k]; });
       return e;
@@ -656,6 +751,7 @@
       const p = this.p; if (!p || p.voice || p.rendered) return;
       p.voice = true; p.vn = 0; p.streak = 0;
       clearTimeout(p.wd);
+      if (p.wc) { try { p.wc.halt(); } catch (e) { /* ignore */ } p.wc = null; p.wcStart = null; }
       // the element loops silence meanwhile: the tab stays the media player (macOS media keys, Control Center)
       const a = p.audio;
       this.self(p);
@@ -683,7 +779,14 @@
       for (let n = p.vn || 0; n < items.length; n++) {
         if (!live()) return;
         p.vn = n;
-        await TTS.speak(items[n].text, items[n].lang, { local: true, forceBrowser: true });
+        const c = p.cards[p.i], card = p.i;
+        const onWord = c && c.raw ? (w, s, e, info) => { if (!live()) return; p.word = { i: card, page: c.page || 0, n, w, total: info.total, done: !!info.done }; document.dispatchEvent(new CustomEvent('listen-word', { detail: p.word })); } : undefined;
+        // 🎭 a dialogue speaker: their own device voice, or the same voice lower / higher
+        let sysVoice = window.Voices && Voices.sysKey ? Voices.sysKey(items[n].lang, PLACE) || undefined : undefined, pitch;
+        const rid = this.roleVoice(p, items, items[n], false);
+        if (rid && Voices.parse(rid).engine === 'sys' && Voices.parse(rid).key) sysVoice = Voices.parse(rid).key;
+        else if (items[n].who != null && Voices.rolesOn && Voices.rolesOn() && Voices.roleIndex(p.roles || (p.roles = []), items[n].who) > 0) pitch = 0.82;
+        await TTS.speak(items[n].text, items[n].lang, { local: true, forceBrowser: true, place: PLACE, onWord, sysVoice, pitch });
         if (!live()) return;
         await new Promise(r => setTimeout(r, (items[n].after != null ? items[n].after : items[n + 1] && items[n + 1].lang !== items[n].lang ? p.o.pause : 0.6) * 1000));
       }
@@ -721,9 +824,62 @@
         }
         p.queue = e.q; p.k = 0;
         this.updateMeta();
-        if (p.cards.length > 1) this.queueFor(p, (p.i + 1) % p.cards.length); // make the next card while this one plays
+        // make the next card while this one plays (once this card's own phrases are made — they come first)
+        if (p.cards.length > 1) {
+          const nx = (p.i + 1) % p.cards.length;
+          if (e.q.allReady) e.q.allReady.then(() => { if (this.p === p) this.queueFor(p, nx); }); else this.queueFor(p, nx);
+        }
+      }
+      const it = p.queue[p.k];
+      if (it && it.slot) {
+        if (!it.clips) {
+          // this phrase is still being made: a short silence keeps the element busy, the phrase plays the moment it is ready
+          it.ready.then(() => { if (this.p === p && p.token === token && p.playing && !p.voice) this.step(); });
+          return this.play(p, { url: silence(300), silent: true, filler: true, ms: 300 }, token);
+        }
+        // the slot becomes its clip(s): several for the free Google voice; none = the voice failed — skipped
+        p.queue.splice(p.k, 1, ...it.clips.map(u => ({ url: u.url, marks: u.marks || null, k0: u.k0, k1: u.k1, eng: u.eng || '', label: it.it.text, lang: it.it.lang, n: it.n })));
+        if (!it.clips.length) return this.step();
       }
       return this.play(p, p.queue[p.k++], token);
+    },
+    /** 🎤 which word is said now (book pages, texts): the clip's own clock (Edge / ElevenLabs word times, otherwise an
+     *  estimate over the clip's length) → document event 'listen-word' { i: card, page, n: phrase, w: word, total, done } */
+    wordClock(p, it) {
+      if (p.wc) { try { p.wc.halt(); } catch (e) { /* ignore */ } p.wc = null; p.wcStart = null; }
+      const c = p.cards[p.i];
+      if (!c || !c.raw || it.silent || it.media || !it.label || !TTS.WordClock) return;
+      const card = p.i, n = it.n;
+      try {
+        const wc = p.wc = new TTS.WordClock(it.label, (w, s, e, info) => {
+          if (this.p !== p) return;
+          p.word = { i: card, page: c.page || 0, n, w, total: info.total, done: !!info.done };
+          document.dispatchEvent(new CustomEvent('listen-word', { detail: p.word }));
+        });
+        wc.spoken(it.label);
+        p.wcStart = () => { try { wc.audio(p.audio, p.rate, 'listen', { marks: it.marks, k0: it.k0, k1: it.k1 }); } catch (e) { /* no word timing */ } };
+        p.wcStart();
+      } catch (e) { p.wc = null; }
+    },
+    /** 🔊 the voice (or the speed) changed while a text is read: the same phrase again with the new voice — not the page from its start */
+    voiceSig() {
+      try { return ['no', 'ru', 'uk'].map(l => (window.Voices ? Voices.audioEngine(l, PLACE) + ':' + Voices.current(l, PLACE) + ':' + Voices.placePick(PLACE, l) : '')).join('|') + '|' + TTS.currentRate() + (window.Voices && Voices.rolesOn && !Voices.rolesOn() ? '|1' : ''); } catch (e) { return ''; }
+    },
+    reVoice() {
+      const p = this.p;
+      if (!p || p.rendered || p.o.media) return;
+      const sig = this.voiceSig();
+      if (sig === p.vsig) return;
+      p.vsig = sig; p.rate = TTS.currentRate(); p.pre = {};
+      if (p.voice) return; // the device's voice: the next phrase already takes the new one
+      const cur = p.cur && !p.cur.silent && p.cur.n != null ? p.cur.n : (p.queue.slice(p.k).find(x => x.n != null) || {}).n;
+      if (cur == null) return; // between cards: the next card is made with the new voice anyway
+      p.queue = this.buildQueue(p, p.cards[p.i], cur); p.k = 0;
+      p.pre[p.i] = { card: p.cards[p.i], q: p.queue, promise: Promise.resolve(p.queue) };
+      const nx = (p.i + 1) % p.cards.length;
+      if (p.cards.length > 1) p.queue.allReady.then(() => { if (this.p === p) this.queueFor(p, nx); });
+      if (p.playing) this.step();
+      else { this.self(p); p.cur = null; try { p.audio.removeAttribute('src'); } catch (e) { /* ignore */ } } // ▶ says this phrase with the new voice
     },
     play(p, it, token) {
       const a = p.audio;
@@ -732,7 +888,7 @@
       a.loop = false;
       a.src = it.url;
       p.curSrc = a.src;
-      if (!it.silent && st().ttsEngine === 'eleven') a.playbackRate = 1;
+      if (!it.silent && it.lang && window.Voices && (it.eng || Voices.audioEngine(it.lang, PLACE)) === 'eleven') a.playbackRate = 1;
       if (it.media) {
         const r = p.o.mediaRate || 1;
         try { a.defaultPlaybackRate = r; a.playbackRate = r; if ('preservesPitch' in a) a.preservesPitch = true; } catch (e) { /* ignore */ }
@@ -747,6 +903,7 @@
         // only a real "not allowed" stops the session; a broken clip is skipped by the 'error' handler
         if (this.p === p && p.token === token && e && e.name === 'NotAllowedError') { p.playing = false; this.bar(); }
       });
+      if (!it.filler) this.wordClock(p, it);
       // watchdog: "playing" but no sound for 8 s (time does not move) -> skip it; a silence whose 'ended' got lost -> go on
       // (a video from the network may take a while to start: 45 s)
       if (!it.silent) p.wd = setTimeout(() => { if (this.p === p && p.playing && !p.voice && p.token === token && a.currentTime <= 0.05 && (!it.media || a.readyState < 3)) this.clipFailed(p, it.media ? (p.o.mediaAudio ? 'запись не загружается' : 'видео не загружается') : 'нет звука от голоса Google', false); }, it.media ? 45000 : CLIP_MS);
@@ -772,7 +929,7 @@
       const a = p.audio;
       if (p.voice) { a.play().catch(() => {}); this.voiceStep(); }
       else if (p.rendered) { if (p.loaded >= 0) { p.played = true; a.play().catch(() => {}); } else this.seat(p); }
-      else if (p.cur && a.getAttribute('src') && !a.ended) a.play().catch(() => {});
+      else if (p.cur && a.getAttribute('src') && !a.ended) { a.play().catch(() => {}); if (p.wcStart && !p.cur.silent) p.wcStart(); }
       else this.step();
       this.bar(); this.position();
       if ('mediaSession' in navigator && TTS.msOwner === 'listen') navigator.mediaSession.playbackState = 'playing';
@@ -785,6 +942,7 @@
       p.playing = true; p.userPaused = false;
       if (p.rendered) { this.seekCard(p, n); return; }
       p.i = n; p.vn = 0; p.queue = []; p.k = 0; clearTimeout(p.wd);
+      if (p.wc) { try { p.wc.halt(); } catch (e) { /* ignore */ } p.wc = null; p.wcStart = null; }
       if (p.voice) { p.vtoken = (p.vtoken || 0) + 1; TTS.stop(); this.voiceStep(); this.bar(); return; }
       this.step();
     },
@@ -807,20 +965,40 @@
       }
       return total ? `${p.i + 1} / ${total}${p.rendered && p.loaded < 0 && !p.played ? ' · готовлю аудио…' : ''}` : '';
     },
-    /** a player row inside any window (book, Telegram…): ⏮ ⏪ ▶/❚❚ ⏩ ⏹ + "1/21 · title" — follows the real state */
-    miniPlayer(el) {
-      if (!el) return;
+    /**
+     * a player row inside any window (book, Telegram…): ⏮ ⏪ ▶/❚❚ ⏩ ⏹ + "1/21 · title" — follows the real state.
+     * o.keep: the row stays when nothing of THIS window plays (o.mine(p) says what is ours) — ▶ then calls o.onIdle(),
+     * o.idleLabel() says what ▶ will do; o.extra: more buttons at the end of the row (📖 the book's «Aa» and «🔊 Голос»).
+     * Returns a function that unhooks the row.
+     */
+    miniPlayer(el, o = {}) {
+      if (!el) return () => {};
       el.classList.add('mini-player');
       el.innerHTML = `<button class="media-btn" data-mp="restart" title="Сначала">${UI.icon('restart', 18)}</button><button class="media-btn" data-mp="prev" title="Назад">${SKIP(18, true)}</button>
         <button class="media-btn main" data-mp="toggle" title="Пауза / продолжить"></button><button class="media-btn" data-mp="next" title="Дальше">${SKIP(18)}</button>
         <button class="media-btn" data-mp="stop" title="Стоп">${UI.icon('stop', 18)}</button>
         <div class="mp-info"><span class="mp-label" data-mpl></span><div class="mp-bar"><i data-mpb></i></div></div>
         <button class="btn sm ghost mp-out" data-mp="out" title="Где слушать: в наушниках или через динамик">🔈 Динамик / 🎧 наушники</button>
-        <button class="media-btn mp-more" data-mp="more" title="Громкость, таймер сна, «знаю / не знаю»" aria-label="Ещё: громкость, таймер сна">${MORE(18)}</button>`;
+        <button class="media-btn mp-more" data-mp="more" title="Громкость, таймер сна, «знаю / не знаю»" aria-label="Ещё: громкость, таймер сна">${MORE(18)}</button>${o.extra || ''}`;
+      const idle = () => !this.p || (o.mine && !o.mine(this.p));
       const paint = () => {
-        const p = this.p;
-        el.hidden = !p;
-        if (!p) return;
+        if (!el.isConnected && el._mpOff) { el._mpOff(); return; }
+        const p = this.p, off = idle();
+        el.hidden = off && !o.keep;
+        el.classList.toggle('idle', off);
+        el.querySelectorAll('[data-mp="restart"], [data-mp="prev"], [data-mp="next"], [data-mp="stop"]').forEach(b => { b.disabled = off; });
+        if (off) {
+          if (!o.keep) return;
+          const b = el.querySelector('[data-mp="toggle"]');
+          b.innerHTML = UI.icon('play', 22); b.classList.remove('playing');
+          b.title = 'Читать вслух'; b.setAttribute('aria-label', 'Читать вслух');
+          el.querySelector('[data-mpl]').textContent = o.idleLabel ? o.idleLabel() : '';
+          el.querySelector('[data-mpb]').style.width = '0';
+          const out = el.querySelector('[data-mp="out"]');
+          if (out && window.ListenX) out.textContent = ListenX.outLabel();
+          return;
+        }
+        el.querySelector('[data-mp="toggle"]').title = 'Пауза / продолжить';
         const out = el.querySelector('[data-mp="out"]');
         if (out && window.ListenX) out.textContent = ListenX.outLabel();
         const b = el.querySelector('[data-mp="toggle"]');
@@ -833,10 +1011,15 @@
       };
       el.addEventListener('click', e => {
         const a = e.target.closest('[data-mp]'); if (!a) return;
+        if (idle() && a.dataset.mp === 'toggle') { if (o.onIdle) o.onIdle(); return; }
+        if (idle() && /^(restart|prev|next|stop)$/.test(a.dataset.mp)) return;
         ({ restart: () => this.restart(), prev: () => this.jump(-1), next: () => this.jump(1), toggle: () => this.toggle(), stop: () => this.stop(), out: () => this.chooseOutput(), more: () => window.ListenX && ListenX.morePop(a) })[a.dataset.mp]();
       });
       document.addEventListener('listen-state', paint);
+      el._mpOff = () => document.removeEventListener('listen-state', paint);
+      el._mpPaint = paint;
       paint();
+      return el._mpOff;
     },
     /** speaker or headphones: «Где слушать?» (and the output device where the browser lets the page choose it) */
     async chooseOutput() {
@@ -862,6 +1045,7 @@
       this.p = null;
       if (p) {
         p.dead = true; // cancels this session's rendering
+        if (p.wc) { try { p.wc.halt(); } catch (e) { /* ignore */ } p.wc = null; }
         clearTimeout(p.wd); clearInterval(p.ticker); clearInterval(p.syncT); p.vtoken = (p.vtoken || 0) + 1;
         if (p.voice) TTS.stop();
         p.audio.loop = false; p.audio.pause(); p.audio.removeAttribute('src');
@@ -1102,6 +1286,10 @@
     Listen.readBlock(el, b.dataset.title);
     if (Listen.p) Listen.p._src = el;
   }, true);
+
+  // 🔊 another voice / speed chosen while a text is read: the same phrase goes on with it (Listen.reVoice)
+  document.addEventListener('voices-pick', () => { try { Listen.reVoice(); } catch (e) { console.warn('listen voice', e); } });
+  document.addEventListener('tts-speed', () => { try { Listen.reVoice(); } catch (e) { console.warn('listen speed', e); } });
 
   /* the 🎧 buttons everywhere: muted when nothing plays, glowing while listening */
   const paint = () => {

@@ -15,11 +15,14 @@
     const items = Object.values((j.query || {}).pages || {}).sort((a, b) => a.index - b.index).map(p => {
       const ii = (p.imageinfo || [])[0] || {};
       const md = ii.extmetadata || {};
-      return { thumb: ii.thumburl || ii.url, full: ii.thumburl || ii.url, credit: `${U.stripHtml((md.Artist || {}).value || '').trim() || 'Wikimedia Commons'} · ${((md.LicenseShortName || {}).value) || ''}`, page: ii.descriptionurl };
+      const author = U.stripHtml((md.Artist || {}).value || '').trim() || 'Wikimedia Commons', license = ((md.LicenseShortName || {}).value) || '';
+      // w / h: the thumbnail's size (the «🔎 Лента фото» lays out its columns before the pictures arrive)
+      return { thumb: ii.thumburl || ii.url, full: ii.thumburl || ii.url, credit: `${author} · ${license}`, page: ii.descriptionurl,
+        author, license, licenseUrl: ((md.LicenseUrl || {}).value) || '', title: String(p.title || '').replace(/^File:|\.[a-z0-9]+$/gi, ''), w: ii.thumbwidth || ii.width || 0, h: ii.thumbheight || ii.height || 0 };
     }).filter(x => x.thumb && !/\.(svg|tif)/i.test(x.thumb));
     return { items, next: j.continue && j.continue.gsroffset != null ? j.continue.gsroffset : null };
   }
-  /** second source: photos used in Wikipedia articles (no key; Openverse now requires registration) */
+  /** second source: photos used in Wikipedia articles (no key; Openverse — the «🔎 Лента фото», js/gallery.js) */
   async function wikipedia(q, off = 0) {
     const res = []; let more = false;
     for (const lang of ['no', 'en']) {
@@ -67,6 +70,8 @@
   const busy = new Set();
 
   const Photos = {
+    /** one page of Wikimedia Commons photos: { items: [{ thumb, full, credit, page, author, license, w, h }], next } (js/gallery.js uses it) */
+    commons,
     /** decks without a picture get a Norwegian photo (once; the user can change it with ✏️) */
     async fillCovers(decks, onDone) {
       const todo = decks.filter(d => !d.cover && !d.coverTried && !busy.has(d.id));
@@ -92,7 +97,7 @@
       if (changed && onDone) onDone();
     },
     /**
-     * open the picker. opts: { title, query, max (px), onPick(dataUrl, credit) }
+     * open the picker. opts: { title, query, max (px), onPick(dataUrl, credit, page) } — page: the photo's source page (author, licence)
      */
     pick(opts = {}) {
       const max = opts.max || 1000;
@@ -113,9 +118,9 @@
       });
       const grid = m.$('[data-grid]');
       let found = [];
-      const done = async (src, credit) => {
+      const done = async (src, credit, page) => {
         grid.insertAdjacentHTML('afterbegin', '<div class="small muted" data-wait><span class="spinner sm"></span> сохраняю…</div>');
-        try { const data = await toData(src, max); m.close(); opts.onPick && opts.onPick(data, credit || ''); }
+        try { const data = await toData(src, max); m.close(); opts.onPick && opts.onPick(data, credit || '', page || ''); }
         catch (e) { const w = grid.querySelector('[data-wait]'); if (w) w.remove(); UI.toast('Не удалось взять картинку: ' + e.message, 'bad', 5000); }
       };
       const search = async () => {
@@ -135,7 +140,7 @@
           page = { eng: usedEng, q: usedQ, next: res.next, run };
           grid.innerHTML = found.length ? tiles(found, 0) + moreBtn() : '<div class="small muted photo-msg">Ничего не нашлось — попробуйте по-английски или по-норвежски (fjord, mountains, hytte).</div>';
           watchMore();
-        } catch (e) { grid.innerHTML = `<div class="small muted photo-msg">Поиск не ответил (${U.esc(e.message)}). Попробуйте другой источник или вставьте картинку.</div>`; }
+        } catch (e) { grid.innerHTML = `<div class="small muted photo-msg">Поиск не ответил (${U.esc(U.niceErr(e, '', true))}). Попробуйте другой источник или вставьте картинку.</div>`; }
       };
       /* «Показать ещё» + endless scrolling, like Google Images: the next page is appended until the photos run out */
       let page = null, loadingMore = false, io = null;
@@ -171,7 +176,7 @@
       m.el.addEventListener('click', e => {
         const s = e.target.closest('[data-s]'); if (s) { m.$('[data-q]').value = s.dataset.s; search(); return; }
         if (e.target.closest('[data-more]')) { loadMore(); return; }
-        const it = e.target.closest('.photo-item'); if (it) { const x = found[+it.dataset.i]; done(x.full, x.credit); }
+        const it = e.target.closest('.photo-item'); if (it) { const x = found[+it.dataset.i]; done(x.full, x.credit, x.page); }
       });
       m.$('[data-file]').onchange = e => { const f = e.target.files[0]; if (f) done(f, 'моё фото'); };
       m.$('[data-cam]').onchange = e => { const f = e.target.files[0]; if (f) done(f, 'моё фото'); };

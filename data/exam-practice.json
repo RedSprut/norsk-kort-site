@@ -1,0 +1,1413 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "note": "Собственные тренировочные задания Norsk Kort в формате, похожем на Norskprøven. Это не официальные задания HK-dir.",
+ "sets": [
+  {
+   "id": "np-a1a2",
+   "title": "Тренировка A1–A2",
+   "titleUk": "Тренування A1–A2",
+   "level": "A1–A2",
+   "les": {
+    "minutes": 25,
+    "texts": [
+     {
+      "id": "t1",
+      "kind": "oppslag",
+      "title": "Oppslag i oppgangen",
+      "level": "A1",
+      "text": "Hei alle sammen!\nPå tirsdag kommer en mann og vasker vinduene i oppgangen. Han begynner klokka ni og er ferdig klokka tolv. Vær så snill: Ikke sett sykler og barnevogner i gangen den dagen.\nHilsen styret i borettslaget",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hva skjer på tirsdag?",
+        "options": [
+         "Noen vasker vinduene i oppgangen.",
+         "Styret har et møte.",
+         "Noen reparerer syklene."
+        ],
+        "answer": 0,
+        "why": "В объявлении: «kommer en mann og vasker vinduene i oppgangen» — придёт человек и вымоет окна на лестнице.",
+        "whyUk": "В оголошенні: «kommer en mann og vasker vinduene i oppgangen» — прийде чоловік і помиє вікна на сходах.",
+        "skill": [
+         "hovedinnhold",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Når er mannen ferdig?",
+        "options": [
+         "Klokka ni.",
+         "Klokka tolv.",
+         "Klokka to."
+        ],
+        "answer": 1,
+        "why": "«Han begynner klokka ni og er ferdig klokka tolv»: в девять он начинает, а заканчивает в двенадцать.",
+        "whyUk": "«Han begynner klokka ni og er ferdig klokka tolv»: о дев'ятій він починає, а закінчує о дванадцятій.",
+        "skill": [
+         "tall"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hva skal beboerne gjøre?",
+        "options": [
+         "Vaske vinduene selv.",
+         "Ikke ha sykler og barnevogner i gangen.",
+         "Komme på møte klokka ni."
+        ],
+        "answer": 1,
+        "why": "Просьба к жильцам: «Ikke sett sykler og barnevogner i gangen» — не ставьте велосипеды и коляски в коридоре.",
+        "whyUk": "Прохання до мешканців: «Ikke sett sykler og barnevogner i gangen» — не ставте велосипеди й візки в коридорі.",
+        "skill": [
+         "detalj",
+         "bolig"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "t2",
+      "kind": "melding",
+      "title": "Melding fra barnehagen",
+      "level": "A1",
+      "text": "Hei! I morgen skal vi på tur til skogen. Barna må ha med matpakke, en flaske vann og varme klær. Det blir kaldt, så husk lue og votter. Vi går fra barnehagen klokka halv ti og kommer tilbake til lunsj.\nHilsen Kari, avdeling Blåbær",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvor skal barna i morgen?",
+        "options": [
+         "Til skogen.",
+         "Til svømmehallen.",
+         "Til biblioteket."
+        ],
+        "answer": 0,
+        "why": "Первая фраза: «I morgen skal vi på tur til skogen» — завтра идём на прогулку в лес.",
+        "whyUk": "Перше речення: «I morgen skal vi på tur til skogen» — завтра йдемо на прогулянку до лісу.",
+        "skill": [
+         "hovedinnhold",
+         "skole"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva trenger barna IKKE å ta med?",
+        "options": [
+         "Matpakke.",
+         "Lue og votter.",
+         "Penger."
+        ],
+        "answer": 2,
+        "why": "В сообщении названы matpakke, вода, тёплая одежда, lue og votter. Деньги не упоминаются.",
+        "whyUk": "У повідомленні названо matpakke, воду, теплий одяг, lue og votter. Про гроші не сказано нічого.",
+        "skill": [
+         "detalj"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Når går de fra barnehagen?",
+        "options": [
+         "Klokka 9.30.",
+         "Klokka 10.30.",
+         "Klokka 12.00."
+        ],
+        "answer": 0,
+        "why": "«Klokka halv ti» — это 9:30, «половина десятого». Норвежское halv ti считают так же, как русское «полдесятого»: полчаса ДО десяти.",
+        "whyUk": "«Klokka halv ti» — це 9:30, «пів на десяту»: пів години ДО десятої.",
+        "skill": [
+         "tall"
+        ]
+       },
+       {
+        "id": "q4",
+        "q": "Hvorfor må barna ha varme klær?",
+        "options": [
+         "Fordi det blir kaldt.",
+         "Fordi de skal sove ute.",
+         "Fordi det skal regne."
+        ],
+        "answer": 0,
+        "why": "«Det blir kaldt, så husk lue og votter» — будет холодно, поэтому нужны шапка и варежки.",
+        "whyUk": "«Det blir kaldt, så husk lue og votter» — буде холодно, тому потрібні шапка й рукавиці.",
+        "skill": [
+         "detalj",
+         "grammatikk"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "t3",
+      "kind": "annonse",
+      "title": "Leilighet til leie",
+      "level": "A2",
+      "text": "Til leie: lys toromsleilighet på 48 kvadratmeter i sentrum. Leiligheten ligger i tredje etasje, og det er heis i bygget. Den har nytt kjøkken og et lite bad med dusj. Det tar fem minutter å gå til bussen og butikken. Husleie: 11 500 kroner i måneden. Strøm og internett kommer i tillegg. Det er ikke lov å ha dyr i leiligheten. Ledig fra 1. september. Ring Per etter klokka 16.",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvor mange rom har leiligheten?",
+        "options": [
+         "Ett rom.",
+         "To rom.",
+         "Tre rom."
+        ],
+        "answer": 1,
+        "why": "«Toromsleilighet» — квартира из двух комнат (to rom): обычно спальня и гостиная. Кухня и ванная в это число не входят.",
+        "whyUk": "«Toromsleilighet» — квартира з двох кімнат (to rom): зазвичай спальня й вітальня. Кухня й ванна кімната не рахуються.",
+        "skill": [
+         "ord",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva må man betale i tillegg til husleia?",
+        "options": [
+         "Strøm og internett.",
+         "Heisen.",
+         "Det nye kjøkkenet."
+        ],
+        "answer": 0,
+        "why": "«Strøm og internett kommer i tillegg» — электричество и интернет оплачиваются отдельно, сверх арендной платы.",
+        "whyUk": "«Strøm og internett kommer i tillegg» — електрику й інтернет оплачують окремо, понад орендну плату.",
+        "skill": [
+         "detalj",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hva er riktig?",
+        "options": [
+         "Man kan ha katt i leiligheten.",
+         "Man kan flytte inn i september.",
+         "Per vil at man ringer om morgenen."
+        ],
+        "answer": 1,
+        "why": "«Ledig fra 1. september» — квартира свободна с 1 сентября. Животных держать нельзя («ikke lov å ha dyr»), а звонить нужно после 16:00.",
+        "whyUk": "«Ledig fra 1. september» — квартира вільна з 1 вересня. Тварин тримати не можна («ikke lov å ha dyr»), а телефонувати треба після 16:00.",
+        "skill": [
+         "detalj",
+         "tall"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "lytt": {
+    "minutes": 15,
+    "plays": 2,
+    "clips": [
+     {
+      "id": "c1",
+      "title": "På legekontoret",
+      "level": "A1",
+      "lines": [
+       {
+        "who": "Resepsjonist",
+        "t": "Legekontoret, god morgen."
+       },
+       {
+        "who": "Kvinne",
+        "t": "God morgen. Jeg heter Olena Koval. Jeg vil gjerne bestille time hos legen. Datteren min har vondt i øret."
+       },
+       {
+        "who": "Resepsjonist",
+        "t": "Hvor gammel er hun?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Hun er fire år."
+       },
+       {
+        "who": "Resepsjonist",
+        "t": "Vi har en ledig time i dag klokka kvart over to. Passer det?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Ja, det passer fint. Tusen takk."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvorfor ringer kvinnen?",
+        "options": [
+         "Hun vil bestille time.",
+         "Hun vil avbestille timen.",
+         "Hun vil snakke med apoteket."
+        ],
+        "answer": 0,
+        "why": "Она говорит: «Jeg vil gjerne bestille time hos legen» — хочу записаться к врачу.",
+        "whyUk": "Вона каже: «Jeg vil gjerne bestille time hos legen» — хочу записатися до лікаря.",
+        "skill": [
+         "hovedinnhold",
+         "lege"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva er problemet?",
+        "options": [
+         "Datteren har vondt i magen.",
+         "Datteren har vondt i øret.",
+         "Kvinnen har feber."
+        ],
+        "answer": 1,
+        "why": "«Datteren min har vondt i øret» — у дочери болит ухо (øre — ухо, mage — живот).",
+        "whyUk": "«Datteren min har vondt i øret» — у доньки болить вухо (øre — вухо, mage — живіт).",
+        "skill": [
+         "detalj",
+         "lege",
+         "ord"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Når er timen?",
+        "options": [
+         "Klokka 14.15.",
+         "Klokka 13.45.",
+         "Klokka 14.45."
+        ],
+        "answer": 0,
+        "why": "«Kvart over to» — четверть третьего, то есть 14:15 (днём). «Kvart på tre» было бы 14:45.",
+        "whyUk": "«Kvart over to» — чверть на третю, тобто 14:15 (удень). «Kvart på tre» було б 14:45.",
+        "skill": [
+         "tall"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c2",
+      "title": "Ved bussholdeplassen",
+      "level": "A1",
+      "lines": [
+       {
+        "who": "Mann",
+        "t": "Unnskyld, går denne bussen til sykehuset?"
+       },
+       {
+        "who": "Bussjåfør",
+        "t": "Nei, dessverre. Du må ta buss nummer tjueen. Den går fra holdeplassen på den andre siden av gata."
+       },
+       {
+        "who": "Mann",
+        "t": "Hvor ofte går den?"
+       },
+       {
+        "who": "Bussjåfør",
+        "t": "Hvert tiende minutt."
+       },
+       {
+        "who": "Mann",
+        "t": "Takk for hjelpen!"
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvor skal mannen?",
+        "options": [
+         "Til sykehuset.",
+         "Til stasjonen.",
+         "Til skolen."
+        ],
+        "answer": 0,
+        "why": "Он спрашивает: «går denne bussen til sykehuset?» — идёт ли этот автобус до больницы.",
+        "whyUk": "Він питає: «går denne bussen til sykehuset?» — чи їде цей автобус до лікарні.",
+        "skill": [
+         "detalj",
+         "transport"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hvilken buss må han ta?",
+        "options": [
+         "Buss nummer tolv.",
+         "Buss nummer tjueen.",
+         "Buss nummer tjueto."
+        ],
+        "answer": 1,
+        "why": "Водитель говорит «buss nummer tjueen» — автобус номер 21 (tjue = 20, en = 1).",
+        "whyUk": "Водій каже «buss nummer tjueen» — автобус номер 21 (tjue = 20, en = 1).",
+        "skill": [
+         "tall",
+         "transport"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c3",
+      "title": "I klesbutikken",
+      "level": "A2",
+      "lines": [
+       {
+        "who": "Kunde",
+        "t": "Hei! Jeg kjøpte denne genseren i går, men den er for liten. Kan jeg bytte den?"
+       },
+       {
+        "who": "Ekspeditør",
+        "t": "Ja, selvfølgelig. Har du kvitteringen?"
+       },
+       {
+        "who": "Kunde",
+        "t": "Ja, her er den."
+       },
+       {
+        "who": "Ekspeditør",
+        "t": "Vi har dessverre ikke en større størrelse i blått. Vil du ha en grå i stedet?"
+       },
+       {
+        "who": "Kunde",
+        "t": "Nei, da vil jeg heller ha pengene tilbake."
+       },
+       {
+        "who": "Ekspeditør",
+        "t": "Det går fint. Du får pengene tilbake på kortet."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvorfor kommer kunden tilbake til butikken?",
+        "options": [
+         "Genseren er for liten.",
+         "Genseren er for dyr.",
+         "Genseren har feil farge."
+        ],
+        "answer": 0,
+        "why": "«…men den er for liten» — свитер оказался мал.",
+        "whyUk": "«…men den er for liten» — светр замалий.",
+        "skill": [
+         "detalj",
+         "butikk"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva gjør kunden til slutt?",
+        "options": [
+         "Kunden tar en grå genser.",
+         "Kunden får pengene tilbake.",
+         "Kunden kjøper en blå genser til."
+        ],
+        "answer": 1,
+        "why": "От серого свитера покупатель отказывается: «da vil jeg heller ha pengene tilbake» — тогда лучше верните мне деньги. Деньги вернут на карту.",
+        "whyUk": "Від сірого светра покупець відмовляється: «da vil jeg heller ha pengene tilbake» — тоді краще поверніть мені гроші. Гроші повернуть на картку.",
+        "skill": [
+         "hovedinnhold",
+         "butikk"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c4",
+      "title": "En telefon fra en venninne",
+      "level": "A2",
+      "lines": [
+       {
+        "who": "Kvinne",
+        "t": "Hei, Ahmed! Har du lyst til å gå på kino på lørdag?"
+       },
+       {
+        "who": "Mann",
+        "t": "På lørdag? Jeg jobber til klokka seks, men etterpå har jeg tid."
+       },
+       {
+        "who": "Kvinne",
+        "t": "Filmen begynner klokka halv åtte. Rekker du det?"
+       },
+       {
+        "who": "Mann",
+        "t": "Ja, det rekker jeg. Skal vi spise noe før filmen?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Gjerne! Vi kan møtes på pizzarestauranten ved siden av kinoen klokka sju."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hva skal de gjøre på lørdag?",
+        "options": [
+         "Gå på kino.",
+         "Jobbe sammen.",
+         "Lage pizza hjemme."
+        ],
+        "answer": 0,
+        "why": "«Har du lyst til å gå på kino på lørdag?» — она зовёт его в кино в субботу.",
+        "whyUk": "«Har du lyst til å gå på kino på lørdag?» — вона кличе його в кіно в суботу.",
+        "skill": [
+         "hovedinnhold",
+         "fritid"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Når begynner filmen?",
+        "options": [
+         "Klokka 18.00.",
+         "Klokka 19.00.",
+         "Klokka 19.30."
+        ],
+        "answer": 2,
+        "why": "«Klokka halv åtte» — половина восьмого, то есть 19:30. В 18:00 он заканчивает работу, в 19:00 они встречаются.",
+        "whyUk": "«Klokka halv åtte» — пів на восьму, тобто 19:30. О 18:00 він закінчує роботу, о 19:00 вони зустрічаються.",
+        "skill": [
+         "tall"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hvor skal de møtes?",
+        "options": [
+         "Hjemme hos Ahmed.",
+         "På en restaurant ved kinoen.",
+         "På jobben til Ahmed."
+        ],
+        "answer": 1,
+        "why": "«Vi kan møtes på pizzarestauranten ved siden av kinoen» — встретимся в пиццерии рядом с кинотеатром.",
+        "whyUk": "«Vi kan møtes på pizzarestauranten ved siden av kinoen» — зустрінемося в піцерії поруч із кінотеатром.",
+        "skill": [
+         "detalj",
+         "fritid"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "skriv": {
+    "minutes": 40,
+    "tasks": [
+     {
+      "id": "w1",
+      "kind": "melding",
+      "level": "A1",
+      "prompt": "Du er syk og kan ikke komme på norskkurset i morgen. Skriv en melding til læreren din, Anne. Skriv:\n– at du ikke kommer i morgen\n– hva som er galt\n– når du tror du kommer tilbake",
+      "promptRu": "Вы заболели и не можете завтра прийти на курс норвежского. Напишите сообщение учительнице Анне. Напишите:\n– что завтра вас не будет\n– что с вами случилось\n– когда вы, наверное, вернётесь",
+      "promptUk": "Ви захворіли й не можете завтра прийти на курс норвезької. Напишіть повідомлення вчительці Анні. Напишіть:\n– що завтра вас не буде\n– що з вами сталося\n– коли ви, мабуть, повернетеся",
+      "minWords": 30,
+      "maxWords": 60,
+      "need": [
+       [
+        "syk",
+        "forkjølet",
+        "feber",
+        "vondt",
+        "influensa"
+       ],
+       [
+        "i morgen"
+       ],
+       [
+        "tilbake",
+        "neste uke",
+        "på mandag",
+        "på tirsdag",
+        "på onsdag",
+        "på torsdag",
+        "på fredag",
+        "snart"
+       ]
+      ],
+      "keywords": [
+       "syk",
+       "kurset",
+       "i morgen",
+       "beklager",
+       "hilsen"
+      ],
+      "model": "Hei, Anne!\nJeg er dessverre syk og kan ikke komme på kurset i morgen. Jeg har feber og vondt i halsen. I dag skal jeg gå til legen. Jeg håper at jeg kommer tilbake på mandag. Beklager!\nHilsen Natalia",
+      "modelRu": "Здравствуйте, Анне!\nК сожалению, я заболела и не смогу прийти завтра на курс. У меня температура и болит горло. Сегодня я пойду к врачу. Надеюсь вернуться в понедельник. Извините!\nНаталья"
+     },
+     {
+      "id": "w2",
+      "kind": "bilde",
+      "level": "A2",
+      "prompt": "Tenk deg et bilde: En familie er på stranda en varm sommerdag. Faren griller pølser, moren leser en bok, og to barn bader i sjøen. En liten hund løper med en ball.\nBeskriv bildet. Skriv:\n– hvem som er på bildet\n– hva de gjør\n– hvordan været er",
+      "promptRu": "Представьте картинку: жарким летним днём семья на пляже. Отец жарит сосиски на гриле, мама читает книгу, двое детей купаются в море. Маленькая собака бегает с мячом.\nОпишите картинку. Напишите:\n– кто на картинке\n– что они делают\n– какая погода",
+      "promptUk": "Уявіть малюнок: спекотного літнього дня родина на пляжі. Батько смажить сосиски на грилі, мама читає книжку, двоє дітей купаються в морі. Маленька собака бігає з м'ячем.\nОпишіть малюнок. Напишіть:\n– хто на малюнку\n– що вони роблять\n– яка погода",
+      "minWords": 50,
+      "maxWords": 80,
+      "need": [
+       [
+        "familie",
+        "far",
+        "faren",
+        "mor",
+        "moren",
+        "barn",
+        "barna"
+       ],
+       [
+        "griller",
+        "leser",
+        "bader",
+        "løper"
+       ],
+       [
+        "varm",
+        "sol",
+        "sola",
+        "sommer",
+        "været",
+        "fint"
+       ]
+      ],
+      "keywords": [
+       "stranda",
+       "sjøen",
+       "hund",
+       "pølser",
+       "bok"
+      ],
+      "model": "På bildet ser jeg en familie på stranda. Det er sommer, og sola skinner. Faren står ved grillen og griller pølser. Moren sitter på et håndkle og leser en bok. To barn bader i sjøen, og de ser glade ut. En liten hund løper på sanden med en ball. Jeg tror at familien har en fin dag sammen.",
+      "modelRu": "На картинке я вижу семью на пляже. Лето, светит солнце. Отец стоит у гриля и жарит сосиски. Мама сидит на полотенце и читает книгу. Двое детей купаются в море, и они выглядят счастливыми. Маленькая собака бегает по песку с мячом. Мне кажется, семья хорошо проводит время вместе."
+     },
+     {
+      "id": "w3",
+      "kind": "tema",
+      "level": "A2",
+      "prompt": "Skriv om fritida di. Skriv:\n– hva du liker å gjøre i fritida\n– hvem du gjør det sammen med\n– hva du gjorde sist helg\n– noe du har lyst til å prøve i Norge",
+      "promptRu": "Напишите о своём свободном времени. Напишите:\n– чем вы любите заниматься в свободное время\n– с кем вы этим занимаетесь\n– что вы делали в прошлые выходные\n– что вам хочется попробовать в Норвегии",
+      "promptUk": "Напишіть про своє дозвілля. Напишіть:\n– чим ви любите займатися у вільний час\n– з ким ви це робите\n– що ви робили минулих вихідних\n– що вам хочеться спробувати в Норвегії",
+      "minWords": 80,
+      "maxWords": 130,
+      "need": [
+       [
+        "liker",
+        "pleier",
+        "fritida",
+        "fritid"
+       ],
+       [
+        "sammen med",
+        "venn",
+        "venner",
+        "familie",
+        "barna",
+        "mannen",
+        "kona"
+       ],
+       [
+        "sist helg",
+        "i helga",
+        "på lørdag",
+        "på søndag"
+       ],
+       [
+        "har lyst",
+        "vil",
+        "prøve"
+       ]
+      ],
+      "keywords": [
+       "fritida",
+       "liker",
+       "helg",
+       "prøve"
+      ],
+      "model": "I fritida liker jeg å gå tur og å lage mat. Jeg pleier å gå tur i skogen sammen med mannen min og hunden vår. Om kvelden lager jeg ofte mat fra hjemlandet mitt, og noen ganger inviterer vi venner. Sist helg var vi på tur til et vann i nærheten. Vi tok med kaffe og matpakke, og barna badet. Det var kaldt i vannet, men veldig koselig! I Norge har jeg lyst til å lære å gå på ski. Mange av kollegene mine går på ski hver vinter, og jeg vil prøve det neste år.",
+      "modelRu": "В свободное время я люблю гулять и готовить. Обычно я хожу гулять в лес с мужем и нашей собакой. Вечером я часто готовлю блюда своей родной страны, а иногда мы приглашаем друзей. В прошлые выходные мы ходили к озеру неподалёку. Мы взяли с собой кофе и бутерброды, а дети купались. Вода была холодная, но было очень уютно! В Норвегии мне хочется научиться ходить на лыжах. Многие мои коллеги каждую зиму катаются на лыжах, и я хочу попробовать в следующем году."
+     }
+    ]
+   },
+   "munt": {
+    "minutes": 15,
+    "tasks": [
+     {
+      "id": "m1",
+      "kind": "presentasjon",
+      "level": "A1",
+      "prompt": "Presenter deg selv kort.",
+      "promptRu": "Коротко расскажите о себе.",
+      "promptUk": "Коротко розкажіть про себе.",
+      "ask": [
+       "Hva heter du, og hvor kommer du fra?",
+       "Hvor bor du nå?",
+       "Hvem bor du sammen med?",
+       "Hva liker du å gjøre?"
+      ],
+      "prepSec": 30,
+      "speakSec": 90,
+      "minWords": 25,
+      "keywords": [
+       "heter",
+       "kommer fra",
+       "bor",
+       "liker"
+      ],
+      "model": "Jeg heter Sergij, og jeg kommer fra Ukraina. Nå bor jeg i Kristiansand. Jeg bor sammen med kona mi og sønnen vår. Han er sju år og går på skole. Jeg går på norskkurs fem dager i uka. I fritida liker jeg å spille fotball og å fiske.",
+      "modelRu": "Меня зовут Сергей, я из Украины. Сейчас я живу в Кристиансанне. Я живу с женой и нашим сыном. Ему семь лет, он ходит в школу. Я учу норвежский на курсах пять дней в неделю. В свободное время я люблю играть в футбол и рыбачить."
+     },
+     {
+      "id": "m2",
+      "kind": "bilde",
+      "level": "A2",
+      "prompt": "Tenk deg et bilde: Det er morgen på en busstasjon. Mange mennesker venter på bussen. En kvinne snakker i telefonen, en gammel mann sitter på en benk, og et barn spiser en banan. Det regner. Fortell hva du ser på bildet.",
+      "promptRu": "Представьте картинку: утро на автовокзале. Много людей ждут автобус. Женщина говорит по телефону, пожилой мужчина сидит на скамейке, а ребёнок ест банан. Идёт дождь. Расскажите, что вы видите на картинке.",
+      "promptUk": "Уявіть малюнок: ранок на автовокзалі. Багато людей чекають на автобус. Жінка говорить по телефону, літній чоловік сидить на лавці, а дитина їсть банан. Іде дощ. Розкажіть, що ви бачите на малюнку.",
+      "ask": [
+       "Hvordan er været?",
+       "Hva tror du kvinnen snakker om?",
+       "Hvor tror du de skal?",
+       "Tar du ofte buss?"
+      ],
+      "prepSec": 60,
+      "speakSec": 150,
+      "minWords": 40,
+      "keywords": [
+       "morgen",
+       "venter",
+       "bussen",
+       "regner",
+       "benk"
+      ],
+      "model": "På bildet ser jeg en busstasjon om morgenen. Det regner, og mange mennesker venter på bussen. En kvinne snakker i telefonen. Kanskje hun ringer til jobben fordi bussen er sen. En gammel mann sitter på en benk og hviler. Et lite barn spiser en banan. Jeg tror at de fleste skal på jobb eller på skole. Jeg tar også buss hver dag, og om vinteren er bussen ofte sen.",
+      "modelRu": "На картинке я вижу автовокзал утром. Идёт дождь, и много людей ждут автобус. Женщина говорит по телефону. Может быть, она звонит на работу, потому что автобус опаздывает. Пожилой мужчина сидит на скамейке и отдыхает. Маленький ребёнок ест банан. Думаю, большинство едут на работу или в школу. Я тоже езжу на автобусе каждый день, и зимой он часто опаздывает."
+     },
+     {
+      "id": "m3",
+      "kind": "samtale",
+      "level": "A2",
+      "prompt": "Tenk deg at du spiser lunsj med en ny kollega. Dere snakker om mat. Svar på spørsmålene og fortell litt mer.",
+      "promptRu": "Представьте, что вы обедаете с новым коллегой. Вы разговариваете о еде. Ответьте на вопросы и расскажите чуть подробнее.",
+      "promptUk": "Уявіть, що ви обідаєте з новим колегою. Ви розмовляєте про їжу. Дайте відповіді на запитання й розкажіть трохи більше.",
+      "ask": [
+       "Hva spiser du vanligvis til lunsj?",
+       "Hva er typisk mat i hjemlandet ditt?",
+       "Hva synes du om norsk mat?",
+       "Liker du å lage mat?"
+      ],
+      "prepSec": 60,
+      "speakSec": 150,
+      "minWords": 40,
+      "keywords": [
+       "spiser",
+       "lunsj",
+       "mat",
+       "synes",
+       "liker"
+      ],
+      "model": "Til lunsj spiser jeg vanligvis brødskiver med ost eller en salat. I hjemlandet mitt spiser vi ofte varm mat midt på dagen, for eksempel suppe. Typisk mat hos oss er borsjtsj og pelmeni. Norsk mat synes jeg er ganske god, men litt enkel. Jeg liker laks og fiskekaker, men brunost liker jeg ikke så godt. Jeg liker å lage mat, særlig i helgene når jeg har god tid.",
+      "modelRu": "На обед я обычно ем бутерброды с сыром или салат. В моей родной стране днём часто едят горячее, например суп. Типичная еда у нас — борщ и пельмени. Норвежская еда, по-моему, довольно вкусная, но немного простая. Я люблю лосося и рыбные котлеты, а вот бурый сыр мне не очень нравится. Я люблю готовить, особенно по выходным, когда есть время."
+     }
+    ]
+   }
+  },
+  {
+   "id": "np-a2b1",
+   "title": "Тренировка A2–B1",
+   "titleUk": "Тренування A2–B1",
+   "level": "A2–B1",
+   "les": {
+    "minutes": 30,
+    "texts": [
+     {
+      "id": "t1",
+      "kind": "oppslag",
+      "title": "Informasjon fra kommunen: ny ordning for avfall",
+      "level": "A2",
+      "text": "Fra 1. mars endrer kommunen ordningen for avfall. Matavfall skal nå sorteres i egne grønne poser, som du får gratis i butikken. Plast skal skylles og legges i en egen sekk. Papir hentes hver tredje uke, ikke hver andre uke som før. Restavfall hentes fortsatt hver uke. Glass og metall må du selv levere på returpunktet ved kjøpesenteret. Har du spørsmål, kan du ringe servicekontoret mellom klokka åtte og tre på hverdager.",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hva er nytt fra 1. mars?",
+        "options": [
+         "Matavfall skal sorteres i grønne poser.",
+         "Restavfall hentes hver tredje uke.",
+         "Glass hentes hjemme hos deg."
+        ],
+        "answer": 0,
+        "why": "«Matavfall skal nå sorteres i egne grønne poser» — пищевые отходы теперь собирают в отдельные зелёные пакеты. Слово «nå» (теперь) указывает на новое правило.",
+        "whyUk": "«Matavfall skal nå sorteres i egne grønne poser» — харчові відходи тепер збирають в окремі зелені пакети. Слово «nå» (тепер) вказує на нове правило.",
+        "skill": [
+         "hovedinnhold",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hvor ofte hentes papir etter endringen?",
+        "options": [
+         "Hver uke.",
+         "Hver andre uke.",
+         "Hver tredje uke."
+        ],
+        "answer": 2,
+        "why": "«Papir hentes hver tredje uke, ikke hver andre uke som før» — раньше раз в две недели, теперь раз в три.",
+        "whyUk": "«Papir hentes hver tredje uke, ikke hver andre uke som før» — раніше раз на два тижні, тепер раз на три.",
+        "skill": [
+         "tall",
+         "detalj"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hva må du gjøre med glass?",
+        "options": [
+         "Legge det i plastsekken.",
+         "Levere det selv på returpunktet.",
+         "Kaste det i restavfallet."
+        ],
+        "answer": 1,
+        "why": "«Glass og metall må du selv levere på returpunktet» — стекло и металл нужно самому отнести в пункт приёма.",
+        "whyUk": "«Glass og metall må du selv levere på returpunktet» — скло й метал треба самому віднести до пункту приймання.",
+        "skill": [
+         "detalj",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q4",
+        "q": "Når kan du ringe servicekontoret?",
+        "options": [
+         "Mandag til fredag fra 8 til 15.",
+         "Hver dag fra 8 til 15.",
+         "Bare i helgene."
+        ],
+        "answer": 0,
+        "why": "«På hverdager» — в будни, с понедельника по пятницу (не «каждый день»). «Mellom klokka åtte og tre» — с 8:00 до 15:00.",
+        "whyUk": "«På hverdager» — у будні, з понеділка по п'ятницю (не «щодня»). «Mellom klokka åtte og tre» — з 8:00 до 15:00.",
+        "skill": [
+         "ord",
+         "tall"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "t2",
+      "kind": "e-post",
+      "title": "E-post fra en kollega",
+      "level": "A2",
+      "text": "Hei, Marta!\nJeg lurer på om du kan bytte vakt med meg neste uke. Jeg har kveldsvakt på torsdag, men sønnen min har avslutning på skolen den kvelden, og jeg vil veldig gjerne være der. Du har dagvakt på fredag, ikke sant? Hvis du tar torsdagen min, kan jeg ta fredagen din. Jeg har allerede snakket med avdelingslederen, og hun sier at det er greit hvis vi blir enige. Gi meg beskjed så snart du kan!\nHilsen Lise",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvorfor vil Lise bytte vakt?",
+        "options": [
+         "Hun er syk.",
+         "Hun vil være på avslutningen til sønnen sin.",
+         "Hun skal reise bort i helga."
+        ],
+        "answer": 1,
+        "why": "«Sønnen min har avslutning på skolen den kvelden, og jeg vil veldig gjerne være der» — у сына в этот вечер в школе праздник по случаю окончания учебного года, и она хочет там быть.",
+        "whyUk": "«Sønnen min har avslutning på skolen den kvelden, og jeg vil veldig gjerne være der» — у сина цього вечора свято закінчення навчального року, і вона хоче там бути.",
+        "skill": [
+         "detalj",
+         "jobb"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva foreslår Lise?",
+        "options": [
+         "At Marta jobber torsdag kveld, og at Lise jobber fredag.",
+         "At de begge jobber på fredag.",
+         "At Marta snakker med avdelingslederen."
+        ],
+        "answer": 0,
+        "why": "«Hvis du tar torsdagen min, kan jeg ta fredagen din» — Марта выходит в четверг вечером, а Лисе — вместо неё в пятницу.",
+        "whyUk": "«Hvis du tar torsdagen min, kan jeg ta fredagen din» — Марта виходить у четвер увечері, а Лісе замість неї в п'ятницю.",
+        "skill": [
+         "hovedinnhold",
+         "jobb",
+         "v2"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hva sier avdelingslederen?",
+        "options": [
+         "At de ikke kan bytte.",
+         "At det er greit hvis de blir enige.",
+         "At Lise må jobbe begge dagene."
+        ],
+        "answer": 1,
+        "why": "«Hun sier at det er greit hvis vi blir enige» — руководитель не против, если они договорятся между собой.",
+        "whyUk": "«Hun sier at det er greit hvis vi blir enige» — керівниця не проти, якщо вони домовляться між собою.",
+        "skill": [
+         "detalj",
+         "mening"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "t3",
+      "kind": "artikkel",
+      "title": "Dugnad – mer enn bare arbeid",
+      "level": "B1",
+      "text": "Mange som flytter til Norge, blir overrasket når de får en lapp i postkassen om dugnad. På en dugnad jobber naboene sammen uten å få betalt. De rydder i hagen, maler gjerdet eller vasker kjelleren i borettslaget. Etterpå spiser man ofte vafler eller pølser sammen.\nFor mange nordmenn handler dugnad ikke bare om arbeidet. Det er også en måte å bli kjent med naboene på. «Jeg hadde bodd her i to år uten å snakke med noen. Så var jeg med på dugnad, og nå hilser alle på meg», forteller Samira (34), som kom til Norge for fem år siden.\nIkke alle liker dugnad. Noen synes det er urettferdig at det alltid er de samme som gjør mest. Likevel mener de fleste at dugnaden gjør bomiljøet bedre.",
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hva er hovedpoenget i teksten?",
+        "options": [
+         "Dugnad er både arbeid og en måte å bli kjent med naboene på.",
+         "Dugnad er en betalt jobb i borettslaget.",
+         "De fleste nordmenn vil slutte med dugnad."
+        ],
+        "answer": 0,
+        "why": "Главная мысль во втором абзаце: «handler dugnad ikke bare om arbeidet. Det er også en måte å bli kjent med naboene på» — это не только работа, но и способ познакомиться с соседями. За дугнад не платят («uten å få betalt»).",
+        "whyUk": "Головна думка в другому абзаці: «handler dugnad ikke bare om arbeidet. Det er også en måte å bli kjent med naboene på» — це не лише робота, а й спосіб познайомитися із сусідами. За дуґнад не платять («uten å få betalt»).",
+        "skill": [
+         "hovedinnhold"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva skjedde etter at Samira var med på dugnad?",
+        "options": [
+         "Hun flyttet fra borettslaget.",
+         "Naboene begynte å hilse på henne.",
+         "Hun fikk betalt for arbeidet."
+        ],
+        "answer": 1,
+        "why": "Самира рассказывает: «nå hilser alle på meg» — теперь все со мной здороваются.",
+        "whyUk": "Саміра розповідає: «nå hilser alle på meg» — тепер усі зі мною вітаються.",
+        "skill": [
+         "detalj",
+         "bolig"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hvorfor liker ikke alle dugnad?",
+        "options": [
+         "De synes det blir servert for mye mat.",
+         "De mener at det alltid er de samme som gjør mest.",
+         "De får ikke lov til å være med."
+        ],
+        "answer": 1,
+        "why": "«Noen synes det er urettferdig at det alltid er de samme som gjør mest» — кому-то кажется несправедливым, что больше всех всегда работают одни и те же.",
+        "whyUk": "«Noen synes det er urettferdig at det alltid er de samme som gjør mest» — комусь здається несправедливим, що найбільше завжди працюють ті самі люди.",
+        "skill": [
+         "mening"
+        ]
+       },
+       {
+        "id": "q4",
+        "q": "Hva betyr «likevel» i den siste setningen?",
+        "options": [
+         "derfor",
+         "til tross for det",
+         "etterpå"
+        ],
+        "answer": 1,
+        "why": "«Likevel» — «тем не менее, всё же»: несмотря на недовольство некоторых, большинство считает дугнад полезным. «Derfor» значит «поэтому», «etterpå» — «потом».",
+        "whyUk": "«Likevel» — «проте, все ж таки»: попри невдоволення декого, більшість вважає дуґнад корисним. «Derfor» означає «тому», «etterpå» — «потім».",
+        "skill": [
+         "ord",
+         "grammatikk"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "lytt": {
+    "minutes": 15,
+    "plays": 2,
+    "clips": [
+     {
+      "id": "c1",
+      "title": "På apoteket",
+      "level": "A2",
+      "lines": [
+       {
+        "who": "Farmasøyt",
+        "t": "Hei, hva kan jeg hjelpe deg med?"
+       },
+       {
+        "who": "Mann",
+        "t": "Jeg har fått en resept fra legen. Det er antibiotika til datteren min."
+       },
+       {
+        "who": "Farmasøyt",
+        "t": "Takk. Hun skal ta en tablett tre ganger om dagen i sju dager. Det er viktig at hun tar alle tablettene, også når hun føler seg bedre."
+       },
+       {
+        "who": "Mann",
+        "t": "Skal hun ta dem sammen med mat?"
+       },
+       {
+        "who": "Farmasøyt",
+        "t": "Ja, helst sammen med et måltid."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvor ofte skal datteren ta en tablett?",
+        "options": [
+         "En gang om dagen.",
+         "To ganger om dagen.",
+         "Tre ganger om dagen."
+        ],
+        "answer": 2,
+        "why": "Фармацевт говорит: «en tablett tre ganger om dagen i sju dager» — по таблетке три раза в день в течение семи дней.",
+        "whyUk": "Фармацевтка каже: «en tablett tre ganger om dagen i sju dager» — по таблетці тричі на день протягом семи днів.",
+        "skill": [
+         "tall",
+         "lege"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hva sier farmasøyten om tablettene?",
+        "options": [
+         "Hun kan slutte når hun føler seg bedre.",
+         "Hun må ta alle tablettene.",
+         "Hun skal ta dem uten mat."
+        ],
+        "answer": 1,
+        "why": "«Det er viktig at hun tar alle tablettene, også når hun føler seg bedre» — нужно пропить весь курс, даже если станет лучше. Принимать лучше во время еды.",
+        "whyUk": "«Det er viktig at hun tar alle tablettene, også når hun føler seg bedre» — треба пропити весь курс, навіть якщо стане краще. Приймати краще під час їжі.",
+        "skill": [
+         "detalj",
+         "lege"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c2",
+      "title": "Beskjed fra barnehagen",
+      "level": "A2",
+      "lines": [
+       {
+        "who": "Kvinne",
+        "t": "Hei, dette er Ingrid fra Bjørkelia barnehage. Jeg ringer fordi Leo har fått feber. Han har drukket litt vann og ligger og hviler nå, men han kan ikke være i barnehagen med feber. Kan du eller noen andre hente ham så fort som mulig? Husk at han må være feberfri i minst ett døgn før han kommer tilbake. Ring meg gjerne på dette nummeret. Ha det!"
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvorfor ringer Ingrid?",
+        "options": [
+         "Leo har feber og må hentes.",
+         "Leo har slått seg på lekeplassen.",
+         "Barnehagen stenger tidlig i dag."
+        ],
+        "answer": 0,
+        "why": "«Leo har fått feber … Kan du eller noen andre hente ham så fort som mulig?» — у Лео температура, его нужно поскорее забрать.",
+        "whyUk": "«Leo har fått feber … Kan du eller noen andre hente ham så fort som mulig?» — у Лео температура, його треба якнайшвидше забрати.",
+        "skill": [
+         "hovedinnhold",
+         "skole"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Når kan Leo komme tilbake til barnehagen?",
+        "options": [
+         "I morgen tidlig.",
+         "Når han har vært feberfri i minst ett døgn.",
+         "Om en uke."
+        ],
+        "answer": 1,
+        "why": "«Han må være feberfri i minst ett døgn» — без температуры не меньше суток (døgn = 24 часа).",
+        "whyUk": "«Han må være feberfri i minst ett døgn» — без температури щонайменше добу (døgn = 24 години).",
+        "skill": [
+         "detalj",
+         "ord"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c3",
+      "title": "Et jobbintervju",
+      "level": "B1",
+      "lines": [
+       {
+        "who": "Leder",
+        "t": "Kan du fortelle litt om hvorfor du søker på denne stillingen?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Ja. Jeg har jobbet som kokk i åtte år, først i Kyiv og de siste to årene på et hotell i Bergen. Nå vil jeg gjerne ha mer ansvar, og jeg liker at dere bruker lokale råvarer."
+       },
+       {
+        "who": "Leder",
+        "t": "Hos oss jobber man ofte kveld og helg. Hvordan passer det for deg?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Det går fint. Barna mine er store nå, og mannen min jobber på dagtid."
+       },
+       {
+        "who": "Leder",
+        "t": "Flott. Kan du begynne allerede i august?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Dessverre ikke. Jeg har tre måneders oppsigelsestid, så jeg kan tidligst begynne i oktober."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvor lenge har kvinnen jobbet som kokk?",
+        "options": [
+         "I to år.",
+         "I åtte år.",
+         "I tre år."
+        ],
+        "answer": 1,
+        "why": "«Jeg har jobbet som kokk i åtte år» — всего восемь лет; два года — это только последние годы в Бергене, а три месяца — срок предупреждения об увольнении.",
+        "whyUk": "«Jeg har jobbet som kokk i åtte år» — загалом вісім років; два роки — лише останні роки в Бергені, а три місяці — термін попередження про звільнення.",
+        "skill": [
+         "tall",
+         "jobb"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hvorfor søker hun på stillingen?",
+        "options": [
+         "Hun vil ha mer ansvar.",
+         "Hun vil jobbe mindre kveld og helg.",
+         "Hun vil flytte tilbake til Kyiv."
+        ],
+        "answer": 0,
+        "why": "«Nå vil jeg gjerne ha mer ansvar» — она хочет больше ответственности; ещё ей нравится, что здесь используют местные продукты.",
+        "whyUk": "«Nå vil jeg gjerne ha mer ansvar» — вона хоче більше відповідальності; ще їй подобається, що тут використовують місцеві продукти.",
+        "skill": [
+         "mening",
+         "jobb"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Når kan hun begynne i den nye jobben?",
+        "options": [
+         "I august.",
+         "Tidligst i oktober.",
+         "Med en gang."
+        ],
+        "answer": 1,
+        "why": "«Jeg har tre måneders oppsigelsestid, så jeg kan tidligst begynne i oktober» — срок предупреждения об увольнении у неё три месяца, поэтому не раньше октября.",
+        "whyUk": "«Jeg har tre måneders oppsigelsestid, så jeg kan tidligst begynne i oktober» — термін попередження про звільнення в неї три місяці, тому не раніше жовтня.",
+        "skill": [
+         "detalj",
+         "jobb",
+         "ord"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "c4",
+      "title": "Planer for helga",
+      "level": "B1",
+      "lines": [
+       {
+        "who": "Mann",
+        "t": "Har du sett værmeldingen? Det skal visst bli sol hele helga."
+       },
+       {
+        "who": "Kvinne",
+        "t": "Ja, endelig! Etter tre uker med regn trenger jeg virkelig å komme meg ut."
+       },
+       {
+        "who": "Mann",
+        "t": "Vi tenkte å dra på hytta på fjellet. Har du lyst til å bli med?"
+       },
+       {
+        "who": "Kvinne",
+        "t": "Det høres fristende ut, men jeg har lovet å hjelpe søsteren min med å flytte på lørdag. Kanskje jeg kan komme etter på søndag?"
+       },
+       {
+        "who": "Mann",
+        "t": "Selvfølgelig. Det går en buss klokka ti på søndag. Jeg kan hente deg på holdeplassen."
+       }
+      ],
+      "items": [
+       {
+        "id": "q1",
+        "q": "Hvordan har været vært de siste ukene?",
+        "options": [
+         "Det har vært sol.",
+         "Det har regnet mye.",
+         "Det har snødd."
+        ],
+        "answer": 1,
+        "why": "«Etter tre uker med regn» — после трёх недель дождей. Солнце обещают только на выходные.",
+        "whyUk": "«Etter tre uker med regn» — після трьох тижнів дощу. Сонце обіцяють лише на вихідні.",
+        "skill": [
+         "detalj"
+        ]
+       },
+       {
+        "id": "q2",
+        "q": "Hvorfor kan ikke kvinnen bli med på lørdag?",
+        "options": [
+         "Hun må jobbe.",
+         "Hun skal hjelpe søsteren sin med å flytte.",
+         "Hun liker ikke å være på hytta."
+        ],
+        "answer": 1,
+        "why": "«Jeg har lovet å hjelpe søsteren min med å flytte på lørdag» — она обещала помочь сестре с переездом.",
+        "whyUk": "«Jeg har lovet å hjelpe søsteren min med å flytte på lørdag» — вона пообіцяла допомогти сестрі з переїздом.",
+        "skill": [
+         "detalj",
+         "mening"
+        ]
+       },
+       {
+        "id": "q3",
+        "q": "Hva skal skje på søndag?",
+        "options": [
+         "Kvinnen tar bussen, og mannen henter henne.",
+         "Mannen kjører henne til søsteren.",
+         "De drar hjem fra hytta sammen."
+        ],
+        "answer": 0,
+        "why": "«Det går en buss klokka ti på søndag. Jeg kan hente deg på holdeplassen» — она приедет автобусом, а он встретит её на остановке.",
+        "whyUk": "«Det går en buss klokka ti på søndag. Jeg kan hente deg på holdeplassen» — вона приїде автобусом, а він зустріне її на зупинці.",
+        "skill": [
+         "hovedinnhold",
+         "transport"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "skriv": {
+    "minutes": 45,
+    "tasks": [
+     {
+      "id": "w1",
+      "kind": "bilde",
+      "level": "A2",
+      "prompt": "Tenk deg et bilde: Det er vinter i en park. Noen barn lager en snømann, en ung mann går på ski, og to eldre damer drikker kaffe på en benk. Det snør litt, og alle har varme klær på seg.\nBeskriv bildet. Fortell også hva du tror personene skal gjøre etterpå.",
+      "promptRu": "Представьте картинку: зима, парк. Несколько детей лепят снеговика, молодой человек катается на лыжах, а две пожилые женщины пьют кофе на скамейке. Идёт небольшой снег, все тепло одеты.\nОпишите картинку. Расскажите также, что, по-вашему, люди будут делать потом.",
+      "promptUk": "Уявіть малюнок: зима, парк. Кілька дітей ліплять сніговика, молодий чоловік катається на лижах, а дві літні жінки п'ють каву на лавці. Падає невеликий сніг, усі тепло вдягнені.\nОпишіть малюнок. Розкажіть також, що, на вашу думку, люди робитимуть потім.",
+      "minWords": 80,
+      "maxWords": 100,
+      "need": [
+       [
+        "barn",
+        "barna",
+        "mann",
+        "damer",
+        "kvinner"
+       ],
+       [
+        "lager",
+        "går på ski",
+        "drikker",
+        "sitter"
+       ],
+       [
+        "vinter",
+        "snø",
+        "snør",
+        "kaldt"
+       ],
+       [
+        "etterpå",
+        "senere",
+        "tror",
+        "kanskje"
+       ]
+      ],
+      "keywords": [
+       "park",
+       "snømann",
+       "ski",
+       "kaffe",
+       "benk"
+      ],
+      "model": "Bildet viser en park om vinteren. Det snør litt, og alle har på seg varme klær, luer og votter. Til venstre lager noen barn en stor snømann. De ler og ser ut til å ha det gøy. En ung mann går på ski langs stien. Han har sikkert vært ute lenge, for han ser sliten ut. På en benk sitter to eldre damer og drikker kaffe fra en termos. Jeg tror at barna skal gå hjem og drikke varm kakao etterpå. Mannen skal kanskje dusje og spise middag, og damene skal kanskje gå på kafé for å varme seg.",
+      "modelRu": "На картинке парк зимой. Идёт небольшой снег, все в тёплой одежде, шапках и варежках. Слева несколько детей лепят большого снеговика. Они смеются, и им явно весело. Молодой человек едет на лыжах по дорожке. Наверное, он катается уже давно: вид у него усталый. На скамейке сидят две пожилые женщины и пьют кофе из термоса. Думаю, потом дети пойдут домой пить горячее какао. Мужчина, может быть, примет душ и поужинает, а женщины, возможно, зайдут в кафе погреться."
+     },
+     {
+      "id": "w2",
+      "kind": "tema",
+      "level": "A2",
+      "prompt": "Skriv om boligen din. Skriv:\n– hvor du bor, og hvordan boligen ser ut\n– hva du liker med boligen\n– hva du ikke liker så godt\n– hvordan du vil bo om fem år",
+      "promptRu": "Напишите о своём жилье. Напишите:\n– где вы живёте и как выглядит ваше жильё\n– что вам в нём нравится\n– что нравится не очень\n– как вы хотите жить через пять лет",
+      "promptUk": "Напишіть про своє житло. Напишіть:\n– де ви живете і який вигляд має ваше житло\n– що вам у ньому подобається\n– що подобається не дуже\n– як ви хочете жити через п'ять років",
+      "minWords": 80,
+      "maxWords": 200,
+      "need": [
+       [
+        "bor",
+        "leilighet",
+        "hus",
+        "rekkehus"
+       ],
+       [
+        "liker",
+        "fint",
+        "koselig"
+       ],
+       [
+        "ikke liker",
+        "dessverre",
+        "problem",
+        "men"
+       ],
+       [
+        "om fem år",
+        "i framtida",
+        "vil",
+        "drømmer"
+       ]
+      ],
+      "keywords": [
+       "bolig",
+       "leilighet",
+       "rom",
+       "kjøkken",
+       "naboer"
+      ],
+      "model": "Jeg bor i en leilighet i tredje etasje i en blokk utenfor sentrum. Leiligheten har to soverom, en stue, et lite kjøkken og et bad. Fra stua har jeg utsikt over et vann, og det er veldig fint, særlig om morgenen. Jeg liker også at det er kort vei til butikken og til skolen til barna. Naboene er hyggelige, og vi hilser alltid på hverandre i oppgangen.\nDet jeg ikke liker så godt, er at det ikke er heis i bygget. Det er tungt å bære matvarer og barnevogn opp trappene. Dessuten er leiligheten litt kald om vinteren, så strømregningen blir høy.\nOm fem år vil jeg gjerne bo i et rekkehus med en liten hage. Da kan barna leke ute, og jeg kan dyrke grønnsaker og blomster.",
+      "modelRu": "Я живу в квартире на третьем этаже многоэтажного дома за пределами центра. В квартире две спальни, гостиная, маленькая кухня и ванная. Из гостиной видно озеро, и это очень красиво, особенно по утрам. Ещё мне нравится, что близко до магазина и до школы детей. Соседи приятные, и мы всегда здороваемся на лестнице.\nЧто мне нравится меньше — в доме нет лифта. Тяжело носить продукты и коляску по лестнице. К тому же зимой в квартире прохладно, поэтому счёт за электричество большой.\nЧерез пять лет я хотела бы жить в таунхаусе с маленьким садом. Тогда дети смогут играть на улице, а я — выращивать овощи и цветы."
+     },
+     {
+      "id": "w3",
+      "kind": "e-post",
+      "level": "B1",
+      "prompt": "Kommunen planlegger å gjøre om parken i nabolaget ditt til en parkeringsplass. Skriv en e-post til kommunen. Skriv:\n– hvem du er\n– hva du mener om planen\n– minst to grunner til at du mener det\n– et forslag til en annen løsning",
+      "promptRu": "Коммуна планирует превратить парк в вашем районе в парковку. Напишите письмо в коммуну. Напишите:\n– кто вы\n– что вы думаете об этом плане\n– минимум две причины, почему вы так считаете\n– предложение другого решения",
+      "promptUk": "Комуна планує перетворити парк у вашому районі на парковку. Напишіть електронного листа до комуни. Напишіть:\n– хто ви\n– що ви думаєте про цей план\n– щонайменше дві причини, чому ви так вважаєте\n– пропозицію іншого рішення",
+      "minWords": 100,
+      "maxWords": 180,
+      "need": [
+       [
+        "jeg heter",
+        "jeg bor",
+        "beboer"
+       ],
+       [
+        "mener",
+        "synes",
+        "tror"
+       ],
+       [
+        "fordi",
+        "derfor",
+        "for det første",
+        "dessuten"
+       ],
+       [
+        "foreslår",
+        "forslag",
+        "i stedet",
+        "heller"
+       ]
+      ],
+      "keywords": [
+       "parken",
+       "parkeringsplass",
+       "barn",
+       "planen",
+       "kommunen"
+      ],
+      "model": "Hei!\nJeg heter Viktoria Petrenko, og jeg bor i Lindeveien sammen med mannen min og to barn. Jeg har lest at kommunen vil gjøre parken vår om til en parkeringsplass. Jeg mener at det er en dårlig idé, og jeg håper at dere tenker dere om.\nFor det første er parken det eneste stedet i nabolaget der barna kan leke trygt. Hver ettermiddag er det mange familier der. For det andre er parken viktig for de eldre. De går tur der og møter naboene sine. Uten parken blir mange mer ensomme.\nJeg forstår at det er vanskelig å finne parkeringsplass her. Derfor foreslår jeg at kommunen heller bygger et parkeringshus ved kjøpesenteret, eller at bussen går oftere, slik at færre trenger bil.\nMed vennlig hilsen\nViktoria Petrenko",
+      "modelRu": "Здравствуйте!\nМеня зовут Виктория Петренко, я живу на улице Линдевейен с мужем и двумя детьми. Я прочитала, что коммуна хочет сделать из нашего парка парковку. Я считаю, что это плохая идея, и надеюсь, что вы передумаете.\nВо-первых, парк — единственное место в районе, где дети могут спокойно играть. Каждый день после обеда там много семей. Во-вторых, парк важен для пожилых людей. Они там гуляют и встречаются с соседями. Без парка многим станет ещё одиноче.\nЯ понимаю, что здесь трудно найти место для машины. Поэтому я предлагаю вместо этого построить многоэтажную парковку у торгового центра или пустить автобусы чаще, чтобы машина была нужна меньшему числу людей.\nС уважением,\nВиктория Петренко"
+     }
+    ]
+   },
+   "munt": {
+    "minutes": 15,
+    "tasks": [
+     {
+      "id": "m1",
+      "kind": "tema",
+      "level": "A2",
+      "prompt": "Fortell om en høytid eller en tradisjon fra hjemlandet ditt.",
+      "promptRu": "Расскажите о празднике или традиции вашей родной страны.",
+      "promptUk": "Розкажіть про свято чи традицію вашої рідної країни.",
+      "ask": [
+       "Når feirer dere den?",
+       "Hva gjør dere den dagen?",
+       "Hva spiser dere?",
+       "Feirer du den i Norge også?"
+      ],
+      "prepSec": 60,
+      "speakSec": 150,
+      "minWords": 50,
+      "keywords": [
+       "feirer",
+       "tradisjon",
+       "familie",
+       "spiser",
+       "Norge"
+      ],
+      "model": "Jeg vil fortelle om nyttår, fordi det er den viktigste høytiden i familien min. Vi feirer det om kvelden den trettiførste desember. Hele familien samles hjemme hos besteforeldrene mine, og vi lager mye mat. Vi spiser salater, kjøtt og kaker, og barna får gaver. Klokka tolv skåler vi og ønsker hverandre godt nytt år. I Norge feirer vi også nyttår, men det er annerledes. Her er vi bare fire personer, så vi inviterer ofte venner. Det er koselig, men jeg savner den store familien min.",
+      "modelRu": "Я хочу рассказать о Новом годе, потому что это самый важный праздник в моей семье. Мы празднуем его вечером тридцать первого декабря. Вся семья собирается у бабушки с дедушкой, мы готовим много еды. Мы едим салаты, мясо и торты, а дети получают подарки. В двенадцать часов мы поднимаем бокалы и поздравляем друг друга с Новым годом. В Норвегии мы тоже отмечаем Новый год, но по-другому. Здесь нас всего четверо, поэтому мы часто приглашаем друзей. Это уютно, но я скучаю по своей большой семье."
+     },
+     {
+      "id": "m2",
+      "kind": "samtale",
+      "level": "A2",
+      "prompt": "Tenk deg at du og en venn skal planlegge en tur sammen i helga. Fortell hva du foreslår, og forklar hvorfor.",
+      "promptRu": "Представьте, что вы с другом планируете вместе поехать куда-нибудь на выходных. Расскажите, что вы предлагаете, и объясните почему.",
+      "promptUk": "Уявіть, що ви з другом плануєте разом кудись поїхати на вихідних. Розкажіть, що ви пропонуєте, і поясніть чому.",
+      "ask": [
+       "Hvor vil du dra?",
+       "Hvordan skal dere reise?",
+       "Hva må dere ta med?",
+       "Hva gjør dere hvis det regner?"
+      ],
+      "prepSec": 60,
+      "speakSec": 150,
+      "minWords": 50,
+      "keywords": [
+       "foreslår",
+       "tur",
+       "buss",
+       "ta med",
+       "regner"
+      ],
+      "model": "Jeg foreslår at vi tar en dagstur til en øy i fjorden. Det går en båt fra sentrum klokka ni, og turen tar bare en halvtime. På øya kan vi gå tur langs stranda og grille. Vi må ta med matpakke, vann, pølser og gode sko. Jeg synes det er en fin idé fordi det ikke koster mye, og vi kommer oss ut av byen. Hvis det regner, kan vi heller gå på museum og drikke kaffe på en kafé etterpå.",
+      "modelRu": "Я предлагаю съездить на день на остров во фьорде. Из центра в девять часов отходит катер, плыть всего полчаса. На острове можно погулять вдоль пляжа и пожарить что-нибудь на гриле. Нужно взять с собой бутерброды, воду, сосиски и удобную обувь. Мне кажется, это хорошая идея, потому что это недорого и мы выберемся из города. Если пойдёт дождь, можно вместо этого сходить в музей, а потом выпить кофе в кафе."
+     },
+     {
+      "id": "m3",
+      "kind": "mening",
+      "level": "B1",
+      "prompt": "Noen mener at alle som flytter til Norge, bør lære norsk før de begynner å jobbe. Hva mener du? Begrunn svaret ditt.",
+      "promptRu": "Некоторые считают, что все, кто переезжает в Норвегию, должны выучить норвежский, прежде чем начать работать. Что вы думаете? Обоснуйте свой ответ.",
+      "promptUk": "Дехто вважає, що всі, хто переїжджає до Норвегії, мають вивчити норвезьку, перш ніж почати працювати. Що ви думаєте? Обґрунтуйте свою відповідь.",
+      "ask": [
+       "Hvorfor mener du det?",
+       "Kan du gi et eksempel fra ditt eget liv?",
+       "Hva er fordelene og ulempene?",
+       "Hva kan arbeidsgiverne gjøre?"
+      ],
+      "prepSec": 60,
+      "speakSec": 180,
+      "minWords": 70,
+      "keywords": [
+       "mener",
+       "fordi",
+       "språk",
+       "jobb",
+       "på den andre siden"
+      ],
+      "model": "Jeg er delvis enig. Det er klart at norsk er viktig. Hvis man kan språket, er det lettere å forstå kollegene, å følge reglene og å bli en del av samfunnet. På den andre siden tar det lang tid å lære et nytt språk, og mange trenger penger med en gang. Jeg begynte selv å jobbe på et lager etter et halvt år i Norge. Der lærte jeg mye norsk fordi jeg snakket med kollegene hver dag. Derfor tror jeg at det beste er å kombinere jobb og norskkurs. Arbeidsgiverne kan også hjelpe, for eksempel ved å gi ansatte tid til å gå på kurs.",
+      "modelRu": "Я частично согласна. Конечно, норвежский важен. Если знаешь язык, легче понимать коллег, соблюдать правила и стать частью общества. С другой стороны, выучить новый язык — долгое дело, а деньги многим нужны сразу. Я сама начала работать на складе через полгода после переезда в Норвегию. Там мой норвежский сильно улучшился, потому что каждый день разговаривала с коллегами. Поэтому я думаю, что лучше всего совмещать работу и курсы норвежского. Работодатели тоже могут помочь, например, давая сотрудникам время на курсы."
+     }
+    ]
+   }
+  }
+ ]
+}

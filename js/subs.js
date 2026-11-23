@@ -13,8 +13,21 @@
  * ✈️ Видео авторов из Telegram (Subs.openStream({ kind: 'tg' })): поток идёт через мост (HTTP Range, js/tgvideo.js);
  * субтитров нет — их создаёт NB-Whisper, звук для распознавания и для карточек мост отдаёт кусками (ffmpeg → PCM 16 кГц),
  * так что у карточки есть настоящий голос автора. 🔎 «Найти слова в кадре» — текст, впечатанный в видео (js/frameocr.js).
+ * 📝 «Надписи в кадре» (Ink): пока нет субтитров, надписи, впечатанные в картинку (титры, название), читаются сами
+ * и переводятся — строкой «📝 В кадре» на видео и в списке строк (из неё тоже можно сделать карточку).
+ * 🎤 «Бегущая строка» (Kar / KEnv): слово загорается, когда его произносят, — точное время из субтитров, иначе по звуку
+ * (паузы речи), иначе по слогам; «⏱ Сдвиг слов» ±1 с для каждого видео. По умолчанию выключена.
+ * 🎤📺 Она же на телевизоре: через мост — WebVTT, где строка разбита на реплики по словам (karSteps: жирное звучащее
+ * слово или слова по одному), в системном полноэкранном плеере iPhone — так же (NativeSubs), на нашей странице для ТВ
+ * (receiver.html, после регистрации Cast App ID) — настоящая подсветка по времени слов. Выключена — файл прежний.
+ * 🌐 Перевод «Под строкой / По словам / Размыт / Скрыт» меняется и во время просмотра: строка под видео, «Aa Вид субтитров»,
+ * кнопка «Aa Перевод: …» на видео (на весь экран — маленькое окно с выбором). 🎬 Титры (Cred): имена — как написаны
+ * (+ примерное чтение по-русски), должности — по словарику; всё собирается в блок «🎬 Титры» под списком строк.
+ * 🎵 Песни без субтитров (Song): там, где субтитров нет, слова распознаются по звуку (NB-Whisper на устройстве);
+ * не норвежский и не английский — «Звучит песня на шведском языке». 🇬🇧 Английские строки переводятся с английского («EN»).
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
   const MEDIA_EXT = /\.(mp4|m4v|mov|webm|mkv|ogv|mp3|m4a|m4b|aac|wav|ogg|oga|opus|flac)$/i;
   const SUB_EXT = /\.(srt|vtt|webvtt|ass|ssa)$/i;
   const AUDIO_EXT = /\.(mp3|m4a|m4b|aac|wav|ogg|oga|opus|flac)$/i;
@@ -34,6 +47,18 @@
   /* 🐢 playback speed for learners: three slow steps, normal, a little faster, fast (kept on this device) */
   const RATES = [[0.6, 'очень медленно'], [0.75, 'медленно'], [0.9, 'чуть медленнее'], [1, 'обычно'], [1.15, 'чуть быстрее'], [1.3, 'быстро']];
   const RATE_KEY = 'nk-rate';
+  /* 🌐 how the translation is shown — one choice everywhere: the row under the video, «Aa Вид субтитров», the «Aa» button
+   * on the video (full screen); applied at once, the video keeps playing, remembered on this device */
+  const TR_MODES = [
+    ['show', 'Под строкой', 'Перевод всей фразы — отдельной строкой под субтитром', '≡'],
+    ['word', 'По словам', 'После каждого слова — его перевод в скобках, по смыслу фразы', '(а)'],
+    ['blur', 'Размыт', 'Перевод размыт — наведите или нажмите на него, чтобы прочитать', '░'],
+    ['hide', 'Скрыт', 'Только норвежский текст — проверьте себя', '✕'],
+  ];
+  const trName = m => (TR_MODES.find(x => x[0] === m) || TR_MODES[0])[1];
+  /** 📍 the place whose voice speaks here (🔊 Голоса → «Где какой голос»): video — or the news / radio, a Telegram author,
+   *  when the player was opened from there */
+  const voicePlace = () => { let p = ''; try { p = window.Voices ? Voices.place('video') : ''; } catch (e) { p = ''; } return p === 'news' || p === 'telegram' ? p : 'video'; };
   const savedRate = () => { const r = +localStorage.getItem(RATE_KEY); return RATES.some(([x]) => x === r) ? r : 1; };
   const rateLabel = r => (RATES.find(([x]) => x === r) || [r, ''])[1];
   const rateNum = r => String(r).replace('.', ',') + '×';
@@ -78,6 +103,44 @@
       .split('\n').map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' ')
       .replace(/\s+/g, ' ').trim();
   }
+  /** 🎤 karaoke times inside a cue: raw text where every timing mark was replaced by a private-use character
+   *  (U+E000 + k → times[k]) → { text (the same as cleanCue gives), wt: the start of each word (NaN: not marked) } */
+  function markTimes(raw, times, start) {
+    const s = cleanCue(raw);
+    let txt = '', t = start, sp = false;
+    const at = [];   // the time of each character of txt
+    for (const ch of s) {
+      const c = ch.codePointAt(0);
+      if (c >= 0xE000 && c < 0xE000 + times.length) { t = times[c - 0xE000]; continue; }
+      if (/\s/.test(ch)) { sp = !!txt; continue; }
+      if (sp) { txt += ' '; at.push(t); sp = false; }
+      txt += ch; at.push(t);
+    }
+    const wt = []; let i = 0;
+    txt.split(' ').forEach(tok => { if (/\p{L}/u.test(tok)) wt.push(at[i]); i += tok.length + 1; });
+    return { text: txt, wt };
+  }
+  /** WebVTT cue text with <00:00:01.250> marks (karaoke, YouTube's own VTT) → { text, wt } or null */
+  function vttWordTimes(body, start) {
+    if (!/<\d{1,2}:\d{2}(?::\d{2})?[.,]\d{1,3}>/.test(body)) return null;
+    const times = [];
+    const raw = body.replace(/<(\d{1,2}:\d{2}(?::\d{2})?[.,]\d{1,3})>/g, (m, ts) => { const v = parseTime(ts.replace(',', '.')); if (!isFinite(v) || times.length > 6000) return ''; times.push(v); return String.fromCharCode(0xE000 + times.length - 1); });
+    const r = markTimes(raw, times, start);
+    return r.wt.some(x => x > start + 0.01) ? r : null;
+  }
+  /** ASS karaoke {\k25}{\kf40}{\ko30} (centiseconds per syllable) → { text, wt } or null */
+  function assWordTimes(body, start) {
+    if (!/\{[^}]*\\[kK][fo]?\d/.test(body)) return null;
+    const times = []; let cum = 0;
+    const raw = body.replace(/\{([^}]*)\}/g, (m, inner) => {
+      const ks = [...inner.matchAll(/\\[kK][fo]?(\d+)/g)];
+      if (!ks.length) return m;
+      times.push(start + cum);
+      ks.forEach(k => { cum += (+k[1] || 0) / 100; });
+      return String.fromCharCode(0xE000 + times.length - 1);
+    });
+    return markTimes(raw, times, start);
+  }
   /** SRT and WebVTT: every "start --> end" line, then the text lines up to an empty line (VTT cue settings ignored) */
   function parseTimed(text) {
     const lines = text.replace(/\r\n?/g, '\n').split('\n');
@@ -90,7 +153,11 @@
       while (i + 1 < lines.length && lines[i + 1].trim() !== '' && !/-->/.test(lines[i + 1])) body.push(lines[++i]);
       // a cue number of the NEXT cue stuck without an empty line (broken SRT): drop a trailing bare number
       if (body.length > 1 && /^\d+$/.test(body[body.length - 1].trim()) && /-->/.test(lines[i + 1] || '')) body.pop();
-      if (isFinite(start) && isFinite(end)) out.push({ start, end: Math.max(end, start + 0.3), text: cleanCue(body.join('\n')) });
+      if (isFinite(start) && isFinite(end)) {
+        const c = { start, end: Math.max(end, start + 0.3), text: cleanCue(body.join('\n')) };
+        const k = vttWordTimes(body.join('\n'), start); if (k && k.text === c.text) c.wt = k.wt; // 🎤 exact word times
+        out.push(c);
+      }
     }
     return out;
   }
@@ -113,7 +180,11 @@
       const start = parseTime(get('start')), end = parseTime(get('end'));
       // drawings (\p1) and karaoke signs are not speech
       if (/\\p[1-9]/.test(body)) return;
-      if (isFinite(start) && isFinite(end)) out.push({ start, end: Math.max(end, start + 0.3), text: cleanCue(body) });
+      if (isFinite(start) && isFinite(end)) {
+        const c = { start, end: Math.max(end, start + 0.3), text: cleanCue(body) };
+        const k = assWordTimes(body, start); if (k && k.text === c.text) c.wt = k.wt; // 🎤 karaoke syllables → word times
+        out.push(c);
+      }
     });
     return out;
   }
@@ -380,7 +451,7 @@
   }
   function lineNew(l) {
     if (skipTr(l)) return new Set();
-    if (l._new === undefined) { const t = String(l.text).split(/\s+/).filter(w => /\p{L}/u.test(w)); l._new = new Set(t.map((w, k) => isNewWord(w, k) ? k : -1).filter(k => k >= 0)); }
+    if (l._new === undefined) { const t = String(l.text).split(/\s+/).filter(w => /\p{L}/u.test(w)), en = enLine(l); l._new = new Set(t.map((w, k) => (!en || (LID() && LangId.isNoWord(w, st.known))) && isNewWord(w, k) ? k : -1).filter(k => k >= 0)); }
     return l._new;
   }
 
@@ -399,12 +470,18 @@
   const learnName = () => (LID() ? LangId.name(LangId.learn()) : 'норвежский');
   /** o: { asr (recognized by the app), music (a hint from the sound), prev ({lang} of the line just before) } */
   function tagLine(l, o = {}) {
-    if (!LID() || !l || l.langOk) return l;
+    if (!LID() || !l || l.langOk || l.song) return l; // 🎵 a song line keeps the language decided when it was heard
     const r = LangId.detect(l.text, Object.assign({}, o, { music: !!(o.music || l.musicA) }));
     l.lang = r.lang; l.music = r.music; l.noWords = r.noWords; l.langWhy = r.why; l._new = undefined;
     return l;
   }
-  function skipTr(l) { return !!l && !l.langOk && (!!l.noWords || (!!l.lang && !!LID() && !LangId.translatable(l.lang))); }
+  /* 🇬🇧 English is a source language too: an English line (a teacher explaining Norwegian in English, an English song)
+   * is translated from English, marked «EN»; the Norwegian words in it stay tappable (cards are made from them) */
+  const enLine = l => !!l && !l.langOk && !l.noWords && l.lang === 'en';
+  const srcOf = l => (enLine(l) ? 'en' : 'no');
+  /** the words of this line can get «(перевод)» after them (Norwegian lines only) */
+  const glOk = l => !!l && !l.noWords && !skipTr(l) && !enLine(l);
+  function skipTr(l) { return !!l && !l.langOk && (!!l.noWords || (!!l.lang && l.lang !== 'en' && !!LID() && !LangId.translatable(l.lang))); }
   /** the line before (≤ 15 s): a foreign song goes on in its short leftovers («Oh baby») */
   const prevOf = (L, k) => { const p = L[k - 1]; return p && L[k].start - p.end < 15 && !p.noWords ? { lang: p.lang } : null; };
   /** stream lines (NRK / YouTube cues): tag them all; music lines in a row become one */
@@ -418,6 +495,11 @@
   }
   function tagHtml(l, i) {
     if (!l || !LID()) return '';
+    if (l.songX) return `<span class="sl-tag mus song-x" title="Приложение услышало ${l.songSpeech ? 'речь' : 'пение'} не на норвежском и не на английском — слова не показываем и не переводим">${l.songSpeech ? `🗣 Говорят ${LangId.nameIn(l.songX)}` : `🎵 Звучит песня ${LangId.nameIn(l.songX)}`}</span>`;
+    const song = !l.song ? '' : l.songSpeech
+      ? `<span class="sl-tag song" title="Здесь нет субтитров — слова приложение распознало по звуку, в них возможны ошибки">🗣 Без субтитров (распознано по звуку, может быть неточно):</span> `
+      : `<span class="sl-tag song" title="Здесь нет субтитров — слова песни приложение распознало по звуку, в пении их легко расслышать неверно">🎵 Песня (распознано по звуку, может быть неточно):</span> `;
+    if (enLine(l)) return song + `<span class="sl-tag en" title="Строка на английском — переводим с английского. Норвежские слова в ней выделены: нажмите на слово — перевод и карточка">EN</span> `;
     if (l.noWords) return `<span class="sl-tag mus" title="Здесь звучит музыка без слов — переводить нечего">🎵 Музыка</span>`;
     const code = LangId.code(l.lang), nm = LangId.name(l.lang);
     if (skipTr(l)) {
@@ -426,7 +508,7 @@
     }
     const near = !l.langOk && l.lang && l.lang !== LangId.learn()
       ? `<span class="sl-tag near" title="Похоже, это ${nm} — он очень близок к языку, который вы учите, поэтому строку переводим">${code}</span> ` : '';
-    return near + (l.music ? `<span class="sl-tag song" title="Песня — переводим, как обычную речь">♪ песня</span> ` : '');
+    return song + near + (l.music && !l.song ? `<span class="sl-tag song" title="Песня — переводим, как обычную речь">♪ песня</span> ` : '');
   }
   /** «это норвежский — перевести»: this line is translated and glossed after all */
   function langOk(i) {
@@ -434,7 +516,7 @@
     l.langOk = true; l._trFail = false; l._new = undefined; l._gl = false;
     redrawLine(i); musicHint();
     if (st.stream && st.stream.live) liveTrSoon();
-    else translate([i], true).then(() => { if (st) { const k = st.lines.indexOf(l); if (k >= 0) redrawLine(k); } });
+    else translate([i]);
     if (st.trMode === 'word') glossNear(i);
   }
   /** 🎵 «Сейчас музыка…»: the newest line (live / recognized ahead) or the current one is music / a foreign song */
@@ -446,38 +528,166 @@
   }
   function trByOf(l) {
     if (l.ruFile) return null;
-    const c = window.Translators && Translators._trCache && Translators._trCache.get('no|ru|' + l.text);
+    const c = window.Translators && Translators._trCache && Translators._trCache.get(srcOf(l) + '|ru|' + l.text);
     return c ? [c.id] : (Study._exBy && Study._exBy.length ? Study._exBy.slice() : ['google']);
   }
-  /** translate these lines (cached for good: Study's 's:' cache) */
-  async function translate(idx, quiet) {
-    const need = [...new Set(idx.map(i => st.lines[i]).filter(l => l && !l.ruFile && trOf(l) === undefined).map(l => l.text))];
-    if (!need.length) return true;
-    for (let k = 0; k < need.length; k += 250) {
-      await Study.translateUnits(need.slice(k, k + 250), []);
-      if (!st) return false;
+  /* ---------- 🌐 the lines' translation: in batches, the lines around the playing one first, cached for good ----------
+   * A whole programme is never sent at once (that is what made Google refuse the address): the line playing now and
+   * the next ~30 go first in ONE request, the rest follow in the background in parts of 60 with a pause between them —
+   * only while Google (or a translator with a key) translates; while it rests, the spares (Mozhi, MyMemory, the
+   * connected neural network — js/translators.js) translate just the lines around the playing one, so their small
+   * free allowances last. Every translation goes into Study's 's:' cache (localStorage): the same programme opened
+   * again costs no request at all.
+   * A line waiting for its translation shows a soft shimmer; a line nobody could translate shows only the original,
+   * and ONE calm line under the list says the translation will come a little later (with «🔄 Перевести снова»).
+   * It is tried again by itself after a pause (1.5 → 3 → 6 … ≤ 10 minutes). */
+  const TR_NEAR = 30, TR_PART = 60;
+  const trWait = ms => new Promise(r => setTimeout(r, ms));
+  const trQ = () => st.tq || (st.tq = { run: false, t: 0, retryT: 0, back: 0, all: false });
+  /** this line still needs a translation (and is not waiting for its next try after a failure) */
+  function trNeed(l) { return !!l && !l.ruFile && !skipTr(l) && trOf(l) === undefined && !(l._trFail && Date.now() < l._trFail); }
+  /** the background (the whole programme) may go on: Google translates (itself or through the Mac bridge), or a
+   *  translator with a key; «🌐 Перевести все» asks for it anyway */
+  function trBgOk() {
+    const T = window.Translators; if (!T) return false;
+    return trQ().all || !T.gResting() || T.dictOrder().some(id => id === 'deepl' || id === 'microsoft');
+  }
+  /** the next part to translate: { idx, near } or null */
+  function trPick() {
+    const L = st.lines, n = L.length, c = Math.max(0, st.cur), live = st.stream && st.stream.live;
+    const ids = [], add = (i, max) => { if (ids.length < max && trNeed(L[i]) && !ids.includes(i)) ids.push(i); };
+    // urgent: the line now (or the newest lines on air) and the next ones — fetched with a margin of ~30 lines
+    let urgent = false;
+    for (let i = Math.max(0, c - 2); i < Math.min(n, c + 10) && !urgent; i++) urgent = trNeed(L[i]);
+    if (live) for (let i = Math.max(0, n - 12); i < n && !urgent; i++) urgent = trNeed(L[i]);
+    if (urgent) {
+      if (live) for (let i = Math.max(0, n - 12); i < n; i++) add(i, 40);
+      for (let i = Math.max(0, c - 3); i < Math.min(n, c + TR_NEAR); i++) add(i, 40);
+      return ids.length ? { idx: ids, near: true } : null;
     }
-    if (Study._lastFail && !quiet) { Study.failModal(() => translate(idx)); return false; }
-    return true;
+    if (!trBgOk()) return null;
+    for (let i = c; i < n; i++) add(i, TR_PART);
+    for (let i = 0; i < c; i++) add(i, TR_PART);
+    return ids.length ? { idx: ids, near: false } : null;
   }
-  /** quietly translate lines ahead of what is playing / shown (3 at a time: no «please wait» card) */
-  async function prefetch() {
-    if (!st || st.trBusy || hasRuFile() || !st.lines.length) return;
-    st.trBusy = true;
+  /** translate these lines in one go (several requests only for a long list) → how many are still without one */
+  async function trBatch(idx) {
+    const me = st, L = me.lines;
+    const need = idx.filter(i => trNeed(L[i]) || (L[i] && L[i]._trFail && trOf(L[i]) === undefined && !L[i].ruFile && !skipTr(L[i])));
+    // 🇬🇧 each line from its own language: Norwegian lines and English lines go in separate requests
+    const groups = {};
+    need.forEach(i => { const f = srcOf(L[i]); (groups[f] = groups[f] || new Set()).add(L[i].text); });
+    const texts = [].concat(...Object.values(groups).map(g => [...g]));
+    if (!texts.length) return 0;
+    need.forEach(i => { L[i]._trWait = true; redrawLine(i); });
+    // lines are drawn as their translations arrive (MyMemory answers line by line), unless someone else listens
+    const T = Translators, mine = !T.onPut;
+    let drawT = 0;
+    if (mine) T.onPut = () => { if (drawT || st !== me) return; drawT = setTimeout(() => { drawT = 0; if (st !== me) return; need.forEach(i => { if (L[i]._trWait && trOf(L[i]) !== undefined) { L[i]._trWait = false; redrawLine(i); } }); }, 120); };
+    const res = { out: [], by: [], missing: 0, error: '' };
     try {
-      for (let guard = 0; guard < 40 && st; guard++) {
-        const from = Math.max(0, st.cur - 2), to = Math.min(st.lines.length, Math.max(st.cur, 0) + 30);
-        const todo = [];
-        for (let i = from; i < to && todo.length < 3; i++) if (trOf(st.lines[i]) === undefined && !st.lines[i]._trFail) todo.push(i);
-        if (!todo.length) break;
-        await Study.translateUnits(todo.map(i => st.lines[i].text), []);
-        if (!st) return;
-        todo.forEach(i => { if (trOf(st.lines[i]) === undefined) st.lines[i]._trFail = true; redrawLine(i); });
-        if (Study._lastFail) break;
+      for (const [from, g] of Object.entries(groups)) {
+        const part = [...g];
+        let r; try { r = await T.translateMany(part, from, 'ru', { quiet: true, place: trPlace() }); } catch (e) { r = { out: [], by: [], missing: part.length, error: '' }; }
+        part.forEach((t, k) => res.out.push(r.out && r.out[k] || ''));
+        res.by.push(...(r.by || [])); res.missing += r.missing || 0; res.error = res.error || r.error || '';
+        if (st !== me) break;
       }
-    } catch (e) { /* the explicit button shows the reason */ }
-    if (st) { st.trBusy = false; drawNow(); }
+    } finally { if (mine && T.onPut) T.onPut = null; clearTimeout(drawT); }
+    // kept for good (Study's 's:' cache — the same as «По предложениям»); no answer = not saved, tried again later
+    if (window.Study && Study.exCache) {
+      const c = Study.exCache();
+      texts.forEach((t, k) => { const v = res.out && res.out[k]; if (v) c['s:' + t] = String(v).trim(); });
+      if (res.by && res.by.length) Study._exBy = [...new Set([...(Study._exBy || []), ...res.by])];
+      try { Study.exSave(); } catch (e) { /* storage full — the session cache still has them */ }
+    }
+    if (st !== me) return 0;
+    const q = trQ();
+    let left = 0;
+    need.forEach(i => {
+      const l = L[i]; if (!l) return;
+      l._trWait = false;
+      if (trOf(l) === undefined) { left++; l._trFail = Date.now() + Math.min(600000, 90000 * Math.pow(2, q.back)); } else l._trFail = 0;
+      redrawLine(i);
+    });
+    if (left && left === need.length) q.back = Math.min(q.back + 1, 3); else if (!left) q.back = 0;
+    trStat();
+    return left;
   }
+  /** 🌐 where these translations belong — the «кто переводит» badge and the preferred translator are per place */
+  function trPlace() {
+    const S = st && st.stream;
+    return !S ? 'subs:file' : S.kind === 'youtube' ? 'subs:youtube' : S.kind === 'tg' ? 'subs:tg' : S.radio ? 'subs:radio' : 'subs:nrk';
+  }
+  /** ONE «кто переводит» badge at the top of the window (js/trnotice.js) — only while the app translates the lines itself */
+  function trBadge() {
+    if (!st || !st.m || !window.TrBadge) return;
+    const head = st.m.$('.modal-head'); if (!head) return;
+    if (st.stage === 'player' && !hasRuFile()) TrBadge.mount(head, { place: trPlace() }); else TrBadge.unmount(head);
+  }
+  /** start (or wake) the translation of the lines; ms: a small delay to gather several calls into one */
+  function trKick(ms = 120) {
+    if (!st || !st.m || hasRuFile() || !window.Translators) return;
+    const q = trQ();
+    clearTimeout(q.t);
+    q.t = setTimeout(() => { q.t = 0; trRun(); }, ms);
+  }
+  async function trRun() {
+    const me = st; if (!me || hasRuFile()) return;
+    const q = trQ(); if (q.run) { q.again = true; return; }
+    q.run = true; q.again = false;
+    try {
+      for (let guard = 0; guard < 400 && st === me; guard++) {
+        const pick = trPick();
+        if (!pick) { if (q.again) { q.again = false; continue; } break; }
+        const left = await trBatch(pick.idx);
+        if (st !== me) return;
+        if (left === pick.idx.length) break; // nobody answered: a pause, then by itself again (below)
+        if (!pick.near) await trWait(1500); // the background goes gently: a pause between parts
+      }
+      if (st !== me) return;
+      if (q.all && !st.lines.some(l => trNeed(l))) q.all = false;
+      // lines still waiting for their next try → wake up when the first of them may be asked again
+      clearTimeout(q.retryT);
+      let next = Math.min(...st.lines.filter(l => l._trFail && trOf(l) === undefined && !skipTr(l)).map(l => l._trFail));
+      // Google's pause ends → the rest of the programme goes on by itself (even when the video stands still)
+      if (Translators.gResting() && st.lines.some(l => trNeed(l))) next = Math.min(next, Translators._gCoolUntil + 1000);
+      if (isFinite(next)) q.retryT = setTimeout(() => { if (st === me) trKick(0); }, Math.max(5000, next - Date.now() + 200));
+    } finally { q.run = false; if (st === me) trStat(); }
+  }
+  /** «🔄 Перевести снова»: every line without a translation is tried at once (Google's own pause is kept) */
+  function trRetry(all) {
+    if (!st) return;
+    const q = trQ(); q.back = 0; if (all) q.all = true;
+    st.lines.forEach((l, i) => { if (l._trFail) { l._trFail = 0; redrawLine(i); } });
+    // Google: one more try only near the end of its pause (asking earlier would only make the pause longer)
+    if (Translators.gCooling() && Translators.gRestMin() <= 4) Translators.gUncool();
+    ['mozhi', 'mymemory', 'deepl', 'microsoft'].forEach(id => { if (Translators.trRestMap && (Translators.trRestMap()[id] || 0) - Date.now() < 30 * 60000) Translators.trUnrest(id); });
+    trKick(0);
+  }
+  /** ONE calm line under the list: some lines are still without a translation — it will come a little later */
+  function trStat() {
+    if (!st || !st.m) return;
+    const el = st.m.$('[data-trstat]');
+    if (window.TrNotice && st.stream) { try { TrNotice.badge(); } catch (e) { /* the player is redrawn */ } }
+    if (!el) return;
+    const n = hasRuFile() ? 0 : st.lines.filter(l => l._trFail && trOf(l) === undefined && !skipTr(l)).length;
+    el.hidden = !n;
+    if (!n) { el.innerHTML = ''; return; }
+    const T = Translators, g = T.gRestMin();
+    el.innerHTML = `<span class="ts-ico" aria-hidden="true">⏳</span><span class="ts-txt">Перевод ${n === 1 ? 'одной строки' : `${n} ${U.plural(n, ['строки', 'строк', 'строк'])}`} появится чуть позже: ${g ? `Google попросил сделать паузу примерно на ${g} ${U.plural(g, ['минуту', 'минуты', 'минут'])}, а запасные переводчики сейчас не отвечают` : 'переводчики сейчас не отвечают'}. Пока — только норвежский текст.</span>
+      <button type="button" class="btn sm" data-trretry>🔄 Перевести снова</button>
+      <button type="button" class="linklike tiny" data-trpick>другой переводчик…</button>`;
+  }
+  /** translate these lines now (a line marked «это норвежский», everything for the TV) → true when all have one */
+  async function translate(idx) {
+    const me = st;
+    const need = idx.filter(i => st.lines[i] && !st.lines[i].ruFile && !skipTr(st.lines[i]) && trOf(st.lines[i]) === undefined);
+    for (let k = 0; k < need.length && st === me; k += TR_PART) await trBatch(need.slice(k, k + TR_PART));
+    return st === me && need.every(i => trOf(st.lines[i]) !== undefined);
+  }
+  /** the lines around what is playing / shown (called on every line change: cheap when they are there) */
+  function prefetch() { if (st && !hasRuFile() && st.lines.length) trKick(); }
 
   /* =================== HTML =================== */
   function wordsHtml(l, i) {
@@ -485,7 +695,20 @@
     if (skipTr(l)) return tag + (l.noWords ? '' : `<span class="sl-xltext">${U.esc(l.text)}</span>`);
     return tag + wordsHtml0(l, i);
   }
+  /** 🇬🇧 an English line: its English words are plain (they still light up with «Бегущая строка»), the Norwegian ones
+   *  stay tappable words — highlighted, «new» ones underlined as usual */
+  function enWordsHtml(l, i) {
+    const nw = st.known ? lineNew(l) : new Set();
+    let k = -1;
+    return String(l.text).split(/(\s+)/).map(tok => {
+      if (!/\p{L}/u.test(tok)) return U.esc(tok);
+      k++;
+      if (LID() && LangId.isNoWord(tok, st.known)) return `<span class="sw no-in-en${nw.has(k) ? ' new' : ''}" data-w="${U.esc(bare(tok))}" data-li="${i}" data-wi="${k}" title="Норвежское слово — нажмите: перевод и карточка">${U.esc(tok)}</span>`;
+      return `<span class="sw-en" data-wi="${k}">${U.esc(tok)}</span>`;
+    }).join('');
+  }
   function wordsHtml0(l, i) {
+    if (enLine(l)) return enWordsHtml(l, i);
     const nw = st.known ? lineNew(l) : new Set();
     // «слово (перевод)»: each word followed by its Russian (the same glosses as on the cards; loaded around the current line)
     // meaning first: the words follow the line's translation (the one shown under it)
@@ -502,7 +725,7 @@
       const tip = r && r.how === 'guess' ? ` title="${U.esc(full + Study.GUESS_TIP)}"` : r && r.how === 'user' ? ' title="ваш перевод ✓"' : full ? ` title="${U.esc(r.g)}"` : '';
       // 🪜 opt-in: a new word of the user's current / next level (js/levels.js) — coloured by its level
       const lv = nw.has(k) && window.Levels && Levels.subsOn() ? Levels.hit(bare(tok)) : '';
-      return `<span class="sw${nw.has(k) ? ' new' : ''}${lv ? ' lv-hit lv-' + lv : ''}" data-w="${U.esc(bare(tok))}" data-li="${i}"${lv ? ` title="Слово уровня ${lv} — его нет в ваших карточках"` : ''}>${U.esc(tok)}</span>${g ? `<span class="wbw-ru sw-gl${cls}"${tip}>(${U.esc(g)}${r.how === 'guess' ? '?' : r.how === 'user' ? ' ✓' : ''})</span>` : ''}`;
+      return `<span class="sw${nw.has(k) ? ' new' : ''}${lv ? ' lv-hit lv-' + lv : ''}" data-w="${U.esc(bare(tok))}" data-li="${i}" data-wi="${k}"${lv ? ` title="Слово уровня ${lv} — его нет в ваших карточках"` : ''}>${U.esc(tok)}</span>${g ? `<span class="wbw-ru sw-gl${cls}" data-wi="${k}"${tip}>(${U.esc(g)}${r.how === 'guess' ? '?' : r.how === 'user' ? ' ✓' : ''})</span>` : ''}`;
     }).join('');
   }
   /**
@@ -528,10 +751,10 @@
         const order = [];
         for (let k = Math.max(0, f - 1); k < L.length; k++) order.push(k);
         for (let k = 0; k < Math.max(0, f - 1); k++) order.push(k);
-        const batch = order.filter(k => !L[k]._gl && !skipTr(L[k])).slice(0, ai ? 16 : 24);
+        const batch = order.filter(k => !L[k]._gl && glOk(L[k])).slice(0, ai ? 16 : 24);
         if (!batch.length) break;
-        const done = L.filter(l => l._gl).length, all = L.filter(l => !skipTr(l)).length;
-        glossProg(`⏳ ${ai ? AI.name() + ' переводит' : 'Перевожу'} слова по смыслу строки: ${Math.min(done, all)} из ${all}`);
+        const done = L.filter(l => l._gl && glOk(l)).length, all = L.filter(glOk).length;
+        glossProg(`${ai ? AI.name() + ' переводит' : 'Перевожу'} слова по смыслу строки: ${Math.min(done, all)} из ${all}`);
         // the whole line first: its translation is what the words follow
         const need = [...new Set(batch.map(k => L[k]).filter(l => !l.ruFile && trOf(l) === undefined).map(l => l.text))];
         if (need.length) await Study.translateUnits(need, [], { quiet: true });
@@ -552,17 +775,18 @@
   function trHtml(l) {
     if (skipTr(l)) return l.en ? `<span class="sl-en">${U.esc(l.en)}</span>` : '';
     const tr = trOf(l);
-    const ru = tr ? `<span class="sl-tr">(${U.esc(tr)})</span>` : hasRuFile() ? '' : `<span class="sl-tr wait">(${l._trFail ? '—' : '…'})</span>`;
+    // waiting: a soft shimmer; nobody could translate it yet: only the original (one calm line under the list says so)
+    const ru = tr ? `<span class="sl-tr">(${U.esc(tr)})</span>` : hasRuFile() || !l._trWait ? '' : '<span class="sl-tr wait" role="img" aria-label="перевод загружается"><i class="sl-shim"></i></span>';
     return ru + (l.en ? `<span class="sl-en">${U.esc(l.en)}</span>` : '');
   }
   function lineHtml(l, i) {
     const made = l._made ? ' made' : '', nw = !l._made && st.known && lineNew(l).size ? ' has-new' : '';
     const xl = skipTr(l) ? (l.noWords ? ' xl mus' : ' xl') : '';
-    return `<div class="subs-line${i === st.cur ? ' cur' : ''}${made}${nw}${xl}" data-i="${i}">
+    return `<div class="subs-line${i === st.cur ? ' cur' : ''}${made}${nw}${xl}${l.frame ? ' ink' : ''}${enLine(l) ? ' en' : ''}${l.song ? ' song' : ''}" data-i="${i}">
       <label class="sl-chk" title="Отметить строку"><input type="checkbox" data-chk="${i}"${st.checked.has(i) ? ' checked' : ''}></label>
       <button class="sl-time" data-play="${i}" title="Проиграть только эту строку">${tLabel(lineT(l, 'start'))}</button>
-      <div class="sl-body" data-play="${i}">${l.auto ? '<span class="sl-auto" title="Эту строку распознало приложение (в передаче нет субтитров) — в словах возможны ошибки">🤖</span> ' : ''}<span class="sl-no">${wordsHtml(l, i)}</span> ${trHtml(l)}</div>
-      <button class="icon-btn sm sl-add" data-add="${i}" ${xl ? 'disabled' : ''} title="${xl ? (l.noWords ? 'Музыка — карточку из неё не сделать' : `Строка не на языке, который вы учите, — карточку не делаем (если это ${learnName()} — нажмите «перевести»)`) : l._made ? 'Карточка уже есть — сделать ещё раз нельзя' : 'Строка → карточка (со звуком этой строки)'}">${l._made ? '✓' : '➕'}</button>
+      <div class="sl-body" data-play="${i}">${l.frame ? inkTag(l, true) + ' ' : ''}${l.auto && !l.song ? `<span class="sl-auto" title="Эту строку распознало приложение (в передаче нет субтитров) — в словах возможны ошибки">${BOT()}</span> ` : ''}<span class="sl-no">${wordsHtml(l, i)}</span> ${trHtml(l)}</div>
+      <button class="icon-btn sm sl-add" data-add="${i}" ${xl ? 'disabled' : ''} title="${xl ? (l.noWords ? 'Музыка — карточку из неё не сделать' : `Строка не на языке, который вы учите, — карточку не делаем (если это ${learnName()} — нажмите «перевести»)`) : l._made ? 'Карточка уже есть — сделать ещё раз нельзя' : enLine(l) ? 'Норвежские слова этой английской строки → карточка (строка — как пример)' : 'Строка → карточка (со звуком этой строки)'}">${l._made ? '✓' : '➕'}</button>
     </div>`;
   }
 
@@ -604,21 +828,29 @@
           <span class="glass-tag"><span data-glass-peek title="Потяните — сдвинуть стекло; удерживайте — увидеть оригинал">▭ Надписи видео закрыты · 👁 удерживайте</span><button type="button" data-glass-off title="Убрать стекло" aria-label="Убрать стекло">✕</button></span>
         </div></div>
         <div class="subs-ov" data-ov aria-live="polite"></div>
+        <div class="subs-cred" data-cred hidden aria-live="polite"></div>
+        <button type="button" class="subs-fsbtn" data-k="full" data-fsbtn title="На весь экран — вместе с субтитрами и переводом (клавиша F или двойной щелчок по видео)" aria-label="На весь экран">⛶</button>
         <div class="subs-ovbar">
           <button class="media-btn sm" data-k="prev" title="Предыдущая строка (←)">${ico('prev')}</button>
           <button class="media-btn sm main" data-k="toggle" title="Пауза / продолжить (пробел)">${UI.icon('play', 18)}</button>
           <button class="media-btn sm" data-k="next" title="Следующая строка (→)">${ico('next')}</button>
           <button class="btn sm subs-loop${st.loop ? ' on' : ''}" data-k="loop" title="Повторять строку (R)">🔁</button>
-          <button class="btn sm" data-k="trcycle" title="Перевод: виден / размыт / скрыт">Aa ${st.trMode === 'show' ? 'RU' : st.trMode === 'blur' ? 'RU ░' : 'RU ✕'}</button>
+          <button class="btn sm trc-btn" data-k="trpop" aria-haspopup="true" aria-expanded="false" title="Как показывать перевод: под строкой, по словам, размыт или скрыт">Aa <span class="trc-l">Перевод:</span> <b class="trc-t" data-trname>${trName(st.trMode).toLowerCase()}</b> <span aria-hidden="true">▾</span></button>
+          ${Kar.btn('ov-kar')}
           ${rateSel('on-dark')}
           <button class="btn sm glass-btn" data-k="glass" aria-pressed="false" title="Закрыть надписи, впечатанные в видео, матовым стеклом">▭</button>
+          ${inkBtn(true)}
           <button class="btn sm" data-k="subview" title="Вид субтитров: размер, цвета">Aa</button>
+          ${bgBtn()}
           <span class="grow"></span>
           <button class="btn sm tv-btn" data-k="tv" title="Подключить к телевизору" aria-label="Подключить к телевизору">${UI.TV_SVG(18)}</button>
           <button class="btn sm primary" data-k="full">⤡ Выйти из полного экрана</button>
         </div>
       </div>`;
   }
+  /** 🔲 the dark strip under OUR lines on the video — one switch (the same setting as in «Aa Вид субтитров» and on the TV) */
+  const bgBtn = () => { const on = !!tvPrefs().bg;
+    return `<button type="button" class="btn sm bg-btn${on ? ' on' : ''}" data-k="ovbg" aria-pressed="${on}" title="Подложка — тёмная полоса под нашими субтитрами на видео (включить / выключить). Без неё буквы с чёрной обводкой. Надписи, впечатанные в само видео, закрывает отдельная кнопка «▭ Закрыть надписи в видео»">🔲 Подложка</button>`; };
   /** under the video: layout (video left / right), full screen, TV */
   function viewBar() {
     const lay = layout();
@@ -627,10 +859,13 @@
           <button data-lay="left" class="${lay === 'left' ? 'active' : ''}" title="Видео слева, субтитры справа">◧ Видео слева</button>
           <button data-lay="right" class="${lay === 'right' ? 'active' : ''}" title="Видео справа, субтитры слева">Видео справа ◨</button>
         </span>
-        ${rateSel()}
         <button class="btn sm glass-btn ovwin-btn" data-k="ovwin" aria-pressed="true" title="Строка с переводом прямо на видео (как в YouTube) — включить / выключить">💬 Субтитры на видео</button>
+        ${Kar.btn('kar-first')}${Kar.mini()}
+        ${rateSel()}
         <button class="btn sm sv-btn" data-k="subview" title="Размер текста, размер перевода слов, цвета — на экране и на телевизоре">Aa Вид субтитров</button>
+        ${bgBtn()}
         <button class="btn sm glass-btn" data-k="glass" aria-pressed="false" title="В видео впечатаны свои надписи? Закрыть их матовым стеклом">▭ Закрыть надписи в видео</button>
+        ${inkBtn(false)}
         ${ocrOk() ? '<button class="btn sm ocr-btn" data-k="ocr" title="Пауза и прочитать надписи этого кадра: слова и фразы → карточки">🔎 Найти слова в кадре</button>' : ''}
         <button class="btn sm" data-k="full" title="Видео на весь экран, субтитры и перевод — поверх видео (F)">⛶ На весь экран</button>
         <button class="btn sm tv-btn" data-k="tv" title="Смотреть на телевизоре — с субтитрами и переводом">${UI.TV_SVG(18)}<span>На телевизор</span></button>
@@ -640,7 +875,7 @@
   const brand = S => (S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : S.radio ? 'NRK Radio' : 'NRK TV');
   const brandIco = S => (S.kind === 'youtube' ? '▶' : S.kind === 'tg' ? '✈️' : S.radio ? '📻' : '📺');
   /** 🔎 the frame can be read (OCR): the picture comes from this site (Telegram through the bridge, own files) */
-  const ocrOk = () => !!(window.FrameOcr && st && st.kind === 'video' && ((st.stream && st.stream.kind === 'tg') || (!st.stream && st.media)));
+  const ocrOk = () => !!(window.FrameOcr && st && st.kind === 'video' && ((st.stream && (st.stream.kind === 'tg' || (st.stream.kind === 'nrk' && !st.stream.companion && !st.stream.audio))) || (!st.stream && st.media)));
   /** 📻 a radio channel / podcast: its picture and the sound player (no video stage) */
   const radioBox = S => `<div class="subs-radio">
       <div class="subs-radio-art">${S.poster ? `<img src="${U.esc(S.poster)}" alt="">` : `<span class="sr-ico" aria-hidden="true">${S.kind === 'tg' ? (S.voice ? '🎤' : '🎵') : '📻'}</span>`}
@@ -649,10 +884,13 @@
     </div>`;
   /** 📡 live: where the player is (on air / behind) and «к прямому эфиру» */
   const liveBar = () => `<div class="subs-livebar" data-livebar><span class="lb-dot" aria-hidden="true"></span><span class="lb-pos" data-livepos>прямой эфир</span><span class="grow"></span>
+      ${st.stream && st.stream.autoAsr ? '<button class="btn sm lb-dl" data-k="livedelay" aria-pressed="true" title="Эфир идёт на ≈40 секунд позже — приложение успевает распознать речь, и субтитры совпадают с голосом">⏱ Эфир с задержкой</button>' : ''}
       <button class="btn sm" data-k="golive" title="Перейти к тому, что идёт в эфире сейчас">⏭ К прямому эфиру</button></div>`;
   function playerHtml() {
     const nNew = st.lines.filter(l => !l._made && lineNew(l).size).length;
     const S = st.stream;
+    // the row under the video (viewBar) has «🎤 Бегущая строка» next to «💬 Субтитры на видео»; without a picture — the row below
+    const hasView = S ? !S.companion && !S.audio : !!(st.media && st.kind === 'video');
     const media = S && S.companion
       ? `${secondBox(S)}${secondBar()}
         <div class="subs-src"><span class="grow">📺 <b>${U.esc(S.title)}</b> · <span class="muted">второй экран к телевизору</span></span>
@@ -661,22 +899,22 @@
       : S && S.audio
       ? `${radioBox(S)}${S.live ? liveBar() : ''}
         <div class="subs-src"><span class="grow small muted">${brandIco(S)} ${S.kind === 'tg' ? `${U.esc(S.channel || 'Telegram')}${S.author && S.author !== S.channel ? ' · ' + U.esc(S.author) : ''}${S.date ? ' · ' + U.esc(new Date(S.date).toLocaleDateString('ru-RU')) : ''}` : `${S.live ? 'прямой эфир' : 'выпуск'} ${brand(S)}`}</span>
-          ${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте ${brand(S)}">↗ ${brand(S)}</a>` : ''}</div>
-        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? '🤖' : 'ℹ️'}</span><span>${S.note}
-          ${S.autoAsr ? '<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>🤖 Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>' : ''}</span></div>` : ''}`
+          ${learnBtn()}${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в приложении или на сайте ${brand(S)}">↗ ${brand(S)}</a>` : ''}</div>
+        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : 'ℹ️'}</span><span>${S.note}
+          ${S.autoAsr ? `<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>${BOT()} Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>` : ''}</span></div>` : ''}`
       : S
       ? `${stage(S.kind === 'youtube'
-          ? `<iframe data-yt-frame src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(S.id)}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&origin=${encodeURIComponent(location.origin)}${S.start ? '&start=' + Math.floor(S.start) : ''}" title="${U.esc(S.title)}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
-          : `<video class="subs-media" data-media playsinline webkit-playsinline preload="auto" controls ${S.poster ? `poster="${U.esc(S.poster)}"` : ''}></video>`)}
+          ? `<iframe data-yt-frame src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(S.id)}?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0&fs=0&origin=${encodeURIComponent(location.origin)}${S.start ? '&start=' + Math.floor(S.start) : ''}" title="${U.esc(S.title)}" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture"></iframe>`
+          : `<video class="subs-media" data-media playsinline webkit-playsinline preload="auto" controls controlslist="nofullscreen" ${S.poster ? `poster="${U.esc(S.poster)}"` : ''}></video>`)}
         ${viewBar()}${S.live ? liveBar() : ''}
         <div class="subs-src"><span class="grow">${brandIco(S)} <b>${U.esc(S.title)}</b>${S.channel ? ` · <span class="muted">${U.esc(S.channel)}</span>` : ''}${S.kind === 'tg' && S.date ? ` · <span class="muted">${U.esc(new Date(S.date).toLocaleDateString('ru-RU'))}</span>` : ''}</span>
-          ${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в ${S.kind === 'youtube' ? 'приложении или на сайте YouTube' : S.kind === 'tg' ? 'Telegram' : 'приложении или на сайте NRK TV'}">↗ ${S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : 'NRK TV'}</a>` : ''}</div>
-        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? '🤖' : 'ℹ️'}</span><span>${S.note}
-          ${S.autoAsr ? `<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>🤖 Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>
+          ${learnBtn()}${S.link ? `<a class="btn sm ghost" href="${U.esc(S.link)}" target="_blank" rel="noopener" title="Открыть в ${S.kind === 'youtube' ? 'приложении или на сайте YouTube' : S.kind === 'tg' ? 'Telegram' : 'приложении или на сайте NRK TV'}">↗ ${S.kind === 'youtube' ? 'YouTube' : S.kind === 'tg' ? 'Telegram' : 'NRK TV'}</a>` : ''}</div>
+        ${S.note ? `<div class="mt-warn ${S.autoAsr ? '' : 'ok'} subs-stream-note"><span>${S.autoAsr ? BOT() : 'ℹ️'}</span><span>${S.note}
+          ${S.autoAsr ? `<span class="subs-asr-row"><button class="btn sm primary" data-asr-go>${BOT()} Создать субтитры и перевод</button><span class="small" data-asr-st></span></span>
           <span class="subs-asr-row"><button class="btn sm glass-btn" data-k="glass" aria-pressed="false">▭ В видео видны свои надписи? Закрыть их стеклом</button></span>` : ''}</span></div>` : ''}`
       : st.media
       ? (st.kind === 'video'
-        ? `${stage(`<video class="subs-media" data-media playsinline webkit-playsinline preload="auto" controls src="${U.esc(st.mediaUrl)}"></video>`)}${viewBar()}`
+        ? `${stage(`<video class="subs-media" data-media playsinline webkit-playsinline preload="auto" controls controlslist="nofullscreen" src="${U.esc(st.mediaUrl)}"></video>`)}${viewBar()}`
         : `<div class="subs-audio-art">🎧 <span>${U.esc(st.media.name)}</span></div><audio class="subs-media" data-media preload="auto" controls src="${U.esc(st.mediaUrl)}"></audio>`)
       : `<div class="subs-nomedia">📄 Только субтитры — без видео нельзя слушать строки и вырезать их звук. <button class="btn sm" data-files>🎞 Добавить видео / аудио</button></div>`;
     return `<div class="subs-wrap" data-lay="${layout()}">
@@ -690,10 +928,13 @@
           <button class="media-btn sm" data-k="next" title="Следующая строка (→)">${ico('next')}</button>
           <button class="btn sm subs-loop${st.loop ? ' on' : ''}" data-k="loop" title="Повторять текущую строку по кругу (R)">🔁 повторять строку</button>
           ${rateSel()}
+          ${hasView ? '' : Kar.btn() + Kar.mini()}
+          ${S ? '' : learnBtn()}
         </div>
+        ${Kar.bar()}
         <div class="subs-ctrl2">
           <span class="small muted">Перевод:</span>
-          <span class="seg-mini sm" data-trm>${[['show', 'виден'], ['word', 'слово (перевод)'], ['blur', 'размыт'], ['hide', 'скрыт']].map(([k, t]) => `<button data-trmode="${k}" class="${st.trMode === k ? 'active' : ''}">${t}</button>`).join('')}</span>
+          <span class="seg-mini sm" data-trm role="group" aria-label="Перевод">${TR_MODES.map(([k, t, tip]) => `<button type="button" data-trmode="${k}" class="${st.trMode === k ? 'active' : ''}" aria-pressed="${st.trMode === k}" title="${tip}">${t}</button>`).join('')}</span>
           <span class="tiny muted subs-glprog" data-glprog role="status" aria-live="polite"></span>
           <span class="tiny muted subs-glass-hint">работает с нашими субтитрами · надписи, впечатанные в видео, закройте <button type="button" class="linklike" data-k="glass">▭ стеклом</button></span>
           <span class="small muted subs-off" title="Если субтитры спешат или опаздывают">Сдвиг: <button class="btn sm ghost" data-off="-0.5">−</button><b data-offv>${fmtOff()}</b><button class="btn sm ghost" data-off="0.5">+</button></span>
@@ -715,8 +956,10 @@
           <span class="small muted" data-cnt></span>
         </div>
         <div class="lv-subs" data-lv-subs hidden></div>
-        <div class="subs-list" data-list>${st.lines.length ? st.lines.map(lineHtml).join('') : S && S.live ? `<div class="nrk-empty muted">${S.autoAsr ? '🤖 Здесь появятся строки эфира, которые распознает приложение, — с переводом. Нажмите ▶.' : `💬 Здесь появятся субтитры эфира NRK — с переводом.${S.companion ? '' : ' Нажмите ▶.'}`}</div>`
-          : S && S.autoAsr ? `<div class="nrk-empty muted">🤖 Здесь появятся строки, которые распознает приложение, — с переводом (запускать ${S.audio ? 'звук' : 'видео'} для этого не нужно).</div>` : ''}</div>
+        <div class="subs-trstat" data-trstat role="status" aria-live="polite" hidden></div>
+        <div class="subs-list" data-list>${st.lines.length ? st.lines.map(lineHtml).join('') : S && S.live ? `<div class="nrk-empty muted">${S.autoAsr ? BOT() + ' Здесь появятся строки эфира, которые распознает приложение, — с переводом. Нажмите ▶.' : `💬 Здесь появятся субтитры эфира NRK — с переводом.${S.companion ? '' : ' Нажмите ▶.'}`}</div>`
+          : S && S.autoAsr ? `<div class="nrk-empty muted">${BOT()} Здесь появятся строки, которые распознает приложение, — с переводом.</div>` : ''}</div>
+        <div class="subs-credwrap" data-credits ${st.cred && st.cred.list.length ? '' : 'hidden'}>${Cred.blockHtml()}</div>
         <div class="tiny muted subs-foot">🃏 Колода: <b>${U.esc(deckName())}</b> · строк: <span data-nlines>${st.lines.length}</span> · <span class="sw new">так</span> подчёркнуты слова, которых ещё нет в ваших карточках${S ? '' : ' · <button class="btn sm ghost" data-files>📂 Другие файлы</button>'}</div>
       </div>
     </div>`;
@@ -739,17 +982,20 @@
   }
   function drawNow() {
     if (!st || !st.m) return;
+    NativeSubs.sync(); // the system's own full screen (iPhone, Safari): our lines as the video's text track
     const box = st.m.$('[data-now]'); if (!box) return;
     const l = st.lines[st.cur];
     // full screen: the same line over the video (words tappable, translation obeys «виден / размыт / скрыт»)
     const ov = st.m.$('[data-ov]'), comp = !!(st.stream && st.stream.companion);
-    if (ov) ov.innerHTML = l && (st.full || ovOn() || comp) ? `<div class="ov-box"><div class="ov-no">${l.auto ? '<span class="sl-auto">🤖</span> ' : ''}${wordsHtml(l, st.cur)}</div><div class="ov-ru">${trHtml(l)}</div></div>`
+    if (ov) ov.innerHTML = l && (st.full || ovOn() || comp) ? (l.frame ? inkBox(l, st.cur) : `<div class="ov-box${l.song ? ' song' : ''}"><div class="ov-no">${l.auto && !l.song ? `<span class="sl-auto">${BOT()}</span> ` : ''}${wordsHtml(l, st.cur)}</div><div class="ov-ru">${trHtml(l)}</div></div>`)
       + (comp ? `<div class="s2-act"><button class="btn sm primary" data-add="${st.cur}" ${l._made || skipTr(l) ? 'disabled' : ''}>${l._made ? '✓ уже в карточках' : '➕ Строка → карточка'}</button></div>` : '')
       : comp && !LiveSubs.quiet ? `<div class="s2-wait">${st.lines.length ? 'Сейчас по телевизору говорят без субтитров — следующая строка появится здесь' : '<span class="spinner sm"></span> Строки эфира появятся здесь через несколько секунд…'}</div>` : '';
-    if (!l) { box.innerHTML = `<div class="sn-empty muted">${st.lines.length ? 'Нажмите ▶ или на строку в списке' : ''}</div>`; return; }
-    box.innerHTML = `<div class="sn-no">${wordsHtml(l, st.cur)}</div><div class="sn-tr">${trHtml(l)}</div>
+    posFit(); // ⊞ a new line: the big / side looks find the size that fits
+    if (!l) { box.innerHTML = `<div class="sn-empty muted">${st.lines.length ? 'Нажмите ▶ или на строку в списке' : ''}</div>`; Kar.bind(); return; }
+    box.innerHTML = `${l.frame ? `<div class="sn-ink">${inkTag(l, true)}</div>` : ''}<div class="sn-no">${wordsHtml(l, st.cur)}</div><div class="sn-tr">${trHtml(l)}</div>
       <div class="sn-act"><button class="btn sm" data-play="${st.cur}" title="Ещё раз эту строку">↺ ещё раз</button>
       <button class="btn sm primary" data-add="${st.cur}" ${l._made || skipTr(l) ? 'disabled' : ''}>${l._made ? '✓ уже в карточках' : '➕ Строка → карточка'}</button></div>`;
+    Kar.bind(); // 🎤 the words of the new line light up as they are said
   }
   function redrawLine(i) {
     if (!st || !st.m) return;
@@ -846,7 +1092,7 @@
           onError: e => { a.errMsg = YT_ERR[e.data] || 'видео не воспроизводится (' + e.data + ')'; fire('error'); },
         },
       });
-    }).catch(err => { a.errMsg = err.message; fire('error'); });
+    }).catch(err => { a.errMsg = U.niceErr(err); fire('error'); });
     return a;
   }
 
@@ -894,7 +1140,7 @@
       h.on(Hls.Events.FRAG_BUFFERED, clk); h.on(Hls.Events.FRAG_CHANGED, clk);
       if (st.resumeAt) h.once(Hls.Events.MANIFEST_PARSED, () => { if (st && st.resumeAt) { v.currentTime = st.resumeAt; st.resumeAt = 0; } });
       h.loadSource(url); h.attachMedia(v);
-    }).catch(err => { if (st) { st.streamErr = err.message; v.dispatchEvent(new Event('error')); } });
+    }).catch(err => { if (st) { st.streamErr = U.niceErr(err); v.dispatchEvent(new Event('error')); } });
   }
   /** the video's own text tracks (HLS subtitle renditions, CEA-608) stay off — our overlay shows the lines; Safari may
    *  switch one on by itself (AUTOSELECT / the system's «subtitles + SDH» setting), so this holds on addtrack / change too.
@@ -903,7 +1149,8 @@
     const T = v.textTracks;
     if (!T || v._noNativeSubs) return;
     v._noNativeSubs = true;
-    const off = () => { for (let i = 0; i < T.length; i++) if (T[i].mode !== 'disabled') T[i].mode = 'disabled'; };
+    // (except OUR track — the lines for the system's own full screen, see NativeSubs)
+    const off = () => { for (let i = 0; i < T.length; i++) if (T[i].mode !== 'disabled' && !T[i]._nk && T[i] !== v._nkTrack) T[i].mode = 'disabled'; };
     if (T.addEventListener) { T.addEventListener('addtrack', off); T.addEventListener('change', off); }
     off();
   }
@@ -1018,6 +1265,7 @@
       st.lines.forEach(l => { l.start += d; l.end += d; });
       if (Asr.segs) Asr.segs.forEach(s => { s.start += d; });
       if (Asr.acc) Asr.acc.t0 += d;
+      (Asr.rec || []).forEach(r => { r[0] += d; r[1] += d; });
       Asr.upTo += d;
       tick();
     },
@@ -1037,6 +1285,7 @@
       const v = media(); if (!v) return;
       st.stopAt = null; st.playLine = -1;
       if (st.clk) { Second.live(); return; } // 📱 second screen: back to the TV's delay
+      AsrGate.goLive(); // 🤖 «Догнать эфир»: no more delay for the recognized lines (they come when ready)
       try { v.currentTime = Math.max(0, this.edge(v) - 0.5); } catch (e) { /* not loaded yet */ }
       const p = v.play(); if (p && p.catch) p.catch(() => {});
       setTimeout(() => this.bar(), 300);
@@ -1049,9 +1298,11 @@
       const el = st.m.$('[data-livepos]'); if (!el) return;
       const behind = Math.max(0, this.edge(v) - v.currentTime), at = this.clock(v.currentTime);
       const onAir = behind < 8;
-      el.innerHTML = (onAir ? (v.paused ? 'эфир на паузе' : '<b>в прямом эфире</b>') : `<b>−${mss(behind)}</b> от эфира`) + (isFinite(at) ? ` · ${clockOf(at)}` : '');
+      const dl = AsrGate.delayed(); // ⏱ on purpose: «эфир −40 с» while the app recognizes ahead
+      el.innerHTML = (dl && !onAir ? `<b class="lb-delay">эфир −${behind < 100 ? Math.round(behind) + ' с' : mss(behind)}</b> <span class="muted">· субтитры успевают</span>` : onAir ? (v.paused ? 'эфир на паузе' : '<b>в прямом эфире</b>') : `<b>−${mss(behind)}</b> от эфира`) + (isFinite(at) ? ` · ${clockOf(at)}` : '');
       const box = st.m.$('[data-livebar]'); if (box) box.classList.toggle('behind', !onAir || v.paused);
-      st.m.$$('[data-k="golive"]').forEach(b => b.classList.toggle('primary', !onAir || v.paused));
+      st.m.$$('[data-k="golive"]').forEach(b => { b.classList.toggle('primary', !dl && (!onAir || v.paused)); const t = dl ? '⏭ Догнать эфир' : '⏭ К прямому эфиру'; if (b.textContent !== t) b.textContent = t; b.title = dl ? 'Смотреть без задержки — субтитры будут появляться, когда успеют' : 'Перейти к тому, что идёт в эфире сейчас'; });
+      AsrGate.delayBtn();
     },
   };
   /* ---------- 📱 second screen: NRK's live TV plays on the TV in NRK's own app (that stream is protected — the app never
@@ -1181,9 +1432,19 @@
   function insertLine(start, end, text, auto, info) {
     const L = st.lines;
     const line = { start, end, text: auto ? text.charAt(0).toUpperCase() + text.slice(1) : text, ruFile: '', en: '', auto: !!auto, musicA: !!(info && info.music) };
+    // 📝 a line read from the picture (Ink): always translated (a short title must not be taken for another language)
+    if (info && info.frame) {
+      Object.assign(line, { frame: true, title: !!info.title, _key: info.key || '' });
+      // 🇬🇧 an English inscription is translated from English; anything else as Norwegian (a short title must not be
+      // taken for another language)
+      const r = LID() ? LangId.detect(text) : null;
+      if (r && r.lang === 'en' && !r.noWords) line.lang = 'en'; else line.langOk = true;
+    }
+    // 🎵 a song heard where there are no subtitles: its language was decided by the recognizer's words (Song)
+    if (info && info.song) Object.assign(line, { song: true, music: info.music !== false, songSpeech: info.music === false, lang: info.lang || '', songX: info.songX || '', noWords: !!info.songX });
     let i = L.findIndex(l => l.start > start); if (i < 0) i = L.length;
     L.splice(i, 0, line);
-    tagLine(line, { asr: !!auto, prev: prevOf(L, i) });
+    if (!line.frame && !line.song) tagLine(line, { asr: !!auto, prev: prevOf(L, i) });
     if (i < L.length - 1) st.checked = new Set([...st.checked].map(k => (k >= i ? k + 1 : k)));
     if (st.cur >= i) st.cur++;
     if (st.playLine >= i) st.playLine++;
@@ -1196,26 +1457,23 @@
     const foot = st.m.$('[data-nlines]'); if (foot) foot.textContent = L.length;
     musicHint();
     if (skipTr(line)) { /* not translated */ }
+    else if (line.frame) trKick(0); // it is on screen now: its translation first
     else if (st.stream && st.stream.live) liveTrSoon();
-    else translate([i], true).then(() => { if (st) { const k = st.lines.indexOf(line); if (k >= 0) redrawLine(k); } });
+    else trKick(1500); // recognized lines come one by one: gathered into one request
     tick();
     return line;
   }
   /** live: new lines are translated in small batches in the background (not one request per line), slower while Google rests */
   function liveTrSoon() {
-    if (!st || st.liveTrT) return;
-    const me = st, rest = window.Translators && Translators.gCooling && Translators.gCooling();
-    st.liveTrT = setTimeout(async () => {
-      if (st !== me) return;
-      const from = Math.max(0, st.cur - 2), idx = [];
-      for (let i = from; i < st.lines.length && idx.length < 12; i++) if (!st.lines[i].ruFile && trOf(st.lines[i]) === undefined && !st.lines[i]._trFail) idx.push(i);
-      try { if (idx.length) await translate(idx, true); } catch (e) { /* the next round */ }
-      if (st !== me) return;
-      st.liveTrT = 0;
-      idx.forEach(i => { if (st.lines[i] && trOf(st.lines[i]) === undefined) st.lines[i]._trFail = true; redrawLine(i); });
-      if (st.trMode === 'word') glossNear(Math.max(0, st.cur));
-      if (idx.length === 12) liveTrSoon(); // more were waiting
-    }, rest ? 15000 : 2500);
+    if (!st) return;
+    const rest = window.Translators && Translators.gResting && Translators.gResting();
+    const q = trQ();
+    // the newest lines shimmer until their round comes (never a bare line that seems forgotten)
+    const L = st.lines;
+    for (let i = Math.max(0, L.length - 12); i < L.length; i++) if (trNeed(L[i]) && !L[i]._trWait) { L[i]._trWait = true; redrawLine(i); }
+    if (q.t || q.run) { q.again = true; return; } // a round is planned / running: the new line joins it
+    trKick(rest ? 6000 : 2500);
+    if (st.trMode === 'word') setTimeout(() => { if (st && st.trMode === 'word') glossNear(Math.max(0, st.cur)); }, rest ? 7000 : 4000);
   }
 
   /* ---------- 💬 NRK's live subtitles: the stream's own WebVTT track, read as it comes ----------
@@ -1374,7 +1632,13 @@
         if (c.s < o.s - 0.6 || c.s > last + tol) return false; // not within this line's time
         if (b === a || (b.length > a.length && b.startsWith(a))) {
           // the newest state of the line (grew by a word — or only a punctuation mark — or repeated in the next piece)
-          if (c.s >= o.last) { o.last = c.s; o.e = c.e; if (c.t !== o.t && (b !== a || c.t.length >= o.t.length)) { o.t = c.t; o.dirty = true; } }
+          if (c.s >= o.last) {
+            o.last = c.s; o.e = c.e;
+            if (c.t !== o.t && (b !== a || c.t.length >= o.t.length)) {
+              const n0 = nWords(o.t); if (nWords(c.t) > n0) (o.ws || (o.ws = [])).push([n0, c.s]); // 🎤 the new word was said about now
+              o.t = c.t; o.dirty = true;
+            }
+          }
           else if (b === a && isFinite(c.e) && !(o.e > c.e)) o.e = c.e; // an earlier state repeated with its real end
           return true;
         }
@@ -1414,6 +1678,7 @@
         // already there (a rewind read the same part again): the same words at an overlapping time
         if (st.lines.some(l => !l.auto && l.start < e && l.end > s && nk(l.text) === nk(m.t))) return;
         m.line = insertLine(s, e, m.t, false); m.dirty = false; this.made++;
+        if (m.ws) { m.line.wt = liveWt(m, off); tick(); }
       });
       // lines that grew / closed after they were shown
       [].concat(this.ctx.recent, o ? [o] : []).forEach(m => {
@@ -1422,6 +1687,7 @@
         if (!m.dirty && Math.abs(l.end - e) < 0.05) return;
         const k = st.lines.indexOf(l); if (k < 0) return;
         if (m.dirty && l.text !== m.t) { l.text = m.t; l._gl = false; l._trFail = false; l._new = undefined; tagLine(l, { prev: prevOf(st.lines, k) }); liveTrSoon(); }
+        if (m.ws) l.wt = liveWt(m, off); else delete l.wt;
         l.end = e; m.dirty = false; redrawLine(k);
       });
       if (this.made) this.say(`💬 Субтитры эфира NRK: строк — <b>${this.made}</b>`);
@@ -1439,10 +1705,11 @@
    * rewinding shows them in sync. Nothing leaves the device. */
   const Asr = {
     on: false, ctx: null, src: null, proc: null, chunks: [], rate: 48000, t0: null, quiet: 0, peak: 0, dur: 0, queue: [], busy: false, made: 0, mute: 0, warned: false,
-    status(html) { const el = st && st.m && st.m.$('[data-asr-st]'); if (el) el.innerHTML = html; },
+    status(html) { AsrGate.said = html; const el = st && st.m && st.m.$('[data-asr-st]'); if (el) el.innerHTML = html; },
     stop() {
       this.on = false; this.queue = []; this.reset();
       this.gen++; this.segs = null; this.done = null; this.acc = null; this.hist = null; this.upTo = 0; this.behind = 0; // the stream reader stops too
+      this.rec = []; this.complete = false; AsrGate.off(); // ⏳ the overlay and the guard go too
       try { if (this.proc) this.proc.disconnect(); if (this.src) this.src.disconnect(); } catch (e) { /* ignore */ }
       try { if (this.ctx) this.ctx.close(); } catch (e) { /* ignore */ }
       this.ctx = this.src = this.proc = null; this.made = 0; this.mute = 0; this.warned = false;
@@ -1457,6 +1724,18 @@
       if (!st || !st.stream || !window.Speech) return;
       if (fromTap) this.prime();
       const btn = st.m.$('[data-asr-go]');
+      const S0 = st.stream, v0 = st.m.$('[data-media]');
+      if (S0.hls || S0.mp3 || S0.pcm || (S0.blob && !(S0.duration > FULL_MAX_SEC))) {
+        // ⏳ the overlay on the video: the model (once) → started → the first phrases; the video waits for its lines
+        AsrGate.compact();
+        if (btn) btn.hidden = true;
+        if (!(await AsrGate.prepare(fromTap))) return;
+        if (!st || st.stream !== S0 || this.on) return;
+        this.on = true; st.asrAsked = true;
+        AsrGate.begin();
+        this.stream(v0 ? v0.currentTime : 0).catch(() => { AsrGate.off(); this.fallback(v0); });
+        return;
+      }
       if (!(await Speech.asrReady())) {
         const info = await Speech.asrInfo().catch(() => null);
         this.status(`⏳ Нужна модель распознавания речи (${info ? '≈' + info.size + ', ' : ''}скачивается один раз, потом работает без интернета)…`);
@@ -1475,13 +1754,7 @@
       this.on = true; st.asrAsked = true;
       if (btn) btn.hidden = true;
       const v = st.m.$('[data-media]');
-      // the main way (every browser, iPhone too): the app reads the program's sound track from NRK itself, ahead of the video
-      if (st.stream && (st.stream.hls || st.stream.mp3 || st.stream.pcm || (st.stream.blob && !(st.stream.duration > FULL_MAX_SEC)))) {
-        this.status(st.stream.live ? '🎧 Распознаю речь эфира — строки появляются через несколько секунд после того, как прозвучали.'
-          : `🎧 Распознаю речь ${st.stream.audio ? (st.stream.kind === 'tg' ? 'в записи' : 'выпуска') : st.stream.kind === 'tg' ? 'в видео' : 'передачи'} — строки появятся через несколько секунд и пойдут чуть впереди ${st.stream.audio ? 'звука' : 'видео'}.`);
-        this.stream(v ? v.currentTime : 0).catch(() => this.fallback(v));
-        return;
-      }
+      // (a program's sound read from NRK / the bridge / the file itself goes through AsrGate above)
       this.fallback(v);
     },
     /** fallback (should the stream not be readable): listen to the playing video through Web Audio */
@@ -1618,47 +1891,83 @@
         // live: the pieces are placed by the wall clock — known once the player has loaded the stream
         if (!st.livePdt) st.livePdt = this.segs.map(s => s.pdt);
         if (!st.liveOff) {
-          this.status('🎧 Нажмите <b>▶</b> — приложение начнёт распознавать речь эфира.');
           await Live.ready();
           if (gen !== this.gen || !st || st.stream !== S) return;
-          this.status('🎧 Распознаю речь эфира — строки появляются через несколько секунд после того, как прозвучали.');
+          AsrGate.info();
         }
         if (!this.segs.placed) { this.segs.forEach(s => { s.start = s.pdt - st.liveOff; }); this.segs.placed = true; }
-        if (v) from = v.currentTime || Live.edge(v);
+        if (v) {
+          // ⏱ «Эфир с задержкой»: the player stands ≈40 s behind the live edge — the recognizer gets that head start
+          if (AsrGate.delayed()) { const x = AsrGate.liveTarget(v); if (v.currentTime > x + 3 || !v.currentTime) { try { v.currentTime = x; } catch (e) { /* not seekable yet */ } } }
+          from = v.currentTime || Live.edge(v);
+        }
       }
-      if (v && !v._asrSeek) { v._asrSeek = true; v.addEventListener('seeked', () => { if (this.on && this.segs && !this.done.has(this.segAt(v.currentTime))) this.stream(v.currentTime).catch(() => {}); }); }
+      if (v && !v._asrSeek) { v._asrSeek = true; v.addEventListener('seeked', () => { if (this.on && this.segs && !this.segOk(this.segAt(v.currentTime))) this.stream(v.currentTime).catch(() => {}); }); }
       let i = this.segAt(from), firstOk = false;
       this.acc = null;
       while (gen === this.gen && st && this.on) {
         if (i >= this.segs.length) {
           // live: wait for the next pieces of the broadcast
           if (live) { if (!(await this.more(gen))) await new Promise(r => setTimeout(r, 2000)); continue; }
-          await this.flush(gen); this.status(`✅ ${S.audio ? (S.kind === 'tg' ? 'Вся запись распознана' : 'Весь выпуск распознан') : S.kind === 'tg' ? 'Всё видео распознано' : 'Вся передача распознана'}: строк — <b>${this.made}</b>.`); return;
+          await this.flush(gen);
+          // a jump forward left an unrecognized stretch behind (only when the viewer chose not to wait): that one now
+          const hole = this.segs.findIndex((x, k) => !this.segOk(k));
+          if (hole >= 0 && hole < i && gen === this.gen) { i = hole; this.acc = null; this.hist = null; continue; }
+          if (gen === this.gen) { this.complete = true; AsrGate.info(); }
+          return;
         }
         const now = v ? v.currentTime || 0 : 0;
-        if (this.segs[i].start > now + 90) {
-          // far enough ahead — unless the video went back to a recognized part: the unrecognized gap after it comes first
-          let j = this.segAt(now); while (j < i && this.done.has(j)) j++;
-          if (j < i) { i = j; this.acc = null; continue; }
-          await new Promise(r => setTimeout(r, 1500)); continue;
+        // the video is at a place not recognized yet (it went back, or jumped there) before the piece being read: that
+        // place comes first — the sound collected in this.acc stays (its pieces are past the hole)
+        if (!AsrGate.noWait) {
+          let j = this.segAt(now); while (j < i && this.segOk(j)) j++;
+          if (j < i && (!this.acc || this.segs[j].start + this.segs[j].dur <= this.acc.t0 + 0.05)) { i = j; this.acc = null; this.hist = null; continue; }
         }
-        if (this.done.has(i)) { i++; this.acc = null; continue; }
-        // recognition can't keep up (slow device / big model on a CPU): the video never waits for it — jump to just
-        // ahead of the playhead instead of trailing behind it (the skipped part is recognized if the user goes back there)
-        if (v && !v.paused && this.segs[i].start + this.segs[i].dur < now - 1) {
+        if (this.segs[i].start > now + 90) { await new Promise(r => setTimeout(r, 1500)); continue; } // far enough ahead
+        if (this.segOk(i)) { i++; this.acc = null; continue; }
+        // only when the viewer chose «не ждать»: a device that can't keep up jumps to just ahead of the playhead (the
+        // video does not wait for it); otherwise the video waits (AsrGate) and no phrase is ever skipped
+        if (AsrGate.noWait && v && !v.paused && this.segs[i].start + this.segs[i].dur < now - 1) {
           const j = this.segAt(now + 2);
           if (j > i) { i = j; this.acc = null; this.hist = null; this.behind = (this.behind || 0) + (this.made ? 1 : 0); continue; } // (not counted while the model is still warming up)
         }
-        let pcm;
-        try { pcm = await this.decode(this.segs[i]); firstOk = true; }
-        catch (e) { if (!firstOk) throw e; i++; this.acc = null; continue; } // a single broken piece: skip it
+        const t0 = performance.now();
+        let pcm = null;
+        try { pcm = await this.decode(this.segs[i]); }
+        catch (e) {
+          // one more try; a piece that still can't be read becomes a visible «…» (never a silent hole in the lines)
+          try { pcm = await this.decode(this.segs[i]); } catch (e2) { if (!firstOk) throw e2; }
+        }
         if (gen !== this.gen || !st) return;
+        if (!pcm) { await this.flush(gen); if (gen !== this.gen || !st) return; this.gap(this.segs[i].start, this.segs[i].start + this.segs[i].dur); i++; continue; }
+        firstOk = true;
         this.done.add(i);
         await this.push(pcm, this.segs[i].start, gen);
+        if (gen !== this.gen || !st) return;
+        AsrGate.sample(performance.now() - t0, this.segs[i].dur); // ⚡ how fast this device recognizes (real-time factor)
         this.upTo = this.segs[i].start + this.segs[i].dur;
-        if (gen === this.gen && st) this.status(`🤖 Строк создано приложением: <b>${this.made}</b> · распознано до ${tLabel(this.upTo)}${this.upTo > now + 5 ? ` — впереди ${S.audio ? 'звука' : 'видео'}` : ''}${this.behind ? ` · ⚠️ распознавание не успевает за ${S.audio ? 'звуком' : 'видео'}, часть фраз пропущена — быстрее: «⚙️ Настройки → 🎙 Распознавание речи → Лёгкое»` : ''}`);
+        AsrGate.info();
         i++;
       }
+    },
+    /* ---- what is recognized (player time): merged stretches [a, b] — the lines of it are on the list ---- */
+    rec: [], complete: false,
+    mark(a, b) {
+      if (!(b > a)) return;
+      const R = (this.rec || []).concat([[a, b]]).sort((x, y) => x[0] - y[0]), out = [];
+      R.forEach(r => { const p = out[out.length - 1]; if (p && r[0] <= p[1] + 0.35) p[1] = Math.max(p[1], r[1]); else out.push([r[0], r[1]]); });
+      this.rec = out;
+    },
+    /** the lines are ready from t up to … (t itself when t is not recognized yet) */
+    readyTo(t) { for (const r of this.rec || []) if (r[0] <= t + 0.5 && r[1] > t) return r[1]; return t; },
+    /** the piece k is recognized all through */
+    segOk(k) { const x = this.segs && this.segs[k]; return !!x && this.readyTo(x.start) >= x.start + x.dur - 0.1; },
+    /** a piece that could not be read even twice: a «…» line marks the gap (not translated), the lines go on after it */
+    gap(a, b) {
+      this.mark(a, b);
+      if (!st || st.lines.some(l => lineT(l, 'end') > a + 0.2 && lineT(l, 'start') < b - 0.2)) return;
+      const l = insertLine(a - st.offset, b - st.offset, '…', true, { gap: true });
+      if (l) { l.noWords = true; l.gap = true; }
     },
     /**
      * add sound, cut it into phrases at pauses and recognize each. The pause test adapts to the program: a frame is
@@ -1669,6 +1978,7 @@
      */
     hist: null,
     async push(pcm, t0, gen) {
+      KEnv.add(pcm, t0); // 🎤 the same sound tells the karaoke where the words and the pauses are (no extra download)
       const SR16 = 16000, W = 320, FPS = SR16 / W;
       const gap = this.acc ? t0 - (this.acc.t0 + this.acc.len / SR16) : 0;
       if (!this.acc || Math.abs(gap) > 0.3) { this.acc = { parts: [], len: 0, t0 }; this.hist = null; } // a new place: new statistics
@@ -1713,13 +2023,20 @@
         const piece = all.subarray(0, cut * W), start = this.acc.t0, end = start + cut * W / SR16;
         this.acc = { parts: [all.slice(cut * W)], len: all.length - cut * W, t0: end };
         await this.say(piece, start, end, gen);
+        if (gen === this.gen) this.mark(start, end);
       }
     },
-    async flush(gen) { if (this.acc && this.acc.len > 16000 * 0.8) { const all = new Float32Array(this.acc.len); let o = 0; this.acc.parts.forEach(p => { all.set(p, o); o += p.length; }); await this.say(all, this.acc.t0, this.acc.t0 + this.acc.len / 16000, gen); } this.acc = null; },
+    async flush(gen) {
+      const a = this.acc; this.acc = null;
+      if (!a || !a.len) return;
+      const s = a.t0, e = a.t0 + a.len / 16000;
+      if (a.len > 16000 * 0.8) { const all = new Float32Array(a.len); let o = 0; a.parts.forEach(p => { all.set(p, o); o += p.length; }); await this.say(all, s, e, gen); }
+      if (gen === this.gen) this.mark(s, e);
+    },
     async say(pcm, start, end, gen) {
       // NRK's own lines (sparse subtitles) keep their place: only the sound around them is recognized — a recognized
       // line must not overlap them (nor repeat what they say)
-      const own = st ? st.lines.filter(l => !l.auto && l.end > start && l.start < end).sort((a, b) => a.start - b.start) : [];
+      const own = st ? st.lines.filter(l => !l.auto && lineT(l, 'end') > start && lineT(l, 'start') < end).map(l => ({ start: lineT(l, 'start'), end: lineT(l, 'end') })).sort((a, b) => a.start - b.start) : [];
       if (own.length) {
         let t = start;
         for (const l of own.concat([{ start: end, end }])) {
@@ -1735,7 +2052,10 @@
       const music = !!(window.LangId && LangId.audioHint(pcm).music);
       let res;
       // a long phrase: ask Whisper for its own segment times too — it becomes several shorter lines
-      try { res = await Speech.transcribe(pcm, end - start > 4.5 ? { timestamps: true, raw: true } : { raw: true }); } catch (e) { return; }
+      const opt = end - start > 4.5 ? { timestamps: true, raw: true } : { raw: true };
+      // a failed recognition is tried once more; then the phrase becomes a visible «…» — never silently left out
+      try { res = await Speech.transcribe(pcm, opt); }
+      catch (e) { if (gen !== this.gen || !st) return; try { res = await Speech.transcribe(pcm, opt); } catch (e2) { if (gen === this.gen && st) this.gap(start, end); return; } }
       if (gen !== this.gen || !st) return;
       const lines = this.split(res, start, end);
       lines.forEach(l => this.add(l.start, l.end, l.text, { music }));
@@ -1746,8 +2066,9 @@
     /** music without words: the previous music line (≤ 20 s before) just grows — one line for a whole song */
     music(start, end) {
       const L = st.lines;
+      start -= st.offset; end -= st.offset; // player time → subtitle time (see add)
       let p = null; for (let k = L.length - 1; k >= 0; k--) if (L[k].start <= start) { p = L[k]; break; }
-      if (p && p.noWords && start - p.end < 20) { p.end = Math.max(p.end, end); musicHint(); return; }
+      if (p && p.noWords && !p.gap && start - p.end < 20) { p.end = Math.max(p.end, end); musicHint(); return; }
       if (L.some(l => Math.min(l.end, end) - Math.max(l.start, start) > 0.5 * (end - start))) return;
       insertLine(start, end, '🎵', true, { music: true });
     },
@@ -1813,12 +2134,12 @@
             const pcm = await Speech.toMono16k(job.chunks, this.rate);
             music = !!(window.LangId && LangId.audioHint(pcm).music);
             res = await Speech.transcribe(pcm, { raw: true }); text = res && typeof res === 'object' ? res.text : res;
-          } catch (e) { this.status('⚠️ Распознавание: ' + U.esc(e.message || e)); }
+          } catch (e) { this.status('⚠️ Распознавание: ' + U.esc(U.niceErr(e, '', true))); }
           if (!st) return;
           text = String(text || '').replace(/\s+/g, ' ').trim();
           if (text && /\p{L}{2}/u.test(text)) this.add(job.start, job.end, text, { music });
           else if (music || this.isMusic(res && res.raw)) this.music(job.start, job.end);
-          this.status(`🤖 Строк создано приложением: <b>${this.made}</b>${this.queue.length > 1 ? ' · догоняю…' : ''}`);
+          this.status(`${BOT()} Строк создано приложением: <b>${this.made}</b>${this.queue.length > 1 ? ' · догоняю…' : ''}`);
         }
       } finally { this.busy = false; }
     },
@@ -1826,6 +2147,8 @@
       const L = st.lines;
       // «la la la», «♪ … ♪» without words: part of the one music line, not a line of its own
       if (window.LangId && LangId.detect(text, { asr: true }).noWords) { this.music(start, end); return; }
+      // the recognizer works in player time; the list keeps subtitle time (player time − «⇆ Сдвиг» of the subtitles)
+      start -= st.offset; end -= st.offset;
       // rewound: this part was already recognized
       if (L.some(l => Math.min(l.end, end) - Math.max(l.start, start) > 0.5 * (end - start))) return;
       const prev = L[L.length - 1];
@@ -1835,26 +2158,341 @@
     },
   };
 
-  /* ---------- ⛶ full screen: the video over the whole window, the Norwegian line + translation on top of it ----------
-   * The page itself goes full screen (so the word bubble, cards window and messages stay visible) and the video
-   * stage covers it; iPhone has no page full screen — there the stage simply covers the whole window. */
+  /* ---------- ⏳ own subtitles in sync: the video waits for its lines ----------
+   * A program without subtitles: before it plays, the model is downloaded (once) and started and the first ≈25 s are
+   * recognized — the video stands, an overlay on it says what is happening («Смотреть без субтитров» skips the wait).
+   * Then recognition keeps ≥ 20–40 s ahead of the playhead (the sound is read straight from the stream, ahead of the
+   * picture). Should that lead drop under 10 s (a slow device, a jump to a place not recognized yet) the video goes a
+   * little slower (0.9×); under 4 s it waits («Догоняю субтитры…») until 15 s are ready — the voice never runs ahead of
+   * its line, and no phrase is skipped. A device that can't keep up with the accurate model (real-time factor > 0.8) is
+   * offered the light one, once. Live (NRK direct): «⏱ Эфир с задержкой» — the stream plays ≈40 s behind the live
+   * edge, which is the recognizer's head start; «⏭ Догнать эфир» goes back to the edge (lines then come when ready). */
+  const GATE = { start: 25, resume: 15, slow: 10, stop: 4 }, LIVE_DELAY = 40, LITE_ASK = 'nk-asr-lite';
+  const aheadTxt = s => (s >= 120 ? Math.floor(s / 60) + ' мин' : s >= 60 ? '1 мин' : Math.max(5, Math.floor(s / 5) * 5) + ' с');
+  const devName = () => {
+    const ua = navigator.userAgent || '';
+    return /iPhone/.test(ua) ? 'Ваш iPhone' : /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'Ваш iPad' : /Macintosh/.test(ua) ? 'Ваш Mac' : /Android|Mobile/.test(ua) ? 'Ваш телефон' : 'Ваш компьютер';
+  };
+  const AsrGate = {
+    view: '', hold: false, noWait: false, wantPlay: false, timer: 0, selfAt: 0, slowed: false, dl: false, dlBg: false, pct: 0, err: '',
+    size: '', samples: [], nSamples: 0, rtf: 0, offer: false, offerSeen: false, liteBusy: -1, delay: true, ctrl: null, waitFn: null, said: '',
+    off() {
+      clearInterval(this.timer); this.timer = 0;
+      if (this.ctrl) { try { this.ctrl.abort(); } catch (e) { /* gone */ } this.ctrl = null; }
+      if (this.waitFn) { const f = this.waitFn; this.waitFn = null; f(false); }
+      const v = st && media(); if (v && this.slowed && v.playbackRate) v.playbackRate = st.rate;
+      this.unmount();
+      Object.assign(this, { view: '', hold: false, noWait: false, wantPlay: false, slowed: false, dl: false, dlBg: false, err: '', samples: [], nSamples: 0, rtf: 0, offer: false, offerSeen: false, said: '', delay: true });
+    },
+    /** live and on purpose behind the edge (the recognized lines in sync) */
+    delayed() { return !!(st && st.stream && st.stream.live && Asr.on && this.delay && !this.noWait); },
+    /* ---- the overlay on the video ---- */
+    host() { return st && st.m && (st.m.$('[data-stage]') || st.m.$('.subs-radio')); },
+    unmount() { const h = this.host(), g = h && h.querySelector(':scope > [data-asrgate]'); if (g) g.remove(); },
+    steps() {
+      const list = [this.dl ? ['dl', 'Скачать распознавание речи'] : null, ['warm', 'Подготовить распознавание'], ['first', 'Распознать первые фразы']].filter(Boolean);
+      const k = list.findIndex(x => x[0] === this.view);
+      return `<ol class="ag-steps">${list.map(([id, t], j) => `<li class="${j < k ? 'done' : j === k ? 'now' : ''}"><span class="ag-n" aria-hidden="true">${j < k ? '✓' : j + 1}</span>${t}${j < k ? '<span class="sr-only"> — готово</span>' : ''}</li>`).join('')}</ol>`;
+    },
+    offerHtml() {
+      return `<div class="ag-offer" role="group" aria-label="Лёгкое распознавание">
+          <p><b>${devName()} не успевает с точной моделью — включить лёгкую?</b> Быстрее, чуть менее точно.</p>
+          <div class="ag-btns"><button type="button" class="btn sm primary" data-gate="lite">Включить лёгкую</button>
+          <button type="button" class="btn sm" data-gate="keep">Оставить точную — смотреть с паузами</button></div></div>`;
+    },
+    /** the first ≈25 s: how much is ready */
+    firstPart() { const v = media(), t = v ? v.currentTime || 0 : 0; return Math.max(0, Math.min(GATE.start, Asr.readyTo(t) - t)); },
+    draw() {
+      if (!st || !st.m) return;
+      const V = this.view;
+      if (!V) { this.unmount(); this.info(); return; }
+      const h = this.host(); if (!h) return;
+      let g = h.querySelector(':scope > [data-asrgate]');
+      if (!g) { g = document.createElement('div'); g.dataset.asrgate = ''; g.setAttribute('role', 'group'); g.setAttribute('aria-label', 'Субтитры, созданные приложением'); h.appendChild(g); }
+      const S = st.stream, what = S && S.audio ? 'Звук' : 'Видео';
+      const offer = this.offer && (V === 'catch' || V === 'first'); // where the eyes are: on the video
+      const key = V + (offer ? '+o' : '') + (V === 'err' ? this.err : '');
+      g.className = 'subs-asrgate ' + (V === 'catch' ? 'pill' : 'full');
+      if (g.dataset.key !== key) {
+        g.dataset.key = key;
+        const skip = `<button type="button" class="btn ag-skip" data-gate="skip">${V === 'catch' ? 'Не ждать' : 'Смотреть без субтитров'}</button>`;
+        const bar = '<div class="ag-bar" aria-hidden="true"><i data-ag-bar></i></div>';
+        g.innerHTML = V === 'ask' ? `<div class="ag-card">
+            <div class="ag-ico" aria-hidden="true">${BOT(40)}</div>
+            <p class="ag-t" aria-live="polite">Субтитры к этой передаче создаст приложение</p>
+            <p class="ag-sub">Для этого нужно один раз скачать распознавание речи (${U.esc(this.size || '≈ 100 МБ')}). Потом оно хранится на устройстве и работает без интернета — для всех передач.</p>
+            <p class="ag-sub small">🔒 Звук передачи обрабатывается только на этом устройстве.</p>
+            <div class="ag-btns"><button type="button" class="btn primary" data-gate="dl">⬇ Скачать (${U.esc(this.size || '≈ 100 МБ')}, один раз)</button>${skip}</div></div>`
+          : V === 'err' ? `<div class="ag-card">
+            <div class="ag-ico" aria-hidden="true">⚠️</div>
+            <p class="ag-t" aria-live="polite">Не получилось скачать распознавание речи</p>
+            <p class="ag-sub">${U.esc(this.err)}. Уже скачанное сохранилось — продолжим с того же места.</p>
+            <div class="ag-btns"><button type="button" class="btn primary" data-gate="dl">🔁 Ещё раз</button>${skip}</div></div>`
+          : V === 'catch' ? `<div class="ag-pill"><span class="ag-spin" aria-hidden="true"></span><span class="ag-t" aria-live="polite">Догоняю субтитры…</span>${skip}</div>${offer ? this.offerHtml() : ''}`
+          : `<div class="ag-card">
+            <div class="ag-ico ag-hg" aria-hidden="true">⏳</div>
+            <p class="ag-t" aria-live="polite" data-ag-t></p>
+            <p class="ag-sub" data-ag-sub></p>
+            ${V === 'warm' ? '' : bar}
+            ${this.steps()}
+            <p class="ag-sub small">${what} начнётся само, как только будут готовы первые субтитры.</p>
+            <div class="ag-btns">${skip}</div>${offer ? this.offerHtml() : ''}</div>`;
+      }
+      const t = g.querySelector('[data-ag-t]'), sub = g.querySelector('[data-ag-sub]'), b = g.querySelector('[data-ag-bar]');
+      let tt = '', ss = '', w = 0;
+      if (V === 'dl') { tt = `Скачиваю распознавание речи — ${this.pct} %`; ss = `${this.size || '≈ 100 МБ'}, только в первый раз — потом субтитры будут начинаться через несколько секунд.`; w = this.pct; }
+      else if (V === 'warm') { tt = 'Готовлю распознавание…'; ss = 'Модель запускается на этом устройстве.'; }
+      else if (V === 'first') { const r = this.firstPart(); tt = 'Распознаю первые фразы…'; ss = `Готово ${Math.floor(r)} из ${GATE.start} с`; w = r / GATE.start * 100; }
+      if (t && t.textContent !== tt) t.textContent = tt;
+      if (sub && sub.textContent !== ss) sub.textContent = ss;
+      if (b) b.style.width = Math.round(w) + '%';
+      this.info();
+    },
+    /** a tap on ▶ while the video waits: it keeps waiting (the overlay says why and offers «Смотреть без субтитров») */
+    nudge() { const h = this.host(), g = h && h.querySelector(':scope > [data-asrgate]'); if (!g) return; g.classList.remove('nudge'); void g.offsetWidth; g.classList.add('nudge'); },
+    pause(v) { if (v && !v.paused) { this.wantPlay = true; this.selfAt = Date.now(); v.pause(); } },
+    release() {
+      this.hold = false; this.view = ''; this.draw();
+      const v = media();
+      if (v && this.slowed) { this.slowed = false; v.playbackRate = st.rate; }
+      if (v && v.paused && this.wantPlay) { this.selfAt = Date.now(); const p = v.play(); if (p && p.catch) p.catch(() => { /* the browser wants a tap — ▶ is there */ }); }
+      this.wantPlay = false;
+    },
+    hook() {
+      const v = media(); if (!v || v._agPlay || !v.addEventListener) return;
+      v._agPlay = true;
+      v.addEventListener('play', () => {
+        if (!st || Date.now() - this.selfAt < 1000) return;
+        if (!this.hold) { this.tick(); return; } // ▶ at a place not recognized yet: it waits right away
+        this.wantPlay = true; this.selfAt = Date.now(); v.pause(); this.nudge();
+      });
+      v.addEventListener('seeking', () => this.tick()); // a jump to a place not recognized yet: wait at once, not ¼ s later
+    },
+    /** download (once, with one tap) → start the model; the video stands meanwhile → false: no subtitles this time */
+    async prepare(fromTap) {
+      const S = st.stream;
+      this.hook();
+      if (!this.noWait) { this.hold = true; this.wantPlay = true; this.pause(media()); }
+      const ready = await Speech.asrReady().catch(() => false);
+      if (!st || st.stream !== S) return false;
+      if (!ready) {
+        const info = await Speech.asrInfo().catch(() => null);
+        this.size = info && info.missingBytes > 0 ? '≈ ' + info.size : '≈ 100 МБ';
+        this.dl = true;
+        if (!fromTap) { this.view = 'ask'; this.draw(); if (!(await this.answer())) return this.declined(); }
+        for (;;) {
+          if (!st || st.stream !== S) return false;
+          this.pct = 0; this.dlBg = true; this.err = '';
+          if (!this.noWait) { this.view = 'dl'; this.hold = true; }
+          this.draw();
+          this.ctrl = new AbortController();
+          try {
+            await Speech.downloadAsr((d, t) => { const p = t ? Math.min(100, Math.floor(d / t * 100)) : 0; if (p !== this.pct) { this.pct = p; this.draw(); } }, this.ctrl.signal);
+            this.ctrl = null; this.dlBg = false; break;
+          } catch (e) {
+            this.ctrl = null; this.dlBg = false;
+            if (!st || st.stream !== S || (e && e.name === 'AbortError')) return false;
+            this.err = U.niceErr(e);
+            if (this.noWait) return this.declined('Не получилось скачать распознавание речи: ' + U.esc(this.err));
+            this.view = 'err'; this.draw();
+            if (!(await this.answer())) return this.declined();
+          }
+        }
+        UI.toast('Распознавание речи скачано — теперь оно работает без интернета', 'good');
+      }
+      if (!st || st.stream !== S) return false;
+      if (!this.noWait) this.view = 'warm';
+      this.draw();
+      try { await Speech.warmAsr(); } catch (e) { /* the first recognition tries again (and says why) */ }
+      return !!st && st.stream === S;
+    },
+    answer() { return new Promise(r => { this.waitFn = r; }); },
+    declined(why) {
+      if (!st) return false;
+      this.dl = false; this.release();
+      const b = st.m.$('[data-asr-go]'); if (b) b.hidden = false;
+      Asr.status(why || 'Субтитры не создаются — передачу можно смотреть и так. Передумаете — кнопка рядом.');
+      return false;
+    },
+    /** the stream is being read: the first phrases (the video waits for them), then the guard */
+    begin() {
+      if (!this.timer) this.timer = setInterval(() => this.tick(), 250);
+      this.hook();
+      if (!this.noWait) { this.view = 'first'; this.hold = true; this.wantPlay = true; this.pause(media()); }
+      this.draw();
+    },
+    tick() {
+      if (!st || !Asr.on || !st.stream) return;
+      const v = media(); if (!v || !('paused' in v)) return;
+      const t = v.currentTime || 0, end = Asr.readyTo(t);
+      const A = Asr.complete || (st.dur && end >= st.dur - 0.5) ? Infinity : end - t;
+      if (this.view === 'first') { if (A >= GATE.start) this.release(); else this.draw(); }
+      else if (this.view === 'catch') { if (A >= GATE.resume) this.release(); }
+      else if (!this.noWait && !this.view && !v.paused) {
+        if (A < GATE.stop) { this.view = 'catch'; this.hold = true; this.pause(v); this.draw(); return; }
+        if (A < GATE.slow && !this.slowed) { this.slowed = true; v.playbackRate = st.rate * 0.9; } // gently: hardly heard
+        else if (A >= GATE.resume && this.slowed) { this.slowed = false; v.playbackRate = st.rate; }
+      }
+      if (this.noWait && this.slowed) { this.slowed = false; v.playbackRate = st.rate; }
+      this.info();
+    },
+    /* ---- ⚡ how fast this device recognizes: seconds of work per second of sound (the last ≈40 s of sound) ---- */
+    sample(ms, dur) {
+      if (!(dur > 0)) return;
+      if (++this.nSamples <= 2) return; // the first pieces: the model is still warming up
+      this.samples.push([ms / 1000, dur]); if (this.samples.length > 8) this.samples.shift();
+      const a = this.samples.reduce((s, x) => s + x[0], 0), b = this.samples.reduce((s, x) => s + x[1], 0);
+      this.rtf = a / b;
+      if (this.samples.length >= 6 && this.rtf > 0.8 && !this.offerSeen) this.maybeOffer();
+    },
+    async maybeOffer() {
+      this.offerSeen = true;
+      try { if (localStorage.getItem(LITE_ASK)) return; } catch (e) { /* ask */ }
+      let info = null; try { info = await Speech.asrInfo(); } catch (e) { return; }
+      if (!st || !info || (info.run || info.key) !== 'small') return; // already the light one: nothing faster to offer
+      this.offer = true; this.draw(); this.info();
+    },
+    async lite(on) {
+      try { localStorage.setItem(LITE_ASK, on ? 'light' : 'accurate'); } catch (e) { /* asked once anyway */ }
+      this.offer = false; this.draw();
+      if (!on) { this.info(); return; }
+      this.liteBusy = 0; this.info();
+      try {
+        await Speech.useLight((d, t) => { this.liteBusy = t ? Math.min(100, Math.floor(d / t * 100)) : 0; this.info(); });
+        UI.toast('Включено лёгкое распознавание — субтитры пойдут быстрее', 'good');
+      } catch (e) { UI.toast('Лёгкую модель скачать не получилось: ' + U.niceErr(e), 'warn'); }
+      this.liteBusy = -1; this.samples = []; this.nSamples = 0; this.offerSeen = false;
+      this.info();
+    },
+    /* ---- 📡 live ---- */
+    liveTarget(v) { const e = Live.edge(v), s = v.seekable, lo = s && s.length ? s.start(0) + 2 : e; return Math.max(lo, e - LIVE_DELAY); },
+    goLive() {
+      if (!st || !Asr.on || !st.stream || !st.stream.live) return;
+      this.delay = false; this.noWait = true; this.hold = false; this.view = ''; this.wantPlay = false; this.draw();
+    },
+    liveToggle() {
+      const v = media(); if (!v || !st.stream || !st.stream.live) return;
+      if (this.delayed()) { Live.go(); return; }
+      this.delay = true; this.noWait = false;
+      if (!Asr.on) { Asr.enable(true); return; }
+      try { v.currentTime = this.liveTarget(v); } catch (e) { /* not loaded yet */ }
+      this.info(); Live.bar();
+    },
+    delayBtn() {
+      if (!st || !st.m) return;
+      const on = this.delayed();
+      st.m.$$('[data-k="livedelay"]').forEach(b => { b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.classList.toggle('on', on); });
+    },
+    /* ---- the line under the video: short and calm; «?» — the details ---- */
+    compact() {
+      const note = st && st.m && st.m.$('.subs-stream-note'); if (!note || note.dataset.asrc) return;
+      const body = note.children[1]; if (!body) return;
+      note.dataset.asrc = '1'; note.classList.add('asr-compact');
+      const rows = [...body.children].filter(x => x.classList.contains('subs-asr-row'));
+      const more = document.createElement('div'); more.className = 'asr-more small'; more.hidden = true; more.id = 'asr-more-' + Math.random().toString(36).slice(2, 8);
+      [...body.childNodes].forEach(n => { if (!rows.includes(n) || n.querySelector('.glass-btn')) more.appendChild(n); });
+      const old = body.querySelector('[data-asr-st]'); if (old) old.remove();
+      const go = body.querySelector('[data-asr-go]'); if (go && !Asr.on) go.hidden = true;
+      const det = document.createElement('div'); det.className = 'asr-detail tiny muted'; det.dataset.asrDetail = ''; more.prepend(det);
+      const head = document.createElement('div'); head.className = 'asr-head';
+      head.innerHTML = `<span class="asr-st" data-asr-st role="status"></span><button type="button" class="btn sm ghost asr-q" data-gate="help" aria-expanded="false" aria-controls="${more.id}" title="Подробнее о субтитрах, которые создаёт приложение" aria-label="Подробнее о субтитрах">?</button>`;
+      const offer = document.createElement('div'); offer.dataset.asrOffer = ''; offer.className = 'asr-offer-box';
+      body.prepend(head); head.after(offer); body.appendChild(more);
+      if (this.said) head.querySelector('[data-asr-st]').innerHTML = this.said;
+      else Asr.status('Субтитры к этой передаче создаст приложение');
+    },
+    info() {
+      if (!st || !st.m || !st.stream) return;
+      this.compact();
+      const S = st.stream, v = media(), t = v && 'currentTime' in v ? v.currentTime || 0 : 0;
+      const V = this.view, done = S.audio ? (S.kind === 'tg' ? 'Вся запись распознана' : 'Весь выпуск распознан') : S.kind === 'tg' ? 'Всё видео распознано' : 'Вся передача распознана';
+      let html = '';
+      if (V === 'ask') html = 'Для субтитров нужно один раз скачать распознавание речи';
+      else if (V === 'dl' || this.dlBg) html = `Скачиваю распознавание речи — ${this.pct} %`;
+      else if (V === 'warm') html = 'Готовлю распознавание…';
+      else if (V === 'first') html = 'Распознаю первые фразы…';
+      else if (V === 'catch') html = 'Догоняю субтитры — видео подождёт';
+      else if (V === 'err') html = 'Распознавание речи не скачалось';
+      else if (!Asr.on) return;
+      else if (Asr.complete) html = `${done} · строк: ${Asr.made}`;
+      else {
+        const A = Asr.readyTo(t) - t; // (live: the bar above says «эфир −40 с»)
+        if (A >= 5) html = `Субтитры готовы на ${aheadTxt(A)} вперёд`;
+        else html = this.noWait ? 'Субтитры появляются, когда успевают' : 'Распознаю…';
+        if (this.noWait && Asr.on && !(S.live && !this.delay)) html += ' <button type="button" class="btn sm" data-gate="wait" title="Видео будет ждать, пока строки готовы, — голос не обгонит строку">⏸ Ждать субтитры</button>';
+        else if (this.noWait && S.live) html += ' <button type="button" class="btn sm" data-gate="delay">⏱ Эфир с задержкой</button>';
+      }
+      if (this.liteBusy >= 0) html += ` · скачиваю лёгкую модель — ${this.liteBusy} %`;
+      if (html !== this.said) { this.said = html; Asr.status(html); }
+      // the details: what the app does, how far, how fast
+      const d = st.m.$('[data-asr-detail]');
+      if (d) {
+        const eng = window.Speech && Speech.engine, up = Asr.readyTo(t);
+        const x = Asr.on ? `Строк создано: ${Asr.made} · распознано до ${tLabel(Math.max(up, Asr.upTo || 0))}${eng ? ` · ${U.esc(eng.model)} (${eng.device === 'webgpu' ? 'видеокарта' : 'процессор'})` : ''}${this.rtf ? ` · скорость: ${this.rtf.toFixed(1).replace('.', ',')} с работы на 1 с речи` : ''}` : '';
+        if (d.textContent !== x) d.textContent = x;
+      }
+      const ob = st.m.$('[data-asr-offer]');
+      if (ob) { const want = this.offer && V !== 'catch' && V !== 'first' ? this.offerHtml() : ''; if ((ob.dataset.on || '') !== (want ? '1' : '')) { ob.dataset.on = want ? '1' : ''; ob.innerHTML = want; } }
+    },
+    /** taps on the overlay / the line (onClick) → handled? */
+    click(t) {
+      const b = t.closest && t.closest('[data-gate]'); if (!b || !st) return false;
+      const k = b.dataset.gate;
+      if (k === 'dl') { if (this.waitFn) { const f = this.waitFn; this.waitFn = null; f(true); } }
+      else if (k === 'skip') {
+        if (this.waitFn) { const f = this.waitFn; this.waitFn = null; f(false); return true; } // no download this time
+        this.noWait = true; this.release(); this.info();
+        if (st.stream && st.stream.live) Live.bar();
+      } else if (k === 'wait') { this.noWait = false; this.info(); }
+      else if (k === 'delay') this.liveToggle();
+      else if (k === 'lite') this.lite(true);
+      else if (k === 'keep') this.lite(false);
+      else if (k === 'help') {
+        const m = st.m.$('.asr-more'); if (!m) return true;
+        m.hidden = !m.hidden; b.setAttribute('aria-expanded', m.hidden ? 'false' : 'true');
+        this.info();
+      }
+      return true;
+    },
+  };
+
+  /* ---------- ⛶ full screen: the video over the whole screen, OUR line + translation on top of it ----------
+   * The PAGE goes full screen — the element that holds the video AND our subtitle layer (and the word bubble, the cards
+   * window and the messages, which live outside the player) — and the video stage covers it. Every way in leads here:
+   * «⛶ На весь экран», the ⛶ on the video, F, a double click on the video. The browser's own full screen of the bare
+   * <video> would show the picture WITHOUT our lines, so:
+   *  · Chrome / Edge: the player's own ⛶ is hidden (controlslist="nofullscreen"); a double click is ours;
+   *  · Safari on a Mac, Firefox (their player keeps its own ⛶): when the bare video goes full screen, the page takes over
+   *    at once if the browser allows it; if not, the browser itself shows our lines (NativeSubs: a text track);
+   *  · iPad: like a computer (the page goes full screen);
+   *  · iPhone (only the bare video can be full screen there): «⛶ На весь экран» makes the stage cover the whole window
+   *    with our layer; the system player's own full screen (its ⛶, or turning the phone) shows our lines via NativeSubs;
+   *  · YouTube: its own ⛶ is off (fs=0, the frame has no full-screen permission) — ours puts our lines over it. */
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const Full = {
-    on: false,
+    on: false, leaving: 0, taking: false,
     enter() {
       if (!st || !st.m || this.on) return;
-      this.on = true; st.full = true;
-      st.m.el.classList.add('subs-full'); document.body.classList.add('subs-fullscreen');
+      this.mark(true);
       const de = document.documentElement, req = de.requestFullscreen || de.webkitRequestFullscreen;
-      if (req) { try { const p = req.call(de); if (p && p.catch) p.catch(() => {}); } catch (e) { /* not allowed — the window-sized stage stays */ } }
+      if (fsEl() && fsEl() !== de) { this.takeOver(true); return; } // the bare video is full screen (F pressed there): it steps out first
+      if (req && fsEl() !== de) { try { const p = req.call(de); if (p && p.catch) p.catch(() => {}); } catch (e) { /* not allowed — the window-sized stage stays */ } }
       try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (e) { /* phones only */ }
-      drawNow(); syncFullBtn();
+    },
+    /** our full-screen look on / off (the browser's own state is followed in onFsChange) */
+    mark(on) {
+      this.on = on; if (st) st.full = on;
+      if (st && st.m) st.m.el.classList.toggle('subs-full', on);
+      document.body.classList.toggle('subs-fullscreen', on);
+      if (st && st.m) { drawNow(); syncFullBtn(); }
     },
     exit(silent) {
       if (!this.on) return;
       this.on = false; if (st) st.full = false;
       if (st && st.m) st.m.el.classList.remove('subs-full');
       document.body.classList.remove('subs-fullscreen');
-      if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (fsEl()) {
+        this.leaving = Date.now(); // the bare video may be under the page (it was full screen first): it goes too
         const ex = document.exitFullscreen || document.webkitExitFullscreen;
         try { const p = ex.call(document); if (p && p.catch) p.catch(() => {}); } catch (e) { /* ignore */ }
       }
@@ -1862,16 +2500,133 @@
       if (!silent) syncFullBtn();
     },
     toggle() { if (this.on) this.exit(); else this.enter(); },
+    /** the bare video went full screen by the browser's own button: the page with our layer takes over.
+     *  Not on top of it (the video would stay in the browser's top layer, UNDER the page — a black screen): the bare video
+     *  leaves full screen first, then the page enters it (onFsChange → takeOn). Only while the browser still counts the
+     *  click as fresh (it asks for one); otherwise the browser's own full screen stays, with our lines in it (NativeSubs). */
+    takeOver(force) {
+      if ((this.on && !force) || this.taking) return;
+      const de = document.documentElement, req = de.requestFullscreen || de.webkitRequestFullscreen, ex = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!req || !ex) return;
+      const ua = navigator.userActivation;
+      if (!force && ua && !ua.isActive) return;
+      this.taking = 'exit';
+      clearTimeout(this.takeT); this.takeT = setTimeout(() => { this.taking = false; }, 4000);
+      try { const p = ex.call(document); if (p && p.catch) p.catch(() => {}); } catch (e) { this.taking = false; }
+    },
+    /** the bare video is back in the page: now the page (with our layer) goes full screen */
+    takeOn() {
+      this.taking = 'req';
+      if (!this.on) this.mark(true);
+      const de = document.documentElement, req = de.requestFullscreen || de.webkitRequestFullscreen;
+      const no = () => {
+        if (!this.taking) return;
+        this.taking = false; this.exit();
+        UI.toast('⛶ Чтобы смотреть на весь экран с субтитрами, нажмите кнопку ⛶ на видео', '', 4500);
+      };
+      try { const p = req.call(de); if (p && p.then) p.then(() => { this.taking = false; }, no); } catch (e) { no(); }
+    },
   };
-  ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
-    if (Full.on && !(document.fullscreenElement || document.webkitFullscreenElement)) Full.exit(); // Esc of the browser
-  }));
+  function onFsChange() {
+    const el = fsEl();
+    if (!st || !st.m) return;
+    const v = st.m.$('video[data-media]'), fr = st.m.$('[data-yt-frame]');
+    if (!el) {
+      Full.leaving = 0;
+      if (Full.taking === 'exit') Full.takeOn(); // the bare video is out → the page with our layer goes in
+      else if (Full.taking !== 'req' && Full.on) Full.exit(); // Esc / the browser's own «exit» (all the way out now)
+    } else if (el === v || el === fr) {
+      // the bare video is full screen: our lines would be gone
+      if (Date.now() - Full.leaving < 2500) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const p = ex.call(document); if (p && p.catch) p.catch(() => {}); } catch (e) { /* ignore */ } }
+      else if (!Full.on) Full.takeOver();
+    } else if (el === document.documentElement && Full.taking) { Full.taking = false; if (!Full.on) Full.mark(true); }
+    NativeSubs.sync();
+  }
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, onFsChange));
+  ['fullscreenerror', 'webkitfullscreenerror'].forEach(ev => document.addEventListener(ev, () => { if (Full.taking === 'req') { Full.taking = false; Full.exit(); } else NativeSubs.sync(); }));
   function syncFullBtn() {
     if (!st || !st.m) return;
-    st.m.$$('[data-k="full"]').forEach(b => { b.innerHTML = Full.on ? '⤡ Выйти из полного экрана' : '⛶ На весь экран'; b.title = Full.on ? 'Обычный вид (Esc)' : 'Видео на весь экран, субтитры и перевод — поверх видео (F)'; });
+    st.m.$$('[data-k="full"]:not([data-fsbtn])').forEach(b => { b.innerHTML = Full.on ? '⤡ Выйти из полного экрана' : '⛶ На весь экран'; b.title = Full.on ? 'Обычный вид (Esc)' : 'Видео на весь экран, субтитры и перевод — поверх видео (F или двойной щелчок по видео)'; });
     requestAnimationFrame(glassLayout); // the picture moved: the glass follows it
     requestAnimationFrame(ovApply); // subtitles on the video: the window's own size in the normal view
   }
+  /** a double click on the picture (not on the player's buttons along the bottom, our words or the glass) = ⛶ */
+  function fsDbl(e) {
+    if (!st || st.stage !== 'player') return;
+    const stg = e.target.closest && e.target.closest('[data-stage]'); if (!stg) return;
+    if (e.target.closest('.subs-ov .sw, .subs-ovbar, .subs-glass, .subs-fsbtn, .subs-ocr-chip, .subs-asrgate, button, a, input, select')) return;
+    const v = e.target.closest('video[data-media]');
+    if (v) { const r = v.getBoundingClientRect(); if (e.clientY > r.bottom - 56) return; } // the bar of play / sound / time
+    e.preventDefault(); e.stopPropagation();
+    Full.toggle();
+  }
+
+  /* ---------- 💬 our lines for the SYSTEM's own player (iPhone full screen, Safari's / Firefox's own ⛶, picture in picture) ----------
+   * There the page is not drawn — only the bare video, which shows its own text tracks. So the video gets one more
+   * track of ours: the Norwegian line (with «слово (перевод)» when that mode is on) + the Russian line, the same as on our
+   * layer, kept up to date when translations arrive. It is shown ONLY while the system shows the video by itself —
+   * otherwise it is off (no double subtitles). No label: hls.js leaves unnamed tracks alone. */
+  const NativeSubs = {
+    native(v) {
+      if (!v || v.tagName !== 'VIDEO') return false;
+      if (Full.on && fsEl() && fsEl() !== v) return false; // the page (with our layer) is on top — Safari may still report the video
+      return fsEl() === v || !!v.webkitDisplayingFullscreen || v.webkitPresentationMode === 'fullscreen' || v.webkitPresentationMode === 'picture-in-picture' || document.pictureInPictureElement === v;
+    },
+    sync() {
+      const v = st && st.m && st.m.$('video[data-media]'); if (!v) return;
+      const on = this.native(v) && !(st.stream && st.stream.companion);
+      let tr = v._nkTrack;
+      if (!on) { if (tr && tr.mode !== 'disabled') tr.mode = 'disabled'; if (tr) v._nkAll = false; return; }
+      if (!tr) {
+        if (typeof v.addTextTrack !== 'function' || typeof window.VTTCue !== 'function') return;
+        try { tr = v._nkTrack = v.addTextTrack('subtitles', '', 'nb'); tr._nk = true; tr.mode = 'disabled'; } catch (e) { return; }
+        v._nkCues = new Map(); // line → { cue, key }
+      }
+      try { this.fill(v, tr); } catch (e) { /* a line could not be added — the others are there */ }
+      if (tr.mode !== 'showing') tr.mode = 'showing';
+    },
+    /** first time in: every line; then only around the current one (cheap — called on every new line / translation) */
+    fill(v, tr) {
+      const L = st.lines, M = v._nkCues, all = !v._nkAll;
+      const K = Kar.prefs(), kar = K.on ? `${K.mode}:${st.ksh || 0}` : '';
+      const from = all ? 0 : Math.max(0, st.cur - 20), to = all ? L.length : Math.min(L.length, Math.max(0, st.cur) + 150);
+      for (let i = from; i < to; i++) {
+        const l = L[i], a = lineT(l, 'start'), nx = L[i + 1];
+        // a moment longer to finish reading — but never over the next line
+        const b = Math.max(a + 0.3, Math.min(lineT(l, 'end') + 0.6, nx ? lineT(nx, 'start') - 0.02 : Infinity));
+        // 🎤 «Бегущая строка»: a few cues for the line, one per word (karSteps) — off: one cue, as always
+        const ks = kar ? karSteps(l, i, a, b) : null;
+        const key = `${a}|${b}|${l.text}|${trOf(l) || ''}|${st.trMode}|${l._gl ? 1 : 0}` + (ks ? `|${kar}|${ks.map(s => `${s.s.toFixed(2)}:${s.c0}:${s.c1}`).join(',')}` : '');
+        const old = M.get(l); if (old && old.key === key) continue;
+        if (old) (old.cues || [old.cue]).forEach(c => { try { tr.removeCue(c); } catch (e) { /* gone */ } });
+        const cues = ks ? ks.map(s => new VTTCue(s.s, s.e, this.text(l, s))) : [new VTTCue(a, b, this.text(l))];
+        cues.forEach(c => tr.addCue(c)); M.set(l, { cue: cues[0], cues, key });
+      }
+      if (all) {
+        const seen = new Set(L);
+        M.forEach((x, l) => { if (!seen.has(l)) { (x.cues || [x.cue]).forEach(c => { try { tr.removeCue(c); } catch (e) { /* gone */ } }); M.delete(l); } });
+        v._nkAll = true;
+      }
+    },
+    /** s — a 🎤 step (karSteps): the word being said in bold, underlined (the system's player reads b / u) */
+    text(l, s) {
+      const ve = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const sk = skipTr(l), no = l.noWords ? '♪ ♪ ♪' : cueText(l.text), ru = String(trOf(l) || '').replace(/\s+/g, ' ').trim();
+      if (s) return karPlain(no, ru, st.trMode === 'word' && glOk(l), s, Kar.prefs().mode === 'wbw', ve) + (ru && !sk && st.trMode !== 'hide' ? '\n' + ve(ru) : '');
+      let top = no;
+      if (st.trMode === 'word' && glOk(l)) { try { top = glossText(no, ru); } catch (e) { /* the plain line */ } }
+      return (l.frame ? '📝 ' : '') + ve(top) + (ru && !sk && st.trMode !== 'hide' ? '\n' + ve(ru) : ''); // 📝 a text in the picture
+    },
+    /** the system's player shows / hides the video by itself: our track follows */
+    bind(v) {
+      if (!v || v.tagName !== 'VIDEO' || v._nkBound) return;
+      v._nkBound = true;
+      const f = () => NativeSubs.sync();
+      ['webkitbeginfullscreen', 'webkitendfullscreen', 'webkitpresentationmodechanged', 'enterpictureinpicture', 'leavepictureinpicture'].forEach(ev => v.addEventListener(ev, f));
+      // there the page may not be drawn (no animation frames): the time of the video moves the lines on
+      v.addEventListener('timeupdate', () => { if (st && !v.paused && NativeSubs.native(v)) tick(); });
+    },
+  };
 
   /* ---------- ▭ matte glass over subtitles burned into the picture ----------
    * Some programs (NRK Super, e.g. Kodeknekkerne) have their subtitles drawn INTO the video: they cannot be read,
@@ -1906,31 +2661,63 @@
     const g = box.querySelector('[data-glass]');
     g.hidden = !p.on; g.style.bottom = p.b + '%'; g.style.height = p.h + '%';
     stg.classList.toggle('glass-on', p.on);
-    const ov = st.m.$('[data-ov]');
-    if (ov) ov.style.bottom = p.on && (Full.on || ovOn()) ? `${(H - h) / 2 + h * p.b / 100 + Math.max(4, h * p.h / 100 * 0.08)}px` : '';
+    // our lines sit right on the glass («Внизу» and the narrow-screen stacks; posFit places the other looks)
+    st.ovGlassB = p.on && (Full.on || ovOn()) ? `${(H - h) / 2 + h * p.b / 100 + Math.max(4, h * p.h / 100 * 0.08)}px` : '';
     st.m.$$('[data-k="glass"]').forEach(b => { b.classList.toggle('on', p.on); b.setAttribute('aria-pressed', p.on ? 'true' : 'false'); });
+    posFit();
   }
-  function glassSet(on) {
+  function glassSet(on, quiet) {
     const p = glassPrefs(); p.on = on; glassSave(p); glassLayout();
-    if (on) UI.toast('▭ Надписи видео закрыты стеклом — потяните его выше / ниже, если нужно', '', 3500);
+    if (on && !quiet) UI.toast('▭ Надписи видео закрыты стеклом — потяните его выше / ниже, если нужно', '', 3500);
   }
-  /** the first time: why the glass (the translation modes work only with our own lines, not with text drawn into the picture) */
+  /** ▭ on / off. Turned on by hand in a video for the first time: the calm note (once per video) asks whether to keep it */
   function glassToggle() {
-    if (glassPrefs().on) { glassSet(false); return; }
-    let told = false; try { told = !!localStorage.getItem('nk-glass-told'); } catch (e) { /* ask */ }
-    if (told) { glassSet(true); return; }
-    let go = false;
-    const m = UI.modal({
-      title: '▭ Надписи впечатаны в видео', cls: 'narrow glass-modal',
-      body: `<p>Если в самом видео видны свои субтитры — они <b>впечатаны в картинку</b>. Это просто изображение: их нельзя перевести и разобрать по словам.</p>
-        <p>Режимы <b>«Как есть»</b>, <b>«По предложениям»</b> и <b>«Слово (перевод)»</b> работают только с <b>нашими субтитрами</b>.</p>
-        <p>Чтобы читать спокойно, включите <b>матовое стекло</b>: оно закроет надписи видео, а наши строки с переводом идут под видео, а на весь экран — прямо на стекле.</p>
-        <p class="small muted">Потяните надпись на стекле — оно сдвинется выше / ниже; ручка сверху делает его толще. Удерживайте надпись — увидите оригинал. Кнопки плеера под стеклом продолжают работать. Для сериала стекло запоминается.</p>`,
-      foot: '<button class="btn ghost" data-no>Не сейчас</button><button class="btn primary" data-yes>▭ Включить стекло</button>',
-      onClose: () => { try { localStorage.setItem('nk-glass-told', '1'); } catch (e) { /* ok */ } if (go) glassSet(true); },
-    });
-    m.$('[data-yes]').onclick = () => { go = true; m.close(); };
-    m.$('[data-no]').onclick = () => m.close();
+    if (glassPrefs().on) { glassSet(false); burnHide(); return; }
+    const ask = !burnSaid() && !!st.m.$('[data-stage]');
+    glassSet(true, ask);
+    if (ask) burnNote('glass');
+  }
+  /* ---------- ▭ «надписи впечатаны в картинку» — a calm note, once per video; never covers anything by itself ----------
+   * There is no reliable detector of text burned into the picture, so the note comes only on evidence: the user turned
+   * the glass on here (the glass is on already — «Оставить как есть» takes it off again), or «🔎 Найти слова в кадре»
+   * found lines in the lower part of the frame. The answer is remembered for this video (nk-burn). */
+  const BURN_KEY = 'nk-burn';
+  const burnId = () => (!st ? '' : st.stream ? st.stream.kind + ':' + st.stream.id : st.media ? 'file:' + st.media.name + '|' + st.media.size : '');
+  function burnAll() { try { return JSON.parse(localStorage.getItem(BURN_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function burnSaid() { const id = burnId(); return !id || !!burnAll()[id]; }
+  function burnSave(v) {
+    const id = burnId(); if (!id) return;
+    try {
+      const all = burnAll(); all[id] = { v, at: Date.now() };
+      Object.keys(all).sort((x, y) => all[y].at - all[x].at).slice(300).forEach(k => delete all[k]);
+      localStorage.setItem(BURN_KEY, JSON.stringify(all));
+    } catch (e) { /* full */ }
+  }
+  function burnNote(why) {
+    if (!st || !st.m || burnSaid() || st.m.$('[data-burn]')) return;
+    const stg = st.m.$('[data-stage]'); if (!stg) return;
+    if (why === 'ocr' && glassPrefs().on) return; // covered already
+    const el = document.createElement('div');
+    el.className = 'subs-burn'; el.dataset.burn = why; el.setAttribute('role', 'status');
+    el.innerHTML = `<span class="sb-txt">В этом видео надписи впечатаны в картинку — бегущая строка работает на нашей строке. Закрыть их надписи матовым стеклом?</span>
+      <span class="sb-act"><button type="button" class="btn sm primary" data-burn-go title="Надписи видео закроет матовое стекло — наша строка с переводом остаётся видна. Для этого видео запомнится">▭ Закрыть стеклом</button>
+        <button type="button" class="btn sm" data-burn-keep title="Картинка остаётся как есть, без стекла. Для этого видео запомнится — больше не спрошу">Оставить как есть</button></span>`;
+    stg.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('on'));
+  }
+  function burnHide() { const el = st && st.m && st.m.$('[data-burn]'); if (el) el.remove(); }
+  function burnAnswer(glass) {
+    burnSave(glass ? 'glass' : 'keep');
+    burnHide();
+    if (glass) glassSet(true); else if (glassPrefs().on) glassSet(false);
+  }
+  /** «🔎 Найти слова в кадре» read lines in the lower part of the frame (where subtitles sit): text burned into the picture */
+  function ocrBurned(m) {
+    try {
+      const svg = m && m.el && m.el.querySelector('[data-fo-boxes]'); if (!svg) return false;
+      const H = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.height; if (!H) return false;
+      return [...svg.querySelectorAll('rect')].filter(r => +r.getAttribute('y') > H * 0.55).length >= 2;
+    } catch (e) { return false; }
   }
   /** drag the glass (move), its top edge (thicker / thinner), hold the label (see the original), ✕ (off) */
   function glassWire() {
@@ -1975,6 +2762,643 @@
     const v = st.m.$('video[data-media]'); if (v) ['loadedmetadata', 'resize'].forEach(ev => v.addEventListener(ev, glassLayout));
     glassLayout();
   }
+  /* ---------- 📝 «Надписи в кадре»: text burned into the picture, read and translated by itself ----------
+   * While a video plays in OUR player (a <video>: NRK TV, own files, Telegram) and no subtitle line is on, a small copy
+   * of the frame (≤ 960 px) is read every ~2 s (slower on a phone / on battery / after a long stretch with no letters;
+   * never while the previous reading runs, the tab is hidden or the video stands still) — js/frameocr.js: Tesseract.js
+   * in its own worker, Norwegian + English, the same download as «🔎 Найти слова в кадре» (asked once, with its size).
+   * The same text in 2 readings in a row (a picture that has not changed counts as the same reading) → a «📝 В кадре»
+   * line: it goes into the list at its time (a card can be made from it), is translated by the lines' own queue (the
+   * cache, the fallback chain, «кто переводит»), and is shown on the video while it stays there (+1.5 s). A text that
+   * repeats the subtitles around it is not shown again. A big single word in the first minutes is the title:
+   * «Håp — Надежда (название)». A frame the browser won't let the page read (a video from another site without CORS)
+   * switches it off for that video, with one calm note. YouTube plays in its own frame: it can't be read at all. */
+  const INK_KEY = 'nk-ink', INK_SAID = 'nk-ink-taint';
+  const inkPref = () => { try { return localStorage.getItem(INK_KEY) !== '0'; } catch (e) { return true; } };
+  /** 0…1: how alike two texts are (a reading may differ in a letter or two from the one before) */
+  function inkSim(a, b) {
+    if (a === b) return 1;
+    if (!a || !b) return 0;
+    const m = a.length, n = b.length;
+    if (Math.abs(m - n) > Math.max(m, n) * 0.4) return 0;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return 1 - prev[n] / Math.max(m, n);
+  }
+  /** «DETTE ER MIN HISTORIE» / «HÅP» → «Dette er min historie» / «Håp» (capitals only are translated letter by letter) */
+  const inkCase = s => (/\p{Ll}/u.test(s) || !/\p{Lu}/u.test(s) ? s : s.toLowerCase().replace(/^[^\p{L}]*\p{L}/u, c => c.toUpperCase()));
+  /** the small label of a line read from the picture */
+  const inkTag = (l, list) => `<span class="sl-tag ink-tag" title="Надпись, впечатанная в кадр: её прочитало и перевело приложение (в буквах возможны ошибки)">📝 В кадре${l.title && list ? ' · название' : ''}</span>`;
+  /** on the video: the label + the text + its translation; a title — «Håp — Надежда (название)» in one line.
+   *  The label sits in the line itself (a small picture has no room for one more row over the inscription) */
+  function inkBox(l, i) {
+    const tr = trOf(l);
+    if (l.title) {
+      return `<div class="ov-box ink title"><div class="ov-no">${inkTag(l)} ${wordsHtml(l, i)}${tr ? ` <span class="ink-dash">—</span> <span class="sl-tr ink-tr">${U.esc(tr)}</span>` : ''} <span class="ink-kind">(название)</span></div>${tr ? '' : `<div class="ov-ru">${trHtml(l)}</div>`}</div>`;
+    }
+    return `<div class="ov-box ink"><div class="ov-no">${inkTag(l)} ${wordsHtml(l, i)}</div><div class="ov-ru">${trHtml(l)}</div></div>`;
+  }
+  /** the switch in the bar on the video (short) and in the row under it; YouTube: none (its picture can't be read) */
+  const inkBtn = short => (!st || st.kind !== 'video' || Ink.yt() || (st.stream && (st.stream.companion || st.stream.audio)) ? ''
+    : `<button type="button" class="btn sm ink-btn${Ink.on() ? ' on' : ''}" data-k="ink" aria-pressed="${Ink.on()}" title="Надписи в кадре — титры, названия — читаются и переводятся сами, когда нет субтитров">📝 ${short ? 'Надписи' : 'Надписи в кадре'}</button>`);
+  const Ink = {
+    batt: null, battAsked: false,
+    s() { return st.ink || (st.ink = { t: 0, busy: false, hit: null, line: null, empty: 0, cost: 0, fp: null, fpRes: null, asked: false, tainted: false }); },
+    yt() { return !!(st && st.stream && st.stream.kind === 'youtube'); },
+    /** the <video> whose picture can be read here (null: YouTube, sound only, the second screen, not the player yet) */
+    video() {
+      if (!st || !st.m || st.stage !== 'player' || st.kind !== 'video') return null;
+      const S = st.stream; if (S && (S.kind === 'youtube' || S.companion || S.audio)) return null;
+      return st.m.$('video[data-media]');
+    },
+    on() { return inkPref() && !!(window.FrameOcr && FrameOcr.auto) && FrameOcr.auto.answer() !== 'no'; },
+    /** how often: ~2 s; a phone 3 s; on battery ×1.5; a long stretch without letters — up to ×3; never faster than 2× a reading */
+    every() {
+      const I = this.s();
+      if (Cred.active()) return Math.round(Math.max(MOBILE ? 1500 : 1000, (I.cost || 0) * 1.5)); // 🎬 credits (they scroll): every second
+      let ms = MOBILE ? 3000 : 2000;
+      if (this.batt && this.batt.charging === false) ms *= 1.5;
+      ms *= 1 + Math.min(2, Math.floor(I.empty / 6) * 0.5);
+      return Math.round(Math.max(ms, (I.cost || 0) * 2));
+    },
+    kick(ms) {
+      if (!st || !st.m) return;
+      const I = this.s();
+      clearTimeout(I.t); I.t = 0;
+      const v = this.video();
+      if (!v || v.paused || v.ended || document.hidden || I.tainted || !this.on()) return;
+      if (!this.battAsked && navigator.getBattery) { this.battAsked = true; navigator.getBattery().then(b => { this.batt = b; }).catch(() => {}); }
+      const me = st;
+      I.t = setTimeout(() => { if (st === me) this.step(); }, ms == null ? this.every() : ms);
+    },
+    stop() { if (st && st.ink) { clearTimeout(st.ink.t); st.ink.t = 0; } },
+    /** a jump: the text being followed ends where it was last seen; nothing is carried over */
+    seek() {
+      const I = st && st.ink; if (!I) return;
+      if (I.line) { const l = I.line; l.end = Math.max(l.start + 0.5, (l._seen || 0) - st.offset + 1.5); I.line = null; }
+      I.hit = null; I.fp = null; I.fpRes = null; I.empty = 0;
+    },
+    /** a subtitle line with words is on now (music-only lines and our own 📝 lines don't count) */
+    cueAt(t) {
+      const L = st.lines, i = indexAt(t);
+      for (let k = i; k >= 0 && k > i - 6; k--) {
+        const l = L[k];
+        if (!l || l.frame || l.noWords || l.song) continue; // 🎵 a song heard by the app: the picture is still read (credits roll over it)
+        if (t >= lineT(l, 'start') - 0.1 && t <= lineT(l, 'end') + 0.2 && /\p{L}/u.test(cueText(l.text))) return l;
+      }
+      return null;
+    },
+    async step() {
+      const I = this.s(); I.t = 0;
+      const v = this.video();
+      if (!v || v.paused || v.ended || document.hidden || I.tainted || !this.on()) return;
+      const me = st, A = FrameOcr.auto;
+      let next = null;
+      try {
+        if (I.busy || v.seeking || v.readyState < 2 || st.ocrOpen) return;
+        const t = v.currentTime;
+        if (this.cueAt(t)) { this.gone(t); I.hit = null; return; }
+        if (!A.ready()) { if (A.answer() === 'yes') this.load(); else this.ask(); return; }
+        let shot;
+        try { shot = A.grab(v); } catch (e) { if (e && e.tainted) { this.taint(); next = -1; } return; }
+        if (!shot) return;
+        let lines;
+        if (I.fp && A.same(I.fp, shot.fp)) lines = I.fpRes; // the same picture: the same reading, no work
+        else if (shot.edges < 250) lines = []; // no sharp strokes anywhere: no letters
+        else {
+          I.busy = true;
+          const t0 = performance.now();
+          try { lines = await A.read(shot); } finally { I.busy = false; }
+          if (st !== me) return;
+          I.cost = performance.now() - t0;
+          I.empty = lines.length ? 0 : I.empty + 1;
+        }
+        I.fp = shot.fp; I.fpRes = lines;
+        if (Cred.read(lines || [], t)) { if (I.line) this.gone(t); I.hit = null; } // 🎬 credits: names stay, roles translated
+        else if (this.seen(lines || [], t)) next = 700; // something new: look again soon to be sure
+      } catch (e) {
+        console.warn('frame text', e);
+      } finally {
+        if (st === me && next !== -1) this.kick(next);
+      }
+    },
+    /** the reading → { text, conf, h, spaced } or null (nothing / only what the subtitles around it say anyway) */
+    textOf(lines, t) {
+      if (!lines.length || lines.length > 5) return null; // a page of text (end credits, a document): not a caption
+      const L = st.lines, i = indexAt(t), near = [];
+      for (let k = Math.max(0, i - 3); k < Math.min(L.length, i + 4); k++) { const l = L[k]; if (l && !l.frame && Math.abs(lineT(l, 'start') - t) < 10) near.push(nk(cueText(l.text))); }
+      const keep = lines.filter(x => { const k = nk(x.text); return k.length >= 2 && !near.some(n => n && (n.includes(k) || k.includes(n) || inkSim(n, k) >= 0.7)); });
+      if (!keep.length) return null;
+      const text = inkCase(keep.map(x => x.text).join(' ').replace(/\s+/g, ' ').trim());
+      if (text.length < 3 || text.length > 220) return null;
+      return { text, conf: keep.reduce((n, x) => n + x.conf, 0) / keep.length, h: Math.max(...keep.map(x => x.h || 0)), spaced: keep.some(x => x.spaced) };
+    },
+    /** → true when a new text waits for its second reading */
+    seen(lines, t) {
+      const I = this.s(), r = this.textOf(lines, t);
+      if (!r) { I.hit = null; this.gone(t); return false; }
+      const key = nk(r.text);
+      if (I.line && inkSim(I.line._key, key) >= 0.75) { this.extend(I.line, t); return false; } // still there
+      if (I.line) this.gone(t); // another text took its place
+      if (I.hit && t - I.hit.t < 12 && inkSim(I.hit.key, key) >= 0.75) {
+        this.add(I.hit.t, t, r.conf >= I.hit.conf ? r : I.hit, key);
+        I.hit = null;
+        return false;
+      }
+      I.hit = Object.assign({ key, t }, r);
+      return true;
+    },
+    add(t0, t1, r, key) {
+      const I = this.s(), L = st.lines;
+      const a = Math.max(0, t0 - st.offset - 0.3), b = t1 - st.offset + this.every() / 1000 + 1;
+      // the same text here before (watched again, a jump back): that line again, not a second one
+      let l = L.find(x => x.frame && a >= x.start - 8 && a <= x.end + 8 && inkSim(x._key, key) >= 0.75);
+      if (l) l.end = Math.max(l.end, b);
+      else {
+        // the title: a big single word (or letters spread wide) in the first minutes, the first one like that
+        const title = !L.some(x => x.frame && x.title) && t1 < 300 && !/\s/.test(r.text) && r.text.length >= 2 && (r.h >= 0.06 || r.spaced);
+        l = insertLine(a, b, r.text, false, { frame: true, key, title });
+      }
+      l._seen = t1; I.line = l;
+      tick();
+      return l;
+    },
+    extend(l, t) {
+      l._seen = t;
+      const b = t - st.offset + this.every() / 1000 + 1;
+      if (b > l.end) { l.end = b; tick(); }
+    },
+    /** the text is no longer there (or a subtitle line came): it stays 1.5 s more */
+    gone(t) {
+      const I = st && st.ink, l = I && I.line; if (!l) return;
+      I.line = null;
+      l.end = Math.max(l.start + 0.5, (l._seen || t) - st.offset + 1.5, Math.min(l.end, t - st.offset + 1.5));
+      tick();
+    },
+    /** «Скачать распознавание надписей?» — once, on the picture (nothing pauses, nothing moves) */
+    ask() {
+      const I = this.s();
+      if (I.asked || !st.m) return;
+      const stg = st.m.$('[data-stage]'); if (!stg || st.m.$('[data-burn]')) return;
+      I.asked = true;
+      const S = FrameOcr.auto.SIZE;
+      const el = document.createElement('div');
+      el.className = 'subs-burn subs-ink-ask'; el.dataset.inkAsk = ''; el.setAttribute('role', 'status');
+      el.innerHTML = `<span class="sb-txt"><b>📝 Скачать распознавание надписей (${S})?</b> Тогда надписи, впечатанные в кадр, — титры, название фильма, вывески — будут переводиться сами, когда на экране нет субтитров. Скачивается один раз, кадры никуда не отправляются.</span>
+        <span class="sb-act"><button type="button" class="btn sm primary" data-ink-dl title="Скачать один раз (${S}), дальше — из памяти браузера">⬇ Скачать (${S})</button>
+          <button type="button" class="btn sm" data-ink-no title="Не скачивать. Включить можно кнопкой «📝 Надписи в кадре»">Не надо</button></span>`;
+      stg.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('on'));
+      // no answer: it steps aside after a while (asked again in the next video), the picture stays free
+      setTimeout(() => { if (el.isConnected) { el.classList.remove('on'); setTimeout(() => el.remove(), 300); } }, 40000);
+    },
+    answer(yes) {
+      const el = st && st.m && st.m.$('[data-ink-ask]'); if (el) el.remove();
+      FrameOcr.auto.save(yes ? 'yes' : 'no');
+      if (yes) this.load();
+      else UI.toast(`Хорошо, не скачиваю.${ocrOk() ? ' Слова из кадра можно найти и вручную: пауза → «🔎 Найти слова в кадре».' : ''} Включить — кнопка «📝 Надписи в кадре».`, '', 5000);
+      this.sync();
+    },
+    /** the engine: downloaded once (a small status on the picture while it comes) */
+    load() {
+      const I = this.s();
+      if (I.loading || (I.loadFail && Date.now() - I.loadFail < 60000)) return;
+      I.loading = true;
+      const me = st, log = m => { if (st === me && I.loading && m && /load|init|download/i.test(m.status || '')) this.status(`📝 Загружаю распознавание надписей…${typeof m.progress === 'number' && m.progress > 0 ? ' ' + Math.round(m.progress * 100) + '%' : ''}`); };
+      this.status('📝 Загружаю распознавание надписей…');
+      FrameOcr.auto.load(log).then(() => {
+        if (FrameOcr._onLog === log) FrameOcr._onLog = null;
+        if (st !== me) return;
+        I.loading = false; this.status(''); this.kick(200);
+      }, () => {
+        if (st !== me) return;
+        I.loading = false; I.loadFail = Date.now(); this.status('');
+        if (!I.failSaid) { I.failSaid = true; UI.toast('📝 Распознавание надписей пока не загрузилось — нужен интернет. Попробую ещё раз чуть позже.', 'warn', 5000); }
+      });
+    },
+    status(txt) {
+      if (!st || !st.m) return;
+      let el = st.m.$('[data-ink-st]');
+      if (!txt) { if (el) el.remove(); return; }
+      const stg = st.m.$('[data-stage]'); if (!stg) return;
+      if (!el) { el = document.createElement('div'); el.className = 'subs-ink-st'; el.dataset.inkSt = ''; el.setAttribute('role', 'status'); stg.appendChild(el); }
+      el.textContent = txt;
+    },
+    /** the browser won't let the page read this picture: off for this video; the calm note once per video */
+    taint() {
+      const I = this.s(); I.tainted = true; this.stop();
+      const id = burnId();
+      let said = true;
+      try {
+        const all = JSON.parse(localStorage.getItem(INK_SAID) || '{}') || {};
+        said = !!all[id];
+        if (!said && id) { all[id] = Date.now(); Object.keys(all).sort((x, y) => all[y] - all[x]).slice(200).forEach(k => delete all[k]); localStorage.setItem(INK_SAID, JSON.stringify(all)); }
+      } catch (e) { said = false; }
+      if (!said) UI.toast('📝 В этом видео надписи в кадре прочитать нельзя. Субтитры и их перевод работают как обычно.', '', 5000);
+      this.sync();
+    },
+    sync() {
+      if (!st || !st.m) return;
+      const bad = !!(st.ink && st.ink.tainted), on = this.on() && !bad;
+      st.m.$$('[data-k="ink"]').forEach(b => {
+        b.classList.toggle('on', on); b.classList.toggle('off', bad); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.title = bad ? 'В этом видео надписи в кадре прочитать нельзя: браузер не даёт читать его картинку'
+          : on ? 'Надписи в кадре — титры, названия — читаются и переводятся сами, когда нет субтитров. Нажмите, чтобы выключить'
+          : 'Включить: надписи в кадре — титры, названия — будут читаться и переводиться сами, когда нет субтитров';
+      });
+    },
+    toggle() {
+      if (!st || !st.m) return;
+      if (st.ink && st.ink.tainted) { UI.toast('📝 В этом видео надписи в кадре прочитать нельзя', '', 3000); return; }
+      const on = !this.on();
+      try { localStorage.setItem(INK_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+      if (on && FrameOcr.auto.answer() === 'no') FrameOcr.auto.save('');
+      const I = this.s();
+      if (on) { I.asked = false; if (this.video() && !FrameOcr.auto.ready() && FrameOcr.auto.answer() !== 'yes') this.ask(); }
+      else {
+        const ask = st.m.$('[data-ink-ask]'); if (ask) ask.remove();
+        this.stop(); const v = this.video(); if (v) this.gone(v.currentTime);
+      }
+      this.sync(); this.kick(300);
+      UI.toast(on ? '📝 Надписи в кадре будут переводиться сами, когда на экране нет субтитров'
+        : `📝 Надписи в кадре больше не переводятся сами${ocrOk() ? ' — их можно найти вручную: пауза → «🔎 Найти слова в кадре»' : ''}`, '', 3500);
+    },
+  };
+  /* ---------- 🎬 Credits: «Надписи в кадре» reads them, names stay as they are, the roles are translated ----------
+   * A reading is credits when it has a role word (Regi, Manus, I rollene…) or — near a role seen a moment ago, in the
+   * first minutes or at the end of the film — lines that look like people's names. Names are never sent to a
+   * translator: they are shown as written plus an approximate Russian reading; the roles come from a small glossary;
+   * «Andrea Bræin Hovig — Anja» → «Andrea Bræin Hovig (Андреа Брэйн Ховиг) — в роли Ани (Anja)». Everything read is
+   * gathered (without repeats) into one «🎬 Титры» block under the list of lines — to read after the film. While credits
+   * are on screen (also scrolling end credits) the picture is read every second. */
+  const CR_CAST = { ru: 'в ролях', kind: 'cast' };
+  const CRED_ROLES = [
+    [/^(i (hoved)?rollene|i rollene som|medvirkende|rolleliste|skuespillere|med|cast|starring)$/, 'в ролях', 'cast'],
+    [/^(manus og regi|regi og manus|skrevet og regissert av)$/, 'сценарий и режиссура'],
+    [/^(regi|regissør|regissert av|instruktør|instruert av|director|directed by)$/, 'режиссёр'],
+    [/^(manus|manuskript|manusforfattere?|skrevet av|screenplay|written by)$/, 'сценарий'],
+    [/^(foto|fotograf|filmfotograf|fotografi|kamera|kameramann|fotografisk leder|director of photography|cinematography)$/, 'оператор'],
+    [/^(musikk|komponist|original ?musikk|musikk av|music|music by|original score)$/, 'музыка'],
+    [/^(klipp|klipper|klippet av|redigering|editor|edited by|film editor)$/, 'монтаж'],
+    [/^(utøvende produsent(er)?|executive producers?)$/, 'исполнительный продюсер'],
+    [/^(produsent(er)?|produsert av|producers?|produced by)$/, 'продюсер'],
+    [/^(produksjon|en produksjon (fra|av)|produksjonsselskap|production)$/, 'производство'],
+    [/^(scenografi|scenograf|produksjonsdesign(er)?|production design(er)?|art director)$/, 'художник-постановщик'],
+    [/^(kostymer?|kostymedesign(er)?|kostymeansvarlig|costumes?|costume design(er)?)$/, 'костюмы'],
+    [/^(lyd|lyddesign(er)?|lydmiks|lydtekniker|lydmann|sound|sound design)$/, 'звук'],
+    [/^(sminke|maske|maskør|make-?up)$/, 'грим'],
+    [/^(casting|rollebesetning)$/, 'кастинг'],
+    [/^(lys|lysmester|gaffer)$/, 'свет'],
+    [/^(fargekorrigering|fargelegging|colorist)$/, 'цветокоррекция'],
+    [/^(visuelle effekter|vfx|spesialeffekter)$/, 'визуальные эффекты'],
+    [/^(animasjon|animation)$/, 'анимация'],
+    [/^(koreografi|koreograf)$/, 'хореография'],
+    [/^(stunt|stuntkoordinator)$/, 'трюки'],
+    [/^(programledere?)$/, 'ведущий'],
+    [/^(redaktør|ansvarlig redaktør)$/, 'редактор'],
+    [/^(prosjektleder)$/, 'руководитель проекта'],
+    [/^(innspillingsleder|opptaksleder|produksjonsleder)$/, 'директор съёмок'],
+    [/^(teksting|oversettelse|oversatt av)$/, 'перевод и субтитры'],
+    [/^(basert på|etter en roman av|basert på romanen)$/, 'по мотивам'],
+    [/^((en )?(stor |spesiell |hjertelig )?takk til|takk|thanks to|special thanks)$/, 'благодарим', 'thanks'],
+    [/^(i samarbeid med|støttet av|med støtte fra)$/, 'при поддержке'],
+    [/^(distribusjon|distribuert av)$/, 'прокат'],
+  ];
+  const crRole = s => {
+    const k = String(s || '').toLowerCase().replace(/[:.,;·—–\-]+\s*$/u, '').replace(/\s+/g, ' ').trim();
+    if (!k) return null;
+    for (const [re, ru, kind] of CRED_ROLES) if (re.test(k)) return kind === 'cast' ? CR_CAST : { ru, kind: kind || 'role' };
+    return null;
+  };
+  // first names that are also ordinary words (Liv = жизнь, Stein = камень, Hans = его…): still names here
+  const CR_FIRST = new Set('liv per stein bjørn ask sol siri vår hans eva kari mari ola ole tor are rune elin ida emma nora sara linn rolf eli rita anne mette heidi gro lise trine frode geir arne odd ulf leif kjell even sverre knut lars jon kristian henrik nils jens anja andrea maja'.split(' '));
+  const CR_PART = /^(von|van|de|der|den|af|av|la|le|da|di|du|bin|mc)$/i;
+  /** «ANDREA BRÆIN HOVIG» / «Andrea Bræin Hovig» → «Andrea Bræin Hovig»; anything that is not a person's name → null */
+  function crName(s, one) {
+    let ws = String(s || '').replace(/[,;:.]+$/, '').trim().split(/\s+/).filter(Boolean);
+    if (!ws.length || ws.length > 5 || (!one && ws.length < 2)) return null;
+    const caps = ws.every(w => w === w.toUpperCase());
+    const tc = w => (caps ? w.toLowerCase().replace(/(^|-)\p{L}/gu, c => c.toUpperCase()) : w);
+    ws = ws.map(w => (CR_PART.test(w) ? w.toLowerCase() : tc(w)));
+    if (!ws.every(w => CR_PART.test(w) || /^\p{Lu}[\p{Ll}'’]*\.?(-\p{Lu}[\p{Ll}'’]*)*$/u.test(w))) return null;
+    if (ws.filter(w => !CR_PART.test(w)).length < (one ? 1 : 2)) return null;
+    // a misread name («Nlile» for «Nils» while the credits scroll): a name does not start with two such consonants
+    if (ws.some(w => !CR_PART.test(w) && /^[^aeiouyæøåéäöü][^aeiouyæøåéäöühjlr]/i.test(w) && !/^(st|sk|sp|sv|sn|sm|sch|sh|ch|th|ph|kn|gn|ts|tz|ps|sw|wr)/i.test(w))) return null;
+    const P = LID() && LangId._prof;
+    const common = w => { const lw = w.toLowerCase().replace(/\.$/, ''); if (CR_FIRST.has(lw)) return false; return !!((P && (P.no.has(lw) || P.en.has(lw))) || (window.NoGloss && NoGloss.has && NoGloss.has(lw))); };
+    if (ws.some(w => !CR_PART.test(w) && w.length > 1 && common(w))) return null;
+    return ws.join(' ');
+  }
+  const crSplit = t => String(t || '').split(/\s*(?:,|&|\s+og\s+|\s+and\s+)\s*/).filter(Boolean);
+  /** one reading (lines of FrameOcr.auto) → { out: [{ role, names, char }], any (a role word), names, other, role } */
+  function crParse(lines, role) {
+    const out = []; let any = false, names = 0, other = 0;
+    for (const ln of lines) {
+      const txt = String(ln.text || '').trim(), cols = ln.cols && ln.cols.length > 1 ? ln.cols : null;
+      const r0 = crRole(txt);
+      if (r0) { role = r0; any = true; continue; } // a heading: «I rollene», «Regi»
+      if (cols) {
+        const rc = crRole(cols[0]);
+        if (rc) { const ns = [].concat(...cols.slice(1).map(c => crSplit(c).map(x => crName(x, true)))).filter(Boolean); if (ns.length) { out.push({ role: rc, names: ns }); any = true; role = rc; continue; } }
+        // «Andrea Bræin Hovig — Anja»: the person and the character
+        const pn = crName(cols[0]), ch = cols.length === 2 ? crName(cols[1], true) : null;
+        if (pn && ch) { out.push({ role: CR_CAST, names: [pn], char: ch }); names++; continue; }
+        const ch2 = cols.length === 2 ? crName(cols[0], true) : null, pn2 = cols.length === 2 ? crName(cols[1]) : null;
+        if (role === CR_CAST && ch2 && pn2 && !pn) { out.push({ role: CR_CAST, names: [pn2], char: ch2 }); names++; continue; }
+      }
+      // «Regi: Ole Hansen» / «Musikk Kari Nordmann og Ola Hansen» on one line
+      const ws = txt.split(/\s+/);
+      let hit = null;
+      for (let n = Math.min(4, ws.length - 1); n >= 1 && !hit; n--) {
+        const rr = crRole(ws.slice(0, n).join(' ')); if (!rr) continue;
+        const rest = ws.slice(n).join(' ').replace(/^[:—–\-]\s*/, '');
+        const ns = crSplit(rest).map(x => crName(x, true)).filter(Boolean);
+        if (ns.length && ns.join(' ').split(/\s+/).length >= rest.split(/\s+/).length - 1) hit = { role: rr, names: ns };
+      }
+      if (hit) { out.push(hit); any = true; role = hit.role; continue; }
+      // just names: «Ole Hansen», «Kari Nordmann, Ola Hansen»
+      const ns = crSplit(txt).map(x => crName(x)).filter(Boolean);
+      if (ns.length && ns.join(' ').split(/\s+/).length >= txt.split(/\s+/).length - 1) { out.push({ role: role || null, names: ns }); names++; continue; }
+      other++;
+    }
+    return { out, any, names, other, role };
+  }
+  /** an approximate Russian reading of a Norwegian name (the usual Norwegian–Russian practical transcription, simplified) */
+  function crTranslitWord(w) {
+    const s = w.toLowerCase(), V = 'aeiouyæøåéèêüöä';
+    const isV = c => !!c && V.includes(c);
+    const L1 = { a: 'а', b: 'б', d: 'д', f: 'ф', g: 'г', i: 'и', k: 'к', m: 'м', n: 'н', o: 'о', p: 'п', q: 'к', r: 'р', s: 'с', t: 'т', u: 'у', v: 'в', w: 'в', x: 'кс', z: 'с', æ: 'э', å: 'о', é: 'е', è: 'е', ê: 'е', ü: 'ю', ä: 'э' };
+    let o = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i], n = s[i + 1] || '', p = i ? s[i - 1] : '', bi = c + n;
+      if (s.startsWith('skj', i)) { o += 'ш'; i += 2; continue; }
+      if (bi === 'sj') { o += 'ш'; i++; continue; }
+      if (bi === 'sk' && /[iy]/.test(s[i + 2] || '')) { o += 'ш'; i++; continue; }
+      if (bi === 'kj') { o += 'кь'; i++; continue; }
+      if (bi === 'gj' || (bi === 'hj' && !p)) { o += 'й'; i++; continue; }
+      if (bi === 'hv') { o += 'в'; i++; continue; }
+      if (bi === 'ch' || bi === 'ck') { o += 'к'; i++; continue; }
+      if (bi === 'ph') { o += 'ф'; i++; continue; }
+      if (bi === 'th') { o += 'т'; i++; continue; }
+      if (bi === 'qu') { o += 'кв'; i++; continue; }
+      if (bi === 'aa') { o += 'о'; i++; continue; }
+      if (c === 'j') {
+        if (isV(n)) {
+          const soft = { a: 'я', e: 'е', i: 'и', o: 'о', u: 'ю', y: 'ю', ø: 'ё', å: 'о', æ: 'е' }[n] || 'е';
+          const head = { a: 'я', e: 'йе', i: 'йи', o: 'йо', u: 'ю', y: 'йю', ø: 'йё', å: 'йо', æ: 'йе' }[n] || 'йе';
+          o += !p || isV(p) ? head : p === 'n' && n === 'a' ? 'я' : 'ь' + soft; i++; continue;
+        }
+        o += 'й'; continue;
+      }
+      if (isV(c) && c !== 'i' && (n === 'i' || n === 'y') && !isV(s[i + 2] || '')) { o += crTranslitWord(c).toLowerCase() + 'й'; i++; continue; } // ei, ai, øy: a diphthong
+      if (c === 'e') { o += !p || (isV(p) && p !== 'i') ? 'э' : 'е'; continue; }
+      if (c === 'ø' || c === 'ö') { o += !p ? 'э' : 'ё'; continue; }
+      if (c === 'y') { o += !p ? 'и' : 'ю'; continue; }
+      if (c === 'c') { o += /[eiy]/.test(n) ? 'с' : 'к'; continue; }
+      if (c === 'h') { if (!(isV(p) && !isV(n))) o += 'х'; continue; } // Dahl → Даль
+      if (c === 'l') { o += n === 'l' ? 'л' : !n || !isV(n) ? 'ль' : 'л'; continue; }
+      o += L1[c] != null ? L1[c] : c;
+    }
+    return o;
+  }
+  const crTranslit = name => String(name || '').split(/(\s+|-)/).map(w => (/^\p{L}/u.test(w) && !CR_PART.test(w) ? (x => x.charAt(0).toUpperCase() + x.slice(1))(crTranslitWord(w)) : CR_PART.test(w) ? crTranslitWord(w) : w)).join('');
+  /** «Аня» → «Ани», «Ларс» → «Ларса»; a woman's name without -а / -я (Ingrid, Solveig) stays as it is */
+  function crGen(cyr, orig) {
+    if (/\s/.test(cyr)) return cyr;
+    if (/(rid|hild|ild|veig|run|borg|bjørg|git|rit|gunn|unn|liv|siv|karin|kristin|ellen|ann|elin|åse|dis)$/i.test(orig || '')) return cyr;
+    if (/я$/.test(cyr)) return cyr.slice(0, -1) + 'и';
+    if (/а$/.test(cyr)) { const b = cyr.slice(0, -1); return b + (/[гкхжшщч]$/.test(b) ? 'и' : 'ы'); }
+    if (/[йь]$/.test(cyr)) return cyr.slice(0, -1) + 'я';
+    if (/[бвгджзклмнпрстфхцчшщ]$/.test(cyr)) return cyr + 'а';
+    return cyr;
+  }
+  const crCap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const crNm = n => { const c = crTranslit(n); return `<b class="cr-nm">${U.esc(n)}</b>${c && c !== n ? ` <span class="cr-cyr" title="Как примерно читается по-русски">(${U.esc(c)})</span>` : ''}`; };
+  const crChar = ch => `в роли ${U.esc(crGen(crTranslit(ch), ch))} <span class="cr-orig">(${U.esc(ch)})</span>`;
+  /** one entry, in Russian (names as written + their reading) */
+  function crHtml(e) {
+    if (e.char) return `${crNm(e.names[0])} — ${crChar(e.char)}`;
+    const role = e.role ? `<span class="cr-role">${U.esc(crCap(e.role.ru))}</span>${e.names.length ? ' — ' : ''}` : '';
+    return role + e.names.map(crNm).join(', ');
+  }
+  const crKey = e => [e.role ? e.role.ru : '', e.names.map(n => n.toLowerCase()).join(','), (e.char || '').toLowerCase()].join('|');
+  const Cred = {
+    s() { return st.cred || (st.cred = { list: [], role: null, roleT: -1e9, seenAt: 0, until: 0 }); },
+    /** credits were on screen a moment ago: the picture is read every second */
+    active() { const C = st && st.cred; return !!C && Date.now() - C.seenAt < 15000; },
+    /** a reading → true when it was credits (shown on the video and kept in «🎬 Титры») */
+    read(lines, t) {
+      if (!st || !lines || !lines.length) return false;
+      const C = this.s();
+      const ctx = C.role && Math.abs(t - C.roleT) < 30 ? C.role : null;
+      const r = crParse(lines, ctx);
+      const v = media(), dur = v && isFinite(v.duration) ? v.duration : 0;
+      const zone = t < 420 || (dur > 0 && (t > dur - 900 || t > dur * 0.9));
+      if (!(r.any || (r.out.length && (ctx || zone || this.active()) && r.names >= r.other))) return false;
+      C.seenAt = Date.now();
+      if (r.role) { C.role = r.role; C.roleT = t; }
+      let changed = false;
+      const pre = (x, y) => { x = x.toLowerCase(); y = y.toLowerCase(); return x === y || y.startsWith(x + ' ') || x.startsWith(y + ' '); };
+      r.out.forEach(e => {
+        const part = e.names.length === 1 && !e.char && C.list.find(x => x.names.length === 1 && (!x.role || !e.role || x.role.ru === e.role.ru) && pre(x.names[0], e.names[0]));
+        if (part) { if (e.names[0].length > part.names[0].length) { part.names = e.names.slice(); changed = true; } if (!part.role && e.role) { part.role = e.role; changed = true; } return; }
+        const same = C.list.find(x => x.names.join('|').toLowerCase() === e.names.join('|').toLowerCase() && (!x.role || !e.role || x.role.ru === e.role.ru));
+        if (same) { if (!same.role && e.role) { same.role = e.role; changed = true; } if (!same.char && e.char) { same.char = e.char; changed = true; } return; }
+        if (C.list.some(x => crKey(x) === crKey(e))) return;
+        C.list.push(Object.assign({ t }, e)); changed = true;
+      });
+      this.show(r.out.length ? r.out : r.role && r.role !== CR_CAST ? [{ role: r.role, names: [] }] : r.role ? [{ role: r.role, names: [] }] : []);
+      if (changed) this.block();
+      return true;
+    },
+    show(list) {
+      const el = st && st.m && st.m.$('[data-cred]'); if (!el) return;
+      const C = this.s();
+      C.until = Date.now() + (MOBILE ? 3500 : 2600);
+      if (!list.length) return;
+      el.innerHTML = `<div class="cr-box"><span class="sl-tag ink-tag cr-tag" title="Титры в кадре: имена — как написано, в скобках примерное чтение по-русски; должности переведены">🎬 Титры</span>${list.slice(0, 5).map(e => `<div class="cr-line">${crHtml(e)}</div>`).join('')}</div>`;
+      el.hidden = false;
+    },
+    tick() {
+      const C = st && st.cred; if (!C || !C.until || Date.now() < C.until) return;
+      C.until = 0;
+      const el = st.m && st.m.$('[data-cred]'); if (el) el.hidden = true;
+    },
+    blockHtml() {
+      const C = st && st.cred; if (!C || !C.list.length) return '';
+      const groups = new Map();
+      C.list.forEach(e => { const g = e.char || (e.role && e.role.kind === 'cast') ? 'В ролях' : e.role ? crCap(e.role.ru) : 'Ещё в титрах'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(e); });
+      return `<details class="subs-credits" open><summary>🎬 Титры <span class="muted">(${C.list.length})</span></summary>
+        <p class="tiny muted cr-note">Имена — как написаны в фильме, в скобках — примерное чтение по-русски. Должности переведены.</p>
+        ${[...groups].map(([g, es]) => `<div class="cr-grp"><div class="cr-gh">${U.esc(g)}</div><ul>${es.map(e => `<li>${e.char ? `${crNm(e.names[0])} — ${crChar(e.char)}` : e.names.map(crNm).join(', ')}</li>`).join('')}</ul></div>`).join('')}
+      </details>`;
+    },
+    block() {
+      const el = st && st.m && st.m.$('[data-credits]'); if (!el) return;
+      const was = el.querySelector('details'), open = !was || was.open;
+      el.innerHTML = this.blockHtml(); el.hidden = !el.innerHTML;
+      const d = el.querySelector('details'); if (d && !open) d.open = false;
+    },
+  };
+
+  /* ---------- 🎵 Songs (and speech) where the subtitles say nothing ----------
+   * Subtitles skip the songs. Where there is no subtitle line but the sound is loud enough, the app listens to the
+   * next ~8 s itself — with the same speech recognizer (NB-Whisper, on this device) that makes subtitles for
+   * programmes without them — only for sources whose sound it can read: NRK (the HLS stream / a podcast), own files,
+   * Telegram; never YouTube (its frame keeps the sound). NB-Whisper is told «Norwegian», so the language is judged by
+   * the words it gives (js/langid.js songLang): Norwegian or English → «🎵 Песня (распознано по звуку, может быть
+   * неточно): …» with a translation; another language → «🎵 Звучит песня на шведском языке», nothing translated.
+   * Only with the recognizer downloaded (asked once, with its size; remembered); «Aa Вид субтитров» switches it off.
+   * Gentle on the CPU: one window at a time, not while the full recognizer runs, not in a hidden tab, not on a pause. */
+  const SONG_KEY = 'nk-song', SONG_ASK = 'nk-song-ask', SONG_W = 8;
+  const songPref = () => { try { return localStorage.getItem(SONG_KEY) !== '0'; } catch (e) { return true; } };
+  const songAns = () => { try { return localStorage.getItem(SONG_ASK) || ''; } catch (e) { return ''; } };
+  const songSave = v => { try { if (v) localStorage.setItem(SONG_ASK, v); else localStorage.removeItem(SONG_ASK); } catch (e) { /* private mode */ } };
+  const Song = {
+    size: '', lastT: 0, busy: false, done: new Set(), segP: null, ready: false, readyAt: 0, asked: false, gen: 0,
+    reset() { this.gen++; this.done = new Set(); this.segP = null; this.busy = false; this.asked = false; this.lastT = 0; this.upTo = -1; },
+    on() { return songPref() && songAns() !== 'no'; },
+    /** this source's sound can be read here (any: whatever the file's size — for the settings window) */
+    can(any) {
+      if (!st || !window.Speech || !window.LangId) return false;
+      const S = st.stream;
+      if (S) return !(S.kind === 'youtube' || S.companion || S.live) && !!(S.pcm || S.mp3 || S.hls || S.blob);
+      if (!st.media || !st.mediaUrl) return false;
+      return !!any || (Clip.fitsInMemory() && (st.media.size || 0) <= (MOBILE ? 120e6 : 400e6));
+    },
+    own: l => !!l && !l.auto && !l.frame && !l.song && !l.noWords && /\p{L}/u.test(l.text),
+    /** the stretch without subtitle lines around t (player time) → [a, b] or null */
+    gap(t) {
+      let a = 0, b = Infinity;
+      for (const l of st.lines) {
+        if (!this.own(l)) continue;
+        const s0 = lineT(l, 'start'), e0 = lineT(l, 'end');
+        if (s0 <= t + 0.3 && e0 >= t - 0.3) return null;
+        if (e0 < t) a = Math.max(a, e0 + 0.4); else if (s0 > t) { b = Math.min(b, s0 - 0.2); break; }
+      }
+      const v = media(); if (v && isFinite(v.duration) && v.duration > 0) b = Math.min(b, v.duration);
+      return b - a >= 3 ? [a, b] : null;
+    },
+    async isReady() {
+      if (this.ready) return true;
+      if (Date.now() - this.readyAt < 30000) return false;
+      this.readyAt = Date.now();
+      try { this.ready = !!(await Speech.asrReady()); } catch (e) { this.ready = false; }
+      if (!this.ready && !this.size) { try { const i = await Speech.asrInfo(); if (i && i.size) this.size = '≈' + i.size; } catch (e) { /* the usual size */ } }
+      return this.ready;
+    },
+    /** from tick(): at most once a second */
+    tick(t) {
+      const now = Date.now(); if (now - this.lastT < 1000) return; this.lastT = now;
+      if (this.busy || !st || st.stage !== 'player' || document.hidden || Asr.on || !this.on()) return;
+      const v = media(); if (!v || v.paused || v.seeking || v.ended) return;
+      if (!st.lines.some(l => this.own(l))) return; // no subtitles at all: «🤖 Создать субтитры» does the whole programme
+      if (!this.can()) return;
+      if (Speech.callMs > 15000) return; // this device recognizes too slowly for it to help
+      this.go(t).catch(() => { /* a piece that could not be read: the next one */ });
+    },
+    async go(t) {
+      let key = -1, a = 0, b = 0;
+      // the window just ahead of what plays (recognition takes a few seconds): its words come in time
+      for (const x of [t + 1, t + SONG_W + 1]) {
+        const k = Math.floor(x / SONG_W); if (this.done.has(k)) continue;
+        const g = this.gap(x); if (!g) continue;
+        a = Math.max(g[0], k * SONG_W, t - 0.5); b = Math.min(g[1], (k + 1) * SONG_W + 1);
+        if (this.upTo > a && this.upTo < b) a = this.upTo; // the window before already heard up to here
+        if (b - a < 2.5) { this.done.add(k); continue; }
+        key = k; break;
+      }
+      if (key < 0) return;
+      if (!this.ready && (this.asked || songAns() === 'yes') && Date.now() - this.readyAt < 30000) return; // asked already: nothing to read until the model is here
+      const me = st, gen = this.gen;
+      this.busy = true;
+      try {
+        const pcm = await this.pcm(a, b);
+        if (st !== me || gen !== this.gen) return;
+        if (!pcm || pcm.length < 16000) { this.done.add(key); return; }
+        let peak = 0, q = 0, n = 0; for (let i = 0; i < pcm.length; i += 4) { const x = Math.abs(pcm[i]); if (x > peak) peak = x; q += x * x; n++; }
+        if (peak < 0.05 || Math.sqrt(q / Math.max(1, n)) < 0.012) { this.done.add(key); return; } // quiet: nothing to hear
+        if (!(await this.isReady())) { this.done.add(key); if (b - a >= 5) this.ask(); return; } // each stretch is looked at once
+        if (st !== me || gen !== this.gen || (st.ink && st.ink.busy)) return; // reading the picture right now: next second
+        this.done.add(key); this.upTo = b;
+        const music = !!(LangId.audioHint(pcm).music);
+        const res = await Speech.transcribe(pcm, { raw: true });
+        if (st !== me || gen !== this.gen) return;
+        const text = String((res && res.text) || '').replace(/\s+/g, ' ').trim();
+        if (!text || !/\p{L}{2}/u.test(text)) return;
+        const sl = LangId.songLang(text);
+        if (sl.noWords) return;
+        this.put(a - st.offset, b - st.offset, text, sl.lang, music);
+      } finally { if (gen === this.gen) this.busy = false; }
+    },
+    /** 16 kHz mono of [a, b] (player time) */
+    async pcm(a, b) {
+      const S = st.stream;
+      if (S && S.pcm) return pcmGet(S.pcm, a, b - a);
+      if (!S) return Clip.fromFull(a, b);
+      if (!this.segP) this.segP = (S.blob ? Asr.pcmSegs(S, true) : S.mp3 ? Asr.mp3Segs(S.mp3, S.duration) : mediaPlaylist(S.hls).then(P => P.segs)).catch(() => []);
+      const segs = await this.segP;
+      const use = (segs || []).filter(x => x.start < b && x.start + x.dur > a);
+      if (!use.length) return null;
+      const out = new Float32Array(Math.round((b - a) * 16000));
+      for (const sg of use) {
+        const f = await Asr.decode(sg);
+        KEnv.add(f, sg.start); // 🎤 the same sound tells the karaoke where the pauses are
+        const off = Math.round((sg.start - a) * 16000);
+        for (let i = Math.max(0, -off); i < f.length && i + off < out.length; i++) out[i + off] = f[i];
+      }
+      return out;
+    },
+    /** the recognized words → a line in its place («🎵 Песня…» / «🎵 Звучит песня на шведском языке») */
+    put(a, b, text, lang, music) {
+      const L = st.lines;
+      if (L.some(l => (l.song || this.own(l)) && Math.min(l.end, b) - Math.max(l.start, a) > Math.min(1.5, (b - a) * 0.4))) return;
+      if (lang === 'no' || lang === 'en') { insertLine(a, b, text, true, { song: true, lang: lang === 'en' ? 'en' : '', music }); return; }
+      // another language: one calm line for the whole song (the line before grows)
+      let p = null; for (let k = L.length - 1; k >= 0; k--) if (L[k].start <= a) { p = L[k]; break; }
+      if (p && p.songX === lang && a - p.end < 12) { p.end = Math.max(p.end, b); redrawLine(L.indexOf(p)); tick(); return; }
+      insertLine(a, b, '🎵', true, { song: true, songX: lang, music });
+    },
+    /** «Распознавать песни?» — once, on the picture (nothing pauses) */
+    ask() {
+      if (this.asked || songAns() || !st || !st.m) return;
+      const stg = st.m.$('[data-stage]') || st.m.$('.subs-radio'); if (!stg || st.m.$('[data-burn]') || st.m.$('[data-ink-ask]')) return;
+      this.asked = true;
+      const S = this.size ? ` (${this.size})` : '';
+      const el = document.createElement('div');
+      el.className = 'subs-burn subs-song-ask'; el.dataset.songAsk = ''; el.setAttribute('role', 'status');
+      el.innerHTML = `<span class="sb-txt"><b>🎵 Здесь поют или говорят без субтитров.</b> Распознавать такие места по звуку и переводить? Для этого один раз скачается модель распознавания речи${S}. Звук обрабатывается прямо на устройстве и никуда не отправляется.</span>
+        <span class="sb-act"><button type="button" class="btn sm primary" data-song-dl>⬇ Скачать${S}</button>
+          <button type="button" class="btn sm" data-song-no title="Не скачивать. Включить можно в «Aa Вид субтитров»">Не надо</button></span>`;
+      stg.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('on'));
+      setTimeout(() => { if (el.isConnected) { el.classList.remove('on'); setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); } }, 40000);
+    },
+    async answer(yes) {
+      const el = st && st.m && st.m.$('[data-song-ask]'); if (el && el.parentNode) el.parentNode.removeChild(el);
+      if (!yes) { songSave('no'); UI.toast('Хорошо, не скачиваю. Включить — «Aa Вид субтитров» → «🎵 Песни без субтитров».', '', 5000); return false; }
+      const ok = await Speech.ensureModel({
+        title: '🎵 Песни и речь без субтитров',
+        lead: '<p>Там, где субтитров нет, а поют или говорят, приложение может само распознать слова по звуку и перевести их — с пометкой «🎵», потому что в пении слова легко расслышать неверно. Если поют не по-норвежски и не по-английски, приложение просто скажет, на каком языке песня.</p><p>Для этого нужна <b>модель распознавания речи</b> — её нужно скачать <b>один раз</b>.</p>',
+        privacy: '🔒 Звук обрабатывается прямо на этом устройстве и никуда не отправляется.',
+        okLabel: '⬇ Скачать', noBrowser: true,
+      });
+      if (ok) { songSave('yes'); this.ready = true; UI.toast('🎵 Готово: песни и речь без субтитров будут распознаваться сами', 'good', 3500); }
+      return !!ok;
+    },
+    /** the switch in «Aa Вид субтитров» */
+    async set(on) {
+      try { localStorage.setItem(SONG_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+      if (!on) { this.gen++; this.busy = false; return; }
+      if (songAns() === 'no') songSave('');
+      if (!(await this.isReady())) { this.readyAt = 0; if (!(await this.isReady())) await this.answer(true); }
+    },
+  };
+
   /* 💬 the line with its translation ON the video in the normal window too (not only in full screen) — on by default */
   const OVW_KEY = 'nk-ovwin';
   const ovOn = () => { if (!st || st.kind !== 'video' || (st.stream && st.stream.companion)) return false; try { return localStorage.getItem(OVW_KEY) !== '0'; } catch (e) { return true; } };
@@ -1990,6 +3414,578 @@
     try { localStorage.setItem(OVW_KEY, ovOn() ? '0' : '1'); } catch (e) { /* full */ }
     ovApply();
     UI.toast(ovOn() ? '💬 Субтитры с переводом — на видео' : 'Субтитры на видео скрыты (строка — под видео и в списке)', '', 2200);
+  }
+  /* ---------- ⊞ «Положение субтитров»: the place of OUR lines on the video (Aa Вид субтитров) ----------
+   * «Внизу» (the start) and «Вверху» keep the usual size; «На весь экран» takes the biggest letters that fit the whole
+   * picture; «Справа» / «Слева» put the block in a column at that edge, the two halves («Норвежский слева · перевод
+   * справа» and back) put the Norwegian line and the translation in columns at the two edges — the middle of the picture
+   * stays free. Black bars around the picture (a screen of another shape) are used first. A narrow video (a phone held
+   * upright, under ~560 px) has no room for columns: the side looks stack under the picture, aligned to their side. */
+  const POS_NARROW = 560;
+  function posFit() {
+    if (!st || !st.m) return;
+    const ov = st.m.$('.subs-stage > [data-ov]'), stg = ov && ov.parentElement; if (!ov || !stg) return;
+    const p = tvPrefs(), S = ov.style, W = stg.clientWidth, H = stg.clientHeight;
+    let lay = p.pos;
+    if (W && W < POS_NARROW && /^(left|right|split)/.test(lay)) lay = 'stack-' + lay;
+    if (ov.dataset.pos !== lay) ov.dataset.pos = lay;
+    const box = ov.firstElementChild;
+    // «🔎 Найти слова в кадре» (shown on a pause) steps out of the way of the big / side looks in full screen: under the bar on top
+    const chip = stg.querySelector('[data-ocr-chip]'), wide = /^(full|right|split)/.test(lay);
+    if (chip && !(Full.on && wide)) { chip.style.removeProperty('top'); chip.style.removeProperty('transform'); }
+    const clear = () => { ['left', 'top', 'width', 'height', '--fit', '--fit-ru', '--colw'].forEach(k => S.removeProperty(k)); delete ov.dataset.fit; st.posKey = ''; };
+    if (lay === 'bottom' || lay.startsWith('stack-')) { clear(); S.bottom = st.ovGlassB || ''; return; }
+    if (!W || !H || !box || !box.classList.contains('ov-box')) return; // nothing shown (or the overlay is off): placed with the next line
+    // the picture inside the stage (object-fit: contain) and what must stay free: the bar on top (full screen), the player's buttons below
+    const v = st.m.$('video[data-media]');
+    const ar = v && v.videoWidth && v.videoHeight ? v.videoWidth / v.videoHeight : 16 / 9;
+    let pw = W, ph = W / ar; if (ph > H) { ph = H; pw = H * ar; }
+    const pl = (W - pw) / 2, pt = (H - ph) / 2, sr = stg.getBoundingClientRect();
+    const sa = { t: 0, r: 0, b: 0, l: 0 };
+    if (Full.on) { // the notch / rounded corners of a phone
+      let pr = stg.querySelector('[data-safe]');
+      if (!pr) { pr = document.createElement('span'); pr.dataset.safe = ''; pr.setAttribute('aria-hidden', 'true');
+        pr.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;width:0;height:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'; stg.appendChild(pr); }
+      const cs = getComputedStyle(pr); sa.t = parseFloat(cs.paddingTop) || 0; sa.r = parseFloat(cs.paddingRight) || 0; sa.b = parseFloat(cs.paddingBottom) || 0; sa.l = parseFloat(cs.paddingLeft) || 0;
+    }
+    const bar = Full.on && st.m.$('.subs-ovbar');
+    let topRes = bar && bar.offsetHeight ? Math.max(8, bar.getBoundingClientRect().bottom - sr.top + 8) : Math.max(8, sa.t);
+    if (wide && Full.on && chip) { chip.style.top = Math.round(topRes) + 'px'; chip.style.transform = 'none'; topRes += 48; }
+    else if (wide && !Full.on && lay !== 'full') topRes = Math.max(topRes, 58); // the ⛶ on the video (and the 🔎 next to it) stay free above a column
+    const botRes = Full.on ? Math.max(70, H * 0.09, sa.b + 56) : Math.max(48, H * 0.14);
+    const m = Math.max(10, W * 0.02), xl = m + sa.l, xr = m + sa.r;
+    const sc = SV_SCALE[p.size] || 1;
+    const key = [lay, W, H, Math.round(topRes), Math.round(botRes), sc, p.gl, p.bg, ov.textContent, ar.toFixed(3)].join('|');
+    if (st.posKey === key && ov.dataset.fit) return; // the same line in the same place: already fitted
+    S.bottom = 'auto'; ['--fit-ru', '--colw', 'height'].forEach(k => S.removeProperty(k));
+    const set = (k, px) => S.setProperty(k, Math.round(px) + 'px');
+    // the biggest letters (≤ hi) with which the measured parts fit their room
+    const fit = (lo, hi, ok) => {
+      const put = f => S.setProperty('--fit', f.toFixed(1) + 'px');
+      put(hi); if (ok()) return hi;
+      let a = lo, b = hi;
+      for (let k = 0; k < 8 && b - a > 0.5; k++) { const c = (a + b) / 2; put(c); if (ok()) a = c; else b = c; }
+      put(a); return a;
+    };
+    ov.dataset.fit = '1';
+    // the usual size of the line (as «Внизу») — columns start from it, «На весь экран» goes far above it
+    const base = (Full.on ? Math.min(42, Math.max(18, innerWidth * 0.031)) : Math.min(26, Math.max(13, W * 0.033))) * sc;
+    const no = box.querySelector('.ov-no'), ru = box.querySelector('.ov-ru');
+    const fits = (el, w, h) => !el || (el.offsetHeight <= h + 0.5 && el.scrollWidth <= w + 1);
+    if (lay === 'top') {
+      // the usual size; in full screen a black bar above the picture holds it when there is room (nothing of the picture covered)
+      S.removeProperty('--fit'); delete ov.dataset.fit;
+      set('left', 0); set('width', W); S.removeProperty('height');
+      let y = topRes;
+      if (Full.on) { const h = ov.offsetHeight; y = pt - topRes >= h + 10 ? pt - h - 6 : Math.max(topRes, Math.min(pt + 6, H - botRes - h)); }
+      set('top', y);
+    } else if (lay === 'full') {
+      // the whole room between the bar on top and the player's buttons below — the biggest letters that fit
+      const aw = W - xl - xr, ah = Math.max(60, H - botRes - topRes);
+      set('left', xl); set('top', topRes); set('width', aw); set('height', ah);
+      S.setProperty('--fit-ru', '.74');
+      fit(Math.max(12, base * 0.8), Math.max(base, Math.min(ah * 0.2, aw * 0.14, 100 * sc)), () => fits(box, aw, ah));
+    } else {
+      // a column at the edge: inside the black bar when it is wide enough, else ~ a third of the picture over its edge
+      const bw = pl - 2 * m;
+      const colW = Math.round(bw >= W * 0.2 ? Math.min(bw, W * 0.42) : Math.max(180, W * (Full.on ? 0.3 : 0.33)));
+      const ah = Math.max(60, H - botRes - topRes);
+      set('top', topRes); set('height', ah);
+      if (lay === 'left' || lay === 'right') {
+        set('left', lay === 'left' ? xl : W - xr - colW); set('width', colW);
+        S.setProperty('--fit-ru', '.78');
+        fit(11, base * 1.1, () => fits(box, colW, ah));
+      } else { // the two halves: one column each
+        set('left', xl); set('width', W - xl - xr); set('--colw', colW);
+        S.setProperty('--fit-ru', '.88');
+        fit(11, base * 1.1, () => fits(no, colW, ah) && fits(ru, colW, ah));
+      }
+    }
+    st.posKey = key;
+  }
+  /** the small picture of a screen for each place (the chosen colours: Norwegian / translation) */
+  function posIcon(k, p) {
+    const r = (x, y, w, c, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h || 2.6}" rx="1.3" fill="${c}"/>`;
+    const zone = x => `<rect x="${x}" y="3" width="21" height="30" rx="2.5" fill="#000" fill-opacity=".4"/>`;
+    const col = (x, c1, c2) => r(x, 11, 17, c1) + r(x, 15.5, 14, c1) + r(x, 20, 17, c2) + r(x, 24.5, 11, c2);
+    const no = p.no, ru = p.ru;
+    const g = k === 'bottom' ? r(14, 23, 36, no) + r(20, 28, 24, ru)
+      : k === 'top' ? r(14, 5, 36, no) + r(20, 10, 24, ru)
+      : k === 'full' ? `<rect x="3" y="3" width="58" height="30" rx="2.5" fill="#000" fill-opacity=".3"/>` + r(8, 7, 48, no, 4.4) + r(12, 13.5, 40, no, 4.4) + r(10, 20.5, 44, ru, 3.4) + r(17, 26, 30, ru, 3.4)
+      : k === 'right' ? zone(41) + col(43, no, ru)
+      : k === 'left' ? zone(2) + col(4, no, ru)
+      : zone(2) + zone(41) + r(4, 12, 17, k === 'split-no' ? no : ru) + r(4, 16.5, 14, k === 'split-no' ? no : ru) + r(4, 21, 16, k === 'split-no' ? no : ru)
+        + r(43, 12, 17, k === 'split-no' ? ru : no) + r(43, 16.5, 13, k === 'split-no' ? ru : no) + r(43, 21, 16, k === 'split-no' ? ru : no);
+    return `<svg class="sv-pos-ico" viewBox="0 0 64 36" aria-hidden="true" focusable="false"><rect x=".5" y=".5" width="63" height="35" rx="4" fill="#24324a" stroke="#fff" stroke-opacity=".25"/><path d="M1 30 L17 19 L27 26 L41 14 L63 29 V31 Q63 35 59 35 H5 Q1 35 1 31 Z" fill="#33496b"/>${g}</svg>`;
+  }
+  /* ---------- 🎤 «Бегущая строка»: the words light up as they are said (karaoke) ----------
+   * The line is drawn as always (posFit, «Подложка», the 7 places, «слово (перевод)»); only classes on its words change
+   * (kp — said, kc — being said, kf — still to come), so nothing jumps. Word times, the best the source allows:
+   *  1. exact: WebVTT <00:00:01.250> marks, ASS {\k} karaoke, YouTube automatic captions (json3 word offsets — when the
+   *     bridge sends them as cue.w), NRK live captions that grow word by word (each new word = its moment);
+   *  2. by the sound — read WITHOUT touching the playing video: own files (the decoded sound track, the same one card
+   *     sounds are cut from), NRK programmes / podcasts / Telegram (the 16 kHz pieces the recognizer reads too), our own
+   *     recognized lines (the very sound Whisper heard). 10 ms frames, a level between the quiet floor and the speech
+   *     level: where the speech starts / ends and its pauses; pauses go to word boundaries (punctuation first), the
+   *     words share the voiced time by their syllables. Music under the speech (no clear pauses) → layer 3;
+   *  3. estimated: syllables + punctuation pauses inside the line's own time (≈ 5.5 syllables a second, from the start
+   *     of the line; a long display time is not stretched over the words).
+   * «⏱ Сдвиг слов» ±1 s (remembered per video). Reduced motion (or the app's own motion setting): colour only. */
+  const KAR_KEY = 'nk-kar', KSH_KEY = 'nk-kar-sh';
+  const SPU = 0.17; // seconds per unit (≈ a syllable)
+  const VOW = /[aeiouyæøåéèêëóòôöüúùûáàâäíìîï]+/giu;
+  const nWords = t => String(t || '').split(/\s+/).filter(w => /\p{L}/u.test(w)).length;
+  /** a cue's own word times: c.wt (aligned with its words) or c.w = [[seconds, piece], …] (the bridge: YouTube's json3) */
+  function cueWordTimes(c) {
+    const n = nWords(c.text); if (!n) return null;
+    if (Array.isArray(c.wt) && c.wt.length === n) return c.wt.map(x => (x != null && isFinite(+x) ? +x : NaN));
+    if (Array.isArray(c.w) && c.w.length && c.w.length < 3000) {
+      const times = []; let raw = '';
+      c.w.forEach(p => { if (Array.isArray(p) && p[0] != null && isFinite(+p[0])) { times.push(+p[0]); raw += ' ' + String.fromCharCode(0xE000 + times.length - 1) + String(p[1] == null ? '' : p[1]); } });
+      if (!times.length) return null;
+      const r = markTimes(raw, times, c.start);
+      if (r.wt.length === n) return r.wt;
+    }
+    return null;
+  }
+  /** 📡 NRK live: the line grew word by word → the moment of each new word (the first words: the line's start) */
+  function liveWt(m, off) {
+    const n = nWords(m.t); if (!n) return undefined;
+    const wt = new Array(n).fill(NaN); wt[0] = m.s - off;
+    (m.ws || []).forEach(([k, g]) => { if (k > 0 && k < n) wt[k] = g - off; });
+    return wt;
+  }
+  /** words → weights (syllables + a little for long consonant clusters) and the pause after each (punctuation, numbers) */
+  function karShape(text) {
+    const W = [], P = [];
+    String(text || '').split(/\s+/).filter(Boolean).forEach(tok => {
+      const pause = /[.!?…]["»”')\]]*$/.test(tok) ? 1.8 : /[,;:]["»”')\]]*$/.test(tok) ? 1 : 0;
+      if (/\p{L}/u.test(tok)) {
+        const core = bare(tok).toLowerCase(), syl = (core.match(VOW) || []).length || 1;
+        W.push(0.6 * syl + 0.08 * core.length + 0.45);
+        P.push(pause);
+      } else if (W.length) P[P.length - 1] += /\d/.test(tok) ? tok.replace(/\D/g, '').length * 1.3 + 0.3 : 0.8; // «15» is said, «–» is a breath
+    });
+    return { W, P };
+  }
+  /** the line's word starts { t: [line time of each word], e: the end of the last word, src: exact | audio | est } */
+  function kwCalc(l, prev, next) {
+    const { W, P } = karShape(l.text), n = W.length; if (!n) return null;
+    const a = l.start, b = Math.max(l.end, a + 0.3);
+    const cum = [0]; for (let k = 0; k < n; k++) cum.push(cum[k] + W[k] + (k < n - 1 ? P[k] : 0));
+    // 1. the subtitles know the time of the words
+    if (l.wt && l.wt.length === n) {
+      const t = l.wt.map(x => (isFinite(x) ? x : NaN));
+      const known = t.filter(x => isFinite(x)).length;
+      if (known >= Math.min(2, n)) {
+        for (let k = 0; k < n; k++) {
+          if (isFinite(t[k])) continue;
+          let j = k + 1; while (j < n && !isFinite(t[j])) j++;
+          if (k === 0 || !isFinite(t[k - 1])) t[k] = j < n ? Math.max(a, t[j] - (cum[j] - cum[k]) * SPU) : a;
+          else if (j >= n) t[k] = t[k - 1] + (cum[k] - cum[k - 1]) * SPU;
+          else t[k] = t[k - 1] + (t[j] - t[k - 1]) * (cum[k] - cum[k - 1]) / Math.max(1e-6, cum[j] - cum[k - 1]);
+        }
+        for (let k = 1; k < n; k++) t[k] = Math.max(t[k], t[k - 1] + 0.02);
+        const last = t[n - 1];
+        return { t, e: Math.max(last + 0.2, Math.min(Math.max(b, last + 0.3), last + Math.max(0.3, W[n - 1] * SPU * 1.2))), src: 'exact' };
+      }
+    }
+    // 2. the sound of this moment is known: speech, pauses
+    let lo = a - 0.3, hi = b + 0.3;
+    if (prev && prev.end - 0.05 > lo) lo = Math.min(a, prev.end - 0.05);
+    if (next && next.start + 0.05 < hi) hi = Math.max(a + 0.5, next.start + 0.05);
+    const env = KEnv.slice(lo + st.offset, hi + st.offset);
+    if (env) { const r = kwAudio(W, P, cum, env, st.offset); if (r) return r; }
+    // 3. syllables in the line's own time
+    const U = cum[n], nat = U * SPU, lead = Math.min(0.1, (b - a) * 0.04), avail = Math.max(0.2, b - a - lead);
+    const span = Math.min(avail, Math.max(nat, Math.min(avail * 0.82, nat * 1.6)));
+    return { t: cum.slice(0, n).map(c => a + lead + c / U * span), e: a + lead + span, src: 'est' };
+  }
+  /** layer 2: the words over the voiced frames of the line (null — the sound does not tell enough) */
+  function kwAudio(W, P, cum, env, off) {
+    const db = env.db, F = db.length, t0 = env.t0 - off, n = W.length;
+    const srt = Float32Array.from(db).sort();
+    const p10 = srt[Math.floor(F * 0.1)], p90 = srt[Math.floor(F * 0.9)];
+    if (!(p90 - p10 >= 9) || p90 < -60) return null; // no clear speech against pauses (music, noise, silence)
+    const thr = p10 + (p90 - p10) * 0.3;
+    const v = new Uint8Array(F); for (let f = 0; f < F; f++) v[f] = db[f] >= thr ? 1 : 0;
+    const smooth = (val, max, inner) => { // runs of `val` shorter than max frames flip (gaps inside speech / blips of noise)
+      for (let f = 0; f < F;) { if (v[f] !== val) { f++; continue; } let g = f; while (g < F && v[g] === val) g++; if (g - f < max && (!inner || (f > 0 && g < F))) v.fill(1 - val, f, g); f = g; }
+    };
+    smooth(0, 6, true); smooth(1, 5, false);
+    let f0 = v.indexOf(1), f1 = v.lastIndexOf(1); if (f0 < 0) return null;
+    const nat = cum[n] * SPU;
+    const gaps = [];
+    for (let f = f0; f <= f1;) { if (v[f]) { f++; continue; } let g = f; while (g <= f1 && !v[g]) g++; if (g - f >= 12) gaps.push({ a: f, b: g }); f = g; }
+    // a long display time with more sound after the words (music, the next speaker): stop at a clear pause after them
+    if ((f1 - f0) / 100 > nat * 2.2) {
+      const k = gaps.findIndex(g => (g.a - f0) / 100 > nat * 0.9 && g.b - g.a >= 25);
+      if (k >= 0) { f1 = gaps[k].a - 1; gaps.splice(k); }
+    }
+    if ((f1 + 1 - f0) / 100 < Math.max(0.25, nat * 0.35)) return null; // too little speech for this line: not it
+    const cv = new Float32Array(F + 1); for (let f = 0; f < F; f++) cv[f + 1] = cv[f] + (f >= f0 && f <= f1 && v[f] ? 1 : 0);
+    const V = cv[f1 + 1]; if (V < 15) return null;
+    const atV = x => { let p = f0, q = f1 + 1; while (p < q) { const m = (p + q) >> 1; if (cv[m + 1] <= x) p = m + 1; else q = m; } return Math.min(p, f1); };
+    const cw = [0]; for (let k = 0; k < n; k++) cw.push(cw[k] + W[k] + (k < n - 1 ? P[k] * 0.3 : 0));
+    const est = j => V * cw[j] / cw[n];
+    // the clearest pauses first, each to the nearest word boundary (after a comma / full stop preferred), in order
+    const anch = [];
+    gaps.slice().sort((x, y) => (y.b - y.a) - (x.b - x.a)).forEach(g => {
+      const gv = cv[g.a]; let best = -1, bc = Infinity;
+      for (let j = 1; j < n; j++) {
+        if (anch.some(q => q.j === j || (q.j < j) !== (q.a < g.a))) continue;
+        const d = Math.abs(est(j) - gv), pun = P[j - 1] > 0;
+        if (d > Math.max(30, V * 0.22) * (pun ? 1.6 : 1)) continue;
+        const c = d * (pun ? 0.45 : 1); if (c < bc) { bc = c; best = j; }
+      }
+      if (best > 0) anch.push({ j: best, a: g.a, b: g.b });
+    });
+    anch.sort((x, y) => x.j - y.j);
+    const pts = [{ j: 0, fb: f0 }].concat(anch.map(q => ({ j: q.j, fa: q.a, fb: q.b })), [{ j: n, fa: f1 + 1 }]);
+    const t = new Array(n);
+    for (let g = 0; g + 1 < pts.length; g++) {
+      const A = pts[g], B = pts[g + 1], vA = cv[A.fb], vB = cv[B.fa];
+      for (let k = A.j; k < B.j; k++) t[k] = t0 + atV(vA + (vB - vA) * (cw[k] - cw[A.j]) / Math.max(1e-6, cw[B.j] - cw[A.j])) / 100;
+    }
+    for (let k = 1; k < n; k++) t[k] = Math.max(t[k], t[k - 1] + 0.03);
+    return { t, e: Math.max(t[n - 1] + 0.15, t0 + (f1 + 1) / 100), src: 'audio' };
+  }
+  function kwOf(l, prev, next) {
+    const key = `${l.text}|${l.start}|${l.end}|${st.offset}|${KEnv.ver}|${l.wt ? l.wt.join(',') : ''}`;
+    if (l._kw && l._kw.key === key) return l._kw.r;
+    let r = null; try { r = kwCalc(l, prev, next); } catch (e) { r = null; }
+    l._kw = { key, r };
+    return r;
+  }
+
+  /* the sound's loudness, 100 frames a second (dB), by the player's time — only read while «Бегущая строка» is on */
+  const KEnv = {
+    ch: [], ver: 0, gen: 0, segP: null, done: new Set(), q: [], busy: false, fails: 0, fullP: null,
+    reset() { this.ch = []; this.ver++; this.gen++; this.segP = null; this.done = new Set(); this.q = []; this.busy = false; this.fails = 0; this.fullP = null; },
+    add(pcm, t0, rate = 16000) {
+      const hop = Math.round(rate / 100), n = Math.floor((pcm && pcm.length || 0) / hop);
+      if (n < 10 || !isFinite(t0) || this.has(t0 + 0.05, t0 + n / 100 - 0.05)) return;
+      const db = new Float32Array(n);
+      for (let f = 0; f < n; f++) { let q = 0; for (let j = f * hop, e = j + hop; j < e; j++) q += pcm[j] * pcm[j]; db[f] = 10 * Math.log10(q / hop + 1e-10); }
+      this.put({ t0, db });
+    },
+    put(c) { this.ch.push(c); this.ch.sort((x, y) => x.t0 - y.t0); if (this.ch.length > 3000) this.ch.splice(0, this.ch.length - 3000); this.ver++; },
+    has(a, b) { return this.ch.some(c => c.t0 <= a && c.t0 + c.db.length / 100 >= b); },
+    /** [a, b] of the player's time → { t0, db } when ≥ 90 % of it is known */
+    slice(a, b) {
+      const n = Math.round((b - a) * 100); if (n < 10 || !this.ch.length) return null;
+      const out = new Float32Array(n).fill(NaN);
+      for (const c of this.ch) {
+        if (c.t0 + c.db.length / 100 <= a || c.t0 >= b) continue;
+        const o = Math.round((c.t0 - a) * 100), from = Math.max(0, -o), to = Math.min(c.db.length, n - o);
+        for (let k = from; k < to; k++) out[k + o] = c.db[k];
+      }
+      let miss = 0, mn = 0; for (let k = 0; k < n; k++) { if (out[k] !== out[k]) miss++; else if (out[k] < mn) mn = out[k]; }
+      if (miss > n * 0.1) return null;
+      if (miss) for (let k = 0; k < n; k++) if (out[k] !== out[k]) out[k] = mn;
+      return { t0: a, db: out };
+    },
+    /** the line i and the next two: their sound, if it can be read here */
+    want(i) {
+      if (!st || !Kar.prefs().on || st.stage !== 'player' || i < 0 || !st.lines[i]) return;
+      const S = st.stream;
+      if (S && (S.kind === 'youtube' || S.live || S.companion)) return; // YouTube: its frame only; live: the recognizer's own pieces
+      if (!S || S.blob) { if (st.media) this.whole(); return; }
+      if (!(S.pcm || S.mp3 || S.hls)) return;
+      if (navigator.connection && navigator.connection.saveData) return; // «экономия трафика»: by syllables
+      const need = [];
+      for (let k = i; k < Math.min(st.lines.length, i + 3); k++) { const l = st.lines[k]; need.push([l.start + st.offset - 0.4, l.end + st.offset + 0.4]); }
+      this.seg(need).catch(() => {});
+    },
+    /** own file: the whole sound track once (not for a big film — that would cost a lot of memory just for this) */
+    whole() {
+      if (this.fullP) return;
+      const big = !Clip._full && (!Clip.fitsInMemory() || (st.media.size || 0) > (MOBILE ? 80e6 : 250e6));
+      if (big) { this.fullP = Promise.resolve(); return; }
+      const me = st, gen = this.gen;
+      this.fullP = (async () => {
+        try {
+          const { pcm, rate } = await Clip.full();
+          if (st !== me || gen !== this.gen) return;
+          const hop = Math.round(rate / 100), n = Math.floor(pcm.length / hop), db = new Float32Array(n), K = 1 / (32767 * 32767 * hop);
+          for (let f = 0; f < n; f++) {
+            let q = 0; for (let j = f * hop, e = j + hop; j < e; j++) q += pcm[j] * pcm[j];
+            db[f] = 10 * Math.log10(q * K + 1e-10);
+            if ((f & 16383) === 16383) { await new Promise(r => setTimeout(r, 0)); if (st !== me || gen !== this.gen) return; }
+          }
+          this.put({ t0: 0, db });
+        } catch (e) { /* this sound can't be decoded here — by syllables */ }
+      })();
+    },
+    /** a stream: the same 4.8 s pieces the recognizer reads (NRK HLS, a podcast's MP3, Telegram's PCM from the bridge) */
+    async seg(need) {
+      const S = st.stream, me = st, gen = this.gen;
+      if (this.fails > 3) return;
+      if (!this.segP) this.segP = (S.pcm ? Asr.pcmSegs(S) : S.mp3 ? Asr.mp3Segs(S.mp3, S.duration) : mediaPlaylist(S.hls).then(P => P.segs)).catch(() => []);
+      const segs = await this.segP; if (st !== me || gen !== this.gen || !segs.length) return;
+      need.forEach(([x, y]) => segs.forEach((s, k) => { if (s.start < y && s.start + s.dur > x && !this.done.has(k) && !this.q.includes(k)) this.q.push(k); }));
+      if (this.busy) return;
+      this.busy = true;
+      try {
+        while (this.q.length && st === me && gen === this.gen && Kar.prefs().on) {
+          const k = this.q.shift(), s = segs[k]; this.done.add(k);
+          if (this.has(s.start + 0.1, s.start + s.dur - 0.1)) continue; // the recognizer has read it already
+          try { const pcm = await Asr.decode(s); if (st !== me || gen !== this.gen) return; this.add(pcm, s.start); this.fails = 0; }
+          catch (e) { if (++this.fails > 3) break; }
+        }
+      } finally { this.busy = false; }
+    },
+  };
+
+  /** animate? the device's «reduce motion» — unless the app's own setting says otherwise (Store.settings.forceMotion) */
+  function karMotion() {
+    try {
+      const s = window.Store && Store.state && Store.settings;
+      const f = s && (s.forceMotion != null ? s.forceMotion : s.motion);
+      if (f === true || f === 'on' || f === 'always') return true;
+      if (f === false || f === 'off' || f === 'never') return false;
+    } catch (e) { /* settings not loaded */ }
+    return !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  const KAR_SRC = {
+    exact: ['✓ Точно', 'Время каждого слова записано в самих субтитрах'],
+    audio: ['🎧 По звуку', 'Приложение послушало звук этой строки: где начинается речь и где паузы'],
+    est: ['≈ Примерно', 'Время слов рассчитано по слогам внутри строки. Спешат или опаздывают — поправьте «⏱ Сдвиг слов»'],
+  };
+  const fmtSh = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1).replace('.', ',') + ' с';
+  const Kar = {
+    p: null, boxes: null, ci: null, li: -2, r: null, fill: [], srcNow: '',
+    prefs() {
+      if (this.p) return this.p;
+      let p = {}; try { p = JSON.parse(localStorage.getItem(KAR_KEY) || '{}') || {}; } catch (e) { /* defaults */ }
+      // on by default — off only when the user turned it off (remembered)
+      return (this.p = { on: p.on !== false, mode: p.mode === 'wbw' ? 'wbw' : 'hl' });
+    },
+    save() { try { localStorage.setItem(KAR_KEY, JSON.stringify(this.p)); } catch (e) { /* full */ } },
+    /** «⏱ Сдвиг слов» of this video / programme (the last 80 kept) */
+    shKey: () => (st.media ? st.media.name + '|' + st.media.size : st.noFile ? 'f:' + st.noFile.name : ''),
+    shLoad() { let v = 0; try { const all = JSON.parse(localStorage.getItem(KSH_KEY) || '{}'); const x = all[this.shKey()]; v = x && isFinite(x.v) ? U.clamp(+x.v, -1, 1) : 0; } catch (e) { /* none */ } st.ksh = v; },
+    shSave() {
+      try {
+        const all = JSON.parse(localStorage.getItem(KSH_KEY) || '{}') || {}, k = this.shKey(); if (!k) return;
+        if (st.ksh) all[k] = { v: st.ksh, at: Date.now() }; else delete all[k];
+        Object.keys(all).sort((a, b) => all[b].at - all[a].at).slice(80).forEach(x => delete all[x]);
+        localStorage.setItem(KSH_KEY, JSON.stringify(all));
+      } catch (e) { /* full */ }
+    },
+    btn(cls = '') {
+      const on = this.prefs().on;
+      return `<button type="button" class="btn sm kar-btn ${cls}${on ? ' on' : ''}" data-k="kar" aria-pressed="${on}" title="Бегущая строка: слово загорается в тот момент, когда его произносят — вместе с переводом">🎤<span class="kar-btn-t"> Бегущая строка</span></button>`;
+    },
+    /** the small «✨ Строка / 👣 По словам» switch next to «🎤 Бегущая строка» (a choice turns the karaoke on too) */
+    mini() {
+      const p = this.prefs();
+      return `<span class="seg-mini sm kar-mini${p.on ? '' : ' off'}" data-karmini role="group" aria-label="Как бежит строка">${[['hl', '✨ Строка', 'Видна вся строка, звучащее слово светится'], ['wbw', '👣 По словам', 'Слова появляются по одному — как их произносят']].map(([k, t, tip]) =>
+        `<button type="button" data-karmode="${k}" class="${p.mode === k ? 'active' : ''}" aria-pressed="${p.on && p.mode === k}" title="${tip}${p.on ? '' : ' (включит бегущую строку)'}">${t}</button>`).join('')}</span>`;
+    },
+    bar() {
+      const p = this.prefs();
+      return `<div class="subs-kar" data-karbar ${p.on ? '' : 'hidden'}>
+          <span class="seg-mini sm kar-modes" role="group" aria-label="Как бежит строка">
+            <button type="button" data-karmode="hl" class="${p.mode === 'hl' ? 'active' : ''}" aria-pressed="${p.mode === 'hl'}" title="Видна вся строка, звучащее слово светится, сказанные остаются">✨ Подсветка</button>
+            <button type="button" data-karmode="wbw" class="${p.mode === 'wbw' ? 'active' : ''}" aria-pressed="${p.mode === 'wbw'}" title="Слова появляются по одному — как их говорят">👣 Слово за словом</button>
+          </span>
+          <span class="kar-sh" title="Слова спешат или опаздывают? Сдвиньте их — запомнится для этого видео"><span class="small muted">⏱ Сдвиг слов</span>
+            <button type="button" class="btn sm ghost" data-karsh="-0.1" aria-label="Слова раньше на 0,1 секунды">−</button><b data-kshv>${fmtSh(st.ksh || 0)}</b><button type="button" class="btn sm ghost" data-karsh="0.1" aria-label="Слова позже на 0,1 секунды">+</button></span>
+          <span class="tiny muted kar-src" data-karsrc role="status"></span>
+          <button type="button" class="btn sm ghost kar-exact" data-karexact aria-expanded="false" title="Точная бегущая строка: приложение будет сверять каждое слово со звуком своим распознаванием речи. Скоро — нажмите, чтобы узнать подробнее">🎯 Точная <span class="kar-soon">скоро</span></button>
+          <button type="button" class="btn sm ghost kar-q" data-karhelp title="Как работает бегущая строка" aria-label="Как работает бегущая строка">?</button>
+          <div class="kar-exact-note small" data-karexact-note role="status" hidden></div>
+        </div>`;
+    },
+    /** buttons, the bar and the words follow the choice */
+    sync() {
+      if (!st || !st.m) return;
+      const p = this.prefs();
+      st.m.$$('[data-k="kar"]').forEach(b => { b.classList.toggle('on', p.on); b.setAttribute('aria-pressed', p.on ? 'true' : 'false'); });
+      st.m.$$('[data-karbar]').forEach(b => { b.hidden = !p.on; });
+      st.m.$$('[data-karmode]').forEach(b => { const on = b.dataset.karmode === p.mode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on && p.on ? 'true' : 'false'); });
+      st.m.$$('[data-karmini]').forEach(b => b.classList.toggle('off', !p.on));
+      st.m.$$('[data-kshv]').forEach(b => { b.textContent = fmtSh(st.ksh || 0); });
+      this.srcNow = ''; this.bind();
+    },
+    set(on, mode, quiet) {
+      if (!st) return;
+      const p = this.prefs(), was = p.on;
+      p.on = !!on; if (mode) p.mode = mode === 'wbw' ? 'wbw' : 'hl';
+      this.save(); this.sync();
+      if (p.on) KEnv.want(Math.max(0, st.cur));
+      this.others(true);
+      if (quiet) return;
+      if (p.on && !was) {
+        UI.toast(p.mode === 'wbw' ? '🎤 Бегущая строка: слова появляются по одному, как их говорят' : '🎤 Бегущая строка: звучащее слово светится', '', 2600);
+        this.coach();
+      } else if (!p.on && was) UI.toast('Бегущая строка выключена — обычные субтитры', '', 2000);
+    },
+    /** 🎯 «Точная бегущая строка» — not yet: what it will do and what it would download (the recognition model) */
+    async exact() {
+      if (!st || !st.m) return;
+      const box = st.m.$('[data-karexact-note]'), btn = st.m.$('[data-karexact]'); if (!box) return;
+      if (!box.hidden) { box.hidden = true; if (btn) btn.setAttribute('aria-expanded', 'false'); return; }
+      let size = '≈110 МБ', ready = false;
+      try { if (window.Speech && Speech.asrInfo) { const i = await Speech.asrInfo(); ready = !!i.ready; if (i.size && i.missingBytes > 0) size = '≈' + i.size; } } catch (e) { /* the usual size */ }
+      if (!st || !st.m || !box.isConnected) return;
+      box.innerHTML = `<span><b>🎯 Точная бегущая строка — скоро.</b> Приложение будет сверять каждое слово этой и следующей строки со звуком — своим распознаванием речи, прямо на устройстве.
+        ${ready ? 'Модель распознавания у вас уже скачана — докачивать ничего не придётся.' : `Для этого один раз скачается модель распознавания норвежской речи (NB-Whisper, ${size}).`}
+        Сейчас время слов приложение узнаёт по паузам в речи или по слогам.</span>
+        <button type="button" class="btn sm" data-karexact-x title="Скрыть это пояснение">Понятно</button>`;
+      box.hidden = false; if (btn) btn.setAttribute('aria-expanded', 'true');
+    },
+    /** 👆 the first time: what is where (Help.coach — shown once per device; «?» repeats the explanation) */
+    coach() {
+      if (!window.Help || !Help.coach || (Help.coachSeen && Help.coachSeen('kar'))) return;
+      setTimeout(() => {
+        if (!st || !st.m || !this.prefs().on) return;
+        Help.coach([
+          { target: ['.subs-modal .subs-ov:not(.gone) .ov-no', '.subs-modal .subs-now .sn-no', '.subs-modal [data-karbar]'], title: '🎤 Слово светится, когда его говорят', text: 'Слушайте и читайте одновременно: звучащее слово ярче, сказанные остаются, следующие — бледнее. Перевод слова загорается вместе с ним.' },
+          { target: '.subs-modal [data-karbar] .kar-modes', title: '✨ Подсветка или 👣 Слово за словом', text: '«Подсветка» — видна вся строка. «Слово за словом» — слова появляются по одному, как их произносят.' },
+          { target: '.subs-modal [data-karbar] .kar-sh', title: '⏱ Сдвиг слов', text: 'Слова спешат или опаздывают? Нажмите − или + (по 0,1 секунды). Приложение запомнит это для видео.' },
+          { target: '.subs-modal [data-karbar] [data-karsrc]', title: '🎯 Насколько точно', text: '«Точно» — время слов есть в субтитрах. «По звуку» — приложение нашло паузы в речи. «Примерно» — по слогам.' },
+          { target: '.subs-modal [data-karbar] [data-karhelp]', title: '? Как это работает', text: 'Короткая анимированная подсказка — всегда здесь.' },
+        ], { id: 'kar', once: true });
+      }, 650);
+    },
+    nudge(d) {
+      st.ksh = U.clamp(Math.round(((st.ksh || 0) + d) * 10) / 10, -1, 1);
+      this.shSave();
+      st.m.$$('[data-kshv]').forEach(b => { b.textContent = fmtSh(st.ksh); });
+      const v = media(); if (v) this.frame(v.currentTime, true);
+      this.others(false);
+    },
+    /** after the line is drawn: its words, by their index (the line on the video and the one under it) */
+    bind() {
+      if (!st || !st.m) return;
+      const cl = st.lines[st.cur], el = st.m.el, p = this.prefs(), on = p.on && st.stage === 'player' && !(cl && cl.frame); // 📝 a line in the picture is not said
+      el.classList.toggle('kar-on', on); el.classList.toggle('kar-wbw', on && p.mode === 'wbw'); el.classList.toggle('kar-still', on && !karMotion());
+      this.boxes = []; this.ci = null; this.li = st.cur; this.r = null; this.fill = [];
+      if (!on) { st.m.$$('.kp, .kc, .kf').forEach(e => { e.classList.remove('kp', 'kc', 'kf'); e.style.removeProperty('--kp'); }); this.src(null); return; }
+      st.m.$$('[data-ov] .ov-no, [data-now] .sn-no').forEach(root => {
+        const m = new Map();
+        root.querySelectorAll('[data-wi]').forEach(e => { const k = +e.dataset.wi; if (!m.has(k)) m.set(k, []); m.get(k).push(e); });
+        if (m.size) this.boxes.push(m);
+      });
+      const v = media(); if (v && this.boxes.length) this.frame(v.currentTime, true);
+      else this.src(null);
+    },
+    /** every frame (and on a seek / pause): which word is being said now */
+    frame(t, force) {
+      if (!this.boxes || !this.boxes.length || !st || st.cur < 0) return;
+      if (this.li !== st.cur) { this.bind(); return; }
+      const L = st.lines, l = L[st.cur]; if (!l) return;
+      const r = kwOf(l, L[st.cur - 1], L[st.cur + 1]); if (!r) return;
+      const x = t - st.offset - (st.ksh || 0), n = r.t.length, wbw = this.prefs().mode === 'wbw';
+      let c = -1; while (c + 1 < n && r.t[c + 1] <= x) c++;
+      if (c === n - 1 && x > r.e + 0.12) c = n; // said: every word stays lit
+      if (wbw && c < 0) c = 0; // the first word is there with the line (no empty box)
+      if (c !== this.ci || force || r !== this.r) {
+        const bar = karMotion() && !wbw;
+        this.fill = [];
+        this.boxes.forEach(m => m.forEach((els, k) => {
+          const cls = k < c ? 'kp' : k === c ? 'kc' : 'kf';
+          els.forEach(e => { if (!e.classList.contains(cls)) { e.classList.remove('kp', 'kc', 'kf'); e.classList.add(cls); } if (k === c && bar && e.classList.contains('sw')) this.fill.push(e); });
+        }));
+        this.ci = c; this.r = r;
+        this.src(r.src);
+      }
+      if (this.fill.length && c >= 0 && c < n) {
+        const e = c + 1 < n ? r.t[c + 1] : r.e, p = U.clamp((x - r.t[c]) / Math.max(0.05, e - r.t[c]), 0, 1).toFixed(3);
+        this.fill.forEach(el => el.style.setProperty('--kp', p));
+      }
+    },
+    src(s) {
+      if (s === this.srcNow || !st || !st.m) return;
+      this.srcNow = s;
+      const k = KAR_SRC[s], el = st.m.$('[data-karsrc]'); if (!el) return;
+      el.textContent = k ? k[0] : ''; el.title = k ? k[1] : '';
+      el.dataset.src = s || '';
+    },
+    /** the choice changed: the system's own player, our TV page and the TV through the bridge follow */
+    others(resend) {
+      try { NativeSubs.sync(); } catch (e) { /* not in the system's player */ }
+      try { if (resend) Cast.kar(); else Cast.style(); } catch (e) { /* no TV */ }
+      try { tvStale(); } catch (e) { /* no TV */ }
+    },
+  };
+  /* ---------- 🎤 the same «Бегущая строка» on the TV and in the system's own player ----------
+   * A WebVTT cue can't light up a word by itself, so one line becomes a few cues in a row — one per word (a word
+   * shorter than 0.12 s goes together with the next one) — from the very same word times as on the screen
+   * («⏱ Сдвиг слов» and the line «Сдвиг» included):
+   *  ✨ «Подсветка»: every cue has the whole line; the word being said is bold + underlined (b / u — every TV player
+   *     reads them; plus its own colour where the TV reads the STYLE block), the words to come a little dimmer there;
+   *  👣 «Слово за словом»: cue k has words 1…k (each with its «(перевод)»); a row still to come keeps its place (a
+   *     no-break space), so nothing jumps. The line's translation is there from the first word — as on the screen
+   *     (the meaning first, the Norwegian words follow the voice), and the bottom of the block stays where it was.
+   * Karaoke off: not a byte of the old file changes. */
+  const KAR_MIN = 0.12;
+  /** the steps of line i inside [a, b] (player time) → [{ s, e, c0, c1 }]: c0…c1 — the words being said
+   *  (c0 = −1: before the first word; c0 = n: all said) — or null (karaoke off / nothing to light up) */
+  function karSteps(l, i, a, b) {
+    const p = Kar.prefs();
+    if (!p.on || !st || !l || l.noWords || skipTr(l) || !(b - a > KAR_MIN * 2)) return null;
+    const L = st.lines, r = kwOf(l, L[i - 1], L[i + 1]); if (!r || !r.t || !r.t.length) return null;
+    const n = r.t.length, sh = st.offset + (st.ksh || 0), wbw = p.mode === 'wbw';
+    const at = x => Math.min(b, Math.max(a, x + sh));
+    const G = [];
+    for (let k = 0; k < n; k++) { const s = at(r.t[k]), g = G[G.length - 1]; if (g && s - g.s < KAR_MIN) g.c1 = k; else G.push({ s, c0: k, c1: k }); }
+    // the line appears at its usual moment: «слово за словом» with its first word (as on the screen), «подсветка» —
+    // the whole line, nothing lit until the first word
+    if (wbw || G[0].s - a < KAR_MIN) G[0].s = a; else G.unshift({ s: a, c0: -1, c1: -1 });
+    const done = at(r.e + 0.12); // all said: every word stays, none lit (on the screen too)
+    if (done - G[G.length - 1].s >= KAR_MIN && b - done >= KAR_MIN) G.push({ s: done, c0: n, c1: n });
+    G.forEach((g, k) => { g.e = k + 1 < G.length ? G[k + 1].s : b; });
+    const last = G[G.length - 1];
+    if (G.length > 1 && last.e - last.s < KAR_MIN) { G.pop(); const pr = G[G.length - 1]; pr.e = b; if (last.c0 < n) pr.c1 = last.c1; }
+    return G;
+  }
+  /** the words of a line for the TV: [{ w, g: its «(перевод)» or '', k: the word's index }] — the same words and glosses
+   *  as glossText (a «–» or a number goes with the word before it) */
+  function karUnits(no, ru, gloss) {
+    let k = -1;
+    return String(no).split(/\s+/).filter(Boolean).map(w => {
+      if (!/\p{L}/u.test(w)) return { w, g: '', k: Math.max(0, k) };
+      k++;
+      let g = '';
+      if (gloss) { try { const r = Study.glossInfo(no, k, ru || ''), x = Study.glossShow ? Study.glossShow(w, r.g) : r.g; if (x) g = x + (r.how === 'guess' ? '?' : ''); } catch (e) { /* the word alone */ } }
+      return { w, g, k };
+    });
+  }
+  /** the rows exactly as tvWrap cuts the line (a word and its «(перевод)» stay together) */
+  function karRows(U, width) {
+    const rows = []; let cur = [], len = 0;
+    U.forEach(u => { const n = u.w.length + (u.g ? u.g.length + 3 : 0); if (cur.length && len + 1 + n > width) { rows.push(cur); cur = [u]; len = n; } else { len += (cur.length ? 1 : 0) + n; cur.push(u); } });
+    if (cur.length) rows.push(cur);
+    return rows;
+  }
+  const karState = (u, s) => (u.k < s.c0 ? 'p' : u.k > s.c1 ? 'f' : 'c');
+  /** one row at a step as WebVTT cue text: C = the classes { no, ru, k (being said), fn, fr (still to come) } */
+  function karRowVtt(row, s, wbw, C, ve) {
+    const seg = [];
+    row.forEach(u => {
+      const x = karState(u, s); if (x === 'f' && wbw) return;
+      const cur = x === 'c' && /\p{L}/u.test(u.w);
+      seg.push([x === 'f' ? C.fn : cur ? C.k : C.no, cur ? `<b><u>${ve(u.w)}</u></b>` : ve(u.w)]);
+      if (u.g) seg.push([x === 'f' ? C.fr : C.ru, cur ? `<b>(${ve(u.g)})</b>` : `(${ve(u.g)})`]);
+    });
+    if (!seg.length) return ' '; // a row still to come keeps its place
+    const out = [];
+    seg.forEach(([c, h]) => { const o = out[out.length - 1]; if (o && o[0] === c) o[1] += ' ' + h; else out.push([c, h]); });
+    return out.map(([c, h]) => `<c.${c}>${h}</c>`).join(' ');
+  }
+  /** the same for a player without classes (the system's own full screen): the word being said in b / u */
+  function karPlain(no, ru, gloss, s, wbw, ve) {
+    const out = [];
+    karUnits(no, ru, gloss).forEach(u => {
+      const x = karState(u, s); if (x === 'f' && wbw) return;
+      const cur = x === 'c' && /\p{L}/u.test(u.w);
+      out.push(cur ? `<b><u>${ve(u.w)}</u></b>` : ve(u.w));
+      if (u.g) out.push(cur ? `<b>(${ve(u.g)})</b>` : `(${ve(u.g)})`);
+    });
+    return out.join(' ') || ' ';
   }
   const LAY_KEY = 'nk-subs-lay';
   const layout = () => { try { return localStorage.getItem(LAY_KEY) === 'right' ? 'right' : 'left'; } catch (e) { return 'left'; } };
@@ -2018,6 +4014,7 @@
     musicHint();
     prefetch();
     if (st.trMode === 'word') glossNear(i);
+    KEnv.want(i); // 🎤 the sound around this line and the next ones (only while «Бегущая строка» is on)
   }
   function tick() {
     const v = media(); if (!v || !st) return;
@@ -2032,12 +4029,16 @@
     // the line on the video / under it shows only while it is being said (+ a moment to finish reading) — a line from
     // minutes ago must not hang there (programs with few subtitles: it looked as if it was said again and again)
     const l = st.lines[st.cur];
-    const live = !!l && t <= lineT(l, 'end') + Math.min(2.5, Math.max(0.8, (lineT(l, 'end') - lineT(l, 'start')) * 0.3)) || (pl && st.cur === st.playLine);
+    const grace = l && l.frame ? 0 : l ? Math.min(2.5, Math.max(0.8, (lineT(l, 'end') - lineT(l, 'start')) * 0.3)) : 0; // 📝 its end has the +1.5 s already
+    const live = !!l && t <= lineT(l, 'end') + grace || (pl && st.cur === st.playLine);
     if (st.m && st.live !== live) {
       st.live = live;
       const ov = st.m.$('[data-ov]'); if (ov) ov.classList.toggle('gone', !live);
       const now = st.m.$('[data-now]'); if (now) now.classList.toggle('gone', !live && !v.paused);
     }
+    Kar.frame(t);
+    Cred.tick(); // 🎬 the credits box leaves when the credits are gone
+    Song.tick(t); // 🎵 a song where the subtitles say nothing (once a second, only while it plays)
   }
   function loop() { if (!st) return; tick(); const v = media(); if (v && !v.paused) st.raf = requestAnimationFrame(loop); else st.raf = 0; }
   function playLine(i) {
@@ -2076,6 +4077,7 @@
   function syncPlayBtn() {
     const v = media();
     if (st && st.m) st.m.$$('[data-k="toggle"]').forEach(b => { b.innerHTML = UI.icon(v && !v.paused ? 'pause' : 'play', 18); });
+    if (st && st.m) st.m.el.classList.toggle('subs-playing', !!(v && !v.paused)); // the ⛶ on the video steps aside while it plays
   }
   /** 📍 the place of this video / programme / podcast / Telegram video or audio (js/resume.js) */
   const posId = () => st.media.name + '|' + st.media.size;
@@ -2102,9 +4104,14 @@
       st.yt = fr ? ytMedia(fr, st.mediaUrl) : null;
     }
     const v = media(); if (!v) return;
+    NativeSubs.bind(v); // the system's own full screen / picture in picture: our lines go with the video
     if (st.stream && (st.stream.kind === 'nrk' || st.stream.kind === 'tg') && (v.tagName === 'VIDEO' || v.tagName === 'AUDIO')) {
+      // the sound and the picture may be read by the page (NRK serves the stream with CORS * — hls.js needs that anyway);
+      // matters for Safari's own HLS player: 🤖 own subtitles from the sound, 📝 / 🔎 the text in the picture
+      if (st.stream.kind === 'nrk' && v.tagName === 'VIDEO' && !st.stream.audio) v.crossOrigin = 'anonymous';
       if (st.stream.autoAsr) {
-        if (st.stream.kind === 'nrk') v.crossOrigin = 'anonymous'; // the sound may be read by the page (NRK serves the stream with CORS *)
+        if (st.stream.kind === 'nrk') v.crossOrigin = 'anonymous';
+        AsrGate.compact(); // a short calm line under the video («?» — the details)
         // the audio context needs a tap (iPhone / Safari); the model already on the device → start on the first play
         st.m.el.addEventListener('pointerdown', () => { if (Asr.on || st.asrAsked) Asr.prime(); }, { capture: true });
         Speech.asrReady().then(ok => {
@@ -2124,12 +4131,15 @@
     if ('preservesPitch' in v) v.preservesPitch = true; // slower, but the voice stays natural (no «deep» voice)
     v.addEventListener('play', () => {
       syncPlayBtn(); ocrChip(false); if (!st.raf) st.raf = requestAnimationFrame(loop);
+      Ink.kick(600); // 📝 the text in the picture is read while it plays
       // 📍 the place is kept while it plays too (a closed tab / a crash keeps it)
       if (st.media && !(st.stream && st.stream.live)) { st.posTouched = true; if (!st.posTimer) st.posTimer = setInterval(() => { const x = media(); if (x && !x.paused) savePos(); }, 5000); }
     });
     v.addEventListener('ended', () => { if (st && st.media && window.Resume) Resume.clear('media', posId()); }); // finished: nothing to come back to
-    v.addEventListener('pause', () => { syncPlayBtn(); tick(); savePos(); ocrChip(true); });
+    v.addEventListener('pause', () => { syncPlayBtn(); tick(); savePos(); ocrChip(true); Ink.stop(); });
     v.addEventListener('seeked', () => { if (v.paused) ocrChip(true); });
+    v.addEventListener('seeking', () => Ink.seek());
+    v.addEventListener('seeked', () => Ink.kick(500));
     v.addEventListener('seeked', tick);
     v.addEventListener('timeupdate', () => { if (v.paused) tick(); });
     v.addEventListener('resize', () => { if (st && st.m && v.videoWidth) st.m.el.classList.remove('subs-is-audio'); }); // the picture arrived after all
@@ -2225,20 +4235,23 @@
     const mine = word ? !!word.me : lineMine;
     const verify = [...(mine ? [Prov.entry('manual', 'verify', { ru: { old: '', new: word ? word.ru : lineRu } }, word ? 'перевод слова в этой строке проверен вами' : 'перевод строки исправлен / подтверждён вами')] : []),
       ...(word && lineMine ? [Prov.entry('manual', 'verify', { exampleRu: { old: '', new: lineRu } }, 'перевод строки-примера проверен вами')] : [])];
-    const note = `${where(l)} · ${l.auto ? 'текст распознало приложение (NB-Whisper)' : `субтитры «${st.noFile.name}»`}`;
+    const note = `${where(l)} · ${l.frame ? 'надпись в кадре — её прочитало приложение' : l.song ? 'слова песни распознало приложение по звуку' : l.auto ? 'текст распознало приложение (NB-Whisper)' : `субтитры «${st.noFile.name}»`}`;
     // a line the app recognized itself (no subtitles in the program): may contain wrong words → «проверить»
-    const asrNote = l.auto ? '\n🤖 Текст распознан приложением по звуку передачи (в ней нет субтитров) — в словах возможны ошибки, проверьте' : '';
+    const asrNote = l.frame ? '\n📝 Надпись в кадре прочитана приложением — в буквах возможны ошибки, проверьте' : l.song ? '\n🎵 Слова песни распознаны приложением по звуку (субтитров там нет) — в пении легко расслышать неверно, проверьте' : l.auto ? '\n🤖 Текст распознан приложением по звуку передачи (в ней нет субтитров) — в словах возможны ошибки, проверьте' : '';
+    // 🇬🇧 an English line: never the Norwegian side — the sentence goes to card.en and the note (with its translation)
+    const en = enLine(l);
+    const enNote = en ? `\n🇬🇧 Пример по-английски: «${l.text}»${lineRu ? ' — ' + lineRu : ''}` : '';
     const data = {
-      no, ru: word ? word.ru : lineRu, en: !word && l.en ? l.en : '',
-      description: (word ? `${where(l)}${word.form && word.form !== word.no ? ` · в тексте: ${word.form}` : ''}` : where(l)) + asrNote,
-      example: word ? l.text : '', exampleRu: word ? lineRu : '',
-      tags: (word ? ['subtitles', 'word'] : ['subtitles']).concat(l.auto ? ['проверить'] : []),
+      no, ru: word ? word.ru : lineRu, en: en ? l.text : !word && l.en ? l.en : '',
+      description: (word ? `${where(l)}${word.form && word.form !== word.no ? ` · в тексте: ${word.form}` : ''}` : where(l)) + asrNote + enNote,
+      example: word && !en ? l.text : '', exampleRu: word && !en ? lineRu : '',
+      tags: (word ? ['subtitles', 'word'] : ['subtitles']).concat(l.frame ? ['текст в кадре', 'проверить'] : l.auto ? ['проверить'] : []),
       history: [Prov.entry('import', 'create', null, note),
         ...(mine ? [] : fromFile ? [Prov.entry('import', 'translate', null, `перевод из субтитров «${st.trFile.name}»`)] : Translators.provKeys(by || []).map(k => Prov.entry(k, 'translate', null, word ? 'перевод слова из субтитров' : 'перевод строки субтитров'))),
         ...verify],
       mtWarn: mine ? false : fromFile ? null : Translators.mtFlag(by || []),
     };
-    if (clip) {
+    if (clip && !en) {
       data.audio = clip.audio;               // data:audio/wav;base64,… (16 kHz mono 16-bit)
       data.audioText = l.text;               // what is said in the clip (for a word card: its example)
       data.audioSrc = { file: st.media.name, start: +clip.start.toFixed(2), end: +clip.end.toFixed(2) };
@@ -2251,6 +4264,7 @@
     return { card: c, deck: d };
   }
   async function clipFor(l) {
+    if (l.frame) return { clip: null, err: '' }; // 📝 text in the picture: nobody says it — the app's voice reads the card
     // ✈️ a Telegram video: the bridge cuts the line's sound (the author's own voice on the card)
     if (st.stream && st.stream.pcm) {
       try { return { clip: await pcmClip(l), err: '' }; } catch (e) { return { clip: null, err: e.silent ? 'В этом месте видео тишина — карточку озвучит голос приложения' : 'Звук строки не вырезан — карточку озвучит голос приложения' }; }
@@ -2259,7 +4273,7 @@
     if (st.stream && st.stream.blob) { try { return { clip: await Clip.get(l), err: '' }; } catch (e) { return { clip: null, err: e.silent ? 'В этом месте записи тишина — карточку озвучит голос приложения' : 'Звук строки не вырезан — карточку озвучит голос приложения' }; } }
     // a stream (YouTube / NRK) can't be cut on the device: the card is voiced by the app's voice, with a link to the moment
     if (!st.media || st.stream) return { clip: null, err: '' };
-    try { return { clip: await Clip.get(l), err: '' }; } catch (e) { return { clip: null, err: e.message }; }
+    try { return { clip: await Clip.get(l), err: '' }; } catch (e) { return { clip: null, err: U.niceErr(e) }; }
   }
   /** 16 kHz mono 16-bit PCM of [t0, t0 + dur] from the bridge (Telegram videos) → Float32 */
   async function pcmGet(url, t0, dur) {
@@ -2293,14 +4307,17 @@
     if (!v || !window.FrameOcr) return;
     if (!v.paused) v.pause();
     const t = v.currentTime || 0, S = st.stream;
-    st.ocrOpen = true; ocrChip(false);
-    FrameOcr.open({
+    st.ocrOpen = true; st.ocrBurn = false; ocrChip(false);
+    const me = st;
+    const p = FrameOcr.open({
       video: v, at: t, label: whereAt(t), url: S ? (S.at ? S.at(t) : S.link || '') : '',
       key: 'frame:' + (st.media ? st.media.name : ''), deck: deckName(),
       deckId: (Store.decks().find(x => x.subsMedia === (st.media ? st.media.name : '')) || Store.decks().find(x => x.name === deckName()) || {}).id,
-      onClose: () => { if (st) { st.ocrOpen = false; ocrChip(true); } },
+      onClose: () => { if (st) { st.ocrOpen = false; ocrChip(true); if (st === me && st.ocrBurn) setTimeout(() => { if (st === me) burnNote('ocr'); }, 350); } },
       onDone: cards => { if (!st) return; cards.forEach(c => st.made.push(Object.assign({}, c, { _clipInfo: '', _clipErr: '' }))); afterMade(); },
     });
+    // the frame has been read (the OCR window is still open): lines at the bottom → the note after it closes
+    Promise.resolve(p).then(m => { if (st === me && m && st.ocrOpen) st.ocrBurn = ocrBurned(m); }).catch(() => {});
   }
   function afterMade() {
     if (!st || !st.m) return;
@@ -2320,7 +4337,8 @@
     if (st.punctOf !== L || st.punctN !== L.length) { st.punctOf = L; st.punctN = L.length; st.punct = L.some(x => /[.!?]/.test(x.text)); } // automatic captions without punctuation: no joining
     const single = () => { const t = cueText(l.text); return Object.assign({}, l, { text: t, parts: [i] }); };
     if (!st.punct) return single();
-    const goesOn = k => k >= 0 && k < L.length - 1 && !SENT_END.test(cueText(L[k].text)) && L[k + 1].start - L[k].end < 1.6 && !skipTr(L[k]) && !skipTr(L[k + 1]);
+    const goesOn = k => k >= 0 && k < L.length - 1 && !SENT_END.test(cueText(L[k].text)) && L[k + 1].start - L[k].end < 1.6 && !skipTr(L[k]) && !skipTr(L[k + 1]) && !L[k].frame && !L[k + 1].frame
+      && srcOf(L[k]) === srcOf(L[k + 1]) && !L[k].song && !L[k + 1].song; // 🇬🇧 an English line never joins a Norwegian one
     let s = i, e = i;
     // …and no further than a line in which a sentence ends and the next begins (the sentence starts / ends inside it)
     const midEnd = k => /[.!?…]["»”')\]]*\s+\S/u.test(cueText(L[k].text));
@@ -2345,8 +4363,50 @@
   }
   /** the translation of whole sentences (cached like every line: Study's 's:' cache) */
   async function ensureTr(list) {
-    const need = [...new Set(list.filter(p => !p.ruFile && trOf(p) === undefined).map(p => p.text))];
+    const need = [...new Set(list.filter(p => !p.ruFile && !enLine(p) && trOf(p) === undefined).map(p => p.text))];
     for (let k = 0; k < need.length; k += 250) await Study.translateUnits(need.slice(k, k + 250), []);
+    // 🇬🇧 English lines: from English (kept in the same cache as every line)
+    const en = [...new Set(list.filter(p => enLine(p) && trOf(p) === undefined).map(p => p.text))];
+    if (en.length && window.Translators) {
+      try {
+        const r = await Translators.translateMany(en, 'en', 'ru', { quiet: true, place: trPlace() });
+        const c = Study.exCache && Study.exCache();
+        if (c) { en.forEach((t, k) => { if (r.out[k]) c['s:' + t] = String(r.out[k]).trim(); }); try { Study.exSave(); } catch (e) { /* full */ } }
+      } catch (e) { /* the card keeps an empty translation */ }
+    }
+  }
+  /** 🇬🇧 the Norwegian words of an English line, in runs: «we say "å snakke" here» → ['å snakke'] */
+  function noRuns(l) {
+    const out = []; let cur = [];
+    String(l.text).split(/\s+/).filter(w => /\p{L}/u.test(w)).forEach(w => {
+      if (LID() && LangId.isNoWord(w, st.known)) cur.push(bare(w)); else { if (cur.length) out.push(cur.join(' ')); cur = []; }
+    });
+    if (cur.length) out.push(cur.join(' '));
+    return [...new Set(out)];
+  }
+  /** ➕ on an English line: the card is made of its Norwegian words; the English sentence goes to card.en and the note */
+  async function enCard(i, btn) {
+    const l = st.lines[i]; const runs = noRuns(l);
+    if (!runs.length) { UI.toast('Строка на английском, норвежских слов в ней нет — карточку не делаем. Норвежское слово в строке можно нажать — будет перевод и карточка.', '', 5000); return; }
+    const no = runs.slice(0, 3).join(', ');
+    st.busy = true;
+    const label = btn && btn.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner sm"></span>'; }
+    try {
+      await ensureTr([l]);
+      let ru = '', by = [];
+      try { const r = await Translators.translateMany([no], 'no', 'ru', { quiet: true }); ru = String(r.out[0] || '').trim(); by = r.by || []; } catch (e) { /* the user fills it in */ }
+      if (!st) return;
+      const r = addCard(l, null, '', { no, ru, by, form: no });
+      if (!r.dup) { l._made = true; }
+      await Store.saveNow();
+      if (r.dup) UI.toast(`«${no}» уже есть в «${r.deck.name}»`, 'warn');
+      else UI.toast(`➕ «${no}» → ${r.deck.name} · английская строка сохранена как пример`, 'good', 3500);
+      redrawLine(i); afterMade();
+    } finally {
+      if (st) st.busy = false;
+      if (btn && btn.isConnected) { btn.disabled = false; btn.innerHTML = label; }
+    }
   }
   const markParts = p => (p.parts || []).forEach(k => { if (st.lines[k]) { st.lines[k]._made = true; redrawLine(k); } });
 
@@ -2354,7 +4414,8 @@
     const l0 = st.lines[i]; if (!l0 || st.busy) return;
     Clip.prime();
     if (l0._made) { UI.toast('Эта строка уже в карточках', '', 1800); return; }
-    if (skipTr(l0)) { UI.toast(l0.noWords ? 'Здесь музыка без слов — карточку не сделать' : `Строка не на языке, который вы учите, — карточку не делаем. Если это ${learnName()} — нажмите «перевести» у строки.`, '', 3500); return; }
+    if (skipTr(l0)) { UI.toast(l0.noWords ? (l0.songX ? 'Песня не на норвежском — карточку из неё не делаем' : 'Здесь музыка без слов — карточку не сделать') : `Строка не на языке, который вы учите, — карточку не делаем. Если это ${learnName()} — нажмите «перевести» у строки.`, '', 3500); return; }
+    if (enLine(l0)) { enCard(i, btn); return; }
     const l = phrase(i);
     st.busy = true;
     const label = btn && btn.innerHTML;
@@ -2379,8 +4440,9 @@
   }
   async function bulk(idx) {
     if (st.busy) return;
-    const skipped = idx.filter(i => skipTr(st.lines[i])).length;
-    idx = idx.filter(i => st.lines[i] && !st.lines[i]._made && !skipTr(st.lines[i]));
+    // 🇬🇧 English lines are not Norwegian sentences: their Norwegian words become cards one by one (➕ on the line)
+    const skipped = idx.filter(i => skipTr(st.lines[i]) || enLine(st.lines[i])).length;
+    idx = idx.filter(i => st.lines[i] && !st.lines[i]._made && !skipTr(st.lines[i]) && !enLine(st.lines[i]));
     if (!idx.length) { UI.toast(skipped ? 'В отмеченных строках нет строк на языке, который вы учите' : 'Все эти строки уже в карточках', '', 2200); return; }
     Clip.prime();
     const MAX = 150;
@@ -2390,7 +4452,7 @@
     const nCards = new Set(idx.map(i => U.norm(phrase(i).text))).size; // several ticked lines of one sentence → one card
     if (!hasRuFile() || autoN) {
       const mt = !hasRuFile() ? `⚠️ <b>Перевод строк — машинный</b> (${U.esc(Translators.provNames(Translators.dictOrder().slice(0, 1)))}): обычные фразы он переводит в основном верно, а выражения и идиомы — часто дословно. Карточки получат пометку <b>«перепроверьте»</b>.` : '';
-      const asr = autoN ? `🤖 <b>${autoN}</b> ${U.plural(autoN, ['строку', 'строки', 'строк'])} распознало приложение (в передаче нет субтитров) — в словах возможны ошибки, такие карточки получат пометку <b>«проверить»</b>.` : '';
+      const asr = autoN ? `${BOT()} <b>${autoN}</b> ${U.plural(autoN, ['строку', 'строки', 'строк'])} распознало приложение (в передаче нет субтитров) — в словах возможны ошибки, такие карточки получат пометку <b>«проверить»</b>.` : '';
       if (!(await UI.confirm(`Создать ${U.cards(nCards)} из отмеченных строк?<br><br>${[mt, asr].filter(Boolean).join('<br><br>')}${AI.available() ? '<br><br>Проверить перевод нейросетью можно потом в колоде (🤖 «Проверить»).' : ''}`, { ok: `➕ Создать ${U.cards(nCards)}`, title: 'Карточки из субтитров' }))) return;
     }
     const slow = st.media && !st.stream && (Clip.mode === 'capture' || !Clip.fitsInMemory());
@@ -2475,7 +4537,7 @@
     const gs = cueText(l.text), lineRu = trOf(l) || '';
     const me = wp = { el, i, k, gs, lineRu, form: low, no: low, ru: '', by: [], how: '' };
     me.ready = (async () => {
-      const ctx = window.Study && Study.glossInfo ? Study.glossInfo(gs, k, lineRu) : null;
+      const ctx = window.Study && Study.glossInfo && !enLine(l) ? Study.glossInfo(gs, k, lineRu) : null; // 🇬🇧 an English line: the word alone
       if (ctx && ctx.g && ['user', 'ai', 'align', 'dict'].includes(ctx.how)) {
         me.ru = ctx.g; me.how = ctx.how; me.me = ctx.how === 'user';
         me.by = ctx.how === 'ai' ? ['ai'] : ctx.how === 'align' && !l.ruFile ? (trByOf(l) || []) : [];
@@ -2489,7 +4551,7 @@
             const r = await Translators.translateMany([low], 'no', 'ru');
             me.ru = (Study.cleanGloss ? Study.cleanGloss(low, r.out[0]) : '') || String(r.out[0] || '').trim(); me.by = r.by; me.err = r.error;
             if (me.ru && window.Align && Align.echoes(low, me.ru)) me.ru = ''; // «Han» → «Хан» is no translation
-          } catch (e) { me.err = e.message; }
+          } catch (e) { me.err = U.niceErr(e); }
         }
       }
       if (wp !== me) return;
@@ -2497,6 +4559,9 @@
       const src = { user: '✓ ваш перевод', ai: '🤖 по смыслу строки', align: 'из перевода строки', dict: 'словарик' }[me.how]
         || `перевод слова без контекста — может не совпадать по смыслу${me.by.length ? ' · ' + Translators.provNames(me.by) : ''}`;
       if (box) box.innerHTML = me.ru ? `<b class="sp-ru">${U.esc(me.ru)}</b>${me.how === 'guess' ? '?' : ''}<div class="tiny muted sp-ctx${me.how === 'guess' ? ' unsure' : ''}">${U.esc(src)}</div>` : `<span class="muted">перевод не пришёл${me.err ? ': ' + U.esc(me.err) : ''}</span>`;
+      // «Дословно: …» of the whole line — only here in the popup (no extra line over the video)
+      const lit = window.Study && Study.litOf && !enLine(l) ? Study.litOf(gs, lineRu) : '';
+      if (lit && box && !el.querySelector('.sp-lit')) box.closest('.sp-tr').insertAdjacentHTML('beforeend', `<div class="tiny muted sp-lit">Дословно: ${U.esc(lit)}</div>`);
       const fx = el.querySelector('[data-wfix]');
       if (fx && window.Study && Study.fixGloss) { fx.hidden = false; const ok = fx.querySelector('[data-wp="ok"]'); if (ok) ok.hidden = !me.ru || me.how === 'user'; }
     })();
@@ -2581,17 +4646,31 @@
   }
   function setMedia(f) {
     if (st.mediaUrl) URL.revokeObjectURL(st.mediaUrl);
-    Clip.reset();
+    Clip.reset(); KEnv.reset(); Song.reset();
     st.media = f; st.mediaUrl = URL.createObjectURL(f); st.dur = 0; st.restored = false; st.posTouched = false;
     st.kind = AUDIO_EXT.test(f.name) || /^audio\//.test(f.type) ? 'audio' : 'video';
   }
   function buildLines() {
     if (!st.noCues) { st.lines = []; return; }
-    st.lines = st.noCues.map(c => ({ start: c.start, end: c.end, text: c.text, ruFile: '', en: '' }));
+    st.lines = st.noCues.map(c => { const l = { start: c.start, end: c.end, text: c.text, ruFile: '', en: '' }; const wt = cueWordTimes(c); if (wt) l.wt = wt; if (c.lang) l.trackLang = c.lang; return l; });
     if (st.trCues) pairUp(st.lines, st.trCues, st.trLang);
-    if (st.stream) tagAll(false); // (own subtitle files: as they are)
+    if (st.stream) { tagAll(false); trackLang(); }
+    // own subtitle files: as they are — only an English line is marked (translated from English, «EN»)
+    else if (LID()) st.lines.forEach(l => { const r = LangId.detect(l.text); if (r.lang === 'en' && !r.noWords) l.lang = 'en'; });
     st.cur = -1; st.checked.clear();
     markMade();
+  }
+  /** 🇬🇧 an English subtitle track (YouTube says which language a track is): every line is English unless it is
+   *  clearly Norwegian (a teacher quoting a Norwegian sentence) */
+  function trackLang() {
+    const S = st.stream, tl = String((S && (S.subLang || S.lang)) || '').toLowerCase();
+    if (!LID()) return;
+    st.lines.forEach(l => {
+      const lg = String(l.trackLang || tl).toLowerCase();
+      if (!/^en/.test(lg) || l.noWords) return;
+      const r = LangId.detect(l.text, { learn: 'en' });
+      l.lang = r.lang; l._new = undefined; // 'en', or 'no' / a neighbour when it clearly is Norwegian
+    });
   }
   function openPlayer() {
     if (!st.noFile) return;
@@ -2607,14 +4686,17 @@
     const body = st.m.el.querySelector('.modal-body');
     st.m.el.dataset.tr = st.trMode;
     st.m.el.classList.toggle('subs-is-audio', st.kind === 'audio');
-    if (st.stage === 'load') { body.innerHTML = loadHtml(); return; }
+    if (st.stage === 'load') { body.innerHTML = loadHtml(); trBadge(); return; }
     const keepT = (() => { const v = media(); return v && v.src === st.mediaUrl ? v.currentTime : 0; })();
+    Kar.shLoad(); // 🎤 «⏱ Сдвиг слов» of this video
     body.innerHTML = playerHtml();
+    if (window.AIHub && AIHub.paintWork) AIHub.paintWork(); // 🌀 who translates the lines: its living logo (js/aihub.js)
     bindMedia();
     glassWire();
     ovApply();
+    Ink.sync(); Ink.kick(); // 📝 «Надписи в кадре»: the buttons' state; reading goes on if the video plays
     svHint(); // a gentle reminder that the subtitle look can be changed (until it has been used once)
-    if (st.stream && window.TrNotice) TrNotice.badge(); // «кто переводит» stays visible after every redraw
+    trBadge(); // 🌐 «кто переводит» — one badge at the top of the window, after every redraw
     const v = media(); if (v && keepT) { try { v.currentTime = keepT; } catch (e) { /* not loaded yet */ } }
     const list = st.m.$('[data-list]');
     ['wheel', 'touchmove'].forEach(ev => list.addEventListener(ev, () => { st.userScrollT = Date.now(); hidePop(); }, { passive: true }));
@@ -2623,9 +4705,17 @@
     drawNow(); countSel();
     prefetch();
     if (window.Levels) Levels.subsBar(st.m.$('[data-lv-subs]')); // 🪜 «в этой передаче N слов уровня A2…» (opt-in)
+    learnHook(); // 🎓 «Учить по материалам»: a step's mode, the plan's button and bar (js/learnby.js)
   }
   function onClick(e) {
     const t = e.target;
+    // the «Aa» choice of the translation closes when anything else is pressed
+    if (st.m && st.m.$('[data-trpop]') && !t.closest('[data-trpop], [data-k="trpop"]')) trPopClose();
+    // «Размыт»: a tap on the blurred translation shows it (a mouse: hovering is enough); a second tap blurs it again
+    if (st.trMode === 'blur' && t.closest('.sl-tr, .sl-en, .ov-ru, .sn-tr')) {
+      const box = t.closest('.subs-line, .ov-box, .subs-now');
+      if (box) { e.preventDefault(); e.stopPropagation(); box.classList.toggle('tr-peek'); return; }
+    }
     if (st.clk) {
       // «эта строка звучит сейчас»: the next line tapped (in the list or the big one) sets the delay
       const row = st.syncTap && (t.closest('.subs-line[data-i]') || t.closest('[data-s2big] .ov-box'));
@@ -2670,16 +4760,17 @@
       if (a === 'toggle') toggle(); else if (a === 'prev') step(-1); else if (a === 'next') step(1); else if (a === 'loop') setLoop(!st.loop);
       else if (a === 'full') Full.toggle();
       else if (a === 'golive') Live.go();
+      else if (a === 'livedelay') AsrGate.liveToggle();
       else if (a === 'retry') retryStream();
       else if (a === 'tv') tvHelp();
       else if (a === 'glass') glassToggle();
       else if (a === 'ocr') ocrFrame();
+      else if (a === 'ink') Ink.toggle();
       else if (a === 'ovwin') ovToggle();
       else if (a === 'subview') svPanel();
-      else if (a === 'trcycle') {
-        const order = ['show', 'blur', 'hide'];
-        setTrMode(order[(order.indexOf(st.trMode) + 1) % 3]);
-      }
+      else if (a === 'ovbg') bgSet(!tvPrefs().bg, true);
+      else if (a === 'kar') Kar.set(!Kar.prefs().on);
+      else if (a === 'trpop') trPop(k);
       return;
     }
     const ly = t.closest('.subs-lay [data-lay]'); // not the .subs-wrap[data-lay] around everything (that swallowed every click below)
@@ -2690,10 +4781,22 @@
       return;
     }
     if (t.closest('[data-asr-go]')) { Asr.enable(true); return; }
+    if (AsrGate.click(t)) return; // ⏳ the overlay of own subtitles: skip / download / wait / the light model
     const r = t.closest('[data-rate]');
     if (r) { setRate(+r.dataset.rate); return; }
     const tm = t.closest('[data-trmode]');
-    if (tm) { setTrMode(tm.dataset.trmode); return; }
+    if (tm) { setTrMode(tm.dataset.trmode); if (tm.closest('[data-trpop]')) trPopClose(true); return; }
+    const km = t.closest('[data-karmode]'); if (km) { Kar.set(true, km.dataset.karmode, true); return; }
+    const ks = t.closest('[data-karsh]'); if (ks) { Kar.nudge(+ks.dataset.karsh); return; }
+    if (t.closest('[data-karhelp]')) { if (window.Help && Help.open) Help.open('karaoke'); return; }
+    if (t.closest('[data-karexact-x]')) { const n = st.m.$('[data-karexact-note]'); if (n) n.hidden = true; const b = st.m.$('[data-karexact]'); if (b) { b.setAttribute('aria-expanded', 'false'); b.focus({ preventScroll: true }); } return; }
+    if (t.closest('[data-karexact]')) { Kar.exact(); return; }
+    if (t.closest('[data-burn-go]')) { burnAnswer(true); return; }
+    if (t.closest('[data-ink-dl]')) { Ink.answer(true); return; }
+    if (t.closest('[data-song-dl]')) { Song.answer(true); return; }
+    if (t.closest('[data-song-no]')) { Song.answer(false); return; }
+    if (t.closest('[data-ink-no]')) { Ink.answer(false); return; }
+    if (t.closest('[data-burn-keep]')) { burnAnswer(false); return; }
     const off = t.closest('[data-off]');
     if (off) { st.offset = Math.round((st.offset + +off.dataset.off) * 10) / 10; st.m.$('[data-offv]').textContent = fmtOff(); st.m.$$('.sl-time').forEach(b => { b.textContent = tLabel(lineT(st.lines[+b.dataset.play], 'start')); }); tick(); return; }
     const s = t.closest('[data-sel]');
@@ -2707,19 +4810,53 @@
     }
     const b = t.closest('[data-bulk]');
     if (b) { bulk(b.dataset.bulk === 'checked' ? [...st.checked].sort((x, y) => x - y) : st.lines.map((l, i) => i).filter(i => !st.lines[i]._made && lineNew(st.lines[i]).size)); return; }
-    if (t.closest('[data-trall]')) {
-      const btn = t.closest('[data-trall]'); btn.disabled = true;
-      translate(st.lines.map((l, i) => i)).then(() => { if (st && st.m) { st.lines.forEach((l, i) => { l._trFail = false; redrawLine(i); }); btn.disabled = false; } });
+    if (t.closest('[data-trall]')) { trRetry(true); UI.toast('Перевожу все строки — частями, начиная с текущей', '', 3500); return; }
+    if (t.closest('[data-trretry]')) { trRetry(false); return; }
+    if (t.closest('[data-trpick]')) {
+      // the app's own «choose a translator» window (Google / Mozhi / MyMemory / keys / neural networks)
+      const n = st.lines.filter(l => l._trFail && trOf(l) === undefined && !skipTr(l)).length;
+      if (window.Study && Study.failModal) { Study._lastFail = { missing: n || 1, error: Translators.gCooling() ? 'Google временно ограничил переводы' : 'переводчики сейчас не отвечают' }; Study.failModal(() => trRetry(false)); }
+      return;
     }
   }
-  function setTrMode(mode) {
+  /** «Aa» on the video: a small window with the four ways to show the translation (the video keeps playing) */
+  function trPop(btn) {
+    if (!st || !st.m) return;
+    if (st.m.$('[data-trpop]')) { trPopClose(true); return; }
+    const host = btn.closest('[data-stage]') || btn.parentElement;
+    const el = document.createElement('div');
+    el.className = 'subs-trpop'; el.dataset.trpop = ''; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Как показывать перевод');
+    el.innerHTML = `<div class="tp-head">Перевод</div><div class="tp-list" role="radiogroup" aria-label="Перевод">${TR_MODES.map(([k, t, tip, ic]) =>
+      `<button type="button" class="tp-opt${st.trMode === k ? ' on' : ''}" data-trmode="${k}" role="radio" aria-checked="${st.trMode === k}"><span class="tp-ico" aria-hidden="true">${ic}</span><span class="tp-txt"><b>${t}</b><small>${tip}</small></span></button>`).join('')}</div>`;
+    host.appendChild(el);
+    const hr = host.getBoundingClientRect(), br = btn.getBoundingClientRect();
+    const w = Math.min(320, hr.width - 16);
+    el.style.width = w + 'px';
+    el.style.left = Math.max(8, Math.min(hr.width - w - 8, br.left - hr.left)) + 'px';
+    el.style.top = (br.bottom - hr.top + 6) + 'px';
+    btn.setAttribute('aria-expanded', 'true');
+    const on = el.querySelector('.tp-opt.on') || el.querySelector('.tp-opt'); if (on) on.focus({ preventScroll: true });
+    el.addEventListener('keydown', e => {
+      const opts = [...el.querySelectorAll('.tp-opt')], i = opts.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); opts[(i + (e.key === 'ArrowDown' ? 1 : opts.length - 1)) % opts.length].focus(); }
+    });
+  }
+  function trPopClose(focus) {
+    const el = st && st.m && st.m.$('[data-trpop]'); if (!el) return;
+    el.parentNode.removeChild(el);
+    const b = st.m.$('[data-k="trpop"]'); if (b) { b.setAttribute('aria-expanded', 'false'); if (focus) b.focus({ preventScroll: true }); }
+  }
+  function setTrMode(mode, temp) {
+    if (!TR_MODES.some(x => x[0] === mode)) mode = 'show';
     const wasWord = st.trMode === 'word';
     st.trMode = mode;
     if (wasWord !== (mode === 'word')) { st.lines.forEach((x, i) => redrawLine(i)); if (mode === 'word') glossNear(Math.max(0, st.cur)); else glossProg(''); }
-    try { localStorage.setItem('nk-subs-tr', mode); } catch (_) { /* full */ }
+    if (!temp) try { localStorage.setItem('nk-subs-tr', mode); } catch (_) { /* full */ } // 🎓 a step's mode is not the saved choice
     st.m.el.dataset.tr = mode;
-    st.m.$$('[data-trmode]').forEach(b => b.classList.toggle('active', b.dataset.trmode === mode));
-    st.m.$$('[data-k="trcycle"]').forEach(b => { b.textContent = `Aa ${mode === 'show' ? 'RU' : mode === 'blur' ? 'RU ░' : 'RU ✕'}`; }); // also when changed under the video
+    st.m.$$('[data-trmode]').forEach(b => { const on = b.dataset.trmode === mode; b.classList.toggle('active', on); b.classList.toggle('on', on); b.setAttribute(b.getAttribute('role') === 'radio' ? 'aria-checked' : 'aria-pressed', on ? 'true' : 'false'); });
+    st.m.$$('[data-trname]').forEach(b => { b.textContent = trName(mode).toLowerCase(); }); // the «Aa» button on the video too
+    st.m.$$('.tr-peek').forEach(b => b.classList.remove('tr-peek'));
+    NativeSubs.sync(); // the system's own full screen follows the mode too
   }
 
   /* ---------- 📺 «Подключиться к телевизору»: one window, the list of TVs (like YouTube's cast button) ----------
@@ -2727,8 +4864,22 @@
    * program itself — with our subtitles (Norwegian + Russian). Works from any browser on the Mac (Safari too). */
   /** a short fingerprint of the subtitles sent to the TV (to notice when the screen has newer translations) */
   const vttHash = s => { let h = 0; s = String(s || ''); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
+  /** what the TV's subtitles depend on: the lines + the 🎤 choice («Бегущая строка», its look, «Сдвиг слов») — not the
+   *  word times themselves (they get finer while the sound is read; that alone is no reason to ask for a refresh) */
+  const tvSig = () => { const k = Kar.prefs(); return k.on ? tvVtt(true) + `|🎤${k.mode}|${st.ksh || 0}` : tvVtt(); };
+  /** the screen's subtitles differ from the TV's (translation, look, place, 🎤): offer «🔄 Обновить субтитры на телевизоре» */
+  function tvStale() {
+    if (!st || !st.m || !st.castInfo || st.castInfo.youtube || !st.tvVttHash || st.castLost || st.castBusy) return;
+    const stale = vttHash(tvSig()) !== st.tvVttHash || (st.tvStyleKey != null && JSON.stringify(tvStyle(tvPrefs())) !== st.tvStyleKey), bar = st.m.$('[data-castbar]'); // the size (A−…A++) is in the style
+    let note = bar && bar.querySelector('[data-tvstale]');
+    if (stale && bar && !note) {
+      note = document.createElement('div'); note.className = 'cast-lost cast-stale'; note.dataset.tvstale = '';
+      note.innerHTML = '<span>📝 Субтитры на экране изменились (перевод, цвет, размер, положение или бегущая строка) — на телевизоре пока прежние.</span><button class="btn sm primary" data-tvc="refresh">🔄 Обновить субтитры на телевизоре</button>';
+      bar.prepend(note);
+    } else if (!stale && note) note.remove();
+  }
   async function castApi(action, body) {
-    if (action === 'play' && body && body.vtt && st) { st.tvVttHash = vttHash(body.vtt); st.tvStyleKey = body.style ? JSON.stringify(body.style) : null; }
+    if (action === 'play' && body && body.vtt && st) { st.tvVttHash = vttHash(tvSig()); st.tvStyleKey = body.style ? JSON.stringify(body.style) : null; }
     let r;
     try { r = await fetch('/api/cast/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) }); }
     catch (e) { throw new Error('мост на Mac не отвечает'); }
@@ -2745,6 +4896,114 @@
     if (S.video || S.mp3) { const t = v.currentTime; v.src = S.video || S.mp3; v.addEventListener('loadedmetadata', () => { if (t) v.currentTime = t; }, { once: true }); const p = v.play(); if (p && p.catch) p.catch(() => {}); return; }
     streamReload(v);
   }
+  /* ---------- 📺 without the Mac bridge (the public site, or the bridge is off) ---------- */
+  /** the app runs on this Mac itself: only here do hints with the Terminal command make sense */
+  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
+  /** what this device and browser can do */
+  function tvDevice() {
+    const ua = navigator.userAgent;
+    const iOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const mac = /Macintosh/.test(ua) && !iOS, android = /Android/.test(ua);
+    const chrome = /Chrome|CriOS|Edg/.test(ua) && !/OPR|SamsungBrowser/.test(ua);
+    const safari = /Safari/.test(ua) && !/Chrome|CriOS|Edg|FxiOS|OPR|Android/.test(ua);
+    return { iOS, mac, android, chrome, safari, cast: Cast.supported() };
+  }
+  /** an address the TV can open by itself (on the internet — not a file on this device, not the Mac's bridge):
+   *  { url, type, audio, hls } or null */
+  function tvSource(S) {
+    if (!S || S.live || S.companion || S.kind === 'youtube') return null;
+    const pub = u => /^https?:\/\//i.test(u || '') && !/^https?:\/\/(localhost|127\.|0\.0\.0\.0|\[::1\])/i.test(u);
+    if (S.kind === 'nrk' && S.hls && pub(S.hls)) return { url: S.hls, type: 'application/x-mpegurl', audio: !!S.audio, hls: true };
+    if (S.mp3 && pub(S.mp3)) return { url: S.mp3, type: 'audio/mpeg', audio: true };
+    if (S.video && pub(S.video) && !S.blob) {
+      const ext = (String(S.video).split(/[?#]/)[0].match(/\.([a-z0-9]{2,4})$/i) || [])[1] || '';
+      const type = { mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', ogg: 'audio/ogg', wav: 'audio/wav', m3u8: 'application/x-mpegurl' }[ext.toLowerCase()] || (S.audio ? 'audio/mpeg' : 'video/mp4');
+      return { url: S.video, type, audio: !!S.audio || /^audio\//.test(type), hls: ext.toLowerCase() === 'm3u8' };
+    }
+    return null;
+  }
+  /** 🪞 screen mirroring for this device: [[title, how]] */
+  function mirrorSteps(d) {
+    const steps = [];
+    if (d.chrome && !d.iOS && !d.android) steps.push(['🖥 Chrome на компьютере → телевизор с Chromecast', 'Меню Chrome <b>⋮</b> → <b>Трансляция, сохранение и отправка</b> → <b>Трансляция…</b> → выберите телевизор. Источник: <b>«Транслировать вкладку»</b> (звук пойдёт тоже). Затем здесь <b>⛶ На весь экран</b>.']);
+    if (d.mac) steps.push(['🍎 Mac → Apple TV или телевизор с AirPlay (Samsung, LG, Sony…)', 'Пункт управления (два переключателя в строке меню) → <b>Повтор экрана</b> → выберите телевизор. Затем здесь <b>⛶ На весь экран</b>. <i>Android-приставки AirPlay не принимают.</i>']);
+    if (d.iOS) steps.push(['📱 iPhone / iPad → Apple TV или телевизор с AirPlay', 'Пункт управления (смахните вниз от правого верхнего угла) → <b>Повтор экрана</b> → выберите телевизор, затем здесь <b>⛶ На весь экран</b>. <i>Android-приставки AirPlay не принимают.</i>']);
+    if (d.android) steps.push(['🤖 Android → Chromecast / Android TV / Google TV', 'Быстрые настройки (смахните сверху вниз) → <b>Трансляция экрана</b> (или «Smart View» на Samsung) → выберите телевизор. Затем здесь <b>⛶ На весь экран</b>.']);
+    if (!steps.length) steps.push(['📺 Любой телевизор', 'Включите на устройстве повтор (трансляцию) экрана на телевизор, затем здесь нажмите <b>⛶ На весь экран</b>.']);
+    return steps;
+  }
+  /** the app's own address (GitHub Pages serves it under a sub-path) */
+  const appAddr = () => location.origin + location.pathname.replace(/[^/]*$/, '');
+  /** 🎤 Google's own player (Chrome's cast, no bridge) shows NRK's own subtitle file only — say so once, kindly */
+  const tvKarNote = () => (Kar.prefs().on && !Cast.appId()
+    ? '<div class="tv-kar-note" data-tv-kar>🎤 Бегущая строка так на телевизор не пойдёт — там будут обычные строки. Со словами, которые загораются, — через мост на Mac (или нашу страницу для телевизора, когда её подключат); при повторе экрана или AirPlay экрана телевизор покажет её как здесь.</div>'
+    : '');
+  /** the window «Подключиться к телевизору» when there is no bridge: the best way for this device first */
+  function tvNoBridge(m, box, S) {
+    const d = tvDevice(), src = tvSource(S);
+    const v = st.m.$('video[data-media]') || st.m.$('audio[data-media]');
+    const sound = !!(src ? src.audio : (S.audio || st.kind === 'audio'));
+    const airplay = !!(src && v && typeof v.webkitShowPlaybackTargetPicker === 'function' && !st.hls);
+    const local = !S.kind || !!S.blob || S.kind === 'tg'; // own files, Telegram (through the Mac or saved here)
+    const ytAt = () => { let t = 0; try { t = st.yt && st.yt.getCurrentTime ? st.yt.getCurrentTime() || 0 : 0; } catch (e) { /* the start */ } return S.at && t > 5 ? S.at(t) : S.link; };
+    const subsHere = S.nrkVtt
+      ? 'На телевизоре — норвежские субтитры NRK, а строка с переводом остаётся здесь, на экране: удобно читать с телефона.'
+      : 'Строки с переводом остаются здесь, на экране, и идут вместе с телевизором.';
+    let main = '', openMirror = false; // the mirroring steps open at once when there is no better way here
+    if (S.live) {
+      main = `<div class="tv-msg">📡 <b>Прямой эфир лучше смотреть на телевизоре в приложении NRK:</b> наши субтитры к эфиру появляются на ходу, и телевизор показал бы его <b>без них</b>. Или повторите экран этого устройства — тогда будут и субтитры, и перевод (ниже).</div>
+        ${S.link ? `<a class="btn tv-wide" href="${U.esc(S.link)}" target="_blank" rel="noopener">↗ Открыть в NRK</a>` : ''}`;
+    } else if (S.kind === 'youtube') {
+      main = `<div class="tv-step tv-main"><b>▶ Видео YouTube — через само приложение YouTube</b>
+          <div class="small">Откройте видео в YouTube и нажмите там значок трансляции (экран с волнами, вверху видео) — выберите телевизор. ${d.iOS ? 'На iPhone приложение YouTube умеет и Chromecast, и AirPlay.' : ''} Видео пойдёт <b>без наших субтитров</b>; с переводом — повтором экрана (ниже).</div>
+          <a class="btn primary tv-wide" data-tvn-yt href="${U.esc(ytAt() || '')}" target="_blank" rel="noopener">▶ Открыть в YouTube</a></div>`;
+    } else if (src && d.cast) {
+      main = `<button class="btn primary lg tv-cast" data-tvn-cast>📡 Выбрать телевизор <small>Chromecast · Android TV · Google TV${sound ? ' · колонка Google' : ''}</small></button>
+        <div class="small muted tv-cast-note">${sound ? 'Звук пойдёт на телевизор или колонку, строки с переводом — здесь, на экране.' : subsHere} Здесь останется пульт: пауза и стоп.</div>
+        ${sound ? '' : tvKarNote()}
+        <div data-tvn-out></div>`;
+    } else if (airplay) {
+      main = `<button class="btn primary lg tv-cast" data-tvn-airplay>◎ AirPlay <small>Apple TV · телевизор с AirPlay (Samsung, LG, Sony…)</small></button>
+        <div class="small muted tv-cast-note">${sound ? 'Звук пойдёт на телевизор или колонку' : 'Телевизор покажет видео'}, а строки с переводом останутся здесь, на экране.
+          ${d.iOS ? `Chromecast и Android-приставки AirPlay не принимают${S.kind === 'nrk' && S.link ? ' — для них откройте передачу в приложении NRK: у него есть своя кнопка трансляции (но без нашего перевода)' : ''}.` : 'Chromecast и Android-приставки AirPlay не принимают — для них откройте приложение в Google Chrome или повторите экран (ниже).'}</div>
+        ${d.iOS && S.kind === 'nrk' && S.link ? `<a class="btn tv-wide" href="${U.esc(S.link)}" target="_blank" rel="noopener">↗ Открыть в приложении NRK</a>` : ''}`;
+    } else if (src) {
+      openMirror = true;
+      main = `<div class="tv-step tv-main"><b>📡 Chromecast, Android TV, Google TV</b>
+          <div class="small">${d.iOS ? 'На iPhone и iPad браузер не умеет отправлять видео на Chromecast — так решила Apple. Откройте это приложение в <b>Safari</b> (там есть AirPlay) — или повторите экран (ниже).'
+            : `Кнопка выбора телевизора есть в браузере <b>Google Chrome</b> (Android, Windows, Mac). Откройте это же приложение в Chrome: <b>${U.esc(appAddr())}</b>`}</div>
+          ${d.iOS ? '' : '<button class="btn sm" data-tvn-copy>📋 Скопировать адрес для Chrome</button>'}</div>`;
+    } else {
+      openMirror = true;
+      main = `<div class="tv-msg">${sound ? '🎧 Эта запись' : '🎬 Это видео'} ${S.kind === 'tg' && !S.blob ? 'из Telegram открывается только здесь, в приложении' : local ? 'хранится на этом устройстве' : 'играет только здесь'} — телевизор сам открыть ${sound ? 'её' : 'его'} не может. Но смотреть на большом экране можно — повтором экрана, это просто:</div>`;
+    }
+    const steps = mirrorSteps(d);
+    const extra = sound && !src ? '<div class="tv-step"><b>🔊 Колонка Bluetooth или наушники</b><div class="small">Подключите их в настройках Bluetooth этого устройства — звук пойдёт туда.</div></div>' : '';
+    box.innerHTML = `${main}
+      <details class="tv-more" ${openMirror ? 'open' : ''}><summary>🪞 Повтор экрана — телевизор показывает ровно то, что здесь (вместе с субтитрами и переводом)</summary>
+        ${steps.map(([h, t]) => `<div class="tv-step"><b>${h}</b><div class="small">${t}</div></div>`).join('')}
+        ${sound ? '' : '<button class="btn tv-wide" data-tvn-full>⛶ На весь экран</button>'}
+      </details>${extra}`;
+    box.addEventListener('click', async e => {
+      if (e.target.closest('[data-tvn-full]')) { m.close(); setTimeout(() => Full.enter(), 220); return; }
+      if (e.target.closest('[data-tvn-yt]')) { try { if (st.yt && st.yt.pauseVideo) st.yt.pauseVideo(); } catch (err) { /* it plays on */ } return; }
+      if (e.target.closest('[data-tvn-airplay]')) { try { v.webkitShowPlaybackTargetPicker(); } catch (err) { UI.toast('AirPlay сейчас недоступен — включите повтор экрана в Пункте управления', 'warn', 5000); } return; }
+      if (e.target.closest('[data-tvn-copy]')) {
+        try { await navigator.clipboard.writeText(appAddr()); UI.toast('Адрес скопирован — вставьте его в Google Chrome', 'good'); } catch (err) { UI.toast('Адрес: ' + appAddr(), '', 6000); }
+        return;
+      }
+      const c = e.target.closest('[data-tvn-cast]'); if (!c || c.disabled) return;
+      const out = box.querySelector('[data-tvn-out]'); if (out) out.innerHTML = '';
+      c.disabled = true; const label = c.innerHTML; c.innerHTML = '<span class="spinner sm"></span> ищу телевизоры…';
+      try { if (await Cast.start()) { m.close(); UI.toast('📡 Идёт на телевизоре', 'good', 4000); } }
+      catch (err) {
+        // no technical text: what to check and how else
+        if (out) out.innerHTML = `<div class="tv-prep warn" role="status"><span class="tv-hourglass" aria-hidden="true">📺</span><span class="grow"><b>${U.esc(err && err.message ? U.niceErr(err) : 'Телевизор сейчас не ответил')}</b>
+          <small>Телевизор или приставка должны быть включены и в той же Wi-Fi сети, что и это устройство. Можно нажать ещё раз — или повторить экран (ниже).</small></span></div>`;
+      }
+      if (c.isConnected) { c.disabled = false; c.innerHTML = label; }
+    });
+  }
   function tvHelp() {
     const S = st.stream || {};
     const canCast = S.kind === 'nrk' || S.kind === 'youtube';
@@ -2755,13 +5014,14 @@
     });
     const box = m.$('[data-tv]');
     m.$('[data-tv-other]').onclick = () => { m.close(); setTimeout(tvOther, 220); };
+    // no bridge (the public site, or the Mac's bridge is off): straight to the best way for this device
+    if (!bridge) { m.$('[data-tv-other]').remove(); tvNoBridge(m, box, S); return; }
     if (!canCast) { box.innerHTML = `<div class="tv-msg">${S.kind === 'tg' ? 'Видео из Telegram идёт через мост на этом Mac — телевизор открыть его сам не может.' : 'Свои файлы с этого Mac телевизор открыть не может.'} Используйте повтор экрана — «Другие способы» ниже.</div>`; return; }
     // live: our subtitles are made on the fly here — a TV playing the stream itself would show it without them
     if (S.live) { box.innerHTML = `<div class="tv-msg">📡 <b>Прямой эфир приложение на телевизор не отправляет:</b> наши субтитры к эфиру появляются на ходу, и телевизор показал бы эфир <b>без них</b>. Смотрите эфир на телевизоре в приложении NRK — или повторите экран этого устройства (тогда будут и субтитры, и перевод): «Другие способы» ниже.</div>
       <a class="btn" href="${U.esc(S.link)}" target="_blank" rel="noopener">↗ Открыть в NRK</a>`; return; }
-    if (!bridge) { box.innerHTML = '<div class="tv-msg">Отправка на телевизор работает через мост на Mac — запустите его (python3 …/bridge/server.py). Пока можно использовать повтор экрана — «Другие способы» ниже.</div>'; return; }
     const devHtml = list => list.length
-      ? `<div class="tv-hint small muted">Выберите телевизор:</div>
+      ? `${Kar.prefs().on && !S.audio ? '<div class="tv-kar-note ok" data-tv-kar>🎤 Бегущая строка тоже пойдёт на телевизор: звучащее слово выделено жирным и цветом.</div>' : ''}<div class="tv-hint small muted">Выберите телевизор:</div>
          <div class="tv-devs">${list.map(d => `<button class="tv-dev" data-dev="${U.esc(d.id)}" data-name="${U.esc(d.name)}"><span class="tv-ico">${d.group ? '🔊' : '📺'}</span><span class="grow"><b>${U.esc(d.name)}</b>${d.model ? `<small>${U.esc(d.model)}</small>` : ''}</span><span class="tv-go">›</span></button>`).join('')}</div>
          <button class="btn sm ghost" data-tv-rescan>🔄 Искать снова</button>`
       : `<div class="tv-msg">Телевизоры не найдены. Они должны быть <b>включены</b> и в <b>той же Wi-Fi сети</b>, что и этот Mac.</div><button class="btn" data-tv-rescan>🔄 Искать снова</button>`;
@@ -2774,7 +5034,7 @@
             <button class="btn primary lg tv-install" data-tv-install>⬇ Установить модуль трансляции</button>`;
         } else if (e.oldBridge) {
           box.innerHTML = '<div class="tv-msg">Мост на Mac нужно перезапустить (в нём новая функция): в окне Терминала, где он запущен, нажмите <b>Ctrl+C</b> и запустите снова <code>python3 "…/bridge/server.py"</code>. Потом снова нажмите «📺 На телевизор».</div>';
-        } else box.innerHTML = `<div class="tv-msg">⚠️ ${U.esc(e.message)}</div><button class="btn" data-tv-rescan>🔄 Попробовать снова</button>`;
+        } else box.innerHTML = `<div class="tv-msg">⚠️ ${U.esc(U.niceErr(e))}</div><button class="btn" data-tv-rescan>🔄 Попробовать снова</button>`;
       }
     };
     box.addEventListener('click', async e => {
@@ -2793,7 +5053,8 @@
       const devName = d.dataset.name;
       box.querySelector('[data-tv-prep]')?.remove();
       box.insertAdjacentHTML('afterbegin', `<div class="tv-prep" data-tv-prep role="status" aria-live="polite">
-        <span class="tv-hourglass" aria-hidden="true">⏳</span><span class="grow"><b data-tv-step></b><small data-tv-sub></small></span></div>`);
+        <span class="tv-hourglass" data-aiw-live="tr" data-aiw-idle="tv" data-aiw-size="34" aria-hidden="true"></span><span class="grow"><b data-tv-step></b><small data-tv-sub></small></span></div>`);
+      if (window.AIHub && AIHub.paintWork) AIHub.paintWork(); // 🌀 the translator's living logo instead of an hourglass
       const step = (t, sub = '') => { const b = box.querySelector('[data-tv-step]'), s = box.querySelector('[data-tv-sub]'); if (b) b.textContent = t; if (s) s.textContent = sub; };
       let tick = 0;
       try {
@@ -2854,10 +5115,21 @@
   const TV_COLORS = [['#ffffff', 'белый'], ['#ffd84d', 'жёлтый'], ['#5ee7ff', 'голубой'], ['#7dff7a', 'зелёный'], ['#ff9f43', 'оранжевый'], ['#ff7eb6', 'розовый']];
   const NAMED = { white: '#ffffff', yellow: '#ffd84d', cyan: '#5ee7ff', lime: '#7dff7a' }; // older saved choices
   const HEX = /^#[0-9a-f]{6}$/i;
+  /* ⊞ «Положение субтитров»: where OUR lines sit on the video — here, in full screen and on our TV page */
+  const SV_POS = [['bottom', 'Внизу'], ['top', 'Вверху'], ['full', 'На весь экран'], ['right', 'Справа'], ['left', 'Слева'],
+    ['split-no', 'Норвежский слева · перевод справа'], ['split-tr', 'Перевод слева · норвежский справа']];
+  const SV_POS_KEYS = SV_POS.map(x => x[0]);
+  // «↺ Сбросить всё» in «Aa Вид субтитров»: the look as it was at the start (the TV mode is not in that window — it stays)
+  const SV_DEF = { no: '#ffffff', ru: '#ffd84d', size: 'm', bg: false, gl: 'small', pos: 'bottom' };
   const tvPrefs = () => {
     let p = {}; try { p = JSON.parse(localStorage.getItem(TV_KEY) || '{}'); } catch (e) { /* defaults */ }
+    if (!p || typeof p !== 'object' || Array.isArray(p)) p = {};
     // gl: how big the (перевод) after each word is — 'same' as the word, 'mid', 'small' (the old look)
-    p = Object.assign({ mode: 'sent', no: '#ffffff', ru: '#ffd84d', size: 'm', bg: true, gl: 'small' }, p);
+    p = Object.assign({ mode: 'sent' }, SV_DEF, p);
+    if (!SV_POS_KEYS.includes(p.pos)) p.pos = 'bottom';
+    // 🔲 the dark strip under the lines is OFF unless chosen with the new switch (bgv: 2) — before, it was on for everyone
+    // (and saved with every other change), so an old «bg: true» is not a choice
+    if (p.bgv !== 2) p.bg = false;
     ['no', 'ru'].forEach(k => { if (NAMED[p[k]]) p[k] = NAMED[p[k]]; if (!HEX.test(p[k])) p[k] = k === 'no' ? '#ffffff' : '#ffd84d'; });
     if (!['s', 'm', 'l', 'xl'].includes(p.size)) p.size = 'm';
     if (!['same', 'mid', 'small'].includes(p.gl)) p.gl = 'small';
@@ -2874,6 +5146,17 @@
     el.style.setProperty('--sv-scale', String(SV_SCALE[p.size] || 1));
     el.style.setProperty('--sv-gl', String(g[0])); el.style.setProperty('--sv-gl2', String(g[1]));
     el.style.setProperty('--sv-bga', p.bg ? '.64' : '0');
+    el.classList.toggle('sv-nobg', !p.bg); // no strip: the letters get a black outline (readable on a light picture)
+    st.m.$$('[data-k="ovbg"]').forEach(b => { b.classList.toggle('on', !!p.bg); b.setAttribute('aria-pressed', p.bg ? 'true' : 'false'); });
+    posFit(); // ⊞ the place of the lines (and their size there) follows
+  }
+  /** 🔲 «Подложка» on / off — ONE setting (this screen, full screen, «Aa Вид субтитров», the TV) */
+  function bgSet(on, toast) {
+    const p = tvPrefs(); p.bg = !!on; p.bgv = 2; tvSave(p);
+    svApply();
+    const cb = st && st.m && st.m.$('[data-castbar]'); if (cb && cb._draw) cb._draw(); // the TV bar shows the same choice
+    Cast.style(); // our TV page (if it is the one showing): at once
+    if (toast) UI.toast(on ? '🔲 Подложка включена: тёмная полоса под субтитрами' : '🔲 Подложка выключена: буквы с чёрной обводкой', '', 2200);
   }
   /* ---------- 💡 «where are the subtitle settings?» — not a one-time tip that is easy to miss:
    * a soft dot on the «Aa» button until it has been opened once, and a small bubble pointing at it —
@@ -2927,26 +5210,84 @@
       const pick = key => { const custom = !TV_COLORS.some(([h]) => h === p[key].toLowerCase());
         return `<label class="tv-pick ${custom ? 'on' : ''}" title="Любой цвет — полная палитра" style="--sw:${p[key]}"><input type="color" data-svcolor="${key}" value="${p[key]}" aria-label="Любой цвет"><span>🎨 Любой цвет</span></label>`; };
       const seg = (key, opts) => `<span class="seg-mini sm">${opts.map(([v, t]) => `<button type="button" data-svp="${key}" data-v="${v}" class="${p[key] === v ? 'active' : ''}">${t}</button>`).join('')}</span>`;
+      const tm = st ? st.trMode : 'show', glp = w => tm === 'word' ? ` <span class="sv-pv-gl" style="color:${p.ru}">(${w})</span>` : '';
       m.$('[data-sv]').innerHTML = `
-        <div class="sv-preview ${p.bg ? 'bg' : ''}" style="--pv-scale:${sc};--pv-gl:${g}">
-          <div class="sv-pv-no" style="color:${p.no}">Jeg <span class="sv-pv-gl" style="color:${p.ru}">(я)</span> vet <span class="sv-pv-gl" style="color:${p.ru}">(знаю)</span> hvem <span class="sv-pv-gl" style="color:${p.ru}">(кто)</span> jeg <span class="sv-pv-gl" style="color:${p.ru}">(я)</span> er. <span class="sv-pv-gl" style="color:${p.ru}">(есть)</span></div>
-          <div class="sv-pv-ru" style="color:${p.ru}">(Я знаю, кто я.)</div></div>
+        <div class="sv-tr-head"><span class="small muted">Перевод:</span></div>
+        <div class="sv-tr" role="radiogroup" aria-label="Перевод">${TR_MODES.map(([k, t, tip, ic]) => `<button type="button" class="sv-tr-opt${tm === k ? ' on' : ''}" data-svtr="${k}" role="radio" aria-checked="${tm === k}" title="${tip}"><span class="sv-tr-ico" aria-hidden="true">${ic}</span><span class="sv-tr-t">${t}</span></button>`).join('')}</div>
+        <p class="tiny muted sv-tr-note">${U.esc((TR_MODES.find(x => x[0] === tm) || TR_MODES[0])[2])}. Меняется сразу — видео не останавливается.</p>
+        <div class="sv-preview ${p.bg ? 'bg' : ''} sv-pv-${tm}" style="--pv-scale:${sc};--pv-gl:${g}" data-svpv>
+          <div class="sv-pv-no" style="color:${p.no}">Jeg${glp('я')} vet${glp('знаю')} hvem${glp('кто')} jeg${glp('я')} er.${glp('есть')}</div>
+          ${tm === 'hide' ? '<div class="sv-pv-off">перевод скрыт</div>' : `<div class="sv-pv-ru" style="color:${p.ru}">(Я знаю, кто я.)</div>`}</div>
+        <div class="sv-pos-head"><span class="small muted">Положение субтитров:</span>
+          <button type="button" class="btn sm sv-reset" data-svreset="pos" title="Вернуть субтитры вниз — как было сначала" ${p.pos === 'bottom' ? 'disabled' : ''}>↺ Сбросить</button></div>
+        <div class="sv-pos" role="group" aria-label="Положение субтитров">${SV_POS.map(([k, t]) => `<button type="button" class="sv-pos-opt${p.pos === k ? ' on' : ''}" data-svp="pos" data-v="${k}" aria-pressed="${p.pos === k}" title="${t}${k === 'bottom' ? ' — как сначала' : ''}">${posIcon(k, p)}<span>${t}</span></button>`).join('')}</div>
+        <p class="tiny muted sv-pos-note">Работает и в окне, и на весь экран. На узком экране (телефон вертикально) «Справа», «Слева» и половинки встают под видео — каждая строка у своего края, чтобы буквы оставались крупными.</p>
         <div class="cast-row"><span class="small muted cast-lab">Размер текста:</span>${seg('size', [['s', 'A−'], ['m', 'A'], ['l', 'A+'], ['xl', 'A++']])}</div>
         <div class="cast-row"><span class="small muted cast-lab">Перевод слов в скобках:</span>${seg('gl', [['same', 'как слова'], ['mid', 'чуть меньше'], ['small', 'мелко']])}</div>
+        <div class="cast-row sv-kar"><span class="small muted cast-lab">🎤 Бегущая строка:</span><span class="seg-mini sm" role="group" aria-label="Бегущая строка">${[['off', 'Выкл'], ['hl', '✨ Подсветка'], ['wbw', '👣 Слово за словом']].map(([v, t]) => { const k = Kar.prefs(), on = v === 'off' ? !k.on : k.on && k.mode === v;
+          return `<button type="button" data-svkar="${v}" class="${on ? 'active' : ''}" aria-pressed="${on}">${t}</button>`; }).join('')}</span></div>
+        <p class="tiny muted sv-kar-note">Слово загорается, когда его произносят, — вместе с переводом: слушаете и читаете одновременно. Работает во всех положениях и на весь экран — и на телевизоре через мост на Mac.</p>
+        ${svInk()}
+        ${svSong()}
+        ${window.Voices && Voices.openChooser ? `<div class="cast-row sv-voice"><span class="small muted cast-lab">🔊 Озвучка слов:</span>${Voices.langButtons(voicePlace())}</div>` : ''}
         <div class="cast-row"><span class="small muted cast-lab">Норвежский:</span>${TV_COLORS.map(([h, l]) => sw('no', h, l)).join('')}${pick('no')}</div>
         <div class="cast-row"><span class="small muted cast-lab">Перевод:</span>${TV_COLORS.map(([h, l]) => sw('ru', h, l)).join('')}${pick('ru')}</div>
-        <label class="cast-bg"><input type="checkbox" data-svbg ${p.bg ? 'checked' : ''}> тёмная подложка под текстом на видео</label>
-        <p class="tiny muted">Цвета и размер — те же и на телевизоре. Цвета применяются к строке на видео (на тёмном фоне); под видео и в списке текст остаётся в цветах темы, чтобы всегда читался.</p>`;
+        <label class="cast-bg" title="То же, что кнопка «🔲 Подложка» под видео"><input type="checkbox" data-svbg ${p.bg ? 'checked' : ''}> 🔲 Подложка — тёмная полоса под субтитрами на видео</label>
+        <p class="tiny muted">Без подложки буквы с чёрной обводкой. Надписи, впечатанные в само видео, закрывает отдельная кнопка «▭ Закрыть надписи в видео» — там всегда матовое стекло.</p>
+        <p class="tiny muted">Цвета и размер — те же и на телевизоре, положение — если телевизор это умеет. Цвета применяются к строке на видео (на тёмном фоне); под видео и в списке текст остаётся в цветах темы, чтобы всегда читался.</p>`;
     };
     const set = (key, val) => { const p = tvPrefs(); p[key] = val; tvSave(p); svApply(); draw();
-      const cb = st && st.m && st.m.$('[data-castbar]'); if (cb && cb._draw) cb._draw(); }; // the TV bar shows the same choice
+      const cb = st && st.m && st.m.$('[data-castbar]'); if (cb && cb._draw) cb._draw(); // the TV bar shows the same choice
+      if (key === 'pos') Cast.style(); }; // our TV page: the new place at once
+    /** ↺ back to the start: only the place («Внизу»), or the whole look of this window */
+    const reset = all => {
+      const p = tvPrefs();
+      if (all) { Object.assign(p, SV_DEF); p.bgv = 2; } else p.pos = 'bottom';
+      tvSave(p); svApply(); draw();
+      const cb = st && st.m && st.m.$('[data-castbar]'); if (cb && cb._draw) cb._draw();
+      Cast.style();
+      UI.toast(all ? '↺ Вид субтитров — как было сначала: внизу, обычный размер, белый и жёлтый' : '↺ Субтитры снова внизу, как было', '', 2600);
+    };
     svHintDone('used'); // found it: the dot and the reminders stop for good
-    m = UI.modal({ title: 'Aa Вид субтитров', cls: 'narrow sv-modal', body: '<div data-sv></div>', foot: '<button class="btn primary" data-sv-ok>Готово</button>' });
+    /** 📝 «Надписи в кадре» — the same switch as in the bar on the video */
+    function svInk() {
+      const no = Ink.yt() ? 'недоступно для YouTube — его картинку браузер не даёт прочитать' : st && st.ink && st.ink.tainted ? 'в этом видео недоступно — браузер не даёт прочитать его картинку' : '';
+      const on = Ink.on();
+      return `<div class="cast-row sv-ink"><span class="small muted cast-lab">📝 Надписи в кадре:</span>${no ? `<span class="small muted">${no}</span>`
+        : `<span class="seg-mini sm" role="group" aria-label="Надписи в кадре">${[['off', 'Выкл'], ['on', 'Переводить сами']].map(([v, t]) => { const a = (v === 'on') === on;
+          return `<button type="button" data-svink="${v}" class="${a ? 'active' : ''}" aria-pressed="${a}" title="${v === 'on' ? 'Титры, название, вывески в кадре читаются и переводятся сами, когда нет субтитров' : 'Не читать надписи в кадре'}">${t}</button>`; }).join('')}</span>`}</div>
+        <p class="tiny muted sv-ink-note">Титры, название фильма, вывески — всё, что впечатано в картинку, — приложение читает само, пока на экране нет субтитров, и показывает перевод с пометкой «📝 В кадре». Эти строки попадают и в список — из них тоже можно делать карточки.</p>`;
+    }
+    /** 🎵 «Песни без субтитров» — on / off (needs the speech recognizer, downloaded once) */
+    function svSong() {
+      const no = !Song.can(true) ? (st && st.stream && st.stream.kind === 'youtube' ? 'недоступно для YouTube — его звук браузер не даёт приложению' : 'недоступно для этого видео — приложение не может прочитать его звук') : '';
+      const on = Song.on();
+      return `<div class="cast-row sv-song"><span class="small muted cast-lab">🎵 Песни без субтитров:</span>${no ? `<span class="small muted">${no}</span>`
+        : `<span class="seg-mini sm" role="group" aria-label="Песни без субтитров">${[['off', 'Выкл'], ['on', 'Распознавать']].map(([v, t]) => { const a = (v === 'on') === on;
+          return `<button type="button" data-svsong="${v}" class="${a ? 'active' : ''}" aria-pressed="${a}">${t}</button>`; }).join('')}</span>`}</div>
+        <p class="tiny muted sv-song-note">Когда субтитров нет, а звучит песня или речь, приложение само распознаёт слова по звуку (прямо на устройстве) и показывает их с переводом и пометкой «🎵». Если поют не по-норвежски и не по-английски — просто скажет, на каком языке песня.${Song.size ? ` Нужна модель распознавания речи — ${Song.size}, скачивается один раз.` : ''}</p>`;
+    }
+    m = UI.modal({ title: 'Aa Вид субтитров', cls: 'narrow sv-modal', body: '<div data-sv></div>', onClose: () => { if (st && Kar.prefs().on) Kar.coach(); },
+      foot: '<button type="button" class="btn ghost sv-reset" data-svreset="all" title="Положение, размер, перевод слов, цвета и подложка — как было сначала">↺ Сбросить всё</button><span class="grow"></span><button class="btn primary" data-sv-ok>Готово</button>' });
     draw();
     m.$('[data-sv-ok]').onclick = () => m.close();
-    m.el.addEventListener('click', e => { const b = e.target.closest('[data-svp]'); if (b) set(b.dataset.svp, b.dataset.v); });
+    m.el.addEventListener('click', e => {
+      const r = e.target.closest('[data-svreset]'); if (r) { reset(r.dataset.svreset === 'all'); return; }
+      const tb = e.target.closest('[data-svtr]');
+      if (tb) { if (st && st.m) setTrMode(tb.dataset.svtr); draw(); const nb = m.$(`[data-svtr="${tb.dataset.svtr}"]`); if (nb) nb.focus({ preventScroll: true }); return; }
+      const pv = e.target.closest('[data-svpv]'); if (pv && st && st.trMode === 'blur') { pv.classList.toggle('tr-peek'); return; }
+      const sg = e.target.closest('[data-svsong]');
+      if (sg) { Song.set(sg.dataset.svsong === 'on').then(() => { draw(); const nb = m.$(`[data-svsong="${sg.dataset.svsong}"]`); if (nb) nb.focus({ preventScroll: true }); }); return; }
+      const ik = e.target.closest('[data-svink]');
+      if (ik) { if ((ik.dataset.svink === 'on') !== Ink.on()) Ink.toggle(); draw(); const nb = m.$(`[data-svink="${ik.dataset.svink}"]`); if (nb) nb.focus({ preventScroll: true }); return; }
+      const kb = e.target.closest('[data-svkar]');
+      if (kb) { const v = kb.dataset.svkar; if (v === 'off') Kar.set(false, null, true); else Kar.set(true, v, true); draw(); const nb = m.$(`[data-svkar="${v}"]`); if (nb) nb.focus({ preventScroll: true }); return; }
+      const b = e.target.closest('[data-svp]'); if (!b) return;
+      const k = b.dataset.svp, v = b.dataset.v; set(k, v);
+      const nb = m.$$('[data-svp]').find(x => x.dataset.svp === k && x.dataset.v === v); if (nb) nb.focus({ preventScroll: true }); // the keyboard stays where it was
+    });
     m.el.addEventListener('change', e => {
-      if (e.target.matches('[data-svbg]')) set('bg', e.target.checked);
+      if (e.target.matches('[data-svbg]')) { bgSet(e.target.checked); draw(); }
       const k = e.target.dataset && e.target.dataset.svcolor; if (k && HEX.test(e.target.value)) set(k, e.target.value.toLowerCase());
     });
     m.el.addEventListener('input', e => { // the preview follows while choosing in the palette
@@ -2987,13 +5328,14 @@
       // meaning first, in the background: no «please wait» window over the TV window — its ⏳ panel shows the progress
       if (mode === 'word') {
         if (onWords) onWords(0, st.lines.length, 'start');
-        await Study.translateUnits([], st.lines.filter(l => !skipTr(l)).map(l => ({ s: cueText(l.text), ru: trOf(l) || '' })), { quiet: true, onProgress: onWords });
+        await Study.translateUnits([], st.lines.filter(glOk).map(l => ({ s: cueText(l.text), ru: trOf(l) || '' })), { quiet: true, onProgress: onWords });
         if (st) st.lines.forEach(l => { l._gl = true; });
       }
     } catch (e) { /* lines without a translation go as they are */ }
   }
-  /** WebVTT for the TV in the chosen mode and colours */
-  function tvVtt() {
+  /** WebVTT for the TV in the chosen mode and colours (🎤 with «Бегущая строка» on: a cue per word — karSteps;
+   *  plain: as if it were off — what the «субтитры изменились» check compares) */
+  function tvVtt(plain) {
     if (!st || !st.lines.length) return '';
     const p = tvPrefs();
     const ve = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3001,19 +5343,58 @@
     // any colour: the exact one in a STYLE block (::cue), plus the nearest standard class for players that ignore it
     const noC = 'nkno.' + vttNamed(p.no), ruC = 'nkru.' + vttNamed(p.ru);
     const c = (cls, s) => `<c.${cls}>${ve(s)}</c>`;
+    // ⊞ the place (WebVTT cue settings — the TV's player follows them where it can): «Внизу» exactly as before;
+    // columns get short lines; the two halves are two cues side by side (line-snapped: a player that ignores the side
+    // puts them one above the other, never on top of each other)
+    const pos = p.pos, col = /^(left|right|split)/.test(pos), wN = col ? 22 : 38, wR = col ? 22 : 40, wG = col ? 24 : 44;
+    const SET = { bottom: 'line:90%,end position:50% align:center size:92%', top: 'line:8%,start position:50% align:center size:92%',
+      full: 'line:50%,center position:50% align:center size:92%', right: 'line:50%,center position:97%,line-right align:center size:36%',
+      left: 'line:50%,center position:3%,line-left align:center size:36%' };
+    const SIDE = { L: 'line:-2 position:3%,line-left align:center size:44%', R: 'line:-2 position:97%,line-right align:center size:44%' };
+    // 🎤 the word being said: its own colour (pink as on the screen — or another one when the lines are pinkish), the
+    // nearest standard class for players that ignore STYLE; the words still to come a little dimmer (STYLE only)
+    const K = !plain && Kar.prefs().on ? { wbw: Kar.prefs().mode === 'wbw' } : null;
+    let KC = null, KST = '';
+    if (K) {
+      const acc = ['#ff7eb6', '#5ee7ff', '#7dff7a', '#ff9f43'].find(h => vttNamed(h) !== vttNamed(p.no) && vttNamed(h) !== vttNamed(p.ru)) || '#ff7eb6';
+      const dim = h => `rgba(${parseInt(h.slice(1, 3), 16)}, ${parseInt(h.slice(3, 5), 16)}, ${parseInt(h.slice(5, 7), 16)}, 0.55)`;
+      KC = { no: noC, ru: ruC, k: 'nkk.' + vttNamed(acc), fn: 'nkfn.' + vttNamed(p.no), fr: 'nkfr.' + vttNamed(p.ru) };
+      KST = `::cue(.nkk) { color: ${acc}; }\n::cue(.nkfn) { color: ${dim(p.no)}; }\n::cue(.nkfr) { color: ${dim(p.ru)}; }\n`;
+    }
+    let n = 0;
     const cues = st.lines.map((l, i) => {
       const sk = skipTr(l), no = l.noWords ? '♪ ♪ ♪' : cueText(l.text), ru = String(trOf(l) || '').replace(/\n+/g, ' ').trim();
-      let txt;
-      if (p.mode === 'word' && !sk) txt = tvWrap(glossText(no, ru).replace(/ ?\((?:[^()]|\([^()]*\))*\)/g, g => g.replace(/ /g, '\u0001')), 44) // a word and its (перевод) stay on one line
-        .map(x => `<c.${noC}>${ve(x.replace(/\u0001/g, ' ')).replace(/\(((?:[^()]|\([^()]*\))*)\)/g, `</c><c.${ruC}>($1)</c><c.${noC}>`)}</c>`.replace(/<c\.[\w.]+><\/c>/g, '')).join('\n')
+      let noTxt, ruTxt = '';
+      if (p.mode === 'word' && glOk(l)) {
+        noTxt = tvWrap(glossText(no, ru).replace(/ ?\((?:[^()]|\([^()]*\))*\)/g, g => g.replace(/ /g, '\u0001')), wG) // a word and its (перевод) stay on one line
+          .map(x => `<c.${noC}>${ve(x.replace(/\u0001/g, ' ')).replace(/\(((?:[^()]|\([^()]*\))*)\)/g, `</c><c.${ruC}>($1)</c><c.${noC}>`)}</c>`.replace(/<c\.[\w.]+><\/c>/g, '')).join('\n');
         // and the whole line's translation under it — as on the computer's screen
-        + (ru ? '\n' + tvWrap(`(${ru})`, 44).map(x => c(ruC, x)).join('\n') : '');
-      else txt = tvWrap(no, 38).map(x => c(noC, x)).join('\n') + (p.mode === 'sent' && ru ? '\n' + tvWrap(ru, 40).map(x => c(ruC, x)).join('\n') : '');
+        if (ru) ruTxt = tvWrap(`(${ru})`, wG).map(x => c(ruC, x)).join('\n');
+      } else {
+        noTxt = tvWrap(no, wN).map(x => c(noC, x)).join('\n');
+        if (p.mode === 'sent' && ru) ruTxt = tvWrap(ru, wR).map(x => c(ruC, x)).join('\n');
+      }
+      const tt = `${ts(lineT(l, 'start'))} --> ${ts(lineT(l, 'end'))}`;
+      const ks = K && !sk && !l.noWords ? karSteps(l, i, lineT(l, 'start'), lineT(l, 'end')) : null;
+      if (ks) {
+        const rows = karRows(karUnits(no, ru, p.mode === 'word' && glOk(l)), p.mode === 'word' ? wG : wN);
+        const words = s => rows.map(r => karRowVtt(r, s, K.wbw, KC, ve)).join('\n');
+        const at = s => `${ts(s.s)} --> ${ts(s.e)}`;
+        if (pos === 'split-no' || pos === 'split-tr') { // the translation: one cue for the whole line on its side
+          const sN = pos === 'split-no' ? SIDE.L : SIDE.R, sR = pos === 'split-no' ? SIDE.R : SIDE.L;
+          return (ruTxt ? [`${++n}\n${tt} ${sR}\n${ruTxt}\n`] : []).concat(ks.map(s => `${++n}\n${at(s)} ${sN}\n${words(s)}\n`)).join('\n');
+        }
+        return ks.map(s => `${++n}\n${at(s)} ${SET[pos] || SET.bottom}\n${words(s)}${ruTxt ? '\n' + ruTxt : ''}\n`).join('\n');
+      }
+      if (pos === 'split-no' || pos === 'split-tr') {
+        const a = pos === 'split-no' ? noTxt : ruTxt, b = pos === 'split-no' ? ruTxt : noTxt;
+        return [a ? `${++n}\n${tt} ${SIDE.L}\n${a}\n` : '', b ? `${++n}\n${tt} ${SIDE.R}\n${b}\n` : ''].filter(Boolean).join('\n');
+      }
       // «line:90%,end»: the BOTTOM of the block stays at 90% — a tall block (words + the line's translation) grows upwards,
       // never off the bottom edge of the TV
-      return `${i + 1}\n${ts(lineT(l, 'start'))} --> ${ts(lineT(l, 'end'))} line:90%,end position:50% align:center size:92%\n${txt}\n`;
+      return `${++n}\n${tt} ${SET[pos] || SET.bottom}\n${noTxt}${ruTxt ? '\n' + ruTxt : ''}\n`;
     });
-    return `WEBVTT\n\nSTYLE\n::cue(.nkno) { color: ${p.no}; }\n::cue(.nkru) { color: ${p.ru}; }\n\n` + cues.join('\n');
+    return `WEBVTT\n\nSTYLE\n::cue(.nkno) { color: ${p.no}; }\n::cue(.nkru) { color: ${p.ru}; }\n${KST}\n` + cues.join('\n');
   }
   /** the TV again with the new look / mode, from where it is now */
   async function tvRecast(el) {
@@ -3079,15 +5460,7 @@
     st.castTimer = setInterval(async () => {
       if (!st || !st.castInfo || st.castLost || st.castBusy) return;
       // every ~16 s: are the translations on the screen newer than on the TV (fixed word, late translation)? → offer to update
-      if (++n % 8 === 0 && st.tvVttHash && !st.castInfo.youtube) {
-        const stale = vttHash(tvVtt()) !== st.tvVttHash || (st.tvStyleKey != null && JSON.stringify(tvStyle(tvPrefs())) !== st.tvStyleKey), bar = st.m.$('[data-castbar]'); // the size (A−…A++) is in the style
-        let note = bar && bar.querySelector('[data-tvstale]');
-        if (stale && bar && !note) {
-          note = document.createElement('div'); note.className = 'cast-lost cast-stale'; note.dataset.tvstale = '';
-          note.innerHTML = '<span>📝 Субтитры на экране изменились (перевод, цвет или размер) — на телевизоре пока прежние.</span><button class="btn sm primary" data-tvc="refresh">🔄 Обновить субтитры на телевизоре</button>';
-          bar.prepend(note);
-        } else if (!stale && note) note.remove();
-      }
+      if (++n % 8 === 0 && st.tvVttHash && !st.castInfo.youtube) tvStale();
       let s; try { s = await castApi('control', { id: st.castInfo.id, action: 'status' }); fails = 0; }
       catch (e) { if (++fails >= 4 && st && st.castInfo && st.castInfo.alive && !st.castBusy) castLost(); return; } // the TV is gone (turned off, network)
       if (!st || !st.castTimer || st.castLost || st.castBusy) return;
@@ -3170,6 +5543,7 @@
       const pick = key => { const custom = !TV_COLORS.some(([h]) => h === p[key].toLowerCase());
         return `<label class="tv-pick ${custom ? 'on' : ''}" title="Любой цвет — полная палитра" style="--sw:${p[key]}"><input type="color" data-tvcolor="${key}" value="${p[key]}" aria-label="Любой цвет"><span>🎨 Любой цвет</span></label>`; };
       el.innerHTML = `<div class="cast-row"><span class="cast-live">${UI.TV_SVG(18)} На телевизоре «${U.esc(name)}»</span>
+          <span class="aiw-live cast-aiw" data-aiw-live="tr" data-aiw-label data-aiw-size="20" role="status" hidden></span>
           <button class="btn sm" data-tvc="pause">⏸ Пауза</button><button class="btn sm" data-tvc="play">▶ Продолжить</button>
           <button class="btn sm bad" data-tvc="stop">⏹ Стоп</button></div>
         ${youtube ? '<div class="small muted">Видео YouTube идёт в приложении YouTube на телевизоре — наши субтитры там не показываются.</div>' : `
@@ -3179,11 +5553,12 @@
         <div class="cast-row"><span class="small muted cast-lab">Перевод:</span>${TV_COLORS.map(([h, l]) => sw('ru', h, l)).join('')}${pick('ru')}</div>
         <div class="cast-row"><span class="small muted cast-lab">Так будет:</span><span class="tv-preview ${p.bg ? 'bg' : ''}"><span style="color:${p.no}">Hei, hvordan går det?</span><span style="color:${p.ru}">Привет, как дела?</span></span></div>
         <div class="cast-row"><span class="small muted">Размер:</span><span class="seg-mini sm">${[['s', 'A−'], ['m', 'A'], ['l', 'A+'], ['xl', 'A++']].map(([k, t]) => `<button data-tvp="size" data-v="${k}" class="${p.size === k ? 'active' : ''}">${t}</button>`).join('')}</span>
-          <label class="cast-bg"><input type="checkbox" data-tvbg ${p.bg ? 'checked' : ''}> тёмная подложка под текстом</label>
+          <label class="cast-bg"><input type="checkbox" data-tvbg ${p.bg ? 'checked' : ''}> 🔲 подложка под текстом</label>
           <span class="tiny muted">изменения применяются на телевизоре за 2–3 секунды</span></div>`}`;
       if (st.castLost) lostNote();
     };
     draw(); el._draw = draw; // the Aa window redraws it after a change there
+    if (window.AIHub && AIHub.paintWork) AIHub.paintWork();
     el.onclick = async e => {
       const b = e.target.closest('[data-tvc]');
       if (b) {
@@ -3215,36 +5590,30 @@
     el.onchange = async e => {
       const k = e.target.dataset && e.target.dataset.tvcolor;
       if (k) { const p = tvPrefs(); p[k] = e.target.value; tvSave(p); draw(); svApply(); await tvRecast(el); return; }
-      if (!e.target.matches('[data-tvbg]')) return; const p = tvPrefs(); p.bg = e.target.checked; tvSave(p); draw(); svApply(); await tvRecast(el);
+      if (!e.target.matches('[data-tvbg]')) return; bgSet(e.target.checked); await tvRecast(el);
     };
   }
   /** other ways: screen mirroring, AirPlay (and the Chrome cast SDK) */
   function tvOther() {
     const S = st.stream || {};
-    const ua = navigator.userAgent;
-    const iOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-    const mac = /Macintosh/.test(ua) && !iOS, android = /Android/.test(ua);
-    const chrome = /Chrome|CriOS|Edg/.test(ua) && !/OPR/.test(ua);
+    const d = tvDevice(), { iOS } = d;
+    const ua = navigator.userAgent, chrome = d.chrome;
     const v = st.m.$('video[data-media]');
     const airplay = v && typeof v.webkitShowPlaybackTargetPicker === 'function' && !(st.hls); // native video only (not hls.js / YouTube)
-    const steps = [];
-    if (chrome && !iOS && !android) steps.push(['🖥 Chrome на компьютере → любой телевизор с Chromecast', 'Меню Chrome <b>⋮</b> → <b>Трансляция, сохранение и отправка</b> → <b>Трансляция…</b> → выберите телевизор. Источник: <b>«Транслировать вкладку»</b>. Затем здесь <b>⛶ На весь экран</b>.']);
-    if (mac) steps.push(['🍎 Mac → Apple TV или телевизор с AirPlay (Samsung, LG, Sony…)', 'Пункт управления (два переключателя в строке меню) → <b>Повтор экрана</b> → выберите телевизор. Затем здесь <b>⛶ На весь экран</b>. <i>Android-приставки AirPlay не принимают.</i>']);
-    if (iOS) steps.push(['📱 iPhone / iPad → Apple TV или телевизор с AirPlay', 'Пункт управления → <b>Повтор экрана</b> → выберите телевизор, затем здесь <b>⛶ На весь экран</b>. <i>Android-приставки AirPlay не принимают.</i>']);
-    if (android) steps.push(['🤖 Android → Chromecast / Android TV / Google TV', 'Быстрые настройки (смахните вниз) → <b>Трансляция экрана</b> → выберите телевизор. Затем здесь <b>⛶ На весь экран</b>.']);
-    if (!steps.length) steps.push(['📺 Любой телевизор', 'Включите на устройстве повтор (трансляцию) экрана на телевизор, затем здесь нажмите <b>⛶ На весь экран</b>.']);
-    const castable = S.kind === 'nrk' && Cast.supported();
+    const steps = mirrorSteps(d);
+    const src = tvSource(S);
+    const castable = !!src && d.cast;
     // the main way: like the cast button in YouTube — Chrome shows the list of TVs (Chromecast / Android TV / Google TV)
-    const castBlock = S.kind === 'nrk'
+    const castBlock = src
       ? (castable
         ? `<button class="btn primary lg tv-cast" data-tv-cast>📡 Выбрать телевизор <small>Chromecast · Android TV · Google TV</small></button>
-           <div class="small muted tv-cast-note">Передача пойдёт прямо на приставку (её же плеером), с субтитрами: норвежская строка + русский перевод. Здесь останется пульт: пауза, субтитры, стоп.</div>`
+           <div class="small muted tv-cast-note">${src.audio ? 'Звук пойдёт прямо на телевизор или колонку' : 'Передача пойдёт прямо на приставку (её же плеером)'}${S.nrkVtt && !src.audio ? ' с норвежскими субтитрами NRK' : ''}; строка с переводом остаётся здесь, на экране. Здесь же — пульт: пауза, стоп.</div>${src.audio ? '' : tvKarNote()}`
         : `<div class="tv-step tv-main"><b>📡 Android-приставка, Chromecast, Google TV — со списком телевизоров, как в YouTube</b>
-             <div class="small">${iOS ? 'На iPhone и iPad браузеры не умеют отправлять видео на Chromecast — это запрет Apple. Откройте приложение на компьютере в <b>Google Chrome</b> — или смотрите передачу в приложении NRK TV (↗): у него есть кнопка трансляции, но без наших субтитров и перевода.'
-               : `Эта кнопка работает в браузере <b>Google Chrome</b> (на Mac, Windows, Android) — в ${/Safari/.test(ua) && !chrome ? 'Safari' : 'этом браузере'} её нет. Откройте это же приложение в Chrome: адрес <b>${U.esc(location.origin)}</b> — там здесь появится «📡 Выбрать телевизор».`}</div>
+             <div class="small">${iOS ? 'На iPhone и iPad браузеры не умеют отправлять видео на Chromecast — это запрет Apple. Откройте приложение на компьютере или Android в <b>Google Chrome</b> — или смотрите передачу в приложении NRK TV (↗): у него есть кнопка трансляции, но без наших субтитров и перевода.'
+               : `Эта кнопка работает в браузере <b>Google Chrome</b> (на Mac, Windows, Android) — в ${/Safari/.test(ua) && !chrome ? 'Safari' : 'этом браузере'} её нет. Откройте это же приложение в Chrome: адрес <b>${U.esc(appAddr())}</b> — там здесь появится «📡 Выбрать телевизор».`}</div>
              ${iOS ? '' : '<button class="btn sm" data-tv-copy>📋 Скопировать адрес для Chrome</button>'}</div>`)
       : S.kind === 'youtube'
-        ? `<div class="tv-step tv-main"><b>▶ Видео YouTube на телевизор</b><div class="small">Нажмите значок трансляции <b>в самом плеере YouTube</b> (правый верхний угол видео) и выберите телевизор — видео откроется в приложении YouTube на телевизоре, <b>без наших субтитров</b>. С субтитрами и переводом — повтором экрана (ниже).</div></div>`
+        ? `<div class="tv-step tv-main"><b>▶ Видео YouTube на телевизор</b><div class="small">Нажмите значок трансляции <b>в самом плеере YouTube</b> (правый верхний угол видео) и выберите телевизор — видео откроется в приложении YouTube на телевизоре, <b>без наших субтитров</b>. С субтитрами и переводом — повтором экрана (ниже).</div>${S.link ? `<a class="btn sm" href="${U.esc(S.link)}" target="_blank" rel="noopener">▶ Открыть в YouTube</a>` : ''}</div>`
         : '';
     const m = UI.modal({
       title: '📺 Смотреть на телевизоре', cls: 'tv-modal',
@@ -3260,38 +5629,97 @@
       if (e.target.closest('[data-close-tv]')) m.close();
       if (e.target.closest('[data-tv-full]')) { m.close(); setTimeout(() => Full.enter(), 220); }
       if (e.target.closest('[data-tv-airplay]') && v) { try { v.webkitShowPlaybackTargetPicker(); } catch (err) { UI.toast(err.message, 'warn'); } }
-      if (e.target.closest('[data-tv-copy]')) { try { await navigator.clipboard.writeText(location.origin + '/'); UI.toast('Адрес скопирован — вставьте его в Google Chrome', 'good'); } catch (err) { UI.toast('Адрес: ' + location.origin, '', 6000); } }
+      if (e.target.closest('[data-tv-copy]')) {
+        // the app's own address, sub-path included (GitHub Pages serves it under /norsk-kort-site/)
+        const addr = appAddr();
+        try { await navigator.clipboard.writeText(addr); UI.toast('Адрес скопирован — вставьте его в Google Chrome', 'good'); } catch (err) { UI.toast('Адрес: ' + addr, '', 6000); }
+      }
       const c = e.target.closest('[data-tv-cast]');
       if (c) {
         c.disabled = true; const label = c.innerHTML; c.innerHTML = '<span class="spinner sm"></span> ищу телевизоры…';
         try { const ok = await Cast.start(); if (ok) m.close(); }
-        catch (err) { UI.toast('Трансляция: ' + err.message, 'bad', 6000); }
+        catch (err) { UI.toast(`📺 ${err.message || 'Телевизор сейчас не ответил'} — проверьте, что он включён и в той же Wi-Fi сети, или повторите экран`, 'warn', 7000); }
         if (c.isConnected) { c.disabled = false; c.innerHTML = label; }
       }
     });
   }
 
-  /* ---------- 📡 Google Cast (Chrome): the TV list like in YouTube → the NRK stream plays on the TV itself ----------
-   * Default Media Receiver (no registration). Subtitles go along as text tracks: «Norsk + русский» (our lines with the
-   * translation, built here) and «Norsk (NRK)» (NRK's own file) — switchable from the remote bar here. */
+  /* ---------- 📡 Google Cast (Chrome / Edge on Android, Windows, Mac, Linux): the TV list like in YouTube ----------
+   * Works WITHOUT the Mac bridge: the TV fetches the stream itself from the internet, so only public addresses can go —
+   * NRK programs (HLS), NRK podcasts (MP3), direct https video / audio files. Files on this device (blob:, Cache
+   * Storage) and the bridge's streams cannot: the TV has no way to reach them.
+   * Default Media Receiver (no registration, no cost). Subtitles: NRK's own WebVTT file as a text track (NRK serves it
+   * with CORS). Our dual lines (Norwegian + Russian) are NOT sent as a data: track: Google documents only URLs for
+   * trackContentId, and every Cast message is limited to 64 KB — a long programme's subtitles inline would break the
+   * LOAD. They stay on the phone screen, which follows the TV's time (the phone's own player runs muted in step).
+   * With a registered custom receiver (CAST_APP_ID + receiver.html) the lines go as messages and the TV draws both.
+   * 🎤 «Бегущая строка»: Google's player gets NRK's file only — no karaoke there (the TV window says so kindly); our TV
+   * page gets the word times with the lines and lights the words up by the TV's own clock. */
   // the Cast App ID of OUR TV page (receiver.html on the site's https domain, registered once in the Google Cast SDK
-  // Developer Console). Empty = Google's standard receiver with the subtitles as a text track.
+  // Developer Console — a one-time developer fee). Empty = Google's standard receiver.
   const CAST_APP_ID = '';
   const CAST_NS = 'urn:x-cast:no.norskkort.subs';
   const Cast = {
     ready: null,
     appId() { return (Store.settings.castAppId || CAST_APP_ID || '').trim(); },
-    /** our TV page: the lines go as messages (≤ 64 KB each) — [start, end, norwegian, russian] */
+    /** our TV page: the lines go as messages (≤ 64 KB each) — [start, end, norwegian, russian, 🎤 word times, glosses]:
+     *  word times = the start of every word (player time, the line «Сдвиг» included) + the end of the last one, or 0;
+     *  glosses = «(перевод)» of every word when «Слово (перевод)» is on. «Сдвиг слов» and the look go as kar: {…}. */
     async sendCues(ses) {
-      const cues = st.lines.map(l => [+lineT(l, 'start').toFixed(2), +lineT(l, 'end').toFixed(2), cueText(l.text), String(trOf(l) || '').replace(/\n+/g, ' ')]);
-      for (let k = 0; k < cues.length || k === 0; k += 150) {
-        await ses.sendMessage(CAST_NS, { reset: k === 0, cues: cues.slice(k, k + 150) });
-        if (!cues.length) break;
-      }
+      const P = tvPrefs(), gl = P.mode === 'word' || st.trMode === 'word', L = st.lines;
+      const cues = L.map((l, i) => {
+        const no = cueText(l.text), ru = String(trOf(l) || '').replace(/\n+/g, ' '), c = [+lineT(l, 'start').toFixed(2), +lineT(l, 'end').toFixed(2), no, ru];
+        if (l.noWords || skipTr(l)) return c;
+        let r = null; try { r = kwOf(l, L[i - 1], L[i + 1]); } catch (e) { /* no word times */ }
+        c.push(r && r.t.length === nWords(no) ? r.t.map(x => +(x + st.offset).toFixed(2)).concat(+(r.e + st.offset).toFixed(2)) : 0);
+        if (gl && glOk(l)) c.push(karUnits(no, ru.trim(), true).filter(u => /\p{L}/u.test(u.w)).map(u => u.g));
+        return c;
+      });
+      // ≤ 150 lines and ≤ ~48 KB a message (a Cast message may be 64 KB at most)
+      const enc = new TextEncoder(), size = c => enc.encode(JSON.stringify(c)).length + 1;
+      const parts = []; let cur = [], bytes = 0;
+      cues.forEach(c => { const b = size(c); if (cur.length && (cur.length >= 150 || bytes + b > 48000)) { parts.push(cur); cur = []; bytes = 0; } cur.push(c); bytes += b; });
+      parts.push(cur);
+      for (let k = 0; k < parts.length; k++) await ses.sendMessage(CAST_NS, Object.assign({ reset: k === 0, cues: parts[k] }, this.look()));
+      this.trSend(ses, true);
+    },
+    /** 🌀 who translates the lines — its coin (the same artwork as in the app) + its name, and whether it works right now.
+     *  OUR TV page shows it in a corner for a moment (older TV pages ignore it). null = nobody translated yet. */
+    trInfo() {
+      const W = window.AIHub && AIHub.work && AIHub.tvCoin ? AIHub.work : null;
+      if (!W) return null;
+      const j = W.cur('tr'), p = j ? j.p : W.last ? W.last('tr') : null;
+      if (!p) return null;
+      try { return Object.assign(AIHub.tvCoin(p), { on: !!j }); } catch (e) { return null; }
+    },
+    trSend(ses, force) {
+      ses = ses || this.ses;
+      if (!ses || !this.appId()) return;
+      if (!this._trHooked && window.AIHub && AIHub.work && AIHub.work.on) { this._trHooked = true; AIHub.work.on(() => this.trSend()); }
+      const tr = this.trInfo(), key = tr ? tr.k + (tr.on ? ':on' : ':off') : '';
+      if (!force && key === this._trKey) return;
+      this._trKey = key;
+      try { const p = ses.sendMessage(CAST_NS, { tr }); if (p && p.catch) p.catch(() => {}); } catch (e) { /* the TV is gone */ }
+    },
+    /** the look of OUR TV page: 🔲 the strip, ⊞ the place, 🎤 «Бегущая строка» (on, how, «Сдвиг слов»), the size of the «(перевод)» */
+    look() {
+      const p = tvPrefs(), k = Kar.prefs();
+      return { bg: !!p.bg, pos: p.pos, kar: { on: !!k.on, mode: k.mode, sh: +(st && st.ksh || 0) }, gs: (SV_GL[p.gl] || SV_GL.small)[0] };
+    },
+    /** 🔲 the strip under the lines / ⊞ their place / 🎤 on OUR TV page changed (Google's own player gets the look with the next start) */
+    style() {
+      if (!this.ses || !this.appId()) return;
+      try { const p = this.ses.sendMessage(CAST_NS, this.look()); if (p && p.catch) p.catch(() => {}); } catch (e) { /* the TV is gone */ }
+    },
+    /** 🎤 switched on / to the other look: our TV page gets the lines again (the freshest word times) */
+    kar() {
+      if (!this.ses || !this.appId() || !st || !st.lines.length) return;
+      this.sendCues(this.ses).catch(() => {});
     },
     supported() {
       const ua = navigator.userAgent;
-      return /Chrome|CriOS|Edg/.test(ua) && !/iPhone|iPad|iPod|OPR|SamsungBrowser/.test(ua) && window.isSecureContext;
+      // Chrome / Edge (not on iPhone — Apple allows no Cast there; not in in-app WebViews or Samsung Internet)
+      return /Chrome|CriOS|Edg/.test(ua) && !/iPhone|iPad|iPod|OPR|SamsungBrowser|; wv\)/.test(ua) && !!window.isSecureContext;
     },
     load() {
       if (window.cast && cast.framework) return Promise.resolve();
@@ -3300,15 +5728,18 @@
         window.__onGCastApiAvailable = ok => {
           if (ok && window.cast && cast.framework) {
             // our own TV page (receiver.html, draws the Norwegian + Russian lines) once it is registered; else Google's player
-            cast.framework.CastContext.getInstance().setOptions({ receiverApplicationId: this.appId() || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED });
+            const ctx = cast.framework.CastContext.getInstance();
+            ctx.setOptions({ receiverApplicationId: this.appId() || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED });
+            // the TV was turned off / another phone took it: the remote here goes away, the sound here comes back
+            try { ctx.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, e => { if (e && e.sessionState === cast.framework.SessionState.SESSION_ENDED) this.ended(); }); } catch (e) { /* older SDK */ }
             res();
-          } else rej(new Error('трансляция в этом браузере недоступна'));
+          } else rej(new Error('Этот браузер сейчас не может искать телевизоры'));
         };
         const s = document.createElement('script');
         s.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
-        s.onerror = () => { this.ready = null; rej(new Error('модуль трансляции Google не загрузился (нужен интернет)')); };
+        s.onerror = () => { this.ready = null; rej(new Error('Не получилось подключиться к службе трансляции — проверьте интернет')); };
         document.head.appendChild(s);
-        setTimeout(() => rej(new Error('модуль трансляции не ответил')), 15000);
+        setTimeout(() => rej(new Error('Служба трансляции не ответила — попробуйте ещё раз')), 15000);
       });
       this.ready.catch(() => { this.ready = null; });
       return this.ready;
@@ -3318,65 +5749,118 @@
     vttText() {
       // whole milliseconds first: 119.99999999999999 (recognized lines) gave «00:01:60.000» — a broken cue
       const ts = t => { t = Math.round(Math.max(0, t) * 1000) / 1000; const h = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = (t % 60).toFixed(3).padStart(6, '0'); return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${ss}`; };
-      const body = st.lines.map((l, i) => { const ru = trOf(l); return `${i + 1}\n${ts(lineT(l, 'start'))} --> ${ts(lineT(l, 'end'))}\n${cueText(l.text)}${ru ? '\n' + cueText(String(ru)) : ''}\n`; }).join('\n');
+      // 🎤 «Бегущая строка»: a cue per word, the word being said in b / u (off: as always)
+      const ve = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const K = Kar.prefs(); let n = 0;
+      const body = st.lines.map((l, i) => {
+        const ru = trOf(l), a = lineT(l, 'start'), b = lineT(l, 'end'), ks = K.on ? karSteps(l, i, a, b) : null;
+        if (ks) return ks.map(s => `${++n}\n${ts(s.s)} --> ${ts(s.e)}\n${karPlain(cueText(l.text), '', false, s, K.mode === 'wbw', ve)}${ru ? '\n' + ve(cueText(String(ru))) : ''}\n`).join('\n');
+        return `${K.on ? ++n : i + 1}\n${ts(a)} --> ${ts(b)}\n${cueText(l.text)}${ru ? '\n' + cueText(String(ru)) : ''}\n`;
+      }).join('\n');
       return 'WEBVTT\n\n' + body;
     },
     dualVtt() { return 'data:text/vtt;base64,' + btoa(unescape(encodeURIComponent(this.vttText()))); },
     /** → true when the TV plays */
     async start(at) {
-      const S = st && st.stream; if (!S || S.kind !== 'nrk') return false;
+      const S = st && st.stream, src = tvSource(S); if (!src) return false;
       await this.load();
       const ctx = cast.framework.CastContext.getInstance();
       // still connected (e.g. the TV only closed the paused program): no device picker again — straight on
       if (!(at != null && ctx.getCurrentSession())) {
-        try { await ctx.requestSession(); } catch (e) { if (e === 'cancel' || e === chrome.cast.ErrorCode.CANCEL) return false; throw new Error('не удалось подключиться к телевизору'); }
+        try { await ctx.requestSession(); }
+        catch (e) {
+          if (e === 'cancel' || e === chrome.cast.ErrorCode.CANCEL) return false;
+          throw new Error(e === 'receiver_unavailable' || e === chrome.cast.ErrorCode.RECEIVER_UNAVAILABLE ? 'Телевизор не найден' : 'Не получилось подключиться к телевизору');
+        }
       }
       const ses = ctx.getCurrentSession(); if (!ses || !st) return false;
-      if (at != null && S.fresh) { try { const u = await S.fresh(); if (u) S.hls = u; } catch (e) { /* the old address */ } }
-      if (!hasRuFile() && st.lines.length) { try { await translate(st.lines.map((l, i) => i), true); } catch (e) { /* lines without translation go as they are */ } }
-      const C = chrome.cast.media;
-      const mi = new C.MediaInfo(S.hls, 'application/x-mpegurl');
-      mi.streamType = C.StreamType.BUFFERED;
-      if (C.HlsSegmentFormat) mi.hlsSegmentFormat = C.HlsSegmentFormat.TS;
-      const md = new C.GenericMediaMetadata(); md.title = S.title; md.subtitle = S.channel || 'NRK TV'; mi.metadata = md;
+      if (at != null && S.fresh && src.hls) { try { const u = await S.fresh(); if (u) { S.hls = u; src.url = u; } } catch (e) { /* the old address */ } }
       const custom = !!this.appId();
+      // our TV page draws the Russian line too: translate all lines first
+      if (custom && !hasRuFile() && st.lines.length) { try { await translate(st.lines.map((l, i) => i), true); } catch (e) { /* lines without translation go as they are */ } }
+      const C = chrome.cast.media;
+      const mi = new C.MediaInfo(src.url, src.type);
+      mi.streamType = C.StreamType.BUFFERED;
+      if (src.hls && !src.audio && C.HlsSegmentFormat) mi.hlsSegmentFormat = C.HlsSegmentFormat.TS;
+      const md = new C.GenericMediaMetadata(); md.title = S.title || ''; md.subtitle = S.channel || (S.kind === 'nrk' ? 'NRK' : '');
+      if (/^https:\/\//.test(S.poster || '') && chrome.cast.Image) md.images = [new chrome.cast.Image(S.poster)];
+      mi.metadata = md;
       if (custom) { try { await this.sendCues(ses); } catch (e) { /* the TV page draws nothing — the video still plays */ } }
       const tracks = [];
-      const mk = (id, url, name) => { if (custom) return; /* our TV page draws the lines itself */ const t = new C.Track(id, C.TrackType.TEXT); t.trackContentId = url; t.trackContentType = 'text/vtt'; t.subtype = C.TextTrackType.SUBTITLES; t.name = name; t.language = 'nb'; tracks.push(t); };
-      if (st.lines.length) mk(1, this.dualVtt(), 'Norsk + русский');
-      if (S.nrkVtt) mk(2, S.nrkVtt, 'Norsk (NRK)');
+      // Google's player: NRK's own subtitle file (a URL with CORS). Our dual lines stay on this screen (see above).
+      if (!custom && !src.audio && S.nrkVtt) { const t = new C.Track(2, C.TrackType.TEXT); t.trackContentId = S.nrkVtt; t.trackContentType = 'text/vtt'; t.subtype = C.TextTrackType.SUBTITLES; t.name = 'Norsk (NRK)'; t.language = 'nb'; tracks.push(t); }
       mi.tracks = tracks;
-      const style = new C.TextTrackStyle();
-      style.backgroundColor = '#00000099'; style.foregroundColor = '#FFFFFFFF'; style.fontScale = 1.15;
-      style.edgeType = C.TextTrackEdgeType.DROP_SHADOW; style.edgeColor = '#000000FF';
-      mi.textTrackStyle = style;
+      if (tracks.length) {
+        const style = new C.TextTrackStyle();
+        style.backgroundColor = '#00000099'; style.foregroundColor = '#FFFFFFFF'; style.fontScale = 1.15;
+        style.edgeType = C.TextTrackEdgeType.DROP_SHADOW; style.edgeColor = '#000000FF';
+        mi.textTrackStyle = style;
+      }
       const req = new C.LoadRequest(mi);
-      const v = media();
+      const v = this.el();
       req.currentTime = at != null ? at : v ? v.currentTime || 0 : 0; req.autoplay = true;
       this.t = req.currentTime;
       req.activeTrackIds = tracks.length ? [tracks[0].trackId] : [];
-      await ses.loadMedia(req);
-      if (v && !v.paused) v.pause();
+      try { await ses.loadMedia(req); }
+      catch (e) { throw new Error('Телевизор не смог открыть эту передачу'); }
+      this.ses = ses;
+      // this screen keeps the lines going with the TV: the player here plays on without sound, in step with the TV
+      if (v) { if (this.muted == null) this.muted = v.muted; this.quiet = Date.now(); v.muted = true; this.hook(v); }
       this.bar(ses, tracks);
       return true;
+    },
+    /** the player on this screen (video or audio element) */
+    el() { return st && st.m ? st.m.$('video[data-media]') || st.m.$('audio[data-media]') : null; },
+    /** ⏯ / seeking the player here moves the TV too (but not our own moves that follow the TV) */
+    hook(v) {
+      if (v._cfHooked) return; v._cfHooked = true;
+      const act = (a, t) => {
+        if (!this.ses || Date.now() - (this.quiet || 0) < 1500) return;
+        const ms = this.ses.getMediaSession && this.ses.getMediaSession(); if (!ms) return;
+        try {
+          if (a === 'pause') ms.pause(null, () => {}, () => {});
+          else if (a === 'play') ms.play(null, () => {}, () => {});
+          else { const r = new chrome.cast.media.SeekRequest(); r.currentTime = t; ms.seek(r, () => {}, () => {}); this.t = t; }
+        } catch (e) { /* the TV is gone */ }
+      };
+      v.addEventListener('pause', () => act('pause'));
+      v.addEventListener('play', () => act('play'));
+      v.addEventListener('seeked', () => act('seek', v.currentTime));
+    },
+    /** the cast is over (stopped here, or the TV ended it): the remote goes, the sound here comes back */
+    ended() {
+      clearInterval(this.timer); this.timer = 0; this.ses = null;
+      const v = this.el();
+      if (v && this.muted != null) { this.quiet = Date.now(); v.muted = this.muted; }
+      this.muted = null;
+      const el = st && st.m && st.m.$('[data-castbar]'); if (el && el.dataset.gcast) el.remove();
     },
     /** the remote under the video while the TV plays */
     bar(ses, tracks) {
       if (!st || !st.m) return;
       const name = (ses.getCastDevice() || {}).friendlyName || 'телевизор';
-      const box = st.m.$('.subs-view'); if (!box) return;
+      const box = st.m.$('.subs-view') || st.m.$('[data-media]'); if (!box) return;
       let el = st.m.$('[data-castbar]');
       if (!el) { el = document.createElement('div'); el.className = 'cast-bar'; el.dataset.castbar = ''; box.after(el); }
-      el.innerHTML = `<span class="cast-live">📡 На телевизоре «${U.esc(name)}»</span>
+      el.dataset.gcast = '1';
+      el.innerHTML = `<div class="cast-row"><span class="cast-live">📡 На телевизоре «${U.esc(name)}»</span>
         <button class="btn sm" data-cast="pp">⏯ Пауза / продолжить</button>
-        <span class="seg-mini sm" title="Субтитры на телевизоре">${tracks.map(t => `<button data-cast-tr="${t.trackId}" class="${t.trackId === tracks[0].trackId ? 'active' : ''}">${U.esc(t.name)}</button>`).join('')}<button data-cast-tr="0">без субтитров</button></span>
-        <button class="btn sm bad" data-cast="stop">⏹ Остановить трансляцию</button>`;
-      // remember where the TV is: if its player closes a long-paused program, ⏯ starts it again from there
+        <button class="btn sm bad" data-cast="stop">⏹ Остановить</button></div>
+        ${tracks.length ? `<div class="cast-row"><span class="small muted">Субтитры на телевизоре:</span><span class="seg-mini sm">${tracks.map(t => `<button data-cast-tr="${t.trackId}" class="${t.trackId === tracks[0].trackId ? 'active' : ''}">${U.esc(t.name)}</button>`).join('')}<button data-cast-tr="0">без субтитров</button></span></div>` : ''}
+        <div class="small muted">💬 Строки с переводом — здесь, на экране: они идут вместе с телевизором.</div>`;
+      // remember where the TV is (if its player closes a long-paused program, ⏯ starts it again from there),
+      // and keep the lines here in step with the TV
       if (this.timer) clearInterval(this.timer);
       this.timer = setInterval(() => {
         if (!st || !el.isConnected) { clearInterval(this.timer); this.timer = 0; return; }
-        const ms = ses.getMediaSession && ses.getMediaSession();
-        if (ms && ms.playerState !== chrome.cast.media.PlayerState.IDLE) { const t = ms.getEstimatedTime ? ms.getEstimatedTime() : ms.currentTime; if (t > 0) this.t = t; }
+        const ms = ses.getMediaSession && ses.getMediaSession(), P = chrome.cast.media.PlayerState;
+        if (!ms || ms.playerState === P.IDLE) return;
+        const t = ms.getEstimatedTime ? ms.getEstimatedTime() : ms.currentTime; if (t > 0) this.t = t;
+        const v = this.el(); if (!v) return;
+        const mark = () => { this.quiet = Date.now(); };
+        if (ms.playerState === P.PLAYING && v.paused) { mark(); const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+        else if (ms.playerState === P.PAUSED && !v.paused) { mark(); v.pause(); }
+        if (t > 0 && Math.abs((v.currentTime || 0) - t) > 2.5) { mark(); try { v.currentTime = t; } catch (e) { /* not ready */ } }
       }, 2000);
       el.onclick = async e => {
         const b = e.target.closest('[data-cast], [data-cast-tr]'); if (!b) return;
@@ -3387,7 +5871,10 @@
           } else if (ms.playerState === chrome.cast.media.PlayerState.PLAYING) ms.pause(null, () => {}, () => {}); else ms.play(null, () => {}, () => {});
         }
         if (b.dataset.cast === 'stop' && await UI.confirm('Остановить трансляцию на телевизоре?', { ok: '⏹ Остановить', cancel: 'Нет, смотреть дальше', danger: true })) {
-          cast.framework.CastContext.getInstance().endCurrentSession(true); clearInterval(this.timer); this.timer = 0; el.remove();
+          const t = this.t || 0;
+          try { cast.framework.CastContext.getInstance().endCurrentSession(true); } catch (err) { /* already gone */ }
+          this.ended();
+          const v = this.el(); if (v && t) { try { v.currentTime = t; } catch (err) { /* ignore */ } }
         }
         if (b.dataset.castTr != null && ms) {
           const id = +b.dataset.castTr;
@@ -3422,6 +5909,8 @@
   function onKey(e) {
     if (!topmost()) return;
     if (e.key === 'Escape' && wp) { e.stopPropagation(); e.preventDefault(); hidePop(); return; }
+    if (e.key === 'Escape' && st.m && st.m.$('[data-trpop]')) { e.stopPropagation(); e.preventDefault(); trPopClose(true); return; }
+    if (e.target.closest && e.target.closest('[data-trpop]') && (e.key === ' ' || e.key === 'Enter')) return; // a choice in «Aa», not play / pause
     if (e.key === 'Escape' && Full.on) { e.stopPropagation(); e.preventDefault(); Full.exit(); return; } // not the whole window
     if ((e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') && st.stage === 'player' && !(st.stream && (st.stream.audio || st.stream.companion)) && !(e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) && !e.metaKey && !e.ctrlKey) { e.preventDefault(); Full.toggle(); return; }
     if (st.stage !== 'player' || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -3456,7 +5945,7 @@
     const b = e.target.closest('.subs-pop [data-wp]'); if (!b || !wp) return;
     e.stopPropagation();
     if (b.dataset.wp === 'x') hidePop();
-    else if (b.dataset.wp === 'say') TTS.speak(wp.form, 'no');
+    else if (b.dataset.wp === 'say') TTS.speak(wp.form, 'no', { place: voicePlace() });
     else if (b.dataset.wp === 'fix') { const me = wp; hidePop(); Study.fixGloss(me.gs, me.k, () => redrawText(me.gs), me.lineRu); }
     else if (b.dataset.wp === 'ok') { const me = wp; hidePop(); if (me.ru) { Study.setUserGloss(me.gs, me.k, me.ru); Study.afterFix(); UI.toast(`✓ «${me.form}» — ${me.ru}`, 'good', 2000); } }
     else if (b.dataset.wp === 'fixline') { const me = wp; hidePop(); const l = st.lines[me.i]; if (l) Study.fixSent(l.text); }
@@ -3498,6 +5987,61 @@
   }
   function listen(target, ev, fn, opt) { target.addEventListener(ev, fn, opt); st.cleanup.push(() => target.removeEventListener(ev, fn, opt)); }
 
+  /* =================== 🎓 «Учить по материалам» (js/learnby.js) ===================
+   * The open player as LearnBy needs it: the lines with their translations (the same queue and 's:' cache), the sound of
+   * any moment (own file · Telegram through the bridge · NRK's HLS / podcast MP3 — Song.pcm; YouTube: none), the picture.
+   * Subs.openStep(material, part, mode): a step of a plan opens with its own way of showing the translation
+   * ('show' · 'blur' · 'hide' · 'off' = no subtitles at all), at its place; the saved choice of the person stays. */
+  let stepWant = null;
+  const learnBtn = () => (window.LearnBy && LearnBy.btnHtml && st && st.media && !(st.stream && (st.stream.live || st.stream.companion)) ? LearnBy.btnHtml(st.stream ? st.stream : { file: true, audio: st.kind === 'audio' }) : '');
+  function learnStep(w) {
+    st.step = w;
+    setTrMode(w.mode === 'off' ? 'hide' : w.mode, true);
+    st.m.el.classList.toggle('lb-nosubs', w.mode === 'off');
+  }
+  function learnHook() {
+    if (!st || !st.m || st.stage !== 'player' || !st.media || (st.stream && (st.stream.live || st.stream.companion))) return;
+    if (stepWant && stepWant.key === posId()) { const w = stepWant; stepWant = null; learnStep(w); }
+    else if (st.step) st.m.el.classList.toggle('lb-nosubs', st.step.mode === 'off'); // a redraw keeps «без субтитров»
+    if (window.LearnBy && LearnBy.attach) { try { LearnBy.attach(learnCtx()); } catch (e) { console.warn('learnby', e); } }
+  }
+  /** 16 kHz mono Float32 of [a, b] (player time) — null when this source has no readable sound (YouTube) */
+  async function learnPcm(a, b) {
+    const S = st.stream;
+    if (S && (S.kind === 'youtube' || S.companion || S.live)) return null;
+    if (S && (S.pcm || S.blob || S.mp3 || S.hls)) return Song.pcm(a, b);
+    if (S || !st.media) return null;
+    if (Clip.mode === 'none') return null;
+    if (Clip.mode !== 'capture' && Clip.fitsInMemory()) {
+      try { return await Clip.fromFull(a, b); } catch (e) { if (e.silent) throw e; Clip.decodeErr = e; Clip.mode = 'capture'; Clip._full = null; }
+    }
+    return Clip.capture(a, b);
+  }
+  function learnCtx() {
+    const me = st, S = st.stream;
+    const alive = () => st === me && !!st.m;
+    return {
+      key: posId(), stream: S || null, file: S ? null : { name: st.media.name, size: st.media.size },
+      kind: S ? (S.audio ? 'audio' : 'video') : st.kind, youtube: !!(S && S.kind === 'youtube'),
+      title: S ? S.title : baseName(st.media.name), channel: (S && S.channel) || '', poster: (S && S.poster) || '',
+      el: st.m.el, alive, step: () => me.step || null, clearStep: () => { if (!alive()) return; me.step = null; me.m.el.classList.remove('lb-nosubs'); },
+      dur: () => me.dur || (S && +S.duration) || 0,
+      /** the lines in player time: { i, a, b, t, ru, song, frame, auto, en, skip } */
+      lines: () => me.lines.map((l, i) => ({ i, a: l.start + me.offset, b: l.end + me.offset, t: l.text, ru: trOf(l), song: !!l.song && !l.songX, songX: l.songX || '', frame: !!l.frame, auto: !!l.auto, en: enLine(l), skip: skipTr(l) })),
+      translate: idx => (alive() ? translate(idx) : Promise.resolve(false)),
+      tr: i => (alive() && me.lines[i] ? trOf(me.lines[i]) : undefined),
+      media: () => (alive() ? media() : null),
+      setTr: (mode, temp = true) => { if (alive()) setTrMode(mode, temp); },
+      trMode: () => me.trMode,
+      pcm: (a, b) => (alive() ? learnPcm(a, b) : Promise.resolve(null)),
+      /** a direct address of the picture for a hidden <video> (own file, Telegram) — '' for HLS / YouTube / sound only */
+      frameSrc: () => (!alive() || st.kind !== 'video' ? '' : !S ? st.mediaUrl : S.kind === 'tg' && S.video && !S.audio ? S.video : ''),
+      video: () => (alive() ? st.m.$('video[data-media]') : null),
+      where: t => whereAt(t), at: t => (S && S.at ? S.at(t) : (S && S.link) || ''),
+      deckName: () => deckName(),
+    };
+  }
+
   /* =================== public API =================== */
   const Subs = {
     /** 🎬 the window; files (optional): File[] to start with */
@@ -3505,6 +6049,9 @@
       if (st && st.m) { try { st.m.close(); } catch (e) { /* ignore */ } }
       if (window.TTS) TTS.stop();
       st = fresh();
+      KEnv.reset(); Kar.p = null; Kar.boxes = null; // 🎤 a new video: nothing of the old one's sound
+      Song.reset(); // 🎵 nothing of the old one's songs
+      Kar.srcNow = '';
       const m = st.m = UI.modal({
         title: '🎬 Субтитры → карточки', cls: 'wide subs-modal',
         body: '',
@@ -3548,12 +6095,14 @@
           LiveSubs.stop();
           if (s.liveTimer) { clearInterval(s.liveTimer); s.liveTimer = 0; }
           if (s.liveTrT) { clearTimeout(s.liveTrT); s.liveTrT = 0; }
+          if (s.tq) { clearTimeout(s.tq.t); clearTimeout(s.tq.retryT); s.tq.t = s.tq.retryT = 0; }
+          if (s.ink) { clearTimeout(s.ink.t); s.ink.t = 0; }
           Full.exit(true);
           if (s.castTimer) { clearInterval(s.castTimer); s.castTimer = 0; } // the TV plays on; this window stops following it
           if (s.hls) { try { s.hls.destroy(); } catch (e) { /* ignore */ } s.hls = null; }
           if (s.raf) cancelAnimationFrame(s.raf);
           if (s.posTimer) { clearInterval(s.posTimer); s.posTimer = 0; }
-          Clip.reset();
+          Clip.reset(); KEnv.reset(); Kar.boxes = null; Song.reset();
           if (s.mediaUrl) setTimeout(() => URL.revokeObjectURL(s.mediaUrl), 500);
           hidePop();
           s.cleanup.forEach(f => f());
@@ -3563,6 +6112,7 @@
       m.el.addEventListener('click', onClick);
       m.el.addEventListener('change', onChange);
       m.el.addEventListener('input', onInput);
+      m.el.addEventListener('dblclick', fsDbl, true); // a double click on the picture = ⛶ with our subtitles (not the browser's bare one)
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => listen(window, ev, onDrag, true));
       listen(window, 'keydown', onKey, true);
       listen(window, 'keyup', onKeyUp, true);
@@ -3570,12 +6120,23 @@
       listen(document, 'touchstart', onDocDown, { passive: true });
       listen(document, 'click', onPopClick, true);
       listen(window, 'nk-userfix', e => redrawText(e.detail && e.detail.sent));
+      listen(document, 'visibilitychange', () => { if (document.hidden) Ink.stop(); else Ink.kick(800); }); // 📝 a hidden tab reads nothing
+      // 🌐 the internet is back: the lines without a translation are asked again at once (not after their long wait)
+      listen(window, 'online', () => { if (st && st.stage === 'player' && st.lines.some(l => l._trFail)) trRetry(false); });
       render();
       if (files && files.length) addFiles(files);
       return m;
     },
     close() { if (st && st.m) st.m.close(); },
     isOpen() { return !!(st && st.m); },
+    /** 🎤 «Бегущая строка» on / off (mode: 'hl' — подсветка, 'wbw' — слово за словом); no args → the current choice */
+    karaoke(on, mode) { if (on === undefined) return Object.assign({}, Kar.prefs()); if (st && st.m) Kar.set(on, mode, true); else { const p = Kar.prefs(); p.on = !!on; if (mode) p.mode = mode === 'wbw' ? 'wbw' : 'hl'; Kar.save(); } return Object.assign({}, Kar.prefs()); },
+    /** for checks: the word times of line i (the current one by default) */
+    karInfo(i) {
+      if (!st) return null; i = i == null ? st.cur : i; const L = st.lines, l = L[i]; if (!l) return null;
+      const r = kwOf(l, L[i - 1], L[i + 1]);
+      return r && { i, text: l.text, src: r.src, t: r.t.map(x => Math.round(x * 1000) / 1000), e: Math.round(r.e * 1000) / 1000, cur: Kar.ci, shift: st.ksh || 0, env: KEnv.ch.length };
+    },
 
     /** a live master playlist → its Norwegian subtitle track (the whole speech before «kun ved annet språk»), '' if none */
     async liveVttUrl(master) {
@@ -3589,7 +6150,7 @@
     },
     /** the Mac bridge's media helpers (/api/media/…): YouTube subtitles and channel videos, NRK TV catalogue */
     async api(action, params = {}) {
-      if (!(window.AI && AI.bridge && AI.bridge.up)) throw Object.assign(new Error('нужен мост на Mac (python3 bridge/server.py) — в облачной версии появится позже'), { noBridge: true });
+      if (!(window.AI && AI.bridge && AI.bridge.up)) throw Object.assign(new Error(onMac() ? 'нужен мост на Mac (python3 bridge/server.py) — в облачной версии появится позже' : 'в версии на сайте это пока недоступно'), { noBridge: true });
       let r;
       try { r = await fetch(`/api/media/${action}?` + new URLSearchParams(params)); } catch (e) { throw new Error('мост на Mac не отвечает'); }
       const ct = r.headers.get('Content-Type') || '';
@@ -3636,6 +6197,24 @@
       return st.m;
     },
 
+    /* ---------- 🎓 «Учить по материалам» (js/learnby.js) ---------- */
+    /** a step of a plan: material = { key } (the place id of js/resume.js), part = { a, b, at }, mode = 'show' | 'blur' |
+     *  'hide' | 'off' (no subtitles). The player already shows it → applied at once (and moved to part.at); otherwise kept
+     *  until it opens (the caller opens it; Resume.prefer moves it to the place) → true when applied now */
+    openStep(material, part, mode) {
+      const w = { key: String(material && material.key || ''), a: +(part && part.a) || 0, b: +(part && part.b) || 0, at: +(part && part.at) || 0, mode: ['show', 'word', 'blur', 'hide', 'off'].includes(mode) ? mode : 'show' };
+      if (st && st.m && st.stage === 'player' && st.media && posId() === w.key) {
+        stepWant = null; learnStep(w);
+        const v = media(); if (v) { try { v.currentTime = w.at || w.a; } catch (e) { /* not seekable yet */ } }
+        if (window.LearnBy && LearnBy.attach) { try { LearnBy.attach(learnCtx()); } catch (e) { console.warn('learnby', e); } }
+        return true;
+      }
+      stepWant = w;
+      return false;
+    },
+    /** the open player for js/learnby.js (null when none) */
+    learnCtx() { return st && st.m && st.stage === 'player' && st.media ? learnCtx() : null; },
+
     /* ---------- for the study card ---------- */
     /** does the card have its own recording (a line cut from a video / audio)? */
     hasAudio(card) { return !!(card && typeof card.audio === 'string' && /^data:audio\//.test(card.audio)); },
@@ -3680,9 +6259,12 @@
     /* ---------- internals (tests) ---------- */
     _ocrFrame: () => ocrFrame(), _whereAt: t => whereAt(t),
     _parse: parseSubs, _decode: decodeSub, _detect: detectLang, _pair: pairUp, _clip: Clip, _wav: wavBytes, _asr: Asr, _cast: Cast, _phrase: i => phrase(i),
-    _tv: { tvVtt, tvPrefs, tvSave, glossText, castBar },
+    _tv: { tvVtt, tvPrefs, tvSave, glossText, castBar, tvSource, tvDevice, mirrorSteps, onMac },
     _live: { Live, LiveSubs, mediaPlaylist, parseMedia, tsPts, mp3Frames, mp3Hdr, insertLine },
     _lang: { tagLine, skipTr, langOk, musicHint },
+    _ink: () => Ink,
+    _song: () => Song, _cred: { Cred, crParse, crTranslit, crGen, crName, crRole },
+    _tr: { setTrMode, enLine, srcOf, trPop },
     get _st() { return st; },
   };
 

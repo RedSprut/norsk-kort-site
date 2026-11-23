@@ -398,3 +398,4 @@ button.pt-c:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 
   .wr-q { font-size: 16px; }
   .wr-in { font-size: 16px; }
 }
+.tf-card.tf-focus { outline: 3px solid var(--accent, #5b8cff); outline-offset: 2px; }

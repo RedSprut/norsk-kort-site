@@ -1,0 +1,491 @@
+{
+ "version": 1,
+ "updated": "2026-11-21",
+ "group": "phrasebook",
+ "attribution": "Универсальные фразы для устного экзамена — собственный материал Norsk Kort (составлены заново), перевод на русский и украинский.",
+ "format": "decks[0].cards: { key, no, ru, uk, wordClass: \"frase\", description, group (функция фразы) } — схема как в data/phrasebook-decks.json",
+ "groups": [
+  {
+   "id": "start",
+   "icon": "🚀",
+   "ru": "Начать ответ",
+   "uk": "Почати відповідь",
+   "keys": [
+    "xp:ph:jeg-vil-gjerne-fortelle-om",
+    "xp:ph:det-er-et-interessant-sporsmaal",
+    "xp:ph:jeg-kan-begynne-med-aa-si-at",
+    "xp:ph:forst-vil-jeg-si-litt-om",
+    "xp:ph:dette-temaet-er-viktig-for-meg-fordi"
+   ]
+  },
+  {
+   "id": "time",
+   "icon": "⏳",
+   "ru": "Взять паузу",
+   "uk": "Узяти паузу",
+   "keys": [
+    "xp:ph:la-meg-tenke-litt",
+    "xp:ph:hvordan-skal-jeg-si-det",
+    "xp:ph:det-er-et-vanskelig-sporsmaal-men",
+    "xp:ph:jeg-har-ikke-tenkt-saa-mye-paa-det-for-men",
+    "xp:ph:et-oyeblikk-jeg-finner-ikke-ordet"
+   ]
+  },
+  {
+   "id": "opinion",
+   "icon": "💭",
+   "ru": "Высказать мнение",
+   "uk": "Висловити думку",
+   "keys": [
+    "xp:ph:etter-min-mening-er",
+    "xp:ph:jeg-synes-at",
+    "xp:ph:jeg-tror-at",
+    "xp:ph:jeg-mener-bestemt-at",
+    "xp:ph:for-meg-er-det-viktigst-at"
+   ]
+  },
+  {
+   "id": "proscons",
+   "icon": "⚖️",
+   "ru": "Плюсы и минусы",
+   "uk": "Плюси й мінуси",
+   "keys": [
+    "xp:ph:fordelen-er-at",
+    "xp:ph:ulempen-er-at",
+    "xp:ph:paa-den-ene-siden-paa-den-andre-siden",
+    "xp:ph:det-har-baade-fordeler-og-ulemper",
+    "xp:ph:et-problem-kan-vaere-at"
+   ]
+  },
+  {
+   "id": "example",
+   "icon": "🔎",
+   "ru": "Привести пример",
+   "uk": "Навести приклад",
+   "keys": [
+    "xp:ph:for-eksempel",
+    "xp:ph:jeg-kan-gi-et-eksempel-fra-mitt-eget-liv",
+    "xp:ph:da-jeg-kom-til-norge",
+    "xp:ph:hjemme-hos-oss",
+    "xp:ph:et-godt-eksempel-er"
+   ]
+  },
+  {
+   "id": "agree",
+   "icon": "🤝",
+   "ru": "Согласиться или возразить",
+   "uk": "Погодитися або заперечити",
+   "keys": [
+    "xp:ph:jeg-er-helt-enig",
+    "xp:ph:det-er-et-godt-poeng",
+    "xp:ph:jeg-er-enig-i-det-men",
+    "xp:ph:jeg-ser-det-litt-annerledes",
+    "xp:ph:der-er-jeg-ikke-helt-enig"
+   ]
+  },
+  {
+   "id": "sum",
+   "icon": "🧾",
+   "ru": "Подвести итог",
+   "uk": "Підбити підсумок",
+   "keys": [
+    "xp:ph:kort-sagt",
+    "xp:ph:alt-i-alt",
+    "xp:ph:saa-for-aa-oppsummere",
+    "xp:ph:derfor-mener-jeg-at",
+    "xp:ph:det-viktigste-for-meg-er"
+   ]
+  },
+  {
+   "id": "repeat",
+   "icon": "🔁",
+   "ru": "Переспросить",
+   "uk": "Перепитати",
+   "keys": [
+    "xp:ph:unnskyld-kan-du-gjenta-sporsmaalet",
+    "xp:ph:kan-du-si-det-litt-saktere",
+    "xp:ph:mener-du-at",
+    "xp:ph:jeg-forstod-ikke-helt-hva-betyr",
+    "xp:ph:kan-du-forklare-hva-du-mener"
+   ]
+  }
+ ],
+ "decks": [
+  {
+   "id": "xp-universal",
+   "ver": 1,
+   "kind": "phrase",
+   "group": "phrasebook",
+   "name": "Экзамен: универсальные фразы",
+   "icon": "🎓",
+   "tags": [
+    "frase",
+    "norskprøven",
+    "muntlig"
+   ],
+   "description": "Фразы, которые подходят к любому устному ответу: как начать, взять паузу, высказать мнение, привести пример, согласиться или возразить, подвести итог и переспросить. Учите их как «связки», а сам ответ говорите своими словами. Перевод дан в мужском роде («согласен»), по-норвежски форма одна для всех.",
+   "cards": [
+    {
+     "key": "xp:ph:jeg-vil-gjerne-fortelle-om",
+     "no": "Jeg vil gjerne fortelle om …",
+     "ru": "Мне хотелось бы рассказать о …",
+     "uk": "Мені хотілося б розповісти про …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "start"
+    },
+    {
+     "key": "xp:ph:det-er-et-interessant-sporsmaal",
+     "no": "Det er et interessant spørsmål.",
+     "ru": "Интересный вопрос.",
+     "uk": "Цікаве питання.",
+     "wordClass": "frase",
+     "description": "💡 Хороший способ выиграть пару секунд и спокойно начать.",
+     "group": "start"
+    },
+    {
+     "key": "xp:ph:jeg-kan-begynne-med-aa-si-at",
+     "no": "Jeg kan begynne med å si at …",
+     "ru": "Начну с того, что …",
+     "uk": "Почну з того, що …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "start"
+    },
+    {
+     "key": "xp:ph:forst-vil-jeg-si-litt-om",
+     "no": "Først vil jeg si litt om …",
+     "ru": "Сначала скажу пару слов о …",
+     "uk": "Спочатку скажу кілька слів про …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "start"
+    },
+    {
+     "key": "xp:ph:dette-temaet-er-viktig-for-meg-fordi",
+     "no": "Dette temaet er viktig for meg, fordi …",
+     "ru": "Эта тема для меня важна, потому что …",
+     "uk": "Ця тема для мене важлива, тому що …",
+     "wordClass": "frase",
+     "description": "💡 После fordi — обычный порядок слов: fordi jeg har barn.",
+     "group": "start"
+    },
+    {
+     "key": "xp:ph:la-meg-tenke-litt",
+     "no": "La meg tenke litt.",
+     "ru": "Дайте подумать.",
+     "uk": "Дайте подумати.",
+     "wordClass": "frase",
+     "description": "",
+     "group": "time"
+    },
+    {
+     "key": "xp:ph:hvordan-skal-jeg-si-det",
+     "no": "Hvordan skal jeg si det …",
+     "ru": "Как бы это сказать …",
+     "uk": "Як би це сказати …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "time"
+    },
+    {
+     "key": "xp:ph:det-er-et-vanskelig-sporsmaal-men",
+     "no": "Det er et vanskelig spørsmål, men …",
+     "ru": "Непростой вопрос, но …",
+     "uk": "Непросте питання, але …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "time"
+    },
+    {
+     "key": "xp:ph:jeg-har-ikke-tenkt-saa-mye-paa-det-for-men",
+     "no": "Jeg har ikke tenkt så mye på det før, men …",
+     "ru": "Раньше я об этом особо не задумывался, но …",
+     "uk": "Раніше я про це особливо не замислювався, але …",
+     "wordClass": "frase",
+     "description": "💡 Если вы женщина: «не задумывалась» / «не замислювалася» — по-норвежски форма та же.",
+     "group": "time"
+    },
+    {
+     "key": "xp:ph:et-oyeblikk-jeg-finner-ikke-ordet",
+     "no": "Et øyeblikk, jeg finner ikke ordet.",
+     "ru": "Секунду, не могу подобрать слово.",
+     "uk": "Секунду, не можу дібрати слово.",
+     "wordClass": "frase",
+     "description": "💡 Лучше так, чем молчать: экзаменатор видит, что вы управляете разговором.",
+     "group": "time"
+    },
+    {
+     "key": "xp:ph:etter-min-mening-er",
+     "no": "Etter min mening er …",
+     "ru": "По-моему, …",
+     "uk": "На мою думку, …",
+     "wordClass": "frase",
+     "description": "💡 После «Etter min mening» глагол идёт сразу: Etter min mening er det viktig …",
+     "group": "opinion"
+    },
+    {
+     "key": "xp:ph:jeg-synes-at",
+     "no": "Jeg synes at …",
+     "ru": "Мне кажется, что … / Я считаю, что …",
+     "uk": "Мені здається, що … / Я вважаю, що …",
+     "wordClass": "frase",
+     "description": "💡 synes — личное впечатление или оценка: Jeg synes filmen var kjedelig.",
+     "group": "opinion"
+    },
+    {
+     "key": "xp:ph:jeg-tror-at",
+     "no": "Jeg tror at …",
+     "ru": "Думаю, что … (но не уверен на сто процентов)",
+     "uk": "Думаю, що … (але не впевнений на сто відсотків)",
+     "wordClass": "frase",
+     "description": "💡 tror — предположение: Jeg tror det blir regn i morgen.",
+     "group": "opinion"
+    },
+    {
+     "key": "xp:ph:jeg-mener-bestemt-at",
+     "no": "Jeg mener bestemt at …",
+     "ru": "Я твёрдо убеждён, что …",
+     "uk": "Я твердо переконаний, що …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "opinion"
+    },
+    {
+     "key": "xp:ph:for-meg-er-det-viktigst-at",
+     "no": "For meg er det viktigst at …",
+     "ru": "Для меня главное, чтобы …",
+     "uk": "Для мене головне, щоб …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "opinion"
+    },
+    {
+     "key": "xp:ph:fordelen-er-at",
+     "no": "Fordelen er at …",
+     "ru": "Плюс в том, что …",
+     "uk": "Плюс у тому, що …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "proscons"
+    },
+    {
+     "key": "xp:ph:ulempen-er-at",
+     "no": "Ulempen er at …",
+     "ru": "Минус в том, что …",
+     "uk": "Мінус у тому, що …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "proscons"
+    },
+    {
+     "key": "xp:ph:paa-den-ene-siden-paa-den-andre-siden",
+     "no": "På den ene siden …, på den andre siden …",
+     "ru": "С одной стороны …, с другой стороны …",
+     "uk": "З одного боку …, з іншого боку …",
+     "wordClass": "frase",
+     "description": "💡 После «På den ene siden» — глагол сразу: På den ene siden er det dyrt …",
+     "group": "proscons"
+    },
+    {
+     "key": "xp:ph:det-har-baade-fordeler-og-ulemper",
+     "no": "Det har både fordeler og ulemper.",
+     "ru": "У этого есть и плюсы, и минусы.",
+     "uk": "У цього є і плюси, і мінуси.",
+     "wordClass": "frase",
+     "description": "",
+     "group": "proscons"
+    },
+    {
+     "key": "xp:ph:et-problem-kan-vaere-at",
+     "no": "Et problem kan være at …",
+     "ru": "Проблема может быть в том, что …",
+     "uk": "Проблема може бути в тому, що …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "proscons"
+    },
+    {
+     "key": "xp:ph:for-eksempel",
+     "no": "For eksempel …",
+     "ru": "Например, …",
+     "uk": "Наприклад, …",
+     "wordClass": "frase",
+     "description": "💡 В начале предложения — инверсия: For eksempel bruker jeg bussen hver dag.",
+     "group": "example"
+    },
+    {
+     "key": "xp:ph:jeg-kan-gi-et-eksempel-fra-mitt-eget-liv",
+     "no": "Jeg kan gi et eksempel fra mitt eget liv.",
+     "ru": "Приведу пример из своей жизни.",
+     "uk": "Наведу приклад зі свого життя.",
+     "wordClass": "frase",
+     "description": "",
+     "group": "example"
+    },
+    {
+     "key": "xp:ph:da-jeg-kom-til-norge",
+     "no": "Da jeg kom til Norge, …",
+     "ru": "Когда я приехал в Норвегию, …",
+     "uk": "Коли я приїхав до Норвегії, …",
+     "wordClass": "frase",
+     "description": "💡 da — один раз в прошлом; после придаточного — инверсия: Da jeg kom til Norge, kunne jeg ikke norsk.",
+     "group": "example"
+    },
+    {
+     "key": "xp:ph:hjemme-hos-oss",
+     "no": "Hjemme hos oss …",
+     "ru": "У нас дома …",
+     "uk": "У нас удома …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "example"
+    },
+    {
+     "key": "xp:ph:et-godt-eksempel-er",
+     "no": "Et godt eksempel er …",
+     "ru": "Хороший пример — …",
+     "uk": "Гарний приклад — …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "example"
+    },
+    {
+     "key": "xp:ph:jeg-er-helt-enig",
+     "no": "Jeg er helt enig.",
+     "ru": "Полностью согласен.",
+     "uk": "Цілком згоден.",
+     "wordClass": "frase",
+     "description": "💡 enig не меняется по родам: и мужчина, и женщина говорят «Jeg er enig».",
+     "group": "agree"
+    },
+    {
+     "key": "xp:ph:det-er-et-godt-poeng",
+     "no": "Det er et godt poeng.",
+     "ru": "Верно подмечено.",
+     "uk": "Слушне зауваження.",
+     "wordClass": "frase",
+     "description": "",
+     "group": "agree"
+    },
+    {
+     "key": "xp:ph:jeg-er-enig-i-det-men",
+     "no": "Jeg er enig i det, men …",
+     "ru": "С этим я согласен, но …",
+     "uk": "З цим я згоден, але …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "agree"
+    },
+    {
+     "key": "xp:ph:jeg-ser-det-litt-annerledes",
+     "no": "Jeg ser det litt annerledes.",
+     "ru": "Я смотрю на это немного иначе.",
+     "uk": "Я дивлюся на це трохи інакше.",
+     "wordClass": "frase",
+     "description": "",
+     "group": "agree"
+    },
+    {
+     "key": "xp:ph:der-er-jeg-ikke-helt-enig",
+     "no": "Der er jeg ikke helt enig.",
+     "ru": "Тут я не совсем согласен.",
+     "uk": "Тут я не зовсім згоден.",
+     "wordClass": "frase",
+     "description": "💡 Вежливое несогласие — норвежцы редко спорят резко.",
+     "group": "agree"
+    },
+    {
+     "key": "xp:ph:kort-sagt",
+     "no": "Kort sagt …",
+     "ru": "Короче говоря, …",
+     "uk": "Коротше кажучи, …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "sum"
+    },
+    {
+     "key": "xp:ph:alt-i-alt",
+     "no": "Alt i alt …",
+     "ru": "В целом …",
+     "uk": "Загалом …",
+     "wordClass": "frase",
+     "description": "💡 Дальше — инверсия: Alt i alt er jeg fornøyd.",
+     "group": "sum"
+    },
+    {
+     "key": "xp:ph:saa-for-aa-oppsummere",
+     "no": "Så for å oppsummere: …",
+     "ru": "Итак, подведу итог: …",
+     "uk": "Отже, підсумую: …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "sum"
+    },
+    {
+     "key": "xp:ph:derfor-mener-jeg-at",
+     "no": "Derfor mener jeg at …",
+     "ru": "Поэтому я считаю, что …",
+     "uk": "Тому я вважаю, що …",
+     "wordClass": "frase",
+     "description": "💡 derfor + глагол: Derfor mener jeg …, а не «Derfor jeg mener».",
+     "group": "sum"
+    },
+    {
+     "key": "xp:ph:det-viktigste-for-meg-er",
+     "no": "Det viktigste for meg er …",
+     "ru": "Самое важное для меня — …",
+     "uk": "Найважливіше для мене — …",
+     "wordClass": "frase",
+     "description": "",
+     "group": "sum"
+    },
+    {
+     "key": "xp:ph:unnskyld-kan-du-gjenta-sporsmaalet",
+     "no": "Unnskyld, kan du gjenta spørsmålet?",
+     "ru": "Простите, можете повторить вопрос?",
+     "uk": "Вибачте, можете повторити питання?",
+     "wordClass": "frase",
+     "description": "💡 Переспросить на экзамене можно — это тоже часть разговора.",
+     "group": "repeat"
+    },
+    {
+     "key": "xp:ph:kan-du-si-det-litt-saktere",
+     "no": "Kan du si det litt saktere?",
+     "ru": "Можете сказать чуть медленнее?",
+     "uk": "Можете сказати трохи повільніше?",
+     "wordClass": "frase",
+     "description": "",
+     "group": "repeat"
+    },
+    {
+     "key": "xp:ph:mener-du-at",
+     "no": "Mener du at …?",
+     "ru": "Вы имеете в виду, что …?",
+     "uk": "Ви маєте на увазі, що …?",
+     "wordClass": "frase",
+     "description": "",
+     "group": "repeat"
+    },
+    {
+     "key": "xp:ph:jeg-forstod-ikke-helt-hva-betyr",
+     "no": "Jeg forstod ikke helt. Hva betyr …?",
+     "ru": "Я не совсем понял. Что значит …?",
+     "uk": "Я не зовсім зрозумів. Що означає …?",
+     "wordClass": "frase",
+     "description": "",
+     "group": "repeat"
+    },
+    {
+     "key": "xp:ph:kan-du-forklare-hva-du-mener",
+     "no": "Kan du forklare hva du mener?",
+     "ru": "Можете объяснить, что вы имеете в виду?",
+     "uk": "Можете пояснити, що ви маєте на увазі?",
+     "wordClass": "frase",
+     "description": "💡 hva du mener — косвенный вопрос: порядок слов как в обычном предложении.",
+     "group": "repeat"
+    }
+   ]
+  }
+ ]
+}

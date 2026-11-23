@@ -1,0 +1,150 @@
+/* ============ 🤖 «Нейросети» — the chooser of every AI (js/aichooser.js) ============
+ * Desktop: a dropdown under the AI button, in the look of the hover fan (.aib-fan in styles.css).
+ * Phones: the same rows inside a bottom sheet (Mobile.sheet). Every target ≥ 44 px. */
+
+/* ---------- the dropdown ---------- */
+.popover.aic-pop {
+  --aic-line: color-mix(in srgb, #8b80ff 45%, var(--panel-border));
+  padding: 0; border-radius: 18px; overflow: visible; color: var(--text);
+  background: var(--panel-solid); backdrop-filter: none; -webkit-backdrop-filter: none;
+  border: 1px solid var(--aic-line);
+  box-shadow: 0 26px 50px -22px rgba(0, 0, 0, .6), 0 0 36px -16px #29c7ff;
+  transform-origin: calc(100% - 30px) 0;
+  animation: aicIn .26s cubic-bezier(.2, 1.25, .4, 1) both;
+}
+.popover.aic-pop::before { background: var(--panel-solid); border-left: 1px solid var(--aic-line); border-top: 1px solid var(--aic-line); z-index: 1; }
+.popover.aic-pop.out { animation: aicOut .16s ease-in forwards; pointer-events: none; }
+@keyframes aicIn { from { opacity: 0; transform: translateY(-6px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes aicOut { to { opacity: 0; transform: translateY(-4px) scale(.98); } }
+.aic-head { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 8px 8px 4px 16px; }
+.aic-head > span { flex: 1; min-width: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
+.aic-x {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer;
+  background: transparent; color: var(--muted); font-size: 15px; transition: background .15s, color .15s;
+}
+.aic-x:hover { background: color-mix(in srgb, var(--bad) 16%, var(--panel)); color: var(--text); }
+.aic-scroll { max-height: min(640px, var(--aic-max, 70vh)); overflow-y: auto; overscroll-behavior: contain; padding: 2px 8px 8px; scrollbar-width: thin; }
+/* the fan stays away while the chooser is open (it lists them already) */
+body:has(.aic-pop:not(.out)) .claude-badge .aib-fan { display: none !important; }
+
+/* ---------- the rows (dropdown and sheet) ---------- */
+.aic-h { margin: 12px 8px 4px; font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
+.aic-sec { display: flex; flex-direction: column; gap: 2px; }
+.aic-top { padding-bottom: 6px; border-bottom: 1px solid var(--panel-border); }
+.aic-lead { margin: 2px 8px 8px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.aic-lead b { color: var(--text); }
+.aic-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 7px 10px; margin: 0;
+  border: 0; border-radius: 13px; background: transparent; color: var(--text); text-align: left; cursor: pointer; font: inherit;
+  transition: background .15s, transform .12s;
+}
+.aic-row:hover { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.aic-row:active { transform: scale(.985); }
+.aic-row:focus-visible, .aic-foot:focus-visible, .aic-x:focus-visible { outline: 2px solid var(--accent2); outline-offset: -2px; }
+.aic-row.cur { background: color-mix(in srgb, var(--good) 10%, transparent); }
+.aic-row.cur:hover { background: color-mix(in srgb, var(--good) 16%, var(--panel)); }
+.aic-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; line-height: 1.25; }
+.aic-t b { font-size: 14.5px; font-weight: 700; overflow-wrap: anywhere; }
+.aic-t small { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aic-row .aib-i.aic-logo { width: 32px; height: 32px; flex: none; transition: transform .2s cubic-bezier(.2, 1.35, .4, 1), opacity .15s; }
+.aic-row .aib-i.aic-logo.no { opacity: .62; }
+.aic-row .aib-i.aic-logo.no svg { filter: saturate(.55); }
+.aic-row:hover .aib-i.aic-logo, .aic-row:focus-visible .aib-i.aic-logo { opacity: 1; transform: scale(1.08); }
+.aic-row:hover .aib-i.aic-logo.no svg { filter: none; }
+.aic-row .aib-i.aic-logo.ok:not(.cur) { box-shadow: 0 0 0 1.5px var(--panel-solid), 0 0 0 3px color-mix(in srgb, var(--good) 55%, transparent); }
+.aic-row .aib-i.aic-logo.cur { box-shadow: 0 0 0 2px var(--panel-solid), 0 0 0 4px var(--good), 0 6px 16px -4px var(--good); }
+.aic-ico { flex: none; width: 32px; height: 32px; display: grid; place-items: center; font-size: 20px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel)); }
+.aic-chev { flex: none; color: var(--muted); font-size: 20px; line-height: 1; padding-right: 2px; }
+.aic-hub b { color: var(--text); }
+.aic-run b { color: var(--accent2); }
+.aic-bar { display: block; height: 4px; margin-top: 5px; border-radius: 3px; background: var(--panel); overflow: hidden; }
+.aic-bar > i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.aic-tags { flex: none; display: flex; align-items: center; gap: 6px; }
+.aic-tag, .aic-free { font-size: 11.5px; font-weight: 700; line-height: 1; padding: 5px 9px; border-radius: 999px; white-space: nowrap; }
+.aic-tag.cur { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.aic-tag.ok { color: var(--muted); border: 1px solid color-mix(in srgb, var(--good) 40%, var(--panel-border)); padding: 4px 8px; }
+.aic-tag.add { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.aic-row:hover .aic-tag.add { color: #fff; background: var(--accent); }
+.aic-free { color: color-mix(in srgb, var(--good) 80%, var(--text)); background: color-mix(in srgb, var(--good) 12%, transparent); font-weight: 600; }
+[data-theme="light"] .aic-tag.cur { color: #15803d; }
+[data-theme="light"] .aic-free { color: #15803d; }
+.aic-foot {
+  display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 10px 12px; border: 0; border-top: 1px solid var(--panel-border);
+  border-radius: 0 0 12px 12px; background: transparent; color: var(--muted); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer;
+}
+.aic-foot:hover { color: var(--text); background: var(--panel); }
+
+/* ---------- phones: inside the bottom sheet ---------- */
+.aic-sheet .aic-row { min-height: 54px; padding: 8px 8px; border-radius: 16px; }
+.aic-sheet .aic-t b { font-size: 15.5px; }
+.aic-sheet .aic-t small { font-size: 12.5px; white-space: normal; }
+.aic-sheet .aib-i.aic-logo, .aic-sheet .aic-ico { width: 36px; height: 36px; }
+.aic-sheet .aic-h { margin: 14px 8px 4px; }
+.aic-sheet .aic-tags { flex-direction: column; align-items: flex-end; gap: 4px; } /* the names keep the room */
+.aic-sheet .aic-foot { border-radius: 14px; border-top: 0; background: var(--panel); text-align: center; margin-top: 12px; min-height: 48px; }
+
+/* ---------- ⚙️ Настройки: the service the chooser sent the person to lights up ---------- */
+details.prov.aic-flash { border-color: var(--accent2); animation: aicFlash 2.6s ease-out both; }
+@keyframes aicFlash {
+  0%, 30% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 55%, transparent), 0 0 30px -6px var(--accent2); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popover.aic-pop, .popover.aic-pop.out { animation: none; }
+  .popover.aic-pop.out { opacity: 0; }
+  .aic-row, .aic-row .aib-i.aic-logo { transition: none; }
+  .aic-row:active, .aic-row:hover .aib-i.aic-logo { transform: none; }
+  details.prov.aic-flash { animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 55%, transparent); }
+}
+.popover.aic-pop.aic-still, .popover.aic-pop.aic-still.out { animation: none; }
+
+/* ---------- 💻 / 🔑 badges on the logos: subscription through the Mac bridge vs an API key ---------- */
+.aic-lw { position: relative; flex: none; display: inline-grid; place-items: center; line-height: 0; }
+.aic-bdg {
+  position: absolute; right: -4px; bottom: -3px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--panel-solid); color: var(--text); box-shadow: 0 0 0 1.5px var(--panel-solid), 0 1px 4px rgba(0, 0, 0, .35);
+  pointer-events: none;
+}
+.aic-bdg svg { width: 11px; height: 11px; }
+.aic-bdg.mac { color: var(--accent2); }
+.aic-bdg.key { color: #d9a21b; }
+.aic-chip .aic-bdg { width: 13px; height: 13px; right: -3px; bottom: -2px; }
+.aic-chip .aic-bdg svg { width: 9px; height: 9px; }
+.aic-tag.rest { color: var(--warn, #d9a21b); background: color-mix(in srgb, var(--warn, #d9a21b) 14%, transparent); }
+
+/* ---------- 💬 ChatGPT · подписка / Gemini · аккаунт Google: the step-by-step window ---------- */
+.aicc-modal { max-width: 560px; }
+.aicc-title { display: inline-flex; align-items: center; gap: 10px; }
+.aicc-title .aib-i { width: 28px; height: 28px; }
+.aicc { display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 1.45; }
+.aicc p { margin: 0; }
+.aicc-lead { color: var(--text); }
+.aicc-box { padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 9%, var(--panel)); border: 1px solid var(--panel-border); }
+.aicc-box.warn { background: color-mix(in srgb, var(--warn, #d9a21b) 12%, var(--panel)); border-color: color-mix(in srgb, var(--warn, #d9a21b) 40%, var(--panel-border)); }
+.aicc-box.note { font-size: 13px; color: var(--muted); }
+.aicc-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.aicc-step { display: flex; gap: 12px; padding: 12px; border-radius: 14px; border: 1px solid var(--panel-border); background: var(--panel); }
+.aicc-step > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.aicc-step.wait { opacity: .55; }
+.aicc-step.active { border-color: color-mix(in srgb, var(--accent) 55%, var(--panel-border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.aicc-step.done { border-color: color-mix(in srgb, var(--good) 45%, var(--panel-border)); }
+.aicc-n { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px;
+  background: color-mix(in srgb, var(--accent) 16%, var(--panel)); color: var(--accent); }
+.aicc-step.done .aicc-n { background: var(--good); color: #fff; }
+.aicc-act { display: flex; flex-wrap: wrap; gap: 8px; }
+.aicc-act .btn { min-height: 40px; }
+.aicc-ok { color: var(--good); font-weight: 600; }
+.aicc-wait { color: var(--muted); }
+.aicc-spin { display: inline-block; width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent); border-top-color: var(--accent); animation: aiccSpin .8s linear infinite; }
+@keyframes aiccSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .aicc-spin { animation: none; } }
+.aicc-msg { min-height: 1.2em; font-size: 13px; color: var(--muted); }
+.aicc-msg.good { color: var(--good); font-weight: 600; }
+.aicc-msg.bad { color: var(--bad); }
+.aicc-help summary { cursor: pointer; font-weight: 700; color: var(--accent); padding: 4px 0; }
+.aicc-help ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.aicc-code { user-select: all; word-break: break-all; padding: 1px 5px; border-radius: 6px; background: color-mix(in srgb, var(--text) 8%, transparent); }
+.aicc-foot { display: flex; justify-content: flex-end; }

@@ -2,6 +2,9 @@
  * Each guide has buttons with actions and "больше не показывать" (then the default action runs right away).
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
+  /** the Mac bridge exists only when the app is opened on the Mac (file / localhost) — on the site its hints are not shown */
+  const onMac = () => location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(location.hostname);
   const Guides = {
     off(id) { return !!((Store.settings.guidesOff || {})[id]); },
     setOff(id) { const g = Object.assign({}, Store.settings.guidesOff || {}); g[id] = true; Store.setSetting('guidesOff', g); },
@@ -60,13 +63,19 @@
       const bridge = AI.bridge.up;
       const hasKey = k => !!(st[k] || '').trim();
       const voiceNo = typeof TTS !== 'undefined' && TTS.hasNorwegianVoice();
+      const mac = onMac();
       return [
         ['🌐 Google переводчик', 100, 'бесплатно, без ключа, везде', ''],
         ['🌐 MyMemory', 100, 'бесплатно, без ключа (≈5000 символов в день)', ''],
-        ['🌐 DeepL', hasKey('deeplKey') && bridge ? 100 : 30, hasKey('deeplKey') ? (bridge ? 'ключ есть, мост запущен — перевод в карточке' : 'ключ есть, но нужен мост на Mac; на телефоне — сайт') : 'без ключа открывается сайт', hasKey('deeplKey') ? (bridge ? '' : 'запустите мост bridge/server.py') : 'добавьте бесплатный ключ DeepL API Free'],
+        mac ? ['🌐 DeepL', hasKey('deeplKey') && bridge ? 100 : 30, hasKey('deeplKey') ? (bridge ? 'ключ есть, мост запущен — перевод в карточке' : 'ключ есть, но нужен мост на Mac; на телефоне — сайт') : 'без ключа открывается сайт', hasKey('deeplKey') ? (bridge ? '' : 'запустите мост bridge/server.py') : 'добавьте бесплатный ключ DeepL API Free']
+          : ['🌐 DeepL', 30, 'открывается сайт DeepL с вашим словом (перевод прямо в карточке — только в приложении на Mac)', 'перевод в карточке дадут Microsoft с ключом или нейросеть'],
         ['🌐 Microsoft', hasKey('msKey') ? 100 : 30, hasKey('msKey') ? 'ключ есть — перевод в карточке' : 'без ключа открывается Bing', hasKey('msKey') ? '' : 'добавьте бесплатный ключ Azure (F0)'],
-        ['🤖 Нейросеть', AI.available() ? 100 : 35, AI.available() ? `${AI.name()} подключена — все ИИ-функции` : 'не подключена — работают только словари и переводчики', AI.available() ? '' : 'подключите бесплатный Google Gemini или Groq'],
-        ['🤖 Claude по подписке', AI.bridge.ok ? 100 : 0, AI.bridge.ok ? 'мост работает' : bridge ? 'мост запущен, но Claude Code не найден' : 'только на Mac через мост', AI.bridge.ok ? '' : 'запустите мост (и войдите в Claude Code)'],
+        [`${BOT()} Нейросеть`, AI.available() ? 100 : 35, AI.available() ? `${AI.name()} подключена — все ИИ-функции` : 'не подключена — работают только словари и переводчики', AI.available() ? '' : 'подключите бесплатный Google Gemini или Groq'],
+        mac ? [`${BOT()} Claude по подписке`, AI.bridge.ok ? 100 : 0, AI.bridge.ok ? 'мост работает'
+          : bridge && AI.bridge.auth === 'bad' ? 'вход в Claude закончился — войдите ещё раз (один раз примерно на год)'
+            : bridge && !AI.bridge.path ? 'мост запущен, но Claude Code не найден' : bridge ? 'мост запущен, Claude пока не ответил' : 'только на Mac через мост',
+          AI.bridge.ok ? '' : bridge && AI.bridge.auth === 'bad' ? 'Настройки → Нейросети → «🔑 Войти в Claude»' : 'запустите мост (и войдите в Claude Code)']
+          : [`${BOT()} Claude по подписке`, 0, 'только в приложении на Mac — в версии на сайте это пока недоступно', 'подключите бесплатный Gemini или Groq — они работают и здесь'],
         ['📖 Ordbøkene', 100, 'статья, примеры, выражения, формы — с переводом', ''],
         ['💬 Tatoeba', 100, 'живые примеры NO→RU', ''],
         ['📚 Glosbe, LEXIN, NAOB, Яндекс', 90, 'через «📋 Вставить»: копируете на сайте — приложение переводит', 'автоматически невозможно — сайты закрыты'],
@@ -85,19 +94,24 @@
 
     /** a neural network is needed for this button */
     needAI(feature) {
+      const B = (window.AI && AI.bridge) || {};
+      if (window.App && App.updateBadge) { try { App.updateBadge(); } catch (e) { /* not drawn yet */ } } // the 🤖 button tells the truth too
+      // Claude by subscription is connected, only its login on this Mac expired: the re-login help, not «connect a key»
+      if (onMac() && B.up && B.auth === 'bad' && !(window.AI && AI.available()) && window.AIHub && AIHub.authHelp) { AIHub.authHelp(); return Promise.resolve(null); }
       return this.show('need-ai', {
-        icon: '🤖', title: 'Нужна нейросеть',
+        icon: BOT(24), title: 'Нужна нейросеть',
         intro: `Функция «${U.esc(feature)}» работает через нейросеть, а она ещё не подключена. Это бесплатно и займёт 2 минуты.`,
         steps: [
           'Откройте <b>Google AI Studio</b> (кнопка ниже) и войдите своим Google-аккаунтом.',
           'Нажмите <b>«Create API key»</b> и скопируйте ключ.',
-          'В приложении: <b>⚙️ Настройки → 🤖 Нейросети → Google Gemini</b> → вставьте ключ → «🔌 Проверить».',
+          `В приложении: <b>⚙️ Настройки → ${BOT()} Нейросети → Google Gemini</b> → вставьте ключ → «🔌 Проверить».`,
         ],
         levels: [
           { label: 'Сейчас, без нейросети', pct: 35, text: 'работают: переводчики Google/MyMemory, Ordbøkene (статья + формы), Tatoeba (примеры), синонимы из словаря, фото по смыслу' },
           { label: 'С бесплатным Gemini или Groq', pct: 100, text: 'всё: проверка карточек, объяснения, полные формы с переводом, примеры по временам, синонимы с разницей, колоды по темам' },
         ],
-        expect: 'Проверка карточек, объяснения, все формы слова с переводом, примеры, синонимы, новые колоды по темам. На Mac можно вместо этого подключить Claude по вашей подписке (мост).',
+        expect: 'Проверка карточек, объяснения, все формы слова с переводом, примеры, синонимы, новые колоды по темам.' + (onMac() ? ' На Mac можно вместо этого подключить Claude по вашей подписке (мост).' : '')
+          + (window.AIHub ? `<br>Как только нейросеть заработает, откроется <b>${BOT()} Центр нейросети</b> — там по шагам, что делать дальше.` : ''),
         actions: [
           { label: 'Позже', value: null, cls: 'ghost' },
           { label: '🔑 Получить ключ Gemini ↗', value: 'key', run: () => window.open('https://aistudio.google.com/apikey', '_blank', 'noopener') },
@@ -117,7 +131,8 @@
           'Зарегистрируйтесь на <b>DeepL API Free</b> (кнопка ниже). Это бесплатно: 500 000 символов в месяц, но DeepL может попросить карту для проверки, денег не списывает.',
           'В личном кабинете откройте <b>API Keys</b> и скопируйте ключ (он заканчивается на <code>:fx</code>).',
           'В приложении: <b>⚙️ Настройки → 🌐 Переводчики → DeepL</b> → вставьте ключ.',
-          'Важно: DeepL не пускает запросы прямо из браузера, поэтому на Mac должен быть запущен <b>мост</b> (bridge/server.py). На телефоне DeepL будет открываться сайтом.',
+          onMac() ? 'Важно: DeepL не пускает запросы прямо из браузера, поэтому на Mac должен быть запущен <b>мост</b> (bridge/server.py). На телефоне DeepL будет открываться сайтом.'
+            : 'Важно: DeepL не пускает запросы прямо из браузера, поэтому в версии на сайте DeepL открывается своим сайтом с вашим словом — перевод прямо в карточке пока недоступен. Перевод в карточке здесь дают Google, MyMemory, Microsoft (с ключом) и нейросети.',
         ] : [
           'Создайте бесплатный ресурс <b>Azure Translator</b> (тариф F0, 2 млн символов в месяц) — инструкция по кнопке ниже.',
           'Скопируйте <b>ключ</b> и <b>регион</b> (например westeurope).',
@@ -125,8 +140,9 @@
         ],
         levels: deepl ? [
           { label: 'Сейчас, без ключа', pct: 30, text: 'открывается сайт DeepL с вашим словом — переносить вручную' },
-          { label: 'С ключом на Mac (мост запущен)', pct: 100, text: 'перевод DeepL прямо в карточке, сверка, значок в истории' },
-          { label: 'С ключом на телефоне', pct: 30, text: 'DeepL не пускает браузер без моста — откроется сайт' },
+          ...(onMac() ? [{ label: 'С ключом на Mac (мост запущен)', pct: 100, text: 'перевод DeepL прямо в карточке, сверка, значок в истории' },
+            { label: 'С ключом на телефоне', pct: 30, text: 'DeepL не пускает браузер без моста — откроется сайт' }]
+            : [{ label: 'С ключом в версии на сайте', pct: 30, text: 'DeepL не пускает браузер — откроется сайт DeepL' }]),
         ] : [
           { label: 'Сейчас, без ключа', pct: 30, text: 'открывается Bing Translator с вашим словом' },
           { label: 'С ключом (Mac и телефон)', pct: 100, text: 'перевод Microsoft прямо в карточке, сверка, значок в истории' },

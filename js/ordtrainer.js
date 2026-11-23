@@ -16,11 +16,15 @@
  * Points, streak, best score: Store.settings.ordtr (separate from the FSRS schedule). Mistakes: replay + «➕ в карточки».
  */
 (function () {
+  const BOT = (size, o) => (window.App && App.robotSvg ? App.robotSvg(size, o) : '🤖'); // 🤖 the app's one brand robot (js/app.js App.robotSvg)
+  const SIC = () => (window.NavIcons ? NavIcons.statsIco() : '📊'); // 📊 → the drawn «Статистика» bars (js/app.js NavIcons)
   const DATA_URL = 'data/ordtrainer.json';
   const DECKS_URL = 'data/grammar-decks.json';
   /** optional deck files after data/grammar-decks.json — each may be missing (skipped quietly); same schema: { attribution?, group?, decks: [...] }.
    *  deck.group (or the file's group) puts a deck under a heading of the catalogue — see SECTIONS below; no group → «Таблицы форм» */
-  const EXTRA_DECKS = ['data/forms-decks.json', 'data/ordbok-sprut-decks.json', 'data/pronunciation-decks.json', 'data/writing-phrases.json', 'data/phrasebook-decks.json'];
+  const EXTRA_DECKS = ['data/forms-decks.json', 'data/ordbok-sprut-decks.json', 'data/pronunciation-decks.json', 'data/writing-phrases.json', 'data/phrasebook-decks.json',
+    // 🧭 «Норвежский для жизни» (work, NAV, doctor, housing…) and 🎨 culture decks with an art theme (deck.theme = ArtCards template id)
+    'data/life-decks.json', 'data/theme-decks.json'];
   const DECK_MISTAKES = '🧩 Порядок слов: мои ошибки';
   const ROUND = 10;
   const esc = s => (window.U ? U.esc(s) : String(s == null ? '' : s));
@@ -28,7 +32,7 @@
   const normS = s => low(s).replace(/[.,!?;:«»"()]/g, ' ').replace(/\s+/g, ' ').trim();
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const SPK = (s = 18) => `<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
-  const say = t => { try { if (t && window.TTS) TTS.speak(t, 'no'); } catch (e) { /* no voice */ } };
+  const say = t => { try { if (t && window.TTS) TTS.speak(t, 'no', { place: 'cards' }); } catch (e) { /* no voice */ } };
 
   /* ================= rules (pure: used by the game and by the checks) ================= */
   const MODAL = new Set(['kan', 'kunne', 'kunnet', 'vil', 'ville', 'villet', 'skal', 'skulle', 'skullet', 'må', 'måtte', 'måttet', 'bør', 'burde', 'burdet',
@@ -356,7 +360,7 @@
     ctx.m = m;
     ctx.body = m.$('[data-ot]');
     ctx.alive = () => !closed;
-    ctx.title = t => { const h = m.$('.modal-head h2'); if (h) h.textContent = t; };
+    ctx.title = (t, html) => { const h = m.$('.modal-head h2'); if (h) { if (html) h.innerHTML = t; else h.textContent = t; } }; // html: our own static markup only
     ctx.go = (v, o) => {
       if (closed) return;
       if (ctx.stop) { try { ctx.stop(); } catch (e) { /* ignore */ } ctx.stop = null; }
@@ -378,7 +382,7 @@
   const VIEWS = {};
   const TOOL = {
     wo: { ico: '🧱', name: 'Собери предложение', desc: 'Нажимайте или перетаскивайте слова по порядку: V2, инверсия, ikke, придаточные, модальные, вопросы' },
-    pos: { ico: '📊', name: 'Порядок слов — таблица позиций', desc: 'Цветная таблица, как на листе Bnorsk: смотрите, как слова встают в столбцы, раскладывайте и собирайте сами, переделывайте: инверсия, sier at / spør om, som, derfor ↔ fordi' },
+    pos: { get ico() { return SIC(); }, name: 'Порядок слов — таблица позиций', desc: 'Цветная таблица, как на листе Bnorsk: смотрите, как слова встают в столбцы, раскладывайте и собирайте сами, переделывайте: инверсия, sier at / spør om, som, derfor ↔ fordi' },
     aa: { ico: 'å', name: 'å или нет?', desc: 'Jeg kan ___ svømme · Jeg pleier ___ svømme — нужен ли å перед инфинитивом' },
     qw: { ico: '❓', name: 'Какое вопросительное слово?', desc: 'По ответу выберите слово: «I Oslo» → Hvor, «To» → Hvor mange' },
     decks: { ico: '📚', name: 'Грамматика: готовые колоды и таблицы форм', desc: 'Глаголы · существительные · прилагательные · местоимения: таблица всех форм, колода в один тап (целиком или выбранные слова) и «Впиши форму»' },
@@ -1084,7 +1088,7 @@
   const posBack = () => backBtn('pos', '← Таблица позиций');
 
   VIEWS.pos = async ctx => {
-    ctx.title('📊 Порядок слов — таблица позиций');
+    ctx.title(`${SIC()} Порядок слов — таблица позиций`, true);
     ctx.body.innerHTML = '<div class="ot-loading"><span class="spinner"></span> Загружаю таблицу…</div>';
     const d = await data();
     if (!ctx.alive()) return;
@@ -1094,7 +1098,7 @@
     const sampleIt = sample.length ? sample : ['hs', 'q', 'ls'].map(g => items.find(x => x.g === g || (g === 'ls' && x.parts[0].t === 'ls'))).filter(Boolean);
     const draw = () => {
       ctx.body.innerHTML = `${backBtn()}
-        <div class="lib-intro">📊 <span>Каждое норвежское предложение раскладывается по <b>столбцам</b>: глагол на 2-м месте, подлежащее, <b>ikke/aldri</b>, второй глагол, дополнение, где/когда. В придаточном — свой порядок: <b>союз → подлежащее → ikke → глагол</b>.</span></div>
+        <div class="lib-intro">${SIC()} <span>Каждое норвежское предложение раскладывается по <b>столбцам</b>: глагол на 2-м месте, подлежащее, <b>ikke/aldri</b>, второй глагол, дополнение, где/когда. В придаточном — свой порядок: <b>союз → подлежащее → ikke → глагол</b>.</span></div>
         <div class="pt-modes">${Object.entries(POS_MODES).map(([id, m]) => {
           const st = POS_KIND[id] ? p.stats[POS_KIND[id]] : null;
           return `<button type="button" class="pt-mode" data-pos-mode="${id}"><span class="pt-mode-ico" aria-hidden="true">${m.ico}</span><span class="pt-mode-txt"><b>${m.name}</b><span>${esc(m.desc)}</span>${st && st.n ? `<small>${Math.round(st.ok / st.n * 100)}% верно · рекорд ${p.best[POS_KIND[id]] || 0} ⭐</small>` : ''}</span></button>`;
@@ -1964,7 +1968,7 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
   function wAiHtml(r) {
     const KIND = { order: 'порядок слов', grammar: 'грамматика', vocab: 'слово', spelling: 'написание' };
     return `<div class="wr-ai">
-      <div class="wr-ai-head">🤖 <b>${r.ok && r.done ? 'Нейросеть: всё верно!' : r.done ? 'Нейросеть нашла, что поправить' : 'Нейросеть: задание выполнено не полностью'}</b></div>
+      <div class="wr-ai-head">${BOT()} <b>${r.ok && r.done ? 'Нейросеть: всё верно!' : r.done ? 'Нейросеть нашла, что поправить' : 'Нейросеть: задание выполнено не полностью'}</b></div>
       ${r.comment ? `<p class="wr-ai-c">${esc(r.comment)}</p>` : ''}
       ${r.errors.length ? `<ol class="wr-ai-errs">${r.errors.map(e => `<li><span><s lang="nb">${esc(e.frag)}</s> → <b lang="nb">${esc(e.fix)}</b>${KIND[e.kind] ? ` <span class="wr-kind">${KIND[e.kind]}</span>` : ''}</span>${e.why ? `<span class="small muted">${esc(e.why)}</span>` : ''}</li>`).join('')}</ol>` : ''}
       ${r.corrected && !(r.ok && !r.errors.length) ? `<div class="wr-ai-fix"><span class="small muted">Исправленный текст:</span> <b lang="nb">${esc(r.corrected)}</b> <button type="button" class="media-btn sm" data-say-t="${esc(r.corrected)}" title="Прослушать" aria-label="Прослушать исправленный текст">${SPK(16)}</button></div>` : ''}
@@ -2013,7 +2017,7 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
         ${!dunno && res.ok && res.unsure && !res.perfect ? '<div class="small muted">Проверка примерная: программа смотрит порядок слов, но не смысл и не каждое слово.</div>' : ''}
         ${dunno || !res.ok || x.model ? `<div class="ot-right"><span class="small muted">${x.model ? 'Образец:' : 'Пример:'}</span> <span lang="nb">${esc(model)}</span> <button type="button" class="media-btn sm" data-say-t="${esc(model)}" title="Прослушать" aria-label="Прослушать образец">${SPK(16)}</button></div>` : ''}
         <div class="ot-fb-act">
-          ${otAiReady() && !dunno ? '<button type="button" class="btn ai" data-ai title="Нейросеть проверит текст и объяснит ошибки">🤖 Проверить подробно</button>' : ''}
+          ${otAiReady() && !dunno ? `<button type="button" class="btn ai" data-ai title="Нейросеть проверит текст и объяснит ошибки">${BOT()} Проверить подробно</button>` : ''}
           ${!res.ok && !dunno ? '<button type="button" class="btn sm" data-mk title="Добавить образец в карточки">➕ в карточки</button>' : ''}
           <button type="button" class="btn primary" data-next>${S.i + 1 < S.items.length ? 'Дальше →' : 'Итоги'}</button></div>
         <div data-ai-out></div>`;
@@ -2057,7 +2061,7 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
       aiBusy = false;
       if (!ctx.alive() || it() !== x) return;
       if (b) b.disabled = false;
-      out.innerHTML = r ? wAiHtml(r) : '<div class="wr-ai wr-ai-err" role="status">🤖 Нейросеть сейчас не ответила — попробуйте чуть позже. Простая проверка выше работает и без неё.</div>';
+      out.innerHTML = r ? wAiHtml(r) : `<div class="wr-ai wr-ai-err" role="status">${BOT()} Нейросеть сейчас не ответила — попробуйте чуть позже. Простая проверка выше работает и без неё.</div>`;
     };
     ctx.body.onclick = async e => {
       const t = e.target.closest('button'); if (!t || t.disabled) return;
@@ -2184,7 +2188,7 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
   const WORDCLASS = new Set(TGROUPS.map(g => g[0]));
   const groupOf = d => (WORDCLASS.has(d.group) && d.group) || ({ noun: 'noun', verb: 'verb', adj: 'adj', pron: 'pron', poss: 'pron' }[d.kind]) || (['modal', 'aa', 'pairs'].includes(d.id) ? 'verb' : 'other');
   /** the catalogue's big headings (deck.group); a deck without one — or with an old word-class group — is a form table */
-  const SECTIONS = [['forms', '📐', 'Таблицы форм'], ['verbs', '🏃', 'Глаголы'], ['prepositions', '📍', 'Предлоги'], ['dictionary', '📖', 'Мой словарь'], ['pronunciation', '🗣️', 'Произношение'], ['phrases', '✍️', 'Фразы для письма'], ['phrasebook', '💬', 'Разговорник по ситуациям']];
+  const SECTIONS = [['forms', '📐', 'Таблицы форм'], ['verbs', '🏃', 'Глаголы'], ['prepositions', '📍', 'Предлоги'], ['dictionary', '📖', 'Мой словарь'], ['pronunciation', '🗣️', 'Произношение'], ['phrases', '✍️', 'Фразы для письма'], ['phrasebook', '💬', 'Разговорник по ситуациям'], ['life', '🧭', 'Норвежский для жизни'], ['themes', '🎨', 'Культура: темы с оформлением карточек']];
   const sectionOf = d => (SECTIONS.some(x => x[0] === d.group) ? d.group : 'forms');
   const hasParadigm = d => Array.isArray(d.cards) && d.cards.length && d.cards.every(c => c.paradigm && c.paradigm.forms);
   const srcLine = d => d._src
@@ -2212,7 +2216,10 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
         : `${c.example ? `<div lang="nb">${esc(c.example)}</div>${c.exampleRu ? `<small>${esc(c.exampleRu)}</small>` : ''}` : ''}${c.description ? `<div class="tf-note"><small>${esc(String(c.description).split('\n')[0])}</small></div>` : ''}`}</td></tr>`).join('')}</tbody></table>`;
   }
 
-  VIEWS.decks = async ctx => {
+  /** 🎨 a culture deck's art template (js/artcards.js · artcards-no.js) — only when that template exists in this build */
+  const artThemeOf = d => { try { return d && d.theme && window.ArtCards && ArtCards.THEMES && ArtCards.THEMES[d.theme] ? ArtCards.THEMES[d.theme] : null; } catch (e) { return null; } };
+  const artNow = () => { try { return ((Store.Safe && Store.Safe.art ? Store.Safe.art(Store.settings.art) : Store.settings.art) || {}).theme || 'fjord'; } catch (e) { return ''; } };
+  VIEWS.decks = async (ctx, o = {}) => {
     ctx.title('📚 Таблицы форм и готовые колоды');
     ctx.body.innerHTML = '<div class="ot-loading"><span class="spinner"></span> Загружаю таблицы…</div>';
     const D = await decksData();
@@ -2232,6 +2239,8 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
         if (status === 'gone') state = '<div class="tf-state gone">🗑 Вы удалили эту колоду — ничего страшного. Если захотите, можете создать её заново: прогресс начнётся с нуля.</div>';
         act = `<button type="button" class="btn primary" data-add="${esc(d.id)}">➕ ${status === 'gone' ? 'Создать заново' : 'Создать колоду'}</button><button type="button" class="btn sm ghost" data-pick="${esc(d.id)}">☑ Выбрать слова</button>${quiz}`;
       }
+      const th = artThemeOf(d);
+      if (th) act += artNow() === d.theme ? `<span class="small muted tf-art-on">🎨 Оформление «${esc(th.name)}» включено</span>` : `<button type="button" class="btn sm ghost" data-artth="${esc(d.id)}" title="Карточки в художественном виде получат этот рисунок, а галерея будет первой предлагать подходящие фото">🎨 Оформить в стиле «${esc(th.name)}»</button>`;
       return `<div class="ot-deck tf-card ${status}" data-deck="${esc(d.id)}">
         <div class="ot-deck-ico" aria-hidden="true">${esc(d.icon)}</div>
         <div class="ot-deck-txt"><b>${esc(d.name)}</b><span>${esc(d.description)}</span>
@@ -2266,9 +2275,25 @@ kind — одно из: "order", "grammar", "vocab", "spelling". ok = true, ес
       }));
     };
     draw();
+    // ExamTrainer «Что подтянуть» / home links: OrdTrainer.open('decks', { focus: 'life-bolig' }) — scroll to that deck
+    if (o.focus) setTimeout(() => {
+      // a deck id ('life-bolig') or a whole section ('life' — «Норвежский для жизни», 'themes' — «Культура»)
+      const sec = ctx.body.querySelector(`[data-sec="${CSS.escape(String(o.focus))}"] .tf-sec-h`);
+      if (sec) { sec.scrollIntoView({ block: 'start', behavior: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); return; }
+      const el = ctx.body.querySelector(`[data-deck="${CSS.escape(String(o.focus))}"]`);
+      if (el) { el.classList.add('tf-focus'); el.scrollIntoView({ block: 'center', behavior: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); setTimeout(() => el.classList.remove('tf-focus'), 2600); }
+    }, 60);
     ctx.body.onclick = e => {
       const t = e.target.closest('button'); if (!t || t.disabled) return;
       if (t.dataset.otGo) { ctx.go(t.dataset.otGo); return; }
+      if (t.dataset.artth) {
+        const d = D.decks.find(x => x.id === t.dataset.artth), th = artThemeOf(d); if (!th) return;
+        try { Store.setSetting('art', Store.Safe.art(Object.assign({}, Store.Safe.art(Store.settings.art), { theme: d.theme, font: 'theme' }))); } catch (er) { return; }
+        ctx.dirty = true;
+        UI.toast(`${th.icon || '🎨'} Оформление «${th.name}» — для карточек в художественном виде; галерея первой предложит подходящие фото. Вернуть прежнее можно в «🎨 Оформление»`, 'good', 5000);
+        draw();
+        return;
+      }
       const id = t.dataset.add || t.dataset.upd || t.dataset.study || t.dataset.open || t.dataset.pick || t.dataset.more || t.dataset.quiz;
       const d = D.decks.find(x => x.id === id); if (!d) return;
       if (t.dataset.pick) { ctx.go('pick', { id, mode: 'create' }); return; }

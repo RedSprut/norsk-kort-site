@@ -156,3 +156,8 @@
   .gr-lvbtn { min-width: 44px; padding: 6px 8px; }
   .gr-item { padding: 8px 10px; gap: 8px; }
 }
+
+/* examples: the Ukrainian line («Язык перевода» → uk / both) */
+.gr-ex-uk { color: var(--uk, var(--ru)); }
+.gr-ex-ru + .gr-ex-uk { margin-top: 2px; }
+.gr-flag { font-size: 12px; margin-right: 2px; }

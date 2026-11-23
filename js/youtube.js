@@ -226,7 +226,7 @@
           : '<div class="nrk-empty muted">У канала пока нет видео.</div>';
       } catch (err) {
         if (!out.isConnected) return;
-        out.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>Видео канала не загрузились: ${U.esc(err.message)}.</b> Канал можно открыть <a href="${U.esc(this.channelUrl(handle, q))}" target="_blank" rel="noopener">на YouTube ↗</a>. Если скопировать оттуда ссылку на видео и вставить в поиск выше — оно откроется здесь с субтитрами.</span></div>`;
+        out.innerHTML = `<div class="mt-warn"><span>⚠️</span><span><b>Видео канала не загрузились: ${U.esc(U.niceErr(err, '', true))}.</b> Канал можно открыть <a href="${U.esc(this.channelUrl(handle, q))}" target="_blank" rel="noopener">на YouTube ↗</a>. Если скопировать оттуда ссылку на видео и вставить в поиск выше — оно откроется здесь с субтитрами.</span></div>`;
       }
     },
 
@@ -246,7 +246,7 @@
         else if (c.auto) { subName = 'автоматические субтитры YouTube'; note = '<b>Это автоматические субтитры YouTube</b> — их распознала машина, в словах бывают ошибки. Прежде чем учить слово, проверьте его: 🔊, перевод и «✍️ Выбрать…» → редактор со словарями.'; }
         else subName = 'субтитры YouTube (от автора)';
       } catch (err) {
-        note = `Субтитры не загрузились: ${U.esc(err.message)}. Видео играет без них.`;
+        note = `Субтитры не загрузились: ${U.esc(U.niceErr(err, '', true))}. Видео играет без них.`;
       } finally { if (busy) busy.close(); }
       Subs.openStream({ kind: 'youtube', id, title: title || 'Видео YouTube', channel, link, at: t => `${link}&t=${Math.floor(t)}s`, cues, subName, note });
     },
@@ -283,7 +283,7 @@
             <img src="${U.esc(th)}" alt="" loading="lazy"><span class="yt-vid-t">${s.title || ''}</span><small>${U.esc(s.channelTitle || '')}</small></a>`;
         }).join('')}</div>`;
       } catch (e) {
-        el.innerHTML = `<div class="mt-warn">⚠️ <span>YouTube: ${U.esc(e.message)}. Проверьте ключ в Настройках (и что в Google Cloud включён «YouTube Data API v3»). Ссылки выше работают и без ключа.</span></div>`;
+        el.innerHTML = `<div class="mt-warn">⚠️ <span>YouTube: ${U.esc(U.niceErr(e, '', true))}. Проверьте ключ в Настройках (и что в Google Cloud включён «YouTube Data API v3»). Ссылки выше работают и без ключа.</span></div>`;
       }
     },
   };

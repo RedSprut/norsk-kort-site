@@ -4,7 +4,8 @@
  * Reading: pages (CSS columns, one or two on wide screens) or one long ribbon; size, line height, width, font,
  * app theme or sepia. Every sentence is its own unit; a bracketed translation «(Жил-был король.)» right after a
  * Norwegian sentence is a unit of its own. Read aloud: each piece in its own voice (Norwegian / Russian /
- * Ukrainian) through TTS.speak — no own speech engine; the sentence being read is highlighted and followed.
+ * Ukrainian) through TTS.speak — no own speech engine; the sentence being read is highlighted and followed, and inside it
+ * the word being said (🎤 «бегущая подсветка слов», karPaint — on by default, «Aa» → off).
  * Position (sentence + book page) is saved per book; on opening: «continue / start over».
  * Public: window.Reader = { open(), openBook(id), importFiles(files) }.
  */
@@ -64,7 +65,7 @@
   };
 
   /* ---------- the reader's own look & listening options (small, per device) ---------- */
-  const DEF = { mode: 'page', size: 19, lh: 2, width: 2, font: 'serif', skin: 'app', hl: 'amber', hls: 'fill', hideTr: false, read: 'both', speed: 'normal', pause: 1, repeat: 1 };
+  const DEF = { mode: 'page', size: 19, lh: 2, width: 2, font: 'serif', skin: 'app', hl: 'amber', hls: 'fill', kar: true, hideTr: false, read: 'both', speed: 'normal', pause: 1, repeat: 1 };
   let P = Object.assign({}, DEF);
   try { Object.assign(P, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (e) { /* defaults */ }
   const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(P)); } catch (e) { /* full / private */ } };
@@ -167,31 +168,44 @@
     flush();
     return units;
   }
-  /** a unit → the pieces read aloud, each with its language */
+  /** words of a text: [[start, end], …] (the same word rule as TTS — 🎤 «бегущая подсветка») */
+  const wordsAt = (t, at) => (window.TTS && TTS.wordsOf ? TTS.wordsOf(t).map(x => [x.s + at, x.e + at]) : []);
+  /** a unit → the pieces read aloud, each with its language; w: where its words are in the unit's text */
   function segsOf(u, uk) {
     if (u.segs) return u.segs;
-    const toks = u.text.match(/\S+\s*/g) || [];
+    const toks = [];
+    const re = /\S+\s*/g;
+    let m;
+    while ((m = re.exec(u.text))) toks.push({ t: m[0], at: m.index });
     const segs = [];
-    let pend = '';
+    let pend = [];
     toks.forEach(tok => {
-      const sc = scriptOf(tok), last = segs[segs.length - 1];
-      if (!sc) { if (last) last.t += tok; else pend += tok; return; }
-      if (last && last.sc === sc) last.t += tok;
-      else { segs.push({ sc, t: pend + tok }); pend = ''; }
+      const sc = scriptOf(tok.t), last = segs[segs.length - 1];
+      if (!sc) { if (last) last.toks.push(tok); else pend.push(tok); return; }
+      if (last && last.sc === sc) last.toks.push(tok);
+      else { segs.push({ sc, toks: pend.concat(tok) }); pend = []; }
     });
-    u.segs = segs.map(s => ({ lang: s.sc === 'lat' ? 'no' : cyrLang(s.t, uk), say: s.t.replace(/[()[\]{}«»"“”„]/g, ' ').replace(/\s+/g, ' ').trim() }))
-      .filter(s => /[\p{L}\p{N}]/u.test(s.say));
+    u.segs = segs.map(s => {
+      const t = s.toks.map(x => x.t).join('');
+      const say = t.replace(/[()[\]{}«»"“”„]/g, ' ').replace(/\s+/g, ' ').trim();
+      const w = [].concat(...s.toks.map(x => wordsAt(x.t, x.at)));
+      return { lang: s.sc === 'lat' ? 'no' : cyrLang(t, uk), say, w };
+    }).filter(s => /[\p{L}\p{N}]/u.test(s.say));
     return u.segs;
   }
   function wantedSegs(u, uk) {
     const out = [];
+    // 📄 books added before the clean-up: a page number / separator left in the text is not read («Side 6 av 40», «- 6 -»)
+    if (window.PageText && u.text && u.text.length <= 24 && PageText.isJunk(u.text, false)) return out;
     segsOf(u, uk).forEach(s => {
       if (P.read === 'no' && s.lang !== 'no') return;
       if (P.read === 'tr' && s.lang === 'no') return;
       const last = out[out.length - 1];
-      if (last && last.lang === s.lang) last.say += (/[.!?,:;]$/.test(last.say) ? ' ' : ', ') + s.say;
-      else out.push(Object.assign({}, s));
+      if (last && last.lang === s.lang) { last.say += (/[.!?,:;]$/.test(last.say) ? ' ' : ', ') + s.say; last.w = last.w.concat(s.w); }
+      else out.push(Object.assign({}, s, { w: s.w.slice() }));
     });
+    // 🎤 the words TTS reports are the words of «say»: the same count → each one has its place in the text
+    out.forEach(s => { s.wok = s.w.length > 0 && wordsAt(s.say, 0).length === s.w.length; });
     return out;
   }
 
@@ -232,9 +246,21 @@
   /** tidy blocks: no empty ones, very long paragraphs cut at sentence ends (one paragraph = one reading chunk) */
   function normBlocks(blocks) {
     const out = [];
-    blocks.forEach(([k, t]) => {
+    // 📄 a paragraph that is only a page number: «- 6 -», «Side 6 av 40», «[6]» — or bare numbers running 1, 2, 3…
+    const PT = window.PageText;
+    const nums = PT ? blocks.map(([k, t], i) => (k === 'p' && /^\s*\d{1,4}\s*$/.test(t) ? i : -1)).filter(i => i >= 0) : [];
+    const run = new Set();
+    if (nums.length >= 3) {
+      const v = nums.map(i => +blocks[i][1]);
+      const steps = v.slice(1).filter((x, j) => x === v[j] + 1).length;
+      const span = blocks.slice(nums[0], nums[nums.length - 1]).reduce((n, b) => n + String(b[1] || '').length, 0) / (nums.length - 1);
+      if (steps >= (nums.length - 1) * 0.6 && span < 6000) nums.forEach((i, j) => { if (v[j - 1] === v[j] - 1 || v[j + 1] === v[j] + 1) run.add(i); });
+    }
+    blocks.forEach(([k, t], i) => {
       t = String(t || '').replace(/[­​﻿]/g, '').replace(/\s+/g, ' ').trim();
       if (!t || !/[\p{L}\p{N}]/u.test(t)) return;
+      if (PT && (run.has(i) || PT.isJunk(t, false))) return;
+      if (PT) t = PT.tidy(t);
       if (k === 'h' && t.length > 160) k = 'p';
       if (t.length <= 2600) { out.push([k, t]); return; }
       let cur = '';
@@ -245,6 +271,8 @@
   }
   function textBlocks(text) {
     text = String(text || '').replace(/\r\n?/g, '\n').replace(/ /g, ' ').replace(/^﻿/, '');
+    // 📄 page breaks («\f»), page numbers («- 6 -», 1-2-3 runs), separators, words cut at line ends (util.js PageText)
+    if (window.PageText) { try { text = PageText.cleanText(text); } catch (e) { /* as it is */ } }
     const lines = text.split('\n');
     const blank = lines.filter(l => !l.trim()).length / Math.max(1, lines.length);
     const blocks = [];
@@ -268,6 +296,7 @@
     'FIGCAPTION', 'TR', 'UL', 'OL', 'TABLE', 'HEADER', 'FOOTER', 'ASIDE', 'MAIN', 'BODY', 'DL', 'FIGURE', 'CENTER', 'ADDRESS', 'HR', 'TBODY', 'THEAD']);
   const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'SVG', 'HEAD', 'TITLE', 'IMG', 'NAV', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'IFRAME', 'OBJECT', 'MATH', 'RT', 'RP']);
   function domBlocks(root, out) {
+    if (window.PageText) PageText.stripDom(root); // EPUB / HTML page-break markers (<span epub:type="pagebreak">, .pagenum)
     let buf = '';
     const flush = k => { const t = buf.replace(/\s+/g, ' ').trim(); if (t && /[\p{L}\p{N}]/u.test(t)) out.push([k, t]); buf = ''; };
     const walk = (el, k) => {
@@ -414,11 +443,16 @@
         if (it.hasEOL) { lines.push(cur); cur = null; }
       });
       if (cur) lines.push(cur);
-      const ls = lines.map(l => Object.assign(l, { s: l.s.replace(/\s+/g, ' ').trim() })).filter(l => l.s && !/^[-–—\s]*\d{1,4}[-–—\s]*$/.test(l.s));
-      if (letters(ls.map(l => l.s).join(' ')) < 20) empty++;
+      // the top / bottom margins of the page (page numbers, running headers / footers live there — util.js PageText)
+      const v = page.view || [0, 0, 0, 0], H = (v[3] || 0) - (v[1] || 0);
+      const band = y => (H > 50 ? (y > v[3] - H * 0.09 ? 'top' : y < v[1] + H * 0.09 ? 'bottom' : '') : '');
+      const ls = lines.map(l => Object.assign(l, { s: l.s.replace(/\s+/g, ' ').trim(), band: band(l.y) })).filter(l => l.s && (window.PageText || !/^[-–—\s]*\d{1,4}[-–—\s]*$/.test(l.s)));
       pages.push(ls);
       if (n % 8 === 0) await sleep(0);
     }
+    // 📄 no page numbers («6», «- 6 -», «Side 6 av 40»), running headers / footers, «. . .» separators
+    if (window.PageText) { try { PageText.cleanPages(pages, { pdf: true }).forEach((ls, k) => { pages[k] = ls; }); } catch (e) { /* as they are */ } }
+    pages.forEach(ls => { if (letters(ls.map(l => l.s).join(' ')) < 20) empty++; });
     if (empty > pdf.numPages * 0.6) throw friendly('В этом PDF текст нарисован картинкой (это скан). Откройте его в «📘 Мой учебник» — там текст распознаётся с картинок');
     // typical line: length, height, spacing
     const all = pages.flat();
@@ -518,6 +552,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     pause: '<svg class="ico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2" fill="currentColor"/><rect x="14" y="4.5" width="4" height="15" rx="1.2" fill="currentColor"/></svg>',
     prevS: '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 19.5 9 12l9.5-7.5z" fill="currentColor"/><path d="M5.5 5v14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
     nextS: '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 19.5 15 12 5.5 4.5z" fill="currentColor"/><path d="M18.5 5v14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+    print: '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z" fill="var(--panel, #fff)"/><circle cx="17" cy="12" r=".9" fill="currentColor" stroke="none"/></svg>',
     again: '<svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>',
     left: '<svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>',
     right: '<svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>',
@@ -794,6 +829,15 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     const sig = `${e.id}|${e.page}`;
     if (sig === recentLast && recentAll()[0] && recentAll()[0].id === e.id) return; // same page: nothing new to write
     recentLast = sig;
+    try { if (window.Resume && Resume.note) Resume.note('reader', e.id, e.page, 'r'); } catch (err) { /* ⏱ reading time for «Мой прогресс» */ }
+    // 🎓 «Учить по книге»: after three pages read — a gentle «Сделать колоду из прочитанного?» (js/learnby.js)
+    try {
+      if (window.LearnBy && LearnBy.offer) {
+        const pg = e.page, id = e.id;
+        LearnBy.offer({ key: 'reader:' + id, title: e.title, sub: e.author, page: pg, src: 'reader', id, open: () => openBook(id),
+          text: () => M.units.filter(x => x.p === pg && !x.cyr && x.k !== 'h').map(x => x.text).join(' ') });
+      }
+    } catch (err) { /* a convenience */ }
     recentPut([e].concat(recentAll().filter(x => x.id !== e.id)));
   }
   function recentForget(id) { recentLast = ''; recentPut(recentAll().filter(x => x.id !== id)); }
@@ -804,6 +848,8 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
    * 📖 the reader
    * ===================================================================== */
   let R = null;
+  // 🔊 a voice chosen for the reader (or «как везде» again): the open «Aa» / «Чтение вслух» panel shows it at once
+  document.addEventListener('voices-pick', () => { if (R && (R.panel === 'look' || R.panel === 'listen')) try { redrawPanel(R); } catch (e) { /* ignore */ } });
   const metaGet = async id => (TEMP.get(id) || {}).meta || DB.meta(id);
   const textGet = async id => (TEMP.get(id) || {}).text || DB.text(id);
 
@@ -902,9 +948,11 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       h2.classList.add('rd-h2');
       h2.insertAdjacentHTML('afterend', `<div class="rd-head-btns">
         <button class="rd-hb" data-a="toc" aria-label="Содержание" title="Содержание">${ICON.toc}</button>
+        ${window.PrintX ? `<button class="rd-hb rd-print" data-a="print" aria-haspopup="dialog" aria-label="Печать и файлы: распечатать книгу или сохранить в Word" title="🖨 Печать и файлы — распечатать страницы книги или сохранить в Word">${ICON.print}</button>` : ''}
         <button class="rd-hb rd-aa" data-a="look" data-panel-btn="look" aria-label="Вид текста: размер, шрифт, фон" aria-expanded="false" title="Вид текста">Aa</button>
         <button class="rd-hb" data-a="menu" data-panel-btn="menu" aria-label="Меню книги" aria-expanded="false" title="Меню книги">${ICON.more}</button></div>`);
     }
+    if (window.TrBadge) TrBadge.mount(m.$('.modal-head'), { place: 'reader' }); // 🌐 who translates now
     applyLook(state);
     m.el.addEventListener('click', e => onClick(state, e));
     m.el.addEventListener('input', e => onInput(state, e));
@@ -915,6 +963,8 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     bindSwipe(state);
     state.escKey = e => {
       if (e.key !== 'Escape' || R !== state) return;
+      const top = [...document.querySelectorAll('#modal-root > .modal-backdrop:not(.closing)')].pop();
+      if (top && !top.contains(state.m.el)) return; // a window above the book (🔊 Голоса…) closes first
       if (state.pop) { e.stopPropagation(); e.preventDefault(); closePop(state); return; }
       if (state.panel) { e.stopPropagation(); e.preventDefault(); closePanel(state, true); }
     };
@@ -1013,6 +1063,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     st.flow.innerHTML = h;
     st.spans = [...st.flow.querySelectorAll('.rd-s')];
     if (st.hl >= 0) { const el = spanOf(st, st.hl); if (el) el.classList.add('rd-cur'); }
+    if (st.kw) karPaint(st, false);
     watchMore(st);
   }
   const spanOf = (st, i) => st.flow.querySelector(`.rd-s[data-i="${i}"]`);
@@ -1228,6 +1279,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       else if (act === 'again') again(st);
       else if (act === 'listen' || act === 'look' || act === 'menu') togglePanel(st, act, a);
       else if (act === 'toc') showToc(st);
+      else if (act === 'print') printBook(st);
       else if (act === 'prevpart') prependPrev(st);
       else if (act === 'lmode') { closePanel(st); setLmode(st, true); }
       else if (act === 'lmode-off') setLmode(st, false);
@@ -1262,6 +1314,14 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
 
   /* ---------- panels: look, listening, book menu ---------- */
   const seg = (key, opts, cur, cls = '') => `<div class="rd-seg ${cls}" role="group">${opts.map(([v, l]) => `<button type="button" data-set="${key}" data-v="${v}" aria-pressed="${String(v) === String(cur)}" class="${String(v) === String(cur) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  /** 🔊 the reader's own voice (🔊 Голоса → «Где какой голос»): the button + what reads now */
+  function voiceBtn() {
+    if (!window.Voices || !Voices.openChooser) return '';
+    let now = '';
+    try { now = Voices.label('no', '', 'reader'); } catch (e) { now = ''; }
+    const own = (() => { try { return ['no', 'uk', 'ru'].some(l => Voices.placePick('reader', l)); } catch (e) { return false; } })();
+    return `<div class="rd-tiny">🔊 Голоса для читалки${own ? ' (свои)' : ' — как везде'}:</div>${Voices.langButtons('reader', { names: !!now })}`;
+  }
   function panelHtml(st, name) {
     if (name === 'look') {
       return `<div class="rd-pt">Вид текста</div>
@@ -1274,7 +1334,10 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
         <div class="rd-row"><span class="rd-lbl">Перевод в скобках</span>${seg('hideTr', [['0', 'Показывать'], ['1', 'Скрыть до нажатия']], P.hideTr ? '1' : '0')}</div>
         <div class="rd-row"><span class="rd-lbl">Подсветка при чтении</span>
           <div class="rd-swatches" role="group" aria-label="Цвет подсветки">${PALETTE.map(([k, l, c]) => `<button type="button" class="rd-sw${P.hl === k ? ' on' : ''}" data-set="hl" data-v="${k}" style="--c:${c}" aria-label="${l}" aria-pressed="${P.hl === k}" title="${l}"></button>`).join('')}</div>
-          ${seg('hls', [['fill', 'Заливка'], ['line', 'Подчёркивание']], P.hls)}</div>`;
+          ${seg('hls', [['fill', 'Заливка'], ['line', 'Подчёркивание']], P.hls)}</div>
+        <div class="rd-row"><span class="rd-lbl">Бегущая подсветка слов</span>${seg('kar', [['1', 'Вкл'], ['0', 'Выкл']], P.kar !== false ? '1' : '0')}
+          <span class="rd-tiny">Во время чтения вслух слово, которое звучит, подсвечивается внутри фразы — как караоке.</span></div>
+        ${voiceBtn()}`;
     }
     if (name === 'listen') {
       const vi = voiceInfo(st);
@@ -1287,11 +1350,13 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
         <div class="rd-row"><span class="rd-lbl">🌙 Таймер сна</span>${sleepSeg(st)}<span class="rd-sleep-st" data-sleep-left aria-live="polite">${esc(sleepText(st))}</span></div>
         <button type="button" class="btn ghost rd-wide" data-a="again" title="Прочитать текущую фразу ещё раз">${ICON.again} Повторить текущую фразу</button>
         <button type="button" class="btn ghost rd-wide" data-a="lmode" title="Крупные кнопки, текущая фраза и таймер сна — удобно слушать лёжа или в наушниках">🎧 Режим прослушивания — крупные кнопки</button>
-        <div class="rd-tiny">Голоса выбираются в Настройках → Озвучка. Норвежский текст читает норвежский голос, перевод — русский${st.M.uk ? ' (украинский — украинским голосом устройства или онлайн-голосом, но не русским)' : ''}.</div>`;
+        ${voiceBtn()}
+        <div class="rd-tiny">Норвежский текст читает норвежский голос, перевод — русский${st.M.uk ? ' (украинский — украинским голосом устройства или онлайн-голосом, но не русским)' : ''}.</div>`;
     }
     return `<div class="rd-menu" role="menu">
       <button type="button" role="menuitem" data-mi="toc">📑 Содержание</button>
       <button type="button" role="menuitem" data-mi="goto">🔢 Перейти к странице…</button>
+      ${window.PrintX ? '<button type="button" role="menuitem" data-mi="print">🖨 Печать и файлы</button>' : ''}
       <button type="button" role="menuitem" data-mi="reset">↺ Сбросить прогресс</button>
       <button type="button" role="menuitem" data-mi="shelf">📚 Моя полка</button>
       <button type="button" role="menuitem" data-mi="del" class="rd-danger">${ICON.trash(16)} Удалить книгу с устройства</button></div>`;
@@ -1336,19 +1401,39 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     else if (key === 'hideTr') P.hideTr = v === '1';
     else if (key === 'hl') P.hl = v;
     else if (key === 'hls') P.hls = v === 'line' ? 'line' : 'fill';
+    else if (key === 'kar') { P.kar = v !== '0'; if (!P.kar) karClear(st); }
     else if (key === 'read') { P.read = v; if (st.playing) playFrom(st, st.hl >= 0 ? st.hl : st.cur); }
     else if (key === 'speed') { P.speed = v; if (st.playing) playFrom(st, st.hl >= 0 ? st.hl : st.cur); }
     else if (key === 'pause') P.pause = +v;
     else if (key === 'repeat') P.repeat = clamp(+v, 1, 3);
     savePrefs();
     applyLook(st);
+    try { document.dispatchEvent(new CustomEvent('reader-look', { detail: { k: key } })); } catch (e) { /* ignore */ }
     if (layout) relayout(st);
     redrawPanel(st);
     if (st.lisEl) lisUi(st, true);
   }
+  /** 🖨 «Печать и файлы» (js/printx.js): the book paragraph by paragraph — Norwegian, its bracketed translation, the book page.
+   *  Chapters of «📘 Мои учебники» (private/reader/) are the owner's own textbooks: printed only for personal use. */
+  function printBook(st) {
+    if (!window.PrintX) { toast('Печать ещё загружается — попробуйте через секунду'); return; }
+    stopSpeech(st);
+    const M = st.M, blocks = [];
+    M.blocks.forEach((b, j) => {
+      const us = M.units.slice(M.bStart[j], M.bStart[j + 1]);
+      if (!us.length) return;
+      const no = us.filter(u => !u.cyr && !u.tr).map(u => u.text).join(' ').trim();
+      const tr = us.filter(u => u.cyr || u.tr).map(u => u.text).join(' ').trim();
+      if (no) blocks.push(Object.assign({ no, page: us[0].p }, tr ? { [M.uk && /[іїєґ]/i.test(tr) ? 'uk' : 'ru']: tr } : {}));
+    });
+    const mine = /^mine:/.test(String(st.meta.srcId || ''));
+    PrintX.text({ title: st.meta.title || 'Книга', author: st.meta.author || '', blocks,
+      source: { id: 'book:' + st.meta.id, name: st.meta.title || '', kind: 'book', protected: mine } });
+  }
   async function menuAct(st, k) {
     closePanel(st);
     if (k === 'toc') showToc(st);
+    else if (k === 'print') printBook(st);
     else if (k === 'goto') {
       const v = await UI.prompt(`Перейти к странице (1–${st.M.pages})`, String(st.M.units[st.cur].p), '');
       const n = parseInt(v, 10);
@@ -1486,7 +1571,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       e.stopPropagation();
       const a = b.dataset.pa;
       if (a === 'x') closePop(st);
-      else if (a === 'say') { try { if (st.playing) pauseRead(st); TTS.speak(w.word, cyr ? cyrLang(String(sentence || w.word), st.M && st.M.uk) : 'no'); } catch (err) { toast('Озвучка сейчас недоступна', 'warn'); } }
+      else if (a === 'say') { try { if (st.playing) pauseRead(st); TTS.speak(w.word, cyr ? cyrLang(String(sentence || w.word), st.M && st.M.uk) : 'no', { place: 'reader' }); } catch (err) { toast('Озвучка сейчас недоступна', 'warn'); } }
       else if (a === 'from') { closePop(st); st.cur = i; playFrom(st, i); }
       else if (a === 'card') { b.disabled = true; b.innerHTML = '<span class="spinner sm"></span> сохраняю…'; await info.ready; await addCard(st, info); closePop(st); }
       else if (a === 'sent') {
@@ -1529,13 +1614,13 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
    * ===================================================================== */
   function sysVoices() { try { return (window.speechSynthesis && speechSynthesis.getVoices()) || []; } catch (e) { return []; } }
   function voiceInfo(st) {
-    const eng = S().ttsEngine || 'auto';
-    let cloud = false;
-    try { cloud = !!(window.Voices && Voices.isCloud(eng) && eng !== 'piper' && Voices.ready(eng)); } catch (e) { cloud = false; }
+    // 🔊 Голоса: the Russian voice may be an audio voice (Edge, Azure, Piper…) or Google — not only the device's
+    let cloud = false, gtr = false;
+    try { const id = window.Voices ? Voices.chain('ru', '', 'reader')[0] || '' : ''; cloud = /^(piper|edge|azure|gcloud|eleven):/.test(id); gtr = id.startsWith('gtr:'); } catch (e) { cloud = false; }
     const vs = sysVoices();
     const ru = cloud || vs.some(v => /^ru([-_]|$)/i.test(v.lang));
     const needRu = st.M.units.some(u => u.cyr || u.tr);
-    return { noRu: vs.length > 0 && !ru && needRu && eng !== 'google', online: navigator.onLine !== false };
+    return { noRu: vs.length > 0 && !ru && needRu && !gtr, online: navigator.onLine !== false };
   }
   function anyToRead(st, from) {
     const M = st.M;
@@ -1586,9 +1671,11 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       st.again = false;
       mark(st, k);
       for (let rep = 0; rep < P.repeat && tok === st.tok; rep++) {
-        for (const s of segs) {
+        for (let si = 0; si < segs.length; si++) {
+          const s = segs[si];
           if (tok !== st.tok) return;
-          await say(st, s);
+          prefetchNext(st, k, si, segs, rep); // ⏩ the next phrase's audio is made while this one is said
+          await say(st, s, k);
           if (tok !== st.tok) return;
           if (TTS._gen !== st.gen) { externalStop(st); return; }
           if (sleepDue(st)) { sleepStop(st); return; } // 🌙 the timer ran out: the phrase is finished — stop here
@@ -1611,11 +1698,45 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       if (k >= M.units.length) { toast('🎉 Книга дочитана до конца', 'good', 4000); if (st.sleep) { st.sleep = null; sleepUi(st); } }
     }
   }
-  async function say(st, s) {
+  const ttsLang = s => (s.lang === 'no' ? 'no' : s.lang === 'uk' ? 'uk' : 'ru');
+  /** ⏩ cloud voices: the phrase after this one is made now (js/tts.js TTS.prefetch) — no wait between phrases */
+  function prefetchNext(st, k, si, segs, rep) {
+    if (!window.TTS || !TTS.prefetch) return;
+    try {
+      let nx = segs[si + 1] || (rep + 1 < P.repeat ? segs[0] : null), nk = k;
+      for (let j = k + 1; !nx && j < Math.min(st.M.units.length, k + 8); j++) { nx = wantedSegs(st.M.units[j], st.M.uk)[0]; nk = j; }
+      if (nx) TTS.prefetch(nx.say, ttsLang(nx), Object.assign({ rate: rateNow(), place: 'reader' }, roleOpts(st, nk, ttsLang(nx))));
+    } catch (e) { /* a hint only */ }
+  }
+  /** 🎭 who says each paragraph (js/voices.js Voices.dialogRoles: «– …» lines take turns, «Kari: …» by name; a
+   *  heading and the narration are nobody's) + the speakers in the order of the book — the same voice for the same
+   *  speaker wherever reading starts */
+  function rolesOf(M) {
+    if (M.roles) return M.roles;
+    let keys = null;
+    try { keys = window.Voices && Voices.dialogRoles ? Voices.dialogRoles(M.blocks.map(([k, t]) => (k === 'h' ? '# ' : '') + String(t || '').replace(/\s*\n\s*/g, ' '))) : null; } catch (e) { keys = null; }
+    const roster = [];
+    (keys || []).forEach(x => { if (x != null && !roster.includes(x)) roster.push(x); });
+    return (M.roles = { keys: keys || [], roster });
+  }
+  /** the voice of the speaker of unit k: {} = the reader's voice; { voiceId } / { pitch } for the other speakers */
+  function roleOpts(st, k, lang) {
+    try {
+      const u = st.M.units[k], R = rolesOf(st.M), who = u ? R.keys[u.b] : null;
+      if (who == null || !window.Voices || !Voices.speakerOpts) return {};
+      const o = Voices.speakerOpts(lang, who, R.roster.slice(), 'reader');
+      delete o.place;
+      return o;
+    } catch (e) { return {}; }
+  }
+  async function say(st, s, k) {
     const rate = rateNow();
+    const o = Object.assign({ keep: true, rate, place: 'reader' }, roleOpts(st, k, ttsLang(s)));
+    // 🎤 «бегущая подсветка»: TTS says which word of «say» is being said; s.w knows where it is in the sentence
+    if (karOn() && s.wok) o.onWord = (i, a, b, info) => karWord(st, k, s, i, info);
     // 🇺🇦 Ukrainian goes to TTS as 'uk': the device's Ukrainian voice, the cloud voice or the online Google voice —
     // never a Russian voice (with no Ukrainian voice TTS says so once and how to add one)
-    try { await TTS.speak(s.say, s.lang === 'no' ? 'no' : s.lang === 'uk' ? 'uk' : 'ru', { keep: true, rate }); } catch (e) { await sleep(300); }
+    try { await TTS.speak(s.say, ttsLang(s), o); } catch (e) { await sleep(300); }
   }
   /** someone else took the voice (another player, a 🔊 elsewhere): the reader pauses too */
   function watchdog(st) {
@@ -1624,6 +1745,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
   }
   function externalStop(st) {
     st.tok++; st.playing = false;
+    karClear(st);
     if (st.hl >= 0) st.cur = st.hl;
     playUi(st); msState('paused'); savePos(st);
   }
@@ -1631,6 +1753,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     const was = st.playing;
     st.tok++;
     st.playing = false;
+    karClear(st);
     if (was && st.hl >= 0) st.cur = st.hl; // the place to continue from is the sentence that was being read
     if (was || release) { try { TTS.stop(); } catch (e) { /* ignore */ } }
     if (!release) playUi(st);
@@ -1659,6 +1782,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
   }
   /** highlight the sentence being read and keep it in view (page turns, scrolling) */
   function mark(st, k) {
+    if (!st.kw || st.kw.k !== k) karClear(st);
     const old = st.hl >= 0 && spanOf(st, st.hl);
     if (old) old.classList.remove('rd-cur');
     st.hl = k;
@@ -1688,6 +1812,64 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
       b.classList.toggle('on', st.playing);
     });
     st.root.classList.toggle('rd-reading', st.playing);
+  }
+
+  /* ---------- 🎤 «бегущая подсветка слов»: the word being said, inside the sentence being read ----------
+   * TTS.speak tells which word is said now (the voice's own word boundaries, or an estimate by syllables and the
+   * voice's measured speed, or the audio clip's clock — js/tts.js). The word gets a soft mark that glides under it,
+   * the words already said in this sentence get calmer. CSS Custom Highlight API ('rd-say' / 'rd-done' — the text is
+   * not touched, so tapping a word, selecting and the layout stay as they are), else short-lived spans
+   * (js/tts.js Karaoke). Reduced motion: the mark jumps from word to word. Nothing works → the sentence highlight only. */
+  let KAR = null;
+  function kar() {
+    if (KAR || !window.TTS || !TTS.Karaoke) return KAR;
+    try { KAR = new TTS.Karaoke({ name: 'rd', cls: 'rd-kmark', host: el => (el.matches('[data-lis-now]') ? el.parentElement : el.closest('.rd-flow')) }); } catch (e) { KAR = null; }
+    return KAR;
+  }
+  const karOn = () => P.kar !== false && !!(window.TTS && TTS.wordsOf && TTS.Karaoke);
+  function karClear(st) {
+    if (st) st.kw = null;
+    if (KAR) try { KAR.clear(); } catch (e) { /* ignore */ }
+  }
+  function karWord(st, k, s, i, info) {
+    if (R !== st || !st.playing || st.hl !== k || !karOn()) return;
+    st.kw = { k, s, i: Math.max(0, Math.min(i, s.w.length)) };
+    karPaint(st, true);
+  }
+  /** paint the current word (again: after a new layout, a size change, the listening mode) */
+  function karPaint(st, follow) {
+    const kw = st.kw, K = kar();
+    if (!kw || !K) return;
+    try {
+      const w = kw.s.w, cur = kw.i < w.length ? w[kw.i] : null;
+      const done = cur ? cur[0] : (w.length ? w[w.length - 1][1] : 0);
+      const els = [];
+      const sp = spanOf(st, kw.k);
+      if (sp) els.push(sp);
+      const now = st.lisEl && !st.lisEl.hidden && st.lisEl.querySelector('[data-lis-now]');
+      if (now && now.dataset.i === String(kw.k)) els.push(now);
+      K.show(els.map(el => ({ el, cur, done })));
+      if (follow && cur && sp && !st.lmode) karFollow(st, sp, cur);
+    } catch (e) { karClear(st); } // never an error on the screen: the sentence highlight stays
+  }
+  /** the word runs onto the next page / below the screen: the page turns, the ribbon scrolls (not right after the reader's own turn) */
+  function karFollow(st, sp, cur) {
+    if (st.userNav && Date.now() - st.userNav < 5000) return;
+    const node = sp.firstChild;
+    let r = null;
+    if (node && node.nodeType === 3 && sp.childNodes.length === 1) {
+      const rg = document.createRange(); rg.setStart(node, cur[0]); rg.setEnd(node, cur[1]);
+      r = rg.getClientRects()[0] || null;
+    } else { const w = sp.querySelector('.rd-w-say'); r = w && w.getClientRects()[0]; }
+    if (!r) return;
+    if (P.mode === 'page') {
+      const fr = st.flow.getBoundingClientRect();
+      const pg = clamp(Math.floor((r.left - fr.left + 2) / st.step), 0, st.nPages - 1);
+      if (pg !== st.page) goPage(st, pg);
+    } else {
+      const v = st.view, vr = v.getBoundingClientRect();
+      if (r.bottom > vr.bottom - 40 || r.top < vr.top + 8) v.scrollTo({ top: Math.max(0, v.scrollTop + r.top - vr.top - v.clientHeight * 0.3), behavior: RM() ? 'auto' : 'smooth' });
+    }
   }
 
   /* =====================================================================
@@ -1746,7 +1928,7 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     const pg = el.querySelector('[data-lis-pg]'); if (pg) pg.textContent = `стр. ${u.p} из ${M.pages} · ${pct}%`;
     const bar = el.querySelector('[data-lis-bar]'); if (bar) bar.style.width = pct + '%';
     const now = el.querySelector('[data-lis-now]');
-    if (now && now.dataset.i !== String(i)) { now.dataset.i = String(i); now.textContent = u.text; now.lang = u.cyr || u.tr ? 'ru' : 'nb'; }
+    if (now && now.dataset.i !== String(i)) { now.dataset.i = String(i); now.textContent = u.text; now.lang = u.cyr || u.tr ? 'ru' : 'nb'; if (st.kw) karPaint(st, false); }
     if (full) { const o = el.querySelector('[data-lis-opts]'); if (o) o.innerHTML = lisOptsHtml(st); }
   }
 
@@ -1887,6 +2069,17 @@ Snipp, snapp, snute, så er eventyret ute. (Вот и сказке конец.)`
     async drawMine(box) { let list = []; try { list = await this.list(); } catch (e) { /* none */ } return drawMine(list, box); },
     mineAvailable: () => mineAvailable(),
     isOpen: () => !!R,
+    /** 🎨 the reading look shared with the 📖 book window (js/bookview.js «Aa»): the highlight colour P.hl (PALETTE),
+     *  the running word highlight P.kar — one choice for the reader and the books, kept on this device */
+    look: {
+      PALETTE,
+      get: k => P[k],
+      set(k, v) {
+        P[k] = v; savePrefs();
+        try { if (R) applyLook(R); } catch (e) { /* the reader redraws on its next open */ }
+        document.dispatchEvent(new CustomEvent('reader-look', { detail: { k } }));
+      },
+    },
     /** for tests and help: the text logic without the screen */
     _t: { splitSentences, paraUnits, segsOf, buildModel, textBlocks, normBlocks, cyrLang, scriptOf, wantedSegs, P: () => P },
   };
